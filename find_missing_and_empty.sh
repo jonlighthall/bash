@@ -1,16 +1,19 @@
 #!/bin/bash
 # reads a list of input files and if the 02.asc file does not exist or is empty
 # writes the name of the input file to missing.lst
-#FILE1='all_infiles.lst'
 FILE1=$1
 
 i=0
 j=0
 k=0
 
+if [ $# -eq 0 ]
+then
+    echo "Please provide an input file"
+else
 if [ $FILE1 == missing.lst ]; then
-    cp missing.lst missing_input.lst
-    FILE1=missing_input.lst
+    cp missing.lst missing.bak
+    FILE1=missing.bak
 fi
 if [ -f missing.lst ]; then
     rm missing.lst
@@ -25,7 +28,7 @@ while read line; do
     #echo $i $fname "is missing"
 	echo $line >> missing.lst
     else
-	if [ ! -s $fname ]; then
+	if [ ! -s $fname ]; then #adding empty increases runtime < 4%
 	    ((j++))
       #echo $j $fname "is empty"
 	    echo $line >> missing.lst
@@ -46,4 +49,5 @@ echo $l "of" $k "problem files"
 #if [ -f missing.lst ]; then
   #cat missing.lst
 #fi
+fi
 printf "\a"
