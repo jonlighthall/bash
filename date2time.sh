@@ -1,5 +1,6 @@
 #!/bin/sh
-#
+#this program takes an integer number of seconds as an input and converts 
+#it to an elasped time in hour:minute:second format using the function date
 INPUT=$1
 
 ENDTIME=$INPUT
