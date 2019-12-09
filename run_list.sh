@@ -12,16 +12,16 @@ if [ $# -eq 0 ]
 then
     echo "Please provide an input file"
 else
-/home/jlighthall/nspe/nspe60_Dec2018/testube/std_copy/clean_nspe.sh
+#/home/jlighthall/nspe/nspe60_Dec2018/testube/std_copy/clean_nspe.sh
 while read line; do
-    printf "testing %s\n" $line
+    printf "testing %s..." $line
     if [ -f $line ]; then
-	echo $line "exists"
-	 $PROGRAM $line
+	echo " exists"
+	 $PROGRAM $line &
 	 echo $line "has been run"
 	#echo " " $(date) "at time $(($SECONDS - $STARTTIME))"
     else
-	echo $line " not found"
+	echo " not found"
     fi
 done < $FILE1
 #rm -rv /Acoustics/forjon/std/*
