@@ -3,8 +3,10 @@ if [ $# -eq 0 ]
 then
     echo "Please provide an input"
 else
-    echo "Elapsed time is $1 sec"
-    if (( $1 >= 60 )); then
+    echo -e "Elapsed time is \c"
+    if (( $1 < 60 )); then
+    echo "$1 sec"
+    else
 	if (( $1 < $((60*60)) )); then
 	    echo $(date -d @${1} +"%M min %S sec")
 	else
