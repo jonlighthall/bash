@@ -1,11 +1,11 @@
 #!/bin/bash
+echo -e "elapsed time is \c"
 if [ $# -eq 0 ]
 then
-    echo "Please provide an input"
+    echo "NULL"
 else
-    echo -e "Elapsed time is \c"
     if (( $1 < 60 )); then
-    echo "$1 sec"
+	echo "$1 sec"
     else
 	if (( $1 < $((60*60)) )); then
 	    echo $(date -d @${1} +"%M min %S sec")
