@@ -16,7 +16,13 @@ else
 	    else
 		DY=$(($HR/24)) 
 		HR=$(($HR - $DY*24))
-		echo $(date -d @${1} +"$DY days $HR hours %M min %S sec")
+		if (( $DY < $((365)) )); then
+		    echo $(date -d @${1} +"$DY days $HR hours %M min %S sec")
+		else
+		    YR=$(($DY/365))
+		    DY=$(($DY - $YR*365))
+		    echo $(date -d @${1} +"$YR years $DY days $HR hours %M min %S sec")
+		fi
 	    fi
 	fi
     fi
