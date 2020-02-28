@@ -9,6 +9,7 @@ xman 2>/dev/null &
 xlogo 2>/dev/null &
 xterm 2>/dev/null &
 
+# close windows
 read -n 1 -s -r -p "Press any key to continue"
 echo
 pkill xeyes 
