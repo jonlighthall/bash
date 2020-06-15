@@ -8,6 +8,6 @@ if [ $# -eq 0 ]; then
     echo "$CMD $SOURCE/* $DEST"
     $CMD $SOURCE/* $DEST
 else
-    echo $CMD $SOURCE/$1 $DEST
+    echo "$CMD $SOURCE/$1 $DEST"
     $CMD $SOURCE/$1 $DEST
 fi
