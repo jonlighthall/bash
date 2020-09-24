@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # test X11
 export LC_ALL=C
