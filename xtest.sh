@@ -2,19 +2,17 @@
 
 # test X11
 export LC_ALL=C
-xeyes 2>/dev/null &
-xclock 2>/dev/null &
-xcalc 2>/dev/null &
-xman 2>/dev/null &
-xlogo 2>/dev/null &
-xterm 2>/dev/null &
+list="xeyes xclock xcalc xman xlogo xterm"
+
+for prog in $list
+do
+    $prog 2>/dev/null &
+done
 
 # close windows
 read -n 1 -s -r -p "Press any key to continue"
 echo
-pkill xeyes 
-pkill xclock
-pkill xcalc
-pkill xman
-pkill xlogo
-pkill xterm
+for prog in $list
+do
+   pkill $prog 2>/dev/null &
+done
