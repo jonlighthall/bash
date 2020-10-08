@@ -6,6 +6,7 @@ list="xeyes xclock xcalc xman xlogo xterm"
 
 for prog in $list
 do
+    echo "opening $prog..."
     $prog 2>/dev/null &
 done
 
@@ -14,5 +15,6 @@ read -n 1 -s -r -p "Press any key to continue"
 echo
 for prog in $list
 do
-   pkill $prog 2>/dev/null &
+    echo "closing $prog..."
+    pkill $prog 2>/dev/null &
 done
