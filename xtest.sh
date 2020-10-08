@@ -13,13 +13,14 @@ then
     echo "not found"
 else
     echo "OK"
+    list2="$list2 $prog"
 fi
 done
 
 # close windows
 read -n 1 -s -r -p "Press any key to continue"
 echo
-for prog in $list
+for prog in $list2
 do
     echo "closing $prog..."
     pkill $prog 2>/dev/null &
