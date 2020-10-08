@@ -6,8 +6,14 @@ list="xeyes xclock xcalc xman xlogo xterm"
 
 for prog in $list
 do
-    echo "opening $prog..."
+    echo -e "opening $prog... \c"
     $prog 2>/dev/null &
+if ! command -v $prog &> /dev/null
+then
+    echo "not found"
+else
+    echo "OK"
+fi
 done
 
 # close windows
