@@ -1,5 +1,5 @@
 #!/bin/bash
-mkdir -p ~/bin
+mkdir -pv ~/bin
 for prog in bell sec2elap whatsup
 do
     if [ ! -f $HOME/bin/$prog ]; then
