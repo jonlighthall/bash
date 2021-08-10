@@ -1,6 +1,7 @@
 #!/bin/sh
 
-echo " host:" $HOSTNAME
-echo " user:" $USER$USERNAME
-echo "  pwd:" $PWD
-echo " date:" $(date)
+echo "   host:" $HOSTNAME
+echo "   user:" $USER$USERNAME
+echo " groups:" `id -nG`
+echo "    pwd:" $PWD
+echo "   date:" $(date)
