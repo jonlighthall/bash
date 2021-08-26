@@ -7,7 +7,7 @@ else
     echo
     echo -n "$1 "
     if [ -L $1 ] ; then
-	echo "is already a link"
+	echo "is a link"
 	echo -n " The link is... "
 	if [ -e $1 ] ; then
 	    echo "valid"
@@ -30,6 +30,5 @@ else
     else
 	echo "does not exist"
     fi
-
 fi
 echo " " $(date) "at time $SECONDS"
