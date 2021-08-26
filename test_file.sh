@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ $# -eq 0 ]
+then
+    echo "Please provide an input file"
+else
     echo
     echo -n "$1 "
     if [ -L $1 ] ; then
@@ -27,3 +31,5 @@
 	echo "does not exist"
     fi
 
+fi
+echo " " $(date) "at time $SECONDS"
