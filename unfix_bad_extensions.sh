@@ -4,10 +4,23 @@
 # define replacement seperator
 sep=_._
 
-for bad in out exe bat
-do
-    echo "replacing \"${sep}${bad}\" with \".$bad\"..."
-    for fname in $(find $PWD -name "*$sep$bad"); do
-	mv -nv "$fname" "`echo $fname | sed "s/$sep$bad/.$bad/"`";
-    done
-done
+if [ $# -eq 0 ]
+then
+    echo "Please provide a target directory"
+    exit 1
+else
+    if [[ -d $1 ]]; then
+	echo "found $1"
+	
+	for bad in out exe bat
+	do
+	    echo "replacing \"${sep}${bad}\" with \".$bad\"..."
+	    for fname in $(find $PWD -name "*$sep$bad"); do
+		mv -nv "$fname" "`echo $fname | sed "s/$sep$bad/.$bad/"`";
+	    done
+	done
+    else
+	echo "$1 is not found"
+	exit 1
+    fi
+fi
