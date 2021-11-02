@@ -1,4 +1,7 @@
-#!/bin/bash
-for fname in *.out; do
-    mv "$fname" "`echo $fname | sed "s/.out/_out"`";
+sep=_._
+for bad in out
+do
+    for fname in *.$bad; do
+	mv -nv "$fname" "`echo $fname | sed "s/.$bad/$sep$bad/"`";
+    done
 done
