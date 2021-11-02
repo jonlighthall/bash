@@ -12,10 +12,10 @@ else
     if [[ -d $1 ]]; then
 	echo "found $1"
 	
-	for bad in out exe bat
+	for bad in out exe bat osx
 	do
 	    echo "replacing \".$bad\" with \"${sep}${bad}\"..."
-	    for fname in $(find $PWD -name "*.${bad}"); do
+	    for fname in $(find $1 -name "*.${bad}"); do
 		mv -nv "$fname" "`echo $fname | sed "s/.$bad/$sep$bad/"`";
 	    done
 	done
