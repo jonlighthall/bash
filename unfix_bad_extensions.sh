@@ -2,7 +2,7 @@
 sep=_._
 for bad in out exe bat
 do
-    for fname in *.$bad; do
-	mv -nv "$fname" "`echo $fname | sed "s/.$bad/$sep$bad/"`";
+    for fname in *$sep$bad; do
+	mv -nv "$fname" "`echo $fname | sed "s/$sep$bad/.$bad/"`";
     done
 done
