@@ -1,5 +1,9 @@
 #!/bin/sh
 
+GOOD='\033[0;32m'
+BAD='\033[0;31m'
+NORMAL='\033[0m'
+
 if [ $# -eq 0 ]
 then
     echo "Please provide an input file"
@@ -12,9 +16,9 @@ else
 	    echo "is a link"
 	    echo -n " The link is... "
 	    if [ -e $arg ] ; then
-		echo "valid"
+		echo "${GOOD}valid${NORMAL}"
 	    else
-		echo "broken"
+		echo "${BAD}broken${NORMAL}"
 	    fi
 	elif [ -e $arg ] ; then
 	    echo "exists"
