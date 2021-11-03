@@ -4,9 +4,9 @@ if [ $# -eq 0 ]
 then
     echo "Please provide an input file"
 else
-    echo
     for arg in "$@"
     do
+	echo
 	echo -n "$arg "
 	if [ -L $arg ] ; then
 	    echo "is a link"
@@ -34,4 +34,5 @@ else
 	fi
     done
 fi
+echo
 echo " " $(date) "at time $SECONDS"
