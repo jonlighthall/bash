@@ -1,4 +1,4 @@
-# used to un-fix bad file extensions for OneDrive
+# used to fix bad file extensions for OneDrive
 # JCL Nov 2021
 
 # define replacement seperator
