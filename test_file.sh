@@ -5,30 +5,33 @@ then
     echo "Please provide an input file"
 else
     echo
-    echo -n "$1 "
-    if [ -L $1 ] ; then
-	echo "is a link"
-	echo -n " The link is... "
-	if [ -e $1 ] ; then
-	    echo "valid"
-	else
-	    echo "broken"
-	fi
-    elif [ -e $1 ] ; then
-	echo "exists"
-	    echo -n " It is... "
-	if [ -f $1 ]; then
-	    echo "a regular file"
-	else
-	    echo -n "not a regular file, but... "
-	    if [ -d $1 ]; then
-		echo "a directory"
+    for arg in "$@"
+    do
+	echo -n "$arg "
+	if [ -L $arg ] ; then
+	    echo "is a link"
+	    echo -n " The link is... "
+	    if [ -e $arg ] ; then
+		echo "valid"
 	    else
-		echo "not a directory"
+		echo "broken"
 	    fi
-	fi	
-    else
-	echo "does not exist"
-    fi
+	elif [ -e $arg ] ; then
+	    echo "exists"
+	    echo -n " It is... "
+	    if [ -f $arg ]; then
+		echo "a regular file"
+	    else
+		echo -n "not a regular file, but... "
+		if [ -d $arg ]; then
+		    echo "a directory"
+		else
+		    echo "not a directory"
+		fi
+	    fi	
+	else
+	    echo "does not exist"
+	fi
+    done
 fi
 echo " " $(date) "at time $SECONDS"
