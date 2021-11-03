@@ -1,0 +1,1 @@
+../sync/badnames/delete_binaries.sh
