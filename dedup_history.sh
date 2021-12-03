@@ -16,19 +16,21 @@ N=$(wc -l < $fname)
 echo $((N-1))
 
 for ((i=1; i<$N; i++)); do
-    bad=$(diff --speed-large-files --suppress-common-lines -y $(sed ''$i'!d' $fname) $(sed ''$((i+1))'!d' $fname) | grep -v ">" | wc -l)
+    old=$(sed ''$i'!d' $fname)
+    new=$(sed ''$((i+1))'!d' $fname)
+    bad=$(diff --speed-large-files --suppress-common-lines -y $old $new | grep -v ">" | wc -l)
     echo -n "$i: "
     if [ $bad -ne 0 ]; then
-	echo " $(sed ''$i'!d' $fname) must be merged"
+	echo " $old must be merged"
 #	echo " $bad non-update differences"
 else
-	echo " $(sed ''$i'!d' $fname) can be deleted"
-#	good=$(diff --speed-large-files --suppress-common-lines -y $(sed ''$i'!d' $fname) $(sed ''$((i+1))'!d' $fname) | grep ">" | wc -l)
-#	echo " $good update-only differences in $(sed ''$((i+1))'!d' $fname)"
+	echo " $old can be deleted"
+#	good=$(diff --speed-large-files --suppress-common-lines -y $old $new | grep ">" | wc -l)
+#	echo " $good update-only differences in $new"
     fi
 done
 
 if [  -f $fname ]; then
     echo $fname has $N lines
-#    rm -v $fname
+    rm -v $fname
 fi
