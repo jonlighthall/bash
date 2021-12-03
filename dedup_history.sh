@@ -27,6 +27,7 @@ else
 	echo " $old can be deleted"
 #	good=$(diff --speed-large-files --suppress-common-lines -y $old $new | grep ">" | wc -l)
 #	echo " $good update-only differences in $new"
+	rm -v $old
     fi
 done
 
