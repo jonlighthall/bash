@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "${0##*/}"
 
 # test X11
 export LC_ALL=C
