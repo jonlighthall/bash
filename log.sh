@@ -12,8 +12,9 @@ else
 	echo "not found"
     else
 	echo "OK"
-	FNAME=./log/${TRIM}_output_$(date +'%Y-%m-%d-t%H%M').log
-	mkdir -p ./log
+	LOGDIR=./log
+	FNAME=$LOGDIR/${TRIM}_output_$(date +'%Y-%m-%d-t%H%M').log
+	mkdir -p $LOGDIR
 	echo -e "saving to $FNAME..."
  	$1 2>&1 | tee ${FNAME}
 #	$1 > ${FNAME} 2>&
