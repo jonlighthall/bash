@@ -17,7 +17,7 @@ else
 	mkdir -p $LOGDIR
 	echo -e "saving to $FNAME..."
  	$1 2>&1 | tee ${FNAME}
-#	$1 > ${FNAME} 2>&
+#	$1 > ${FNAME} 2>&1
 	echo "done" 
     fi
 fi
