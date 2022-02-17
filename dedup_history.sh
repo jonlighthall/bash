@@ -13,7 +13,8 @@ fname=hist_list.txt
 find ${HOME} -maxdepth 1 -type f -name ".bash_history_*" | sort -n > $fname
 N=$(wc -l < $fname)
 
-echo $((N-1))
+echo "$N history files found"
+echo "$((N-1)) history files will be assessed for deletion"
 
 for ((i=1; i<$N; i++)); do
     old=$(sed ''$i'!d' $fname)
