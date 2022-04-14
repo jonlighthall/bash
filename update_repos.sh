@@ -2,7 +2,7 @@
 echo "${0##*/}"
 
 # list repository paths, relative to home
-list="bash batch config fortran hello nrf powershell scripts"
+list="bash batch config fortran hello matlab/macros nrf powershell scripts"
 
 for repo in $list
 do
