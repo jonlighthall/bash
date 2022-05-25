@@ -11,6 +11,7 @@ if [ $# -eq 0 ]; then
 else
     if [[ -f $1 ]]; then
 	echo "found archive $1"
+	file "${1}"
 	dir_name="${1%.*}" # remove extension
         dir_name=${dir_name// /_} # remove spaces
 	echo -n "target directory $dir_name... "
@@ -18,10 +19,11 @@ else
 	    echo "found"
 	else
 	    echo "not found"
+	    mkdir -pv ./$dir_name
 	fi
+
 	ext_name="${1##*.}"
 	echo "extension is $ext_name"
-
 	SUB='tar'
 	if [[ "$ext_name" == *"$SUB"* ]]; then
 	    echo "$1 is a tarball"
@@ -32,12 +34,19 @@ else
 		echo "$1 is a gzip"
 		OPT=xfvz
 	    else
-		echo "$1 file type unknown"
-		OPT=tfv
+		SUB='zip'
+		if [[ "$ext_name" == *"$SUB"* ]]; then
+		    echo "$1 is a zip"
+		    zip -T "${1}"
+		    unzip "${1}" -d $dir_name
+		    exit $?
+		else
+		    echo "$1 file type unknown"
+		    OPT=tfv
+		fi
 	    fi
 	fi
-	mkdir -pv ./$dir_name
-	tar ${OPT} $1 -C ./$dir_name
+	tar ${OPT} "${1}" -C ./$dir_name
     else
 	echo "$1 is not found"
 	exit 1
