@@ -11,8 +11,8 @@ if [ $# -eq 0 ]; then
 else
     if [[ -f $1 ]]; then
 	echo "found archive $1"
-
-	dir_name="${1%.*}"
+	dir_name="${1%.*}" # remove extension
+        dir_name=${dir_name// /_} # remove spaces
 	echo -n "target directory $dir_name... "
 	if [ -d $dir_name ]; then
 	    echo "found"
