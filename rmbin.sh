@@ -21,16 +21,16 @@ else
 
 	    # first, remove tracked files from the repository
 	    echo "removing tracked binary files from the repository..."
-	    find ./ -type f -not -path "*$GITDIR/*" | perl -lne 'print if -B' | xargs -r git rm --ignore-unmatch
+	    find ./ -type f -not -path "*$GITDIR/*" -not -path "*/.git/*" | perl -lne 'print if -B' | xargs -r git rm --ignore-unmatch
 
 	    # then, remove remaining binary files
 	    echo "removing untracked binary files..."
-	    find ./ -type f -not -path "*$GITDIR/*" | perl -lne 'print if -B' | xargs -r rm -v
+	    find ./ -type f -not -path "*$GITDIR/*" -not -path "*/.git/*" | perl -lne 'print if -B' | xargs -r rm -v
 	else
 	    # this is not a git repository
 	    echo "$1 is not part of a Git repsoity"
 	    echo "removing binary files..."
-	    find ./ -type f | perl -lne 'print if -B' | xargs -r rm -v
+	    find ./ -type f -not -path "*/.git/*" | perl -lne 'print if -B' | xargs -r rm -v
 	fi
     else
 	echo "$1 is not found"
