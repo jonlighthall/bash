@@ -59,19 +59,19 @@ do
     echo
 done
 
-echo "    not found: "
+echo -n "    not found: "
 if [ -z "$loc_fail" ]; then
     echo "none"
 else
     echo "$loc_fail"
 fi
-echo "push failures: "
+echo -n "push failures: "
 if [ -z "$push_fail" ]; then
     echo "none"
 else
     echo "$push_fail"
 fi
-echo "pull failures: "
+echo -n "pull failures: "
 if [ -z "$pull_fail" ]; then
     echo "none"
 else
