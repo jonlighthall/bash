@@ -20,7 +20,8 @@ list+="config "
 # fortran
 list+="fortran \
        hello \
-       nrf "
+       nrf \
+       nrf77 "
 
 # matlab
 list+="matlab \
