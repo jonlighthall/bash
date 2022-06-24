@@ -3,7 +3,8 @@
 #
 # enter the command to be applied to each file within the parenthesis
 # on the next line
-CMD=(-exec ls -la {} \;)
+CMD=(rm -rvfd)
+FNDCMD=(-exec ${CMD[@]} {} \;)
 
 if [ $# -eq 0 ]; then
     echo "Please provide a target directory"
@@ -21,7 +22,8 @@ else
 
 	# empty
 	echo -n "  removing empty files in ${1} ..."
-	find $1 -type f -not -name ".gitkeep" -empty "${CMD[@]}" 2>$error_file
+	find $1 -type f -not -name ".gitkeep" -empty "${FNDCMD[@]}" 2>$error_file
+	find $1 -type d -empty "${FNDCMD[@]}" 2>$error_file
 	echo "done"
 
 	# OS X binaries
@@ -30,10 +32,9 @@ else
   	    .DS_Store \
 	    ._.DS_Store \
 	    \.*\.swp \
-	    */extras/fld3c.dSYM/Contents/Resources/DWARF/fld3c
-	    
+	    fld3c	    
 	do
-	    find $1 -type f -name ${pe_file} "${CMD[@]}" 2>$error_file
+	    find $1 -type f -name ${pe_file} "${FNDCMD[@]}" 2>$error_file
 	    echo -n "."
 	done
 	echo "done"
