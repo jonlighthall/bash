@@ -22,7 +22,9 @@ else
 
 	# empty
 	echo -n "  removing empty files in ${1} ..."
-	find $1 -type f -not -name ".gitkeep" -empty "${FNDCMD[@]}" 2>$error_file
+	find $1 -type f -not -name ".gitkeep" \
+	     -not -name $error_file \
+	     -empty "${FNDCMD[@]}" 2>$error_file
 	find $1 -type d -empty "${FNDCMD[@]}" 2>$error_file
 	echo "done"
 
