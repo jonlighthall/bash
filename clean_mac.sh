@@ -32,9 +32,10 @@ else
   	    .DS_Store \
 	    ._.DS_Store \
 	    \.*\.swp \
-	    fld3c	    
+	    fld3c \
+	    \._*
 	do
-	    find $1 -type f -name ${pe_file} "${FNDCMD[@]}" 2>$error_file
+	    find $1 -type f -name "${pe_file}" "${FNDCMD[@]}" 2>$error_file
 	    echo -n "."
 	done
 	echo "done"
