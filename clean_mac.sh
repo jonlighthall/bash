@@ -31,6 +31,7 @@ else
 	for pe_file in \
   	    .DS_Store \
 	    ._.DS_Store \
+	    \.*\.swo \
 	    \.*\.swp \
 	    fld3c \
 	    \._*
