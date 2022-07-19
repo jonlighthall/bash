@@ -49,7 +49,7 @@ else
 	    .obj \
 	    .out
 	do
-	    find $1 -type f -name *${pe_file} -print0 | perl -lne "print if not -T" | xargs -0 -r "${CMD[@]}" 2>$error_file
+	    find $1 -type f -name "*${pe_file}" -print0 | perl -lne "print if not -T" | xargs -0 -r "${CMD[@]}" 2>$error_file
 	    echo -n "."
 	done
 	echo "done"
