@@ -8,7 +8,7 @@ FNDCMD=(-exec ${CMD[@]} {} \;)
 
 if [ $# -eq 0 ]; then
     echo "Please provide a target directory"
-    return 1
+    exit 1
 else
     if [[ -d $1 ]]; then
 	echo "cleaning $1 ..."
@@ -68,6 +68,6 @@ else
 	echo "done"
     else
 	echo "$1 is not found"
-	return 1
+	exit 1
     fi
 fi
