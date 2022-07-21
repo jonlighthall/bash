@@ -1,6 +1,8 @@
 # Used to delete binary files from directory. Tracked binary files
 # found in a Git repository will be removed from the repository. The
-# .git directory will not be searched. JCL Nov 2021
+# .git directory will not be searched.
+
+# JCL Nov 2021
 
 if [ $# -eq 0 ]
 then
