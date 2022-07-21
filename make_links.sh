@@ -3,7 +3,7 @@ mkdir -pv ~/bin
 # list files to be linked in bin
 for prog in bell sec2elap whatsup rmbin fix_bad_extensions \
     unfix_bad_extensions test_file update_repos update_packages \
-    untar clean_mac
+    untar clean_mac set_path
 do
     if [ ! -f $HOME/bin/$prog ]; then
 	if [ -f $PWD/$prog.sh ]; then
