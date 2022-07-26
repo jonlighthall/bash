@@ -16,9 +16,9 @@ else
 	    echo "is a link"
 	    echo -n " The link is... "
 	    if [ -e $arg ] ; then
-		echo "${GOOD}valid${NORMAL}"
+		echo -e "${GOOD}valid${NORMAL}"
 	    else
-		echo "${BAD}broken${NORMAL}"
+		echo -e "${BAD}broken${NORMAL}"
 	    fi
 	elif [ -e $arg ] ; then
 	    echo "exists"
