@@ -16,7 +16,7 @@ else
 	do
 	    echo "replacing \"${sep}${bad}\" with \".$bad\"..."
 	    for fname in $(find $1 -name "*$sep$bad"); do
-		mv -nv "$fname" "`echo $fname | sed "s/$sep$bad/.$bad/"`";
+		mv -v "$fname" "`echo $fname | sed "s/$sep$bad/.$bad/"`";
 	    done
 	done
     else

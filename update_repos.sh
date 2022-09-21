@@ -41,7 +41,7 @@ do
 	echo "OK"
 	cd ${HOME}/$repo
 	#	echo -e "pulling $repo... \c"
-	git pull --all
+	git pull --all --tags --prune
 	if [[ $? != 0 ]]; then
 	    echo "pull: $?"
 	    pull_fail+="$repo "
