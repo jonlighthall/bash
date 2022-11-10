@@ -1,5 +1,6 @@
 #!/bin/bash
-# add the following directories to the start of PATH
+# add the directories passed to the command as arguments to the start
+# of the PATH environmental variable
 #
 # NB: remember to 'source' this script, don't just execute it
 #
@@ -7,13 +8,16 @@
 for ADDPATH in "$@"
 do
     echo -n ${ADDPATH}
-    if [[ "$PATH" != *"${ADDPATH}:"*  ]]; then
-	if [ -d "${ADDPATH}" ] ; then
-	    export PATH=$ADDPATH:$PATH
-	    echo " added to PATH"
-	else
-	    echo " not found"
-	fi
+    if [ -d "${ADDPATH}" ] ; then
+	echo " found"
+	ABSPATH=$(cd $ADDPATH; \pwd)
+	echo -n ${ABSPATH}
+    else
+	echo " not found"
+    fi
+    if [[ "$PATH" != *"${ABSPATH}:"*  ]]; then
+	export PATH=$ABSPATH:$PATH
+	echo " added to PATH"
     else
 	echo " already in PATH"
     fi
