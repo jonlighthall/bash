@@ -12,7 +12,7 @@ else
     if [[ -d $1 ]]; then
 	echo "found $1"
 	
-	for bad in bat bin cmd exe out osx gz
+	for bad in bat bin cmd csh exe gz prf out osx
 	do
 	    echo "replacing \".$bad\" with \"${sep}${bad}\"..."
 	    for fname in $(find $1 -name "*.${bad}"); do
