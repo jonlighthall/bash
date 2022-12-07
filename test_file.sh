@@ -1,7 +1,7 @@
 #!/bin/sh
 
-GOOD='\033[0;32m'
-BAD='\033[0;31m'
+GOOD='\033[1;32m'
+BAD='\033[1;31m'
 NORMAL='\033[0m'
 BOLD='\033[4m'
 
@@ -11,27 +11,23 @@ then
 else
     for arg in "$@"
     do
-	echo
 	echo -n "$arg "
 	if [ -L $arg ] ; then
-	    echo -e "is a ${BOLD}link${NORMAL}"
-	    echo -n " The link is... "
+	    echo -en "is a "
 	    if [ -e $arg ] ; then
-		echo -e "${GOOD}valid${NORMAL}"
+		echo -en "${GOOD}valid${NORMAL}"
 	    else
-		echo -e "${BAD}broken${NORMAL}"
+		echo -en "${BAD}broken${NORMAL}"
 	    fi
+	    echo -e " ${BOLD}link${NORMAL}"
 	elif [ -e $arg ] ; then
-	    echo "exists"
-	    echo -n " It is... "
 	    if [ -f $arg ]; then
-		echo -e "a regular ${BOLD}file${NORMAL}"
+		echo -e "is a regular ${BOLD}file${NORMAL}"
 	    else
-		echo -n "not a regular file, but... "
 		if [ -d $arg ]; then
-		    echo -e "a ${BOLD}directory${NORMAL}"
+		    echo -e "is a ${BOLD}directory${NORMAL}"
 		else
-		    echo "not a directory"
+		    echo "${BOLD} exits, but is not a link, file, or directory"
 		fi
 	    fi	
 	else
@@ -39,5 +35,3 @@ else
 	fi
     done
 fi
-echo
-echo " " $(date) "at time $SECONDS"
