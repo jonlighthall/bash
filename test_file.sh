@@ -31,7 +31,7 @@ else
 		fi
 	    fi	
 	else
-	    echo "${BOLD}does not exist${NORMAL}"
+	    echo -e "${BOLD}does not exist${NORMAL}"
 	fi
     done
 fi
