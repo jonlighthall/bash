@@ -1,8 +1,8 @@
 #!/bin/bash
 echo $BASH_SOURCE
 
-  GOOD='\033[0;32m'
-   BAD='\033[0;31m'
+  GOOD='\033[1;32m'
+   BAD='\033[1;31m'
 NORMAL='\033[0m'
 
 # get list of deleted files
@@ -12,13 +12,12 @@ echo
 # checkout deleted files
 for fname in $list
 do
-    echo $fname
     \ls -dl $fname
     timeout -s 9 1s \ls -dl --color $fname
     RETVAL=$?
+    echo -n "$fname "
     if [[ $RETVAL -eq 137 ]]; then
-	echo -e "\n RETVAL = $RETVAL"
-	echo -e " ls --color=auto ${BAD}timed out${NORMAL}"
+	echo -e "${BAD}timed out${NORMAL}"
     else
 	echo -e "${GOOD}OK${NORMAL}"
 	test_file $fname
