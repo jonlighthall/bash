@@ -19,7 +19,7 @@ list+="config "
 
 # fortran
 list+="fortran \
-       fortran_utilites \
+       fortran_utilities \
        hello \
        nrf \
        nrf77 "
@@ -38,7 +38,7 @@ for repo in $list
 do
     hline
     echo -e "locating $repo... \c"
-    if [ -d ${HOME}/$repo ]; then
+    if [ -e ${HOME}/$repo ]; then
 	echo "OK"
 	cd ${HOME}/$repo
 	#	echo -e "pulling $repo... \c"
@@ -56,6 +56,7 @@ do
     else
 	echo "not found"
 	loc_fail+="$repo "
+	test_file ${HOME}/$repo
     fi
     hline
     echo
