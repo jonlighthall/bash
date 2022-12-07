@@ -19,6 +19,7 @@ list+="config "
 
 # fortran
 list+="fortran \
+       fortran_utilites \
        hello \
        nrf \
        nrf77 "
