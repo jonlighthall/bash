@@ -21,6 +21,7 @@ do
 	echo -e " ls --color=auto ${BAD}timed out${NORMAL}"
     else
 	echo -e "${GOOD}OK${NORMAL}"
+	test_file $fname
     fi
 done
 wait
