@@ -5,8 +5,7 @@
 echo $BASH_SOURCE
 
 # get list of deleted files
-list=$(git status | grep deleted | awk '{print $2}')
-echo $list
+list=$(git ls-files -d)
 
 # checkout deleted files
 for fname in $list
