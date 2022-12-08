@@ -4,6 +4,8 @@
 
 echo $BASH_SOURCE
 
+unfix_bad_extensions ./
+
 # get list of deleted files
 list=$(git ls-files -d)
 
