@@ -3,7 +3,7 @@ echo "${0##*/}"
 
 # deinfe horizontal line
 hline() {
-    for i in {1..64}; do echo -n "-"; done
+    for i in {1..69}; do echo -n "-"; done
     echo
 }
 
