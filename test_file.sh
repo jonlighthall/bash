@@ -1,9 +1,10 @@
 #!/bin/sh
 
-GOOD='\033[1;32m'
+GOOD='\033[1;36m'
 BAD='\033[1;31m'
 NORMAL='\033[0m'
 BOLD='\033[4m'
+DIR='\033[1;34m'
 
 if [ $# -eq 0 ]
 then
@@ -25,7 +26,7 @@ else
 		echo "is a regular ${BOLD}file${NORMAL}"
 	    else
 		if [ -d $arg ]; then
-		    echo " is a ${BOLD}directory${NORMAL}"
+		    echo " is a ${DIR}${BOLD}directory${NORMAL}"
 		else
 		    echo "${BOLD} exits, but is not a link, file, or directory"
 		fi
