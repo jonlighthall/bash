@@ -34,6 +34,7 @@ list+=""
 loc_fail=""
 pull_fail=""
 push_fail=""
+mods=""
 for repo in $list
 do
     hline
@@ -52,6 +53,11 @@ do
 	if [[ $? != 0 ]]; then
 	    echo "push: $?"
 	    push_fail+="$repo "
+	fi
+	if [[ ! -z $(git ls-files -m) ]]; then
+	    echo "modified:"
+	    git ls-files -m | sed 's/^/   /'
+	    mods+="$repo "
 	fi
     else
 	echo "not found"
@@ -79,4 +85,10 @@ if [ -z "$pull_fail" ]; then
     echo "none"
 else
     echo "$pull_fail"
+fi
+echo -n "     modified: "
+if [ -z "$mods" ]; then
+    echo "none"
+else
+    echo "$mods"
 fi
