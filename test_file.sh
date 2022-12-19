@@ -1,7 +1,7 @@
 #!/bin/sh
 
 GOOD='\033[1;32m'
-BAD='\033[1;31m'
+BAD='\033[4;31m'
 NORMAL='\033[0m'
 BOLD='\033[4m'
 
@@ -15,23 +15,23 @@ else
 	if [ -L $arg ] ; then
 	    echo -en "is a "
 	    if [ -e $arg ] ; then
-		echo -en "${GOOD}valid${NORMAL}"
+		echo -e -n "${GOOD}valid${NORMAL}"
 	    else
 		echo -en "${BAD}broken${NORMAL}"
 	    fi
-	    echo -e " ${BOLD}link${NORMAL}"
+	    echo " ${BOLD}link${NORMAL}"
 	elif [ -e $arg ] ; then
 	    if [ -f $arg ]; then
-		echo -e "is a regular ${BOLD}file${NORMAL}"
+		echo "is a regular ${BOLD}file${NORMAL}"
 	    else
 		if [ -d $arg ]; then
-		    echo -e "is a ${BOLD}directory${NORMAL}"
+		    echo "is a ${BOLD}directory${NORMAL}"
 		else
 		    echo "${BOLD} exits, but is not a link, file, or directory"
 		fi
 	    fi	
 	else
-	    echo -e "${BOLD}does not exist${NORMAL}"
+	    echo "${BAD}does not exist${NORMAL}"
 	fi
     done
 fi
