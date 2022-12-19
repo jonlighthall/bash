@@ -1,7 +1,7 @@
 #!/bin/sh
 
 GOOD='\033[1;32m'
-BAD='\033[4;31m'
+BAD='\033[1;31m'
 NORMAL='\033[0m'
 BOLD='\033[4m'
 
@@ -31,7 +31,7 @@ else
 		fi
 	    fi
 	else
-	    echo "${BAD}does not exist${NORMAL}"
+	    echo "${BAD}${BOLD}does not exist${NORMAL}"
 	fi
     done
 fi
