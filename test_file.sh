@@ -16,23 +16,23 @@ else
 	if [ -L $arg ] ; then
 	    echo -n "is a "
 	    if [ -e $arg ] ; then
-		echo -n "${GOOD}valid${NORMAL}"
+		echo -e -n "${GOOD}valid${NORMAL}"
 	    else
-		echo -n "${BAD}broken${NORMAL}"
+		echo -e -n "${BAD}broken${NORMAL}"
 	    fi
-	    echo " ${BOLD}link${NORMAL}"
+	    echo -e " ${BOLD}link${NORMAL}"
 	elif [ -e $arg ] ; then
 	    if [ -f $arg ]; then
-		echo "is a regular ${BOLD}file${NORMAL}"
+		echo -e "is a regular ${BOLD}file${NORMAL}"
 	    else
 		if [ -d $arg ]; then
-		    echo " is a ${DIR}${BOLD}directory${NORMAL}"
+		    echo -e " is a ${DIR}${BOLD}directory${NORMAL}"
 		else
-		    echo "${BOLD} exits, but is not a link, file, or directory"
+		    echo -e "${BOLD} exits, but is not a link, file, or directory"
 		fi
 	    fi
 	else
-	    echo "${BAD}${BOLD}does not exist${NORMAL}"
+	    echo -e "${BAD}${BOLD}does not exist${NORMAL}"
 	fi
     done
 fi
