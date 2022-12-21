@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 GOOD='\033[1;36m'
 BAD='\033[1;31m'
@@ -26,7 +26,7 @@ else
 		echo -e "is a regular ${BOLD}file${NORMAL}"
 	    else
 		if [ -d $arg ]; then
-		    echo -e " is a ${DIR}${BOLD}directory${NORMAL}"
+		    echo -e "is a ${DIR}${BOLD}directory${NORMAL}"
 		else
 		    echo -e "${BOLD} exits, but is not a link, file, or directory"
 		fi
