@@ -1,10 +1,13 @@
 #!/bin/bash
+# define highligt colors
+  GOOD='\033[0;32m' # green
+   BAD='\033[0;31m' # red
+NORMAL='\033[0m'    # reset
+    UL='\033[4m'    # underline
 
-GOOD='\033[1;36m'
-BAD='\033[1;31m'
-NORMAL='\033[0m'
-BOLD='\033[4m'
-DIR='\033[1;34m'
+ VALID='\033[1;36m' # bold cyan: valid link
+BROKEN='\033[1;31m' # bold red : broken link
+   DIR='\033[1;34m' # bold blue: directory
 
 if [ $# -eq 0 ]
 then
@@ -16,23 +19,23 @@ else
 	if [ -L $arg ] ; then
 	    echo -n "is a "
 	    if [ -e $arg ] ; then
-		echo -e -n "${GOOD}valid${NORMAL}"
+		echo -e -n "${VALID}valid${NORMAL}"
 	    else
-		echo -e -n "${BAD}broken${NORMAL}"
+		echo -e -n "${BROKEN}broken${NORMAL}"
 	    fi
-	    echo -e " ${BOLD}link${NORMAL}"
+	    echo -e " ${UL}link${NORMAL}"
 	elif [ -e $arg ] ; then
 	    if [ -f $arg ]; then
-		echo -e "is a regular ${BOLD}file${NORMAL}"
+		echo -e "is a regular ${UL}file${NORMAL}"
 	    else
 		if [ -d $arg ]; then
-		    echo -e "is a ${DIR}${BOLD}directory${NORMAL}"
+		    echo -e "is a ${DIR}${UL}directory${NORMAL}"
 		else
-		    echo -e "${BOLD} exits, but is not a link, file, or directory"
+		    echo -e "${UL} exits, but is not a link, file, or directory"
 		fi
 	    fi
 	else
-	    echo -e "${BAD}${BOLD}does not exist${NORMAL}"
+	    echo -e "${BAD}${UL}does not exist${NORMAL}"
 	fi
     done
 fi
