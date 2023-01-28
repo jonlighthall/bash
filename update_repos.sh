@@ -42,22 +42,30 @@ do
     if [ -e ${HOME}/$repo ]; then
 	echo "OK"
 	cd ${HOME}/$repo
-	#	echo -e "pulling $repo... \c"
-	git pull --all --tags --prune
-	if [[ $? != 0 ]]; then
-	    echo "pull: $?"
-	    pull_fail+="$repo "
-	fi
-	#	echo -e "pushing $repo... \c"
-	git push --all
-	if [[ $? != 0 ]]; then
-	    echo "push: $?"
-	    push_fail+="$repo "
-	fi
-	if [[ ! -z $(git ls-files -m) ]]; then
-	    echo "modified:"
-	    git ls-files -m | sed 's/^/   /'
-	    mods+="$repo "
+	git rev-parse --is-inside-work-tree >/dev/null 2>&1
+	RETVAL=$?
+	if [[ $RETVAL -eq 0 ]]; then
+	    #	echo -e "pulling $repo... \c"
+	    git pull --all --tags --prune
+	    if [[ $? != 0 ]]; then
+		echo "pull: $?"
+		pull_fail+="$repo "
+	    fi
+	    #	echo -e "pushing $repo... \c"
+	    git push --all
+	    if [[ $? != 0 ]]; then
+		echo "push: $?"
+		push_fail+="$repo "
+	    fi
+	    if [[ ! -z $(git ls-files -m) ]]; then
+		echo "modified:"
+		git ls-files -m | sed 's/^/   /'
+		mods+="$repo "
+	    fi
+	else
+	    echo "return value = $RETVAL"
+	    echo "$repo not a repo"
+	    loc_fail+="$repo "
 	fi
     else
 	echo "not found"
