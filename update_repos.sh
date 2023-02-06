@@ -16,7 +16,7 @@ list="bash \
 
 # settings
 list+="config \
-       home"
+       home "
 
 # fortran
 list+="fortran \
