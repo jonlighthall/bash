@@ -15,7 +15,8 @@ list="bash \
       scripts "
 
 # settings
-list+="config "
+list+="config \
+       home"
 
 # fortran
 list+="fortran \
