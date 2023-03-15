@@ -14,10 +14,14 @@ else
     mkdir -pv $TGTDIR
 fi
 
-# list files to be linked in bin
+echo "--------------------------------------"
+echo "------ Start Linking Repo Files-------"
+echo "--------------------------------------"
+
+# list files to be linked
 for prog in bell sec2elap whatsup rmbin fix_bad_extensions \
-    unfix_bad_extensions test_file update_repos update_packages \
-    untar clean_mac add_path log ls_test
+		 unfix_bad_extensions test_file update_repos update_packages \
+		 untar clean_mac add_path log ls_test
 do
     echo -n "program $SRCDIR/$prog.sh... "
     if [ -e $SRCDIR/$prog.sh ]; then
@@ -28,7 +32,8 @@ do
 	    if [ -e $TGTDIR/${prog} ] ; then
 		echo -n "exists and "
 		if [[ $SRCDIR/$prog.sh -ef $TGTDIR/$prog ]]; then
-		    echo "already points to ${prog}. skipping..."
+		    echo "already points to ${prog}"
+		    echo "${TAB}skipping..."
 		    continue
 		else
 		    echo -n "will be backed up..."
@@ -38,11 +43,15 @@ do
 		echo "does not exist"
 	    fi
 	    echo -n "${TAB}making link... "
-	    ln -svf $SRCDIR/$prog.sh $TGTDIR/$prog
+	    ln -sv $SRCDIR/$prog.sh $TGTDIR/$prog
 	else
 	    echo "not executable"
 	fi
     else
 	echo "does not exist"
     fi
+    echo
 done
+echo "--------------------------------------"
+echo "--------- Done Making Links ----------"
+echo "--------------------------------------"
