@@ -6,7 +6,15 @@ TAB="   "
 source_dir=$PWD
 user_bin=$HOME/bin
 
-# check target directory
+# check directories
+echo "source directory $source_dir..."
+if [ -d $source_dir ]; then
+    echo "exists"
+else
+    echo "does not exist"
+    return 1
+fi
+
 echo -n "target directory $user_bin... "
 if [ -d $user_bin ]; then
     echo "exists"
@@ -14,8 +22,6 @@ else
     echo "does not exist"
     mkdir -pv $user_bin
 fi
-
-echo "source directory $source_dir"
 
 echo "--------------------------------------"
 echo "------ Start Linking Repo Files-------"
@@ -28,7 +34,7 @@ for prog in bell sec2elap whatsup rmbin fix_bad_extensions \
 		 untar clean_mac add_path log ls_test xtest
 do
     target=${source_dir}/${prog}${ext}
-    link=${user_bin}/$prog
+    link=${user_bin}/${prog}
 
     echo -n "program $target... "
     if [ -e $target ]; then
@@ -36,7 +42,8 @@ do
 	if [ -x $target ]; then
 	    echo "executable"
 	    echo -n "${TAB}link $link... "
-	    if [ -e $link ] || [ -L $link ] || [ -d $link ] ; then
+	    # first, backup existing copy
+	    if [ -L $link ] || [ -f $link ] || [ -d $link ]; then
 		echo -n "exists and "
 		if [[ $target -ef $link ]]; then
 		    echo "already points to ${prog}"
@@ -51,6 +58,7 @@ do
 	    else
 		echo "does not exist"
 	    fi
+	    # then link
 	    echo -n "${TAB}making link... "
 	    ln -sv $target $link
 	else
