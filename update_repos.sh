@@ -11,19 +11,22 @@ hline() {
 # scripting
 list="bash \
       batch \
-      powershell\
-      scripts "
+      powershell "
 
 # settings
 list+="config \
        home "
 
-# fortran
-list+="fortran \
-       fortran_utilities \
-       hello \
-       nrf \
-       nrf77 "
+# utilities
+list+="fortran_utilities "
+
+repo_dir="repos/"
+# tutorials
+list+="${repo_dir}fortran \
+       ${repo_dir}hello \
+       ${repo_dir}nrf \
+       ${repo_dir}nrf77 \
+       ${repo_dir}python "
 
 # matlab
 list+="matlab \
@@ -31,6 +34,9 @@ list+="matlab \
 
 # projects
 list+=""
+
+# inaccessible
+#list+="scripts"
 
 loc_fail=""
 pull_fail=""
