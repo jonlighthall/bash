@@ -8,35 +8,37 @@ hline() {
 }
 
 # list repository paths, relative to home
-# scripting
-list="bash \
-      batch \
-      powershell "
-
 # settings
 list+="config \
        home "
 
-# utilities
-list+="fortran_utilities "
+# scripting
+dir_script="utils/"
+list="${dir_script}bash \
+      ${dir_script}batch \
+      ${dir_script}powershell "
+# inaccessible
+list+="${dir_script}scripts "
 
-repo_dir="repos/"
+# utilities
+dir_utils="utils/"
+list+="${dir_utils}fortran_utilities "
+
 # tutorials
-list+="${repo_dir}fortran \
-       ${repo_dir}hello \
-       ${repo_dir}nrf \
-       ${repo_dir}nrf77 \
-       ${repo_dir}python "
+dir_tutor="repos/"
+list+="${dir_tutor}fortran \
+       ${dir_tutor}hello \
+       ${dir_tutor}nrf \
+       ${dir_tutor}nrf77 \
+       ${dir_tutor}python "
 
 # matlab
-list+="matlab \
-       matlab/macros "
+dir_matlab="matlab/"
+list+="${dir_matlab} \
+       ${dir_matlab}macros "
 
 # projects
 list+=""
-
-# inaccessible
-#list+="scripts"
 
 loc_fail=""
 pull_fail=""
