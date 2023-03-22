@@ -25,13 +25,14 @@ else
 	    fi
 	    echo -e " ${UL}link${NORMAL}"
 	elif [ -e $arg ] ; then
+	    echo -n "exists and "
 	    if [ -f $arg ]; then
 		echo -e "is a regular ${UL}file${NORMAL}"
 	    else
 		if [ -d $arg ]; then
 		    echo -e "is a ${DIR}${UL}directory${NORMAL}"
 		else
-		    echo -e "${UL} exits, but is not a link, file, or directory"
+		    echo -e "${UL} is not a link, file, or directory"
 		fi
 	    fi
 	else
