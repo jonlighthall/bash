@@ -12,25 +12,24 @@ hline() {
 list+="config \
        home "
 
-# scripting
+# scripting utilities
 dir_script="utils/"
 list="${dir_script}bash \
       ${dir_script}batch \
+      ${dir_script}scripts \
       ${dir_script}powershell "
-# inaccessible
-list+="${dir_script}scripts "
 
-# utilities
-dir_utils="utils/"
-list+="${dir_utils}fortran_utilities "
+# programming utilities
+dir_prog="utils/"
+list+="${dir_prog}fortran_utilities "
 
-# tutorials
-dir_tutor="repos/"
-list+="${dir_tutor}fortran \
-       ${dir_tutor}hello \
-       ${dir_tutor}nrf \
-       ${dir_tutor}nrf77 \
-       ${dir_tutor}python "
+# tutorial examples
+dir_examp="examples/"
+list+="${dir_examp}fortran \
+       ${dir_examp}hello \
+       ${dir_examp}nrf \
+       ${dir_examp}nrf77 \
+       ${dir_examp}python "
 
 # matlab
 dir_matlab="matlab/"
