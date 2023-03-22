@@ -14,6 +14,8 @@ else
     mkdir -pv $TGTDIR
 fi
 
+echo "source directory $SRCDIR"
+
 echo "--------------------------------------"
 echo "------ Start Linking Repo Files-------"
 echo "--------------------------------------"
@@ -29,7 +31,7 @@ do
 	if [ -x $SRCDIR/$prog.sh ]; then
 	    echo "executable"
 	    echo -n "${TAB}link $TGTDIR/${prog}... "
-	    if [ -e $TGTDIR/${prog} ] ; then
+	    if [ -e $TGTDIR/${prog} ] || [ -L $TGTDIR/${prog} ] || [ -d $TGTDIR/${prog} ] ; then
 		echo -n "exists and "
 		if [[ $SRCDIR/$prog.sh -ef $TGTDIR/$prog ]]; then
 		    echo "already points to ${prog}"
