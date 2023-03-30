@@ -26,7 +26,7 @@ list+="${dir_prog}fortran_utilities "
 # tutorial examples
 dir_examp="examples/"
 list+="${dir_examp}cpp \
-       ${dir_examp}hello \	
+       ${dir_examp}hello \
        ${dir_examp}fortran \
        ${dir_examp}nrf \
        ${dir_examp}nrf77 \
