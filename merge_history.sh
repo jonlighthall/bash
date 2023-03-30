@@ -1,0 +1,73 @@
+#!/bin/bash
+#
+# Purpose: this script will compare the comntents of of the given input argument against
+# .bash_history, append the non-common lines to .bash_history and delte the resulting redundant
+# file.
+#
+# JCL Mar 2023
+
+# shell settings
+#set -e # exit on non-zero status
+#set -x
+#shopt -s expand_aliases
+#alias diffy='diff --color=auto --suppress-common-lines -yiEZbwB'
+#alias comm1='comm -2 -3 --nocheck-order'
+
+
+# define highligt colors
+GOOD='\033[0;32m' # green
+BAD='\033[0;31m' # red
+NORMAL='\033[0m'    # reset
+UL='\033[4m'    # underline
+
+# check for input
+if [ $# -eq 0 ]
+then
+    echo "Please provide a (list of) files to compare"
+    exit 1
+else
+    # check for reference file
+    hist=${HOME}/.bash_history
+    echo -n "${hist}... "
+    if [ -f $hist ]; then
+	echo -e "is a regular ${UL}file${NORMAL}"
+    else
+	echo -e "${BAD}${UL}does not exist${NORMAL}"
+	exit 1
+    fi
+    # check arguments
+    for arg in "$@"
+    do
+	echo -n "${arg}... "
+	if [ -f $arg ]; then
+	    echo -e "is a regular ${UL}file${NORMAL}"
+	    echo "proceeding..."
+	    (diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist})
+	    #	    echo "here";exit
+	    comm -2 -3 --nocheck-order ${arg} ${hist}
+
+	    echo "${arg} contains $(comm -2 -3 --nocheck-order ${arg} ${hist}|wc -l) lines not present in ${hist}"
+	    read -p "Press q to quit, any other key to continue " -n 1 -s -r
+	    echo
+	    if [[ $REPLY =~ [qQ] ]]; then
+		echo "exiting..."
+		exit 1
+	    else
+		echo "continuing..."
+	    fi
+	    set -x
+	    comm -2 -3 --nocheck-order ${arg} ${hist} &>> ${hist}
+	    comm -2 -3 --nocheck-order ${arg} ${hist}
+	    N=$(comm -2 -3 --nocheck-order ${arg} ${hist} | wc -l)
+	    echo "remaining uncommon lines = ${N}"
+	    if [[ $N == 0 ]]; then
+		echo "yes"
+		rm -v ${arg}
+	    else
+		echo "no"
+	    fi
+	else
+	    echo -e "${BAD}${UL}does not exist${NORMAL}"
+	fi
+    done
+fi
