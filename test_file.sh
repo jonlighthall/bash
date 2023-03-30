@@ -8,11 +8,12 @@ NORMAL='\033[0m'    # reset
  VALID='\033[1;36m' # bold cyan: valid link
 BROKEN='\033[1;31m' # bold red : broken link
    DIR='\033[1;34m' # bold blue: directory
-
-if [ $# -eq 0 ]
-then
+#
+# check for input
+if [ $# -eq 0 ]; then
     echo "Please provide an input file"
 else
+    # check arguments
     for arg in "$@"
     do
 	echo -n "$arg "
