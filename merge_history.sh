@@ -43,44 +43,38 @@ else
 	    echo -e "is a regular ${UL}file${NORMAL}"
 	    echo "proceeding..."
 	    diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist}
-
 	    echo -e "\n-----\n"
-	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history
+	    diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist} | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//'
 	    echo -e "\n-----\n"
-	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep "^[^\s]*<"
-	    echo -e "\n-----\n"
-	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep "^[^\s]*<" | sed 's/\s*<$//'
-	    echo -e "\n-----\n"
-	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep -v "^[^\s]*>"
-	    echo -e "\n-----\n"
-	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//'
-
-	    N=$(diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//' | wc -l)
-
-	    #	    N=(diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep -v "^[^\s]*>" | sed 's/\s*>.*$//' | wc -l)
+	    N=$(diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist} | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//' | wc -l)
 	    echo "$N lines from ${arg}"
-
 	    if [[ $N > 0 ]]; then
 		echo "yes"
 		echo "#$(date +'%s') INDIFF $(date +'%a %b %d %Y %R:%S %Z')" >> ${hist}
-		diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//' >> ${hist}
+		diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist} | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//' >> ${hist}
 	    else
 		echo "no"
 	    fi
-
-	    #
-
-	    #	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep "^[^\s]*<" | sed 's/\s*<$//' >> ${hist}
 
 	    echo -e "\n-----\n"
 	    set -x
 	    comm -2 -3 --nocheck-order ${arg} ${hist}
 	    set +x
-	    N=$(comm -2 -3 --nocheck-order ${arg} ${hist} | wc -l)
-	    echo "  initial uncommon lines = ${N}"
-	    #	    echo "#$(date +'%s') INCOMM $(date +'%a %b %d %Y %R:%S %Z')" >> ${hist}
-	    N=$(comm -2 -3 --nocheck-order ${arg} ${hist} | wc -l)
-	    echo "remaining uncommon lines = ${N}"
+	    M=$(comm -2 -3 --nocheck-order ${arg} ${hist} | wc -l)
+	    echo "  initial uncommon lines = ${M}"
+	    if [[ $M > 0 ]]; then
+		echo "yes"
+		exit
+	    	echo "#$(date +'%s') INCOMM $(date +'%a %b %d %Y %R:%S %Z')" >> ${hist}
+		comm -2 -3 --nocheck-order ${arg} ${hist} >> ${hist}
+		echo "done"
+		echo "check"
+		comm -2 -3 --nocheck-order ${arg} ${hist}
+		O=$(comm -2 -3 --nocheck-order ${arg} ${hist} | wc -l)
+		echo "remaining uncommon lines = ${O}"
+	    else
+		echo "no"
+	    fi
 	    exit
 
 

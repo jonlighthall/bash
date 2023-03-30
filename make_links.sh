@@ -31,7 +31,7 @@ echo "--------------------------------------"
 ext=.sh
 for prog in bell sec2elap whatsup rmbin fix_bad_extensions \
 		 unfix_bad_extensions test_file update_repos update_packages \
-		 untar clean_mac add_path log ls_test xtest
+		 untar clean_mac add_path log ls_test xtest merge_history
 do
     target=${source_dir}/${prog}${ext}
     link=${user_bin}/${prog}
