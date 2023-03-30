@@ -42,9 +42,50 @@ else
 	if [ -f $arg ]; then
 	    echo -e "is a regular ${UL}file${NORMAL}"
 	    echo "proceeding..."
-	    (diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist})
-	    #	    echo "here";exit
+	    diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist}
+
+	    echo -e "\n-----\n"
+	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history
+	    echo -e "\n-----\n"
+	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep "^[^\s]*<"
+	    echo -e "\n-----\n"
+	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep "^[^\s]*<" | sed 's/\s*<$//'
+	    echo -e "\n-----\n"
+	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep -v "^[^\s]*>"
+	    echo -e "\n-----\n"
+	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//'
+
+	    N=$(diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//' | wc -l)
+
+	    #	    N=(diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep -v "^[^\s]*>" | sed 's/\s*>.*$//' | wc -l)
+	    echo "$N lines from ${arg}"
+
+	    if [[ $N > 0 ]]; then
+		echo "yes"
+		echo "#$(date +'%s') INDIFF $(date +'%a %b %d %Y %R:%S %Z')" >> ${hist}
+		diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//' >> ${hist}
+	    else
+		echo "no"
+	    fi
+
+	    #
+
+	    #	    diff --color=auto --suppress-common-lines -yiEZbwB ./.bash_history_old ./.bash_history | grep "^[^\s]*<" | sed 's/\s*<$//' >> ${hist}
+
+	    echo -e "\n-----\n"
+	    set -x
 	    comm -2 -3 --nocheck-order ${arg} ${hist}
+	    set +x
+	    N=$(comm -2 -3 --nocheck-order ${arg} ${hist} | wc -l)
+	    echo "  initial uncommon lines = ${N}"
+	    #	    echo "#$(date +'%s') INCOMM $(date +'%a %b %d %Y %R:%S %Z')" >> ${hist}
+	    N=$(comm -2 -3 --nocheck-order ${arg} ${hist} | wc -l)
+	    echo "remaining uncommon lines = ${N}"
+	    exit
+
+
+
+
 
 	    echo "${arg} contains $(comm -2 -3 --nocheck-order ${arg} ${hist}|wc -l) lines not present in ${hist}"
 	    read -p "Press q to quit, any other key to continue " -n 1 -s -r
