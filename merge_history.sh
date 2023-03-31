@@ -47,14 +47,27 @@ else
 	    diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist} | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//'
 	    echo -e "\n-----\n"
 	    N=$(diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist} | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//' | wc -l)
-	    echo "$N lines from ${arg}"
+	    echo "initial $N diff lines from ${arg}"
 	    if [[ $N > 0 ]]; then
-		echo "yes"
+		echo "there are differences"
 		echo "#$(date +'%s') INDIFF $(date +'%a %b %d %Y %R:%S %Z')" >> ${hist}
 		diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist} | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//' >> ${hist}
 	    else
-		echo "no"
+		echo "there are no... or negative differences"
 	    fi
+
+	    diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist} | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//'
+	    NN=$(diff --color=auto --suppress-common-lines -yiEZbwB ${arg} ${hist} | grep -v "^[^\s]*>" | sed 's/\s*<$//; s/\s*|.*$//' | wc -l)
+	    echo "remaining $NN diff lines from ${arg}"
+
+	    if [[ $NN == 0 ]]; then
+		echo "time to delte file!"
+		rm -f ${arg}
+		exit
+	    else
+		echo "differences remain! what happened?"
+	    fi
+	    exit
 
 	    echo -e "\n-----\n"
 	    set -x
