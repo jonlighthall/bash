@@ -62,12 +62,12 @@ else
 
 	    if [[ $NN == 0 ]]; then
 		echo "time to delte file!"
-		rm -f ${arg}
+		rm -v ${arg}
 		exit
 	    else
 		echo "differences remain! what happened?"
 	    fi
-	    exit
+	    continue
 
 	    echo -e "\n-----\n"
 	    set -x
