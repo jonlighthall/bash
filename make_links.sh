@@ -29,9 +29,9 @@ echo "--------------------------------------"
 
 # list files to be linked
 ext=.sh
-for prog in bell sec2elap whatsup rmbin fix_bad_extensions \
-		 unfix_bad_extensions test_file update_repos update_packages \
-		 untar clean_mac add_path log ls_test xtest merge_history
+for prog in add_path bell clean_mac fix_bad_extensions log ls_test merge_history rmbin sec2elap \
+		 test_file undel_repo unfix_bad_extensions untar update_packages update_repos \
+		 whatsup xtest
 do
     target=${source_dir}/${prog}${ext}
     link=${user_bin}/${prog}
