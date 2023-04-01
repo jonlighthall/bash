@@ -70,6 +70,7 @@ do
 	git rev-parse --is-inside-work-tree >/dev/null 2>&1
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
+	    git remote -v | awk -F " " '{print $2}' | uniq >> ${HOME}/utils/bash/remote_list.txt
 	    #	echo -e "pulling $repo... \c"
 	    git pull --all --tags --prune
 	    if [[ $? != 0 ]]; then
