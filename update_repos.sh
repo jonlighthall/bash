@@ -22,7 +22,7 @@ dir_script="utils/"
 list+="${dir_script}bash \
        ${dir_script}batch \
        ${dir_script}powershell "
-list_remote=${HOME}/${dir_script}bash/remote_list.txt
+list_remote=${HOME}/${dir_script}bash/remote.lst
 
 # programming utilities
 dir_prog="utils/"
