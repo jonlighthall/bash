@@ -38,7 +38,7 @@ list+="${dir_matlab} \
        ${dir_matlab}macros "
 
 # private
-if [-f private.lst ]; then
+if [ -f private.lst ]; then
     while IFS= read -r line
     do list+=" $line"
     done < private.lst
