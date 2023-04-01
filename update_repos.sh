@@ -72,7 +72,6 @@ do
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
 	    git remote -v | awk -F " " '{print $2}' | uniq >> ${list_remote}
-	    continue
 	    #	echo -e "pulling $repo... \c"
 	    git pull --all --tags --prune
 	    if [[ $? != 0 ]]; then
