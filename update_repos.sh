@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# update_repos.sh - push and pull a specified list of git repositories and print summaryories and print summary
+#
+# JCL Apr 2022
+
 echo "${0##*/}"
 
 # deinfe horizontal line
