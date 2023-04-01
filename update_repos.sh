@@ -72,6 +72,7 @@ do
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
 	    git remote -v | awk -F " " '{print $2}' | uniq >> ${list_remote}
+	    continue
 	    #	echo -e "pulling $repo... \c"
 	    git pull --all --tags --prune
 	    if [[ $? != 0 ]]; then
@@ -129,5 +130,12 @@ else
 fi
 
 # sort and uniquify remotes list
-cat ${list_remote} | uniq | sort > ${list_remote}_sort
-mv ${list_remote}_sort ${list_remote}
+#echo "orginal:";cat ${list_remote}
+sort -o ${list_remote}_sort ${list_remote}
+#echo "sorted:";cat ${list_remote}_sort
+uniq ${list_remote}_sort > ${list_remote}_uniq
+#echo "unique:";cat ${list_remote}_uniq
+rm ${list_remote}_sort
+mv ${list_remote}_uniq ${list_remote}
+echo "      remotes: "
+cat ${list_remote}
