@@ -130,4 +130,4 @@ fi
 
 # sort and uniquify remotes list
 cat ${list_remote} | uniq | sort ${list_remote}_sort
-mv -v ${list_remote}_sort ${list_remote}
+mv ${list_remote}_sort ${list_remote}
