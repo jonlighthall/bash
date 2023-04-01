@@ -129,5 +129,5 @@ else
 fi
 
 # sort and uniquify remotes list
-cat ${list_remote} | uniq | sort ${list_remote}_sort
+cat ${list_remote} | uniq | sort > ${list_remote}_sort
 mv ${list_remote}_sort ${list_remote}
