@@ -16,7 +16,6 @@ list+="config \
 dir_script="utils/"
 list="${dir_script}bash \
       ${dir_script}batch \
-      ${dir_script}scripts \
       ${dir_script}powershell "
 
 # programming utilities
