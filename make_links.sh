@@ -31,7 +31,7 @@ echo "--------------------------------------"
 ext=.sh
 for prog in add_path bell clean_mac fix_bad_extensions log ls_test merge_history rmbin sec2elap \
 		 test_file undel_repo unfix_bad_extensions untar update_packages update_repos \
-		 whatsup xtest
+		 whatsup xtest find_missing_and_empty
 do
     target=${source_dir}/${prog}${ext}
     link=${user_bin}/${prog}
