@@ -103,6 +103,19 @@ do
     echo
 done
 
+# sort and uniquify remotes list
+#echo "orginal:";cat ${list_remote}
+sort -o ${list_remote}_sort ${list_remote}
+#echo "sorted:";cat ${list_remote}_sort
+uniq ${list_remote}_sort > ${list_remote}_uniq
+#echo "unique:";cat ${list_remote}_uniq
+rm ${list_remote}_sort
+mv ${list_remote}_uniq ${list_remote}
+echo -n "      remotes: "
+head -n 1 ${list_remote}
+tail -n +1 ${list_remote} | sed 's/^/               /'
+echo
+
 echo -n "    not found: "
 if [ -z "$loc_fail" ]; then
     echo "none"
@@ -127,14 +140,3 @@ if [ -z "$mods" ]; then
 else
     echo "$mods"
 fi
-
-# sort and uniquify remotes list
-#echo "orginal:";cat ${list_remote}
-sort -o ${list_remote}_sort ${list_remote}
-#echo "sorted:";cat ${list_remote}_sort
-uniq ${list_remote}_sort > ${list_remote}_uniq
-#echo "unique:";cat ${list_remote}_uniq
-rm ${list_remote}_sort
-mv ${list_remote}_uniq ${list_remote}
-echo "      remotes: "
-cat ${list_remote}
