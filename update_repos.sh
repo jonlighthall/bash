@@ -37,8 +37,12 @@ dir_matlab="matlab/"
 list+="${dir_matlab} \
        ${dir_matlab}macros "
 
-# projects
-list+=""
+# private
+if [-f private.lst ]; then
+    while IFS= read -r line
+    do list+=" $line"
+    done < private.lst
+fi
 
 loc_fail=""
 pull_fail=""
