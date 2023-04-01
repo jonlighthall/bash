@@ -22,6 +22,7 @@ dir_script="utils/"
 list="${dir_script}bash \
       ${dir_script}batch \
       ${dir_script}powershell "
+list_remote=${HOME}/${dir_script}bash/remote_list.txt
 
 # programming utilities
 dir_prog="utils/"
@@ -70,7 +71,7 @@ do
 	git rev-parse --is-inside-work-tree >/dev/null 2>&1
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
-	    git remote -v | awk -F " " '{print $2}' | uniq >> ${HOME}/utils/bash/remote_list.txt
+	    git remote -v | awk -F " " '{print $2}' | uniq >> ${list_remote}
 	    #	echo -e "pulling $repo... \c"
 	    git pull --all --tags --prune
 	    if [[ $? != 0 ]]; then
@@ -126,3 +127,7 @@ if [ -z "$mods" ]; then
 else
     echo "$mods"
 fi
+
+# sort and uniquify remotes list
+cat ${list_remote} | uniq | sort ${list_remote}_sort
+mv -v ${list_remote}_sort ${list_remote}
