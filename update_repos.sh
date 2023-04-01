@@ -41,7 +41,14 @@ list+="${dir_matlab} \
 fname_private=private.lst
 if [ -f ${fname_private} ]; then
     while IFS= read -r line
-    do list+=" $line"
+    do
+	# evaluate each line to expand defined variable names
+	eval line2=$line
+	if [[ $line == $line2 ]]; then
+	    list+=" ${line}"
+	else
+	    list+=" ${line2}"
+	fi
     done < ${fname_private}
 fi
 
