@@ -112,7 +112,7 @@ mv ${list_remote}_uniq ${list_remote}
 # print list of remotes
 echo -n "      remotes: "
 head -n 1 ${list_remote}
-tail -n +1 ${list_remote} | sed 's/^/               /'
+tail -n +2 ${list_remote} | sed 's/^/               /'
 echo
 
 # print push/pull summary
