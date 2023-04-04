@@ -53,8 +53,9 @@ else
     while read line; do
         fname=$line
         ((k++))
-	echo "looking for ${fname}..."
+	echo -n "$k looking for ${fname}..."
 	find ./ -name *${fname}* >> ${file_out}
+	echo "done"
     done < $file_in
     echo $k "filenames checked"
     echo $(cat ${file_out} | wc -l) "files found"
