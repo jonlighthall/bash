@@ -8,6 +8,7 @@
 #
 #JCL Apr 2023
 
+TAB="   "
 # set file names
 file_in=$1
 fname=found.txt
@@ -24,28 +25,29 @@ then
     echo "Please provide an input file"
     exit 1
 else
-    # check if input and output are the same file
-    echo -n "input file ${file_in} is... "
-    if [ ${file_in} -ef ${file_out} ]; then
-        echo "the same file as ${file_out}"
-	echo "waiting..."
+   # check if input and output are the same file
+    echo -n " input file ${file_in} is... "
+    while [ ${file_in} -ef ${file_out} ]; do
+        eqcho "the same file as ${file_out}"
+	echo "${TAB}waiting..."
 	sleep 1
-        echo "renaming output..."
+        echo -n "${TAB}renaming output..."
 	file_out=${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
-    else
-        echo "unique"
-    fi
+	echo ${file_out}
+    done
+    echo "OK"
 
     # check if output exists
     echo -n "output file ${file_out}... "
-    if [ -f ${file_out} ]; then
+    while [ -f ${file_out} ]; do
         echo "exists"
-	echo "waiting..."
+	echo "${TAB}waiting..."
 	sleep 1
-        echo "renaming output..."
+        echo -n "${TAB}renaming output..."
 	file_out=${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
-
-    fi
+	echo ${file_out}
+    done
+    echo "OK"
 
     # read input file
     while read line; do
@@ -87,4 +89,3 @@ else
     #cat ${file_out}
     #fi
 fi
-printf "\a"
