@@ -51,41 +51,11 @@ else
 
     # read input file
     while read line; do
-        # modify file name
-        #fpre="${line%.*}"
-        #fname=$(printf '%s_suf.ext' "$fpre" )
         fname=$line
         ((k++))
-        # printf "%5d %s\n" $k $line
 	echo "looking for ${fname}..."
 	find ./ -name *${fname}* >> ${file_out}
-        if [ ! -f $fname ]; then
-            ((i++))
-            echo $i $fname "is missing"
-            echo $line >> ${file_out}
-        else
-            if [ ! -s $fname ]; then #adding empty increases runtime < 4%
-                ((j++))
-                echo $j $fname "is empty"
-                echo $line >> ${file_out}
-	    else
-		echo "$k $fname is found"
-		echo $line >> ${file_out}
-            fi
-        fi
     done < $file_in
     echo $k "filenames checked"
-    echo $i "of" $k "files missing"
-    ((m=k-i))
-    if [ $m == 0 ]; then
-        echo "no empty files found"
-    else
-        echo $m "files found"
-        echo $j "of" $m "files empty"
-    fi
-    ((l=i+j))
-    echo $l "of" $k "problem files"
-    #if [ -f ${file_out} ]; then
-    #cat ${file_out}
-    #fi
+    echo $(cat ${file_out} | wc -l) "files found"
 fi
