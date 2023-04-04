@@ -4,7 +4,7 @@
 
 # set file names
 file_in=$1
-file_out=missing.lst
+file_out=missing.txt
 base="${file_out%.*}"
 ext="${file_out##*.}"
 file_new=${base}_$(date +'%Y-%m-%d-t%H%M').${ext}
