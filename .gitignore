@@ -1,6 +1,6 @@
 # private repo list
-private.lst
-remote.lst
+list_private_dir.txt
+list_remote_url.txt
 
 # Emacs
 *~
