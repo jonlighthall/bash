@@ -20,7 +20,7 @@ if [ $# -eq 0 ]; then
     echo "Please provide an input file"
     exit 1
 else
-    if [ $# -eq 2 ]; then
+    if [ $# -ge 2 ]; then
 	file_spec=$2
     else
 	file_spec=found.txt
