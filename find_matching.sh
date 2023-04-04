@@ -33,15 +33,12 @@ else
     fi
 
     file_out=${base}.${ext}
-    #file_out=${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
 
     # check if input and output are the same file
     echo -n " input file ${file_in} is... "
     while [ ${file_in} -ef ${file_out} ]; do
         eqcho "the same file as ${file_out}"
-	echo "${TAB}waiting..."
-	sleep 1
-        echo -n "${TAB}renaming output..."
+        echo -n "${TAB}renaming output... "
 	file_out=${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
 	echo ${file_out}
     done
@@ -51,9 +48,7 @@ else
     echo -n "output file ${file_out}... "
     while [ -f ${file_out} ]; do
         echo "exists"
-	echo "${TAB}waiting..."
-	sleep 1
-        echo -n "${TAB}renaming output..."
+        echo -n "${TAB}renaming output... "
 	file_out=${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
 	echo ${file_out}
     done
