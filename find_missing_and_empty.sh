@@ -74,4 +74,3 @@ else
     #cat ${file_out}
     #fi
 fi
-printf "\a"
