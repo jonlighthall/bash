@@ -59,7 +59,22 @@ else
         fname=$line
         ((k++))
 	echo -n "$k looking for ${fname}..."
-	find ./ -type f -name *${fname}* >> ${file_out}
+	# if third argument present, mv file
+	if [ $# -ge 3 ]; then
+	    dir_par=${fname%/*}
+	    dir_mv=${dir_par}/$3
+	    if [ -d ${dir_mv} ]; then
+		echo "${dir_mv} found"
+	    else
+		echo "${dir_mv} not found"
+		mkdir -pv ${dir_mv}
+	    fi
+	    mv ${fname} ${dir_mv}
+
+	    # otherwise write match to file
+	else
+	    find ./ -type f -name *${fname}* >> ${file_out}
+	fi
 	echo "done"
     done < $file_in
     echo $k "filenames checked"
