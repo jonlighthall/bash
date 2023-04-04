@@ -33,6 +33,7 @@ for prog in \
     add_path \
     bell \
     clean_mac \
+    find_matching \
     find_missing_and_empty \
     fix_bad_extensions \
     log \
