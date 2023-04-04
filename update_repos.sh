@@ -43,7 +43,7 @@ list+="${dir_matlab} \
        ${dir_matlab}macros "
 
 # private
-fname_private=list_private_dir.txt
+fname_private=${HOME}/${dir_script}bash/list_private_dir.txt
 if [ -f ${fname_private} ]; then
     while IFS= read -r line
     do
