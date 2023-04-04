@@ -54,7 +54,7 @@ else
         fname=$line
         ((k++))
 	echo -n "$k looking for ${fname}..."
-	find ./ -name *${fname}* >> ${file_out}
+	find ./ -type f -name *${fname}* >> ${file_out}
 	echo "done"
     done < $file_in
     echo $k "filenames checked"
