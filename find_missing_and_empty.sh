@@ -74,3 +74,5 @@ else
     #cat ${file_out}
     #fi
 fi
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

@@ -90,10 +90,6 @@ else
 	    fi
 	    exit
 
-
-
-
-
 	    echo "${arg} contains $(comm -2 -3 --nocheck-order ${arg} ${hist}|wc -l) lines not present in ${hist}"
 	    read -p "Press q to quit, any other key to continue " -n 1 -s -r
 	    echo
@@ -119,3 +115,5 @@ else
 	fi
     done
 fi
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

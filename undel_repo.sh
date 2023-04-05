@@ -14,4 +14,5 @@ do
     git checkout $fname
 done
 wait 
-echo "${TAB}$(date): ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

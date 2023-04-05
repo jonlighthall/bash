@@ -12,3 +12,6 @@ sudo apt install -y xterm
 # re-check and cleanup
 sudo apt upgrade -y --fix-missing
 sudo apt autoremove -y
+
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

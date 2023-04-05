@@ -74,3 +74,5 @@ else
     echo $k "filenames checked"
     echo $(ls ${dir_mv} | wc -l) "files found"
 fi
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

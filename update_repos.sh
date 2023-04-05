@@ -140,3 +140,6 @@ if [ -z "$mods" ]; then
 else
     echo "$mods"
 fi
+
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

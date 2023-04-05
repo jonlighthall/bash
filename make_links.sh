@@ -89,3 +89,5 @@ done
 echo "--------------------------------------"
 echo "--------- Done Making Links ----------"
 echo "--------------------------------------"
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

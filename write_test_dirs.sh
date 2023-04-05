@@ -24,3 +24,5 @@ while read line; do
 done < $FILE1
 echo $i "directories checked"
 echo $j "of" $i "failed write"
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

@@ -91,3 +91,5 @@ else
 	echo $(cat ${file_out} | wc -l) "files found"
     fi
 fi
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

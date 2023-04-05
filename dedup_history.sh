@@ -37,3 +37,5 @@ if [  -f $fname ]; then
     echo "$fname has $N lines"
     rm -v $fname
 fi
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

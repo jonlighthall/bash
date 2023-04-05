@@ -11,7 +11,6 @@ then
 else
     if [[ -d $1 ]]; then
 	echo "found $1"
-	
 	for bad in bat bin cmd csh exe gz prf out osx
 	do
 	    echo "replacing \"${sep}${bad}\" with \".$bad\"..."
@@ -24,3 +23,5 @@ else
 	exit 1
     fi
 fi
+# print time at exit
+echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
