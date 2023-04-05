@@ -84,9 +84,9 @@ do
 		echo "push: $?"
 		push_fail+="$repo "
 	    fi
-	    if [[ ! -z $(git ls-files -m) ]]; then
+	    if [[ ! -z $(git diff --name-only --diff-filter=M) ]]; then
 		echo "modified:"
-		git ls-files -m | sed 's/^/   /'
+		git diff --name-only --diff-filter=M | sed 's/^/   /'
 		mods+="$repo "
 	    fi
 	else
