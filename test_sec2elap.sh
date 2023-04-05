@@ -7,4 +7,4 @@ do
     sec2elap $((10**$n))
 done
 # print time at exit
-echo -e "\n$(date +"%R) ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
