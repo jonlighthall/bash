@@ -36,9 +36,12 @@ sed -i ':start;N;s/\$\$\$\n#/\n#/;t start;P;D' ${hist_out}
 
 # merge commands with timestamps
 echo "merge commands with timestamp lines..."
-sed -i ':start;N;s/\$\$\$\n//;t start;P;D' ${hist_out}
+sed -i ':start;N;s/\$\$\$\n/$$$/;t start;P;D' ${hist_out}
 
 # mark orphaned lines
 echo "mark orphaned lines..."
 sed -i 's/^[^#]/@@@&/' ${hist_out}
 
+# merge commands with timestamps
+echo "merge orphaned lines..."
+sed -i ':start;N;s/\n@@@/@@@/;t start;P;D' ${hist_out}
