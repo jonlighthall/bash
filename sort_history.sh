@@ -31,9 +31,14 @@ echo "mark timestamp lines..."
 sed -i 's/^#[0-9]\{10\}.*/&$$$/' ${hist_out}
 
 # remove marks from timestamp lines with no associated commands
-echo "un-mark childless timestamp liness..."
+echo "un-mark childless timestamp lines..."
 sed -i ':start;N;s/\$\$\$\n#/\n#/;t start;P;D' ${hist_out}
 
 # merge commands with timestamps
-echo "merge commands with timestamp liness..."
+echo "merge commands with timestamp lines..."
 sed -i ':start;N;s/\$\$\$\n//;t start;P;D' ${hist_out}
+
+# mark orphaned lines
+echo "mark orphaned lines..."
+sed -i 's/^[^#]/@@@&/' ${hist_out}
+
