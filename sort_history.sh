@@ -1,8 +1,7 @@
 #!/bin/bash
 #
-# Purpose: this script will compare the comntents of of the given input argument against
-# .bash_history, append the non-common lines to .bash_history and delte the resulting redundant
-# file.
+# sort_history.sh - this script will merge all commands in .bash_history with their corresponding
+# timestamps, sort the result, and unmerge the sorted list.
 #
 # JCL Apr 2023
 
@@ -45,3 +44,7 @@ sed -i 's/^[^#]/@@@&/' ${hist_out}
 # merge commands with timestamps
 echo "merge orphaned lines..."
 sed -i ':start;N;s/\n@@@/@@@/;t start;P;D' ${hist_out}
+
+# sort history
+echo "sorting lines..."
+sort -u ${hist_out} -o ${hist_out}
