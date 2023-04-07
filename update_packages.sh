@@ -18,15 +18,17 @@ bar() {
     hline
 }
 
-# update and upgrade
+# update
 bar "update..."
 sudo apt update
+
+# upgrade
 bar "upgrade..."
 sudo apt upgrade -y
-
-# re-check and cleanup
 bar "upgrade (again) and fix missing..."
 sudo apt upgrade -y --fix-missing
+
+# cleanup
 bar "autoremove and purge..."
 sudo apt autoremove --purge -y
 bar "autoclean..."
