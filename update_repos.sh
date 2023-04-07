@@ -81,7 +81,7 @@ do
 	    git remote -v | awk -F " " '{print $2}' | uniq >> ${list_remote}
 
 	    # pull
-	    echo "pulling $repo... "
+	    echo "pulling..."
 	    git pull --all --tags --prune | sed "s/^/${TAB}/"
 	    if [[ $? != 0 ]]; then
 		echo "pull: $?"
@@ -89,7 +89,7 @@ do
 	    fi
 
 	    # push
-	    echo "pushing $repo... "
+	    echo "pushing..."
 	    (git push --all 2>&1) | sed "s/^/${TAB}/"
 	    if [[ $? != 0 ]]; then
 		echo "push: $?"
