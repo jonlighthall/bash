@@ -18,11 +18,22 @@ else
 fi
 
 # copy file
+echo "copying..."
 cp -pv ${hist_in} ${hist_out}
 
 # delete blank lines
-sed -i 's/^$//'
+echo "delete blank lines..."
+sed -i 's/^$//' ${hist_out}
 \diff --suppress-common-lines ${hist_in} ${hist_out}
 
-# find timestamps
+# find and mark timestamp lines
+echo "mark timestamp lines..."
 sed -i 's/^#[0-9]\{10\}.*/&$$$/' ${hist_out}
+
+# remove marks from timestamp lines with no associated commands
+echo "un-mark childless timestamp liness..."
+sed -i ':start;N;s/\$\$\$\n#/\n#/;t start;P;D' ${hist_out}
+
+# merge commands with timestamps
+echo "merge commands with timestamp liness..."
+sed -i ':start;N;s/\$\$\$\n//;t start;P;D' ${hist_out}
