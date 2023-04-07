@@ -48,3 +48,7 @@ sed -i ':start;N;s/\n@@@/@@@/;t start;P;D' ${hist_out}
 # sort history
 echo "sorting lines..."
 sort -u ${hist_out} -o ${hist_out}
+
+# unmerge commands
+echo "unmerge commands..."
+sed -i 's/\$\$\$/\n/;s/@@@/\n/' ${hist_out}
