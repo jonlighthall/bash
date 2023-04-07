@@ -90,7 +90,7 @@ do
 
 	    # push
 	    echo "pushing $repo... "
-	    git push --all | sed "s/^/${TAB}/"
+	    (git push --all 2>&1) | sed "s/^/${TAB}/"
 	    if [[ $? != 0 ]]; then
 		echo "push: $?"
 		push_fail+="$repo "
