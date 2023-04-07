@@ -12,6 +12,7 @@ hline() {
     echo
 }
 bar() {
+    echo
     hline
     echo "$1"
     hline
@@ -24,13 +25,18 @@ bar "upgrade..."
 sudo apt upgrade -y
 
 # re-check and cleanup
+bar "upgrade (again) and fix missing..."
 sudo apt upgrade -y --fix-missing
-bar "autoremove..."
+bar "autoremove and purge..."
 sudo apt autoremove --purge -y
 bar "autoclean..."
 sudo apt autoclean
 bar "clean..."
 sudo apt clean
+
+# check for distro update
+bar "release upgrade..."
+sudo do-release-upgrade
 
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
