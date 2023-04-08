@@ -34,7 +34,7 @@ do
     if [ -f ${hist_in} ]; then
 	echo -e "is a regular ${UL}file${NORMAL}"
 	list_out+="${hist_in} "
-	cp -pv ${hist_in} ${hist_in}_backup
+	#	cp -pv ${hist_in} ${hist_in}_backup
     else
 	echo -e "${BAD}${UL}does not exist${NORMAL}"
     fi
@@ -49,11 +49,9 @@ done
 
 hist_in=${hist_ref}_merge
 
-cat list_out > ${hist_in}
-
+cat ${list_out} > ${hist_in}
 
 hist_out=${hist_in}_edit
-
 
 # copy file
 echo "${TAB}copying..."
