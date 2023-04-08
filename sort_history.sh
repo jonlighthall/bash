@@ -59,7 +59,7 @@ sed -i 's/^$//' ${hist_out}
 
 # find and mark timestamp lines
 echo "${TAB}mark timestamp lines..."
-export TS_MARKER=\$\$\$
+TS_MARKER=%%%
 sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_out}
 
 # remove marks from timestamp lines with no associated commands
@@ -72,7 +72,7 @@ sed -i ":start;N;s/${TS_MARKER}\n/${TS_MARKER}/;t start;P;D" ${hist_out}
 
 # mark orphaned lines
 echo "${TAB}mark orphaned lines..."
-export OR_MARKER=###
+OR_MARKER=###
 sed -i "s/^[^#]/${OR_MARKER}&/" ${hist_out}
 
 # merge commands with timestamps
@@ -85,7 +85,7 @@ sort -u ${hist_out} -o ${hist_out}
 
 # unmerge commands
 echo "${TAB}unmerge commands..."
-sed -i 's/\$\$\$/\n/' ${hist_out}
+sed -i "s/${TS_MARKER}/\n/" ${hist_out}
 sed -i "s/${OR_MARKER}/\n/" ${hist_out}
 
 # print time at exit
