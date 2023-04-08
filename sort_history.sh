@@ -34,7 +34,6 @@ do
     if [ -f ${hist_in} ]; then
 	echo -e "is a regular ${UL}file${NORMAL}"
 	list_out+="${hist_in} "
-	#	cp -pv ${hist_in} ${hist_in}_backup
     else
 	echo -e "${BAD}${UL}does not exist${NORMAL}"
     fi
@@ -51,11 +50,7 @@ hist_in=${hist_ref}_merge
 
 cat ${list_out} > ${hist_in}
 
-hist_out=${hist_in}_edit
-
-# copy file
-echo "${TAB}copying..."
-cp -pv ${hist_in} ${hist_out} | sed "s/^/${TAB}${TAB}/"
+hist_out=${hist_in}
 
 # delete blank lines
 echo "${TAB}delete blank lines..."
