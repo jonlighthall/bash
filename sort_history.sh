@@ -5,18 +5,55 @@
 #
 # JCL Apr 2023
 
-export TAB="   "
+TAB="   "
 
 # check for reference file
-hist_in=${HOME}/.bash_history
-hist_out=${hist_in}_edit
-echo -n "${hist_in}... "
-if [ -f ${hist_in} ]; then
-    echo -e "is a regular ${UL}file${NORMAL}"
-else
-    echo -e "${BAD}${UL}does not exist${NORMAL}"
-    exit 1
+hist_ref=${HOME}/.bash_history
+
+list_in=${hist_ref}
+
+if [ $# -gt 0 ]; then
+    list_in+=" $@"
+    echo "list of arguments:"
+    for arg in "$@"
+    do
+	echo "${TAB}$arg"
+    done
+
+    echo "list of files:"
+    for file in $list_in
+    do
+	echo "${TAB}$file"
+    done
 fi
+
+list_out=""
+for hist_in in $list_in
+do
+    echo -n "${hist_in}... "
+    if [ -f ${hist_in} ]; then
+	echo -e "is a regular ${UL}file${NORMAL}"
+	list_out+="${hist_in} "
+	cp -pv ${hist_in} ${hist_in}_backup
+    else
+	echo -e "${BAD}${UL}does not exist${NORMAL}"
+    fi
+done
+echo "list out = ${list_out}"
+
+echo "list of files:"
+for file in $list_out
+do
+    echo "${TAB}$file"
+done
+
+hist_in=${hist_ref}_merge
+
+cat list_out > ${hist_in}
+
+
+hist_out=${hist_in}_edit
+
 
 # copy file
 echo "${TAB}copying..."
