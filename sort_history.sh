@@ -72,11 +72,12 @@ sed -i ":start;N;s/${TS_MARKER}\n/${TS_MARKER}/;t start;P;D" ${hist_out}
 
 # mark orphaned lines
 echo "${TAB}mark orphaned lines..."
-sed -i 's/^[^#]/@@@&/' ${hist_out}
+export OR_MARKER=###
+sed -i "s/^[^#]/${OR_MARKER}&/" ${hist_out}
 
 # merge commands with timestamps
 echo "${TAB}merge orphaned lines..."
-sed -i ':start;N;s/\n@@@/@@@/;t start;P;D' ${hist_out}
+sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_out}
 
 # sort history
 echo "${TAB}sorting lines..."
@@ -84,7 +85,8 @@ sort -u ${hist_out} -o ${hist_out}
 
 # unmerge commands
 echo "${TAB}unmerge commands..."
-sed -i 's/\$\$\$/\n/;s/@@@/\n/' ${hist_out}
+sed -i 's/\$\$\$/\n/' ${hist_out}
+sed -i "s/${OR_MARKER}/\n/" ${hist_out}
 
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
