@@ -41,6 +41,7 @@ for prog in \
     merge_history \
     rmbin \
     sec2elap \
+    sort_history \
     test_file \
     undel_repo \
     unfix_bad_extensions \
