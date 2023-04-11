@@ -57,7 +57,7 @@ echo "${TAB}delete blank lines..."
 sed -i 's/^$//' ${hist_out}
 \diff --suppress-common-lines ${hist_in} ${hist_out}
 
-# find unique marker
+# define random marker functions
 function find_marker () {
     \grep -m 1 $marker ${hist_out}
 }
@@ -67,55 +67,22 @@ function add_marker () {
 }
 
 function gen_marker () {
+    echo "${TAB}generating unique marker..."
     marker=""
-    echo "marker = $marker"
     add_marker
-    echo "marker = $marker"
     while [[ ! -z $(find_marker) ]]; do
-	if [[ -z $(find_marker) ]]; then
-	    echo "true"
-	    echo "$marker not found"
-	else
-	    echo "false"
-	    echo "$marker found:"
-	    find_marker | sed "s/$marker.*/$marker.../"
-	fi
+	echo -ne "${TAB}${TAB}marker = $marker\t"
+	echo -ne "found     "
+	find_marker | sed "s/$marker.*/$marker.../"
 	add_marker
     done
+    echo -e "${TAB}${TAB}marker = $marker\tnot found"
 }
 
-echo "finding marker"
-marker=""
-for n in {1..5}; do
-    marker+=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
-    echo -n "trying $marker..."
-    if [[ -z $(\grep -m 1 $marker ${hist_out}) ]]; then
-	echo "not found"
-	break
-    else
-	echo -e "found\n${TAB}\c"
-	\grep -m 1 $marker ${hist_out}
-    fi
-done
-echo -e "${marker} is not found\n"
-
-marker=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
-while [[ ! -z $(\grep -m 1 $marker ${hist_out}) ]]; do
-    echo "trying $marker..."
-    \grep -m 1 $marker ${hist_out}
-    marker+=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
-done
-
-echo "marker = $marker"
-
-echo "test functions"
-gen_marker
-echo "marker = $marker"
-
 # find and mark timestamp lines
-echo "${TAB}mark timestamp lines..."
-
+gen_marker
 TS_MARKER=$marker
+echo "${TAB}mark timestamp lines..."
 sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_out}
 
 # remove marks from timestamp lines with no associated commands
@@ -127,12 +94,9 @@ echo "${TAB}merge commands with timestamp lines..."
 sed -i ":start;N;s/${TS_MARKER}\n/${TS_MARKER}/;t start;P;D" ${hist_out}
 
 # mark orphaned lines
-echo "${TAB}mark orphaned lines..."
-marker=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
-while [[ ! -z $(\grep -m 1 $marker ${hist_out}) ]]; do
-    marker+=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
-done
+gen_marker
 OR_MARKER=$marker
+echo "${TAB}mark orphaned lines..."
 sed -i "s/^[^#]/${OR_MARKER}&/" ${hist_out}
 
 # merge commands with timestamps
