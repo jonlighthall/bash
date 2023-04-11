@@ -38,7 +38,7 @@ do
 	list_out+="${hist_in} "
 	if [ ! ${hist_in} -ef ${hist_ref} ]; then
 	    echo "${hist_in} is not the same as ${hist_ref}"
-	    list_del+="{hist_in}"
+	    list_del+="${hist_in} "
 	else
 	    echo "${hist_ref} and ${hist_in} are the same file"
 	fi
@@ -67,7 +67,6 @@ hist_out=${hist_in}
 # delete blank lines
 echo "${TAB}delete blank lines..."
 sed -i 's/^$//' ${hist_out}
-\diff --suppress-common-lines ${hist_in} ${hist_out}
 
 echo "${TAB}delete trailing whitespaces..."
 sed -i 's/[[:blank:]]*$//' ${hist_out}
@@ -83,40 +82,15 @@ function add_marker () {
     start=33
     end=126
     span=$(( $end - $start + 1 ))
-    #    echo "span = $span"
     escape_list="36 42 47 91 92"
-    #   echo "list = $escape_list"
-
-
-    # for N in {33..126}; do
-    # 	marker=$(printf '%b' $(printf '\\%03o' $N))
-    # 	echo "N = $N ${marker}"
-    # 	if [[ ! $escape_list =~ $N ]]; then
-    # 	    find_marker | sed "s/${marker}/${esc}[0;44m${marker}${esc}[0m/"
-    # 	fi
-    # done
-    # return
-
     valid=.false.
     while [ $valid == .false. ]; do
 	N_dec=$(($RANDOM % span + start))
-	if [[ $escape_list =~ ${N_dec} ]]; then
-	    echo "N = ${N_dec} $(printf '%b' $(printf '\\%03o' ${N_dec}))"
-	    echo "${N_dec} is in $escape_list"
-	    echo "-----------------"
-	    echo "finding new value"
-	    echo "-----------------"
-	else
-	    #	    echo $(printf '%b' $(printf '\\%03o' ${N_dec}))
-	    #	    printf '%b' $(printf '\\%03o' ${N_dec})
-	    #	    echo "${N_dec} is not $escape_list"
-	    #	    echo "OK"
+	if [[ ! $escape_list =~ ${N_dec} ]]; then
 	    valid=.true.
 	fi
     done
     marker+=$(printf '%b' $(printf '\\%03o' ${N_dec}))
-    #    marker+=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 94 + 33))))
-    #    marker+=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
 }
 
 function gen_marker () {
@@ -124,10 +98,8 @@ function gen_marker () {
     marker=""
     add_marker
     while [[ ! -z $(find_marker) ]]; do
-	#   while [[ .true. ]]; do
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
 	echo -ne "found     "
-	#	esc=$(printf '\033')
 	find_marker | sed "s/${marker}/${esc}[0;44m${marker}${esc}[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/${esc}[4m${TS_MARKER}${esc}[0m/" )
 	add_marker
     done
