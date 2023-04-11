@@ -128,7 +128,7 @@ function gen_marker () {
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
 	echo -ne "found     "
 	#	esc=$(printf '\033')
-	find_marker | sed "s/${marker}/${esc}[0;44m${marker}${esc}[0m/"
+	find_marker | sed "s/${marker}/${esc}[0;44m${marker}${esc}[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/${esc}[4m${TS_MARKER}${esc}[0m/" )
 	add_marker
     done
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
@@ -142,7 +142,7 @@ sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_out}
 
 # remove marks from timestamp lines with no associated commands
 echo "${TAB}un-mark childless timestamp lines..."
-sed -i ":start;N;s/${TS_MARKER}\n#/\n#/;t start;P;D" ${hist_out}
+sed -i "/${TS_MARKER}/{N; /${TS_MARKER}\n#[0-9]\{10\}/{s/${TS_MARKER}\n#/\n#/}};P;D" ${hist_out}
 
 # merge commands with timestamps
 echo "${TAB}merge commands with timestamp lines..."
