@@ -7,6 +7,41 @@
 
 TAB="   "
 
+# define random marker functions
+esc=$(printf '\033')
+
+function find_marker () {
+    \grep -m 1 -n ${marker} ${hist_out}
+}
+
+function add_marker () {
+    start=33
+    end=126
+    span=$(( $end - $start + 1 ))
+    escape_list="36 42 47 91 92"
+    valid=.false.
+    while [ $valid == .false. ]; do
+	N_dec=$(($RANDOM % span + start))
+	if [[ ! $escape_list =~ ${N_dec} ]]; then
+	    valid=.true.
+	fi
+    done
+    marker+=$(printf '%b' $(printf '\\%03o' ${N_dec}))
+}
+
+function gen_marker () {
+    echo "${TAB}generating unique marker..."
+    marker=""
+    add_marker
+    while [[ ! -z $(find_marker) ]]; do
+	echo -ne "${TAB}${TAB}marker = ${marker}\t"
+	echo -ne "found     "
+	find_marker | sed "s/${marker}/${esc}[0;44m${marker}${esc}[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/${esc}[4m${TS_MARKER}${esc}[0m/" )
+	add_marker
+    done
+    echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
+}
+
 # specify default history file
 hist_ref=${HOME}/.bash_history
 
@@ -57,6 +92,7 @@ done
 
 # set name of history file to check
 hist_in=${hist_ref}_merge
+#list_del+="${hist_in} "
 
 # create history file
 cat ${list_out} > ${hist_in}
@@ -64,47 +100,9 @@ cat ${list_out} > ${hist_in}
 # set output file name
 hist_out=${hist_in}
 
-# delete blank lines
-echo "${TAB}delete blank lines..."
-sed -i 's/^$//' ${hist_out}
-
-echo "${TAB}delete trailing whitespaces..."
-sed -i 's/[[:blank:]]*$//' ${hist_out}
-
-# define random marker functions
-function find_marker () {
-    \grep -m 1 -n ${marker} ${hist_out}
-}
-
-esc=$(printf '\033')
-
-function add_marker () {
-    start=33
-    end=126
-    span=$(( $end - $start + 1 ))
-    escape_list="36 42 47 91 92"
-    valid=.false.
-    while [ $valid == .false. ]; do
-	N_dec=$(($RANDOM % span + start))
-	if [[ ! $escape_list =~ ${N_dec} ]]; then
-	    valid=.true.
-	fi
-    done
-    marker+=$(printf '%b' $(printf '\\%03o' ${N_dec}))
-}
-
-function gen_marker () {
-    echo "${TAB}generating unique marker..."
-    marker=""
-    add_marker
-    while [[ ! -z $(find_marker) ]]; do
-	echo -ne "${TAB}${TAB}marker = ${marker}\t"
-	echo -ne "found     "
-	find_marker | sed "s/${marker}/${esc}[0;44m${marker}${esc}[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/${esc}[4m${TS_MARKER}${esc}[0m/" )
-	add_marker
-    done
-    echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
-}
+# clean up whitespace
+echo "${TAB}${TAB}delete trailing whitespaces..."
+sed -i 's/^$//;s/[[:blank:]]*$//' ${hist_out}
 
 # find and mark timestamp lines
 gen_marker
@@ -118,7 +116,7 @@ sed -i "/${TS_MARKER}/{N; /${TS_MARKER}\n#[0-9]\{10\}/{s/${TS_MARKER}\n#/\n#/}};
 
 # merge commands with timestamps
 echo "${TAB}merge commands with timestamp lines..."
-sed -i ":start;N;s/${TS_MARKER}\n/${TS_MARKER}/;t start;P;D" ${hist_out}
+sed -i "/${TS_MARKER}/{N; s/${TS_MARKER}\n/${TS_MARKER}/};P;D" ${hist_out}
 
 # mark orphaned lines
 gen_marker
@@ -138,6 +136,9 @@ sort -u ${hist_out} -o ${hist_out}
 echo "${TAB}unmerge commands..."
 sed -i "s/${TS_MARKER}/\n/" ${hist_out}
 sed -i "s/${OR_MARKER}/\n/" ${hist_out}
+
+echo "${TAB}removing merged files..."
+rm -v ${list_del}
 
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
