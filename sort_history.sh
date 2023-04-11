@@ -90,15 +90,13 @@ do
     echo "${TAB}$file"
 done
 
-# set name of history file to check
-hist_in=${hist_ref}_merge
-#list_del+="${hist_in} "
+# set output file name
+hist_out=${hist_ref}_merge
+#list_del+="${hist_out} "
+echo "${TAB}output file name is ${hist_out}"
 
 # create history file
-cat ${list_out} > ${hist_in}
-
-# set output file name
-hist_out=${hist_in}
+cat ${list_out} > ${hist_out}
 
 # clean up whitespace
 echo "${TAB}${TAB}delete trailing whitespaces..."
@@ -137,8 +135,10 @@ echo "${TAB}unmerge commands..."
 sed -i "s/${TS_MARKER}/\n/" ${hist_out}
 sed -i "s/${OR_MARKER}/\n/" ${hist_out}
 
-echo "${TAB}removing merged files..."
-rm -v ${list_del}
+if [[ ! -z ${list_del} ]]; then
+    echo "${TAB}removing merged files..."
+    rm -v ${list_del}
+fi
 
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
