@@ -92,7 +92,7 @@ done
 
 # set output file name
 hist_out=${hist_ref}_merge
-#list_del+="${hist_out} "
+list_del+="${hist_out} "
 echo "${TAB}output file name is ${hist_out}"
 
 # create history file
@@ -126,14 +126,20 @@ sed -i "s/^[^#]/${OR_MARKER}&/" ${hist_out}
 echo "${TAB}merge orphaned lines..."
 sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_out}
 
+echo "${TAB}login..."
+sed -i "s/ LOGIN/! LOGIN/;s/ LOGOUT/~ LOGOUT/" ${hist_out}
+
 # sort history
 echo "${TAB}sorting lines..."
 sort -u ${hist_out} -o ${hist_out}
+echo "${TAB}login..."
+sed -i "s/! LOGIN/ LOGIN/;s/~ LOGOUT/ LOGOUT/" ${hist_out}
 
 # unmerge commands
 echo "${TAB}unmerge commands..."
-sed -i "s/${TS_MARKER}/\n/" ${hist_out}
-sed -i "s/${OR_MARKER}/\n/" ${hist_out}
+sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/" ${hist_out}
+
+cp -Lpv ${hist_out} ${hist_ref}
 
 if [[ ! -z ${list_del} ]]; then
     echo "${TAB}removing merged files..."
