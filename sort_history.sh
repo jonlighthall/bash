@@ -58,6 +58,32 @@ sed -i 's/^$//' ${hist_out}
 \diff --suppress-common-lines ${hist_in} ${hist_out}
 
 # find unique marker
+function find_marker () {
+    \grep -m 1 $marker ${hist_out}
+}
+
+function add_marker () {
+    marker+=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
+}
+
+function gen_marker () {
+    marker=""
+    echo "marker = $marker"
+    add_marker
+    echo "marker = $marker"
+    while [[ ! -z $(find_marker) ]]; do
+	if [[ -z $(find_marker) ]]; then
+	    echo "true"
+	    echo "$marker not found"
+	else
+	    echo "false"
+	    echo "$marker found:"
+	    find_marker | sed "s/$marker.*/$marker.../"
+	fi
+	add_marker
+    done
+}
+
 echo "finding marker"
 marker=""
 for n in {1..5}; do
@@ -74,12 +100,16 @@ done
 echo -e "${marker} is not found\n"
 
 marker=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
-while [[ ! -z $(\grep -m 1 $marker ${hist_out}) ]]; do 
+while [[ ! -z $(\grep -m 1 $marker ${hist_out}) ]]; do
     echo "trying $marker..."
     \grep -m 1 $marker ${hist_out}
     marker+=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
 done
 
+echo "marker = $marker"
+
+echo "test functions"
+gen_marker
 echo "marker = $marker"
 
 # find and mark timestamp lines
@@ -99,7 +129,7 @@ sed -i ":start;N;s/${TS_MARKER}\n/${TS_MARKER}/;t start;P;D" ${hist_out}
 # mark orphaned lines
 echo "${TAB}mark orphaned lines..."
 marker=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
-while [[ ! -z $(\grep -m 1 $marker ${hist_out}) ]]; do 
+while [[ ! -z $(\grep -m 1 $marker ${hist_out}) ]]; do
     marker+=$(printf '%b\n' $(printf '\\%03o' $(($RANDOM % 26 + 65))))
 done
 OR_MARKER=$marker
