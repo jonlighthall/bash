@@ -20,14 +20,6 @@ else
 	# create log file to save errors
 	error_file=$TRIM/${fname}_errors_$(date +'%Y-%m-%d-t%H%M').log
 
-	# empty
-	echo -n "  removing empty files in ${1} ..."
-	find $1 -type f -not -name ".gitkeep" \
-	    -not -name $error_file \
-	    -empty "${FNDCMD[@]}" 2>$error_file
-	find $1 -type d -empty "${FNDCMD[@]}" 2>$error_file
-	echo "done"
-
 	# OS X binaries
 	echo -n "  removing OS X files in ${1} ..."
 	for pe_file in \
@@ -39,7 +31,7 @@ else
 	    Info.plist \
   	    .DS_Store
 	do
-	    find $1 -type f -name "${pe_file}" "${FNDCMD[@]}" 2>$error_file
+	    find $1 -not -path "*/.git/*" -type f -name "${pe_file}" -delete 2>>$error_file
 	    echo -n "."
 	done
 	echo "done"
@@ -53,9 +45,17 @@ else
 	    .obj \
 	    .out
 	do
-	    find $1 -type f -name "*${pe_file}" -print0 | perl -lne "print if not -T" | xargs -0 -r "${CMD[@]}" 2>$error_file
+	    find $1 -not -path "/*.git/*" -type f -name "*${pe_file}" -print0 | perl -lne "print if not -T" | xargs -0 -r "${CMD[@]}" 2>>$error_file
 	    echo -n "."
 	done
+	echo "done"
+
+	# empty
+	echo -n "  removing empty files in ${1} ..."
+	find $1 -not -path "*/.git*" \
+	    -not -name ".gitkeep" \
+	    -not -samefile $error_file \
+	    -empty -delete 2>>$error_file
 	echo "done"
 
 	# check for errors
