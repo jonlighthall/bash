@@ -23,20 +23,21 @@ else
 	# empty
 	echo -n "  removing empty files in ${1} ..."
 	find $1 -type f -not -name ".gitkeep" \
-	     -not -name $error_file \
-	     -empty "${FNDCMD[@]}" 2>$error_file
+	    -not -name $error_file \
+	    -empty "${FNDCMD[@]}" 2>$error_file
 	find $1 -type d -empty "${FNDCMD[@]}" 2>$error_file
 	echo "done"
 
 	# OS X binaries
 	echo -n "  removing OS X files in ${1} ..."
 	for pe_file in \
-  	    .DS_Store \
 	    ._.DS_Store \
 	    \.*\.swo \
 	    \.*\.swp \
+	    \._* \
 	    fld3c \
-	    \._*
+	    Info.plist \
+  	    .DS_Store
 	do
 	    find $1 -type f -name "${pe_file}" "${FNDCMD[@]}" 2>$error_file
 	    echo -n "."
@@ -56,7 +57,7 @@ else
 	    echo -n "."
 	done
 	echo "done"
-	
+
 	# check for errors
 	if [[ -f $error_file ]]; then
 	    if [[ -s $error_file ]]; then
