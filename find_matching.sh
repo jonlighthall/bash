@@ -6,6 +6,26 @@
 #
 # Adapted from find_missing_and_empty.sh
 #
+# First arguemtn is the list file of patterns
+#
+# Second arguemnt is the name of the output file
+#
+# Third argument specifies the named subdirectory to move the matching files
+#
+# Use example:
+# find_matching list_of_patterns.txt output.txt
+# find_matching output.txt dummy subdir
+#
+# the first command will locate the files matching the pattern and write the matches to file. the
+# second command will take the located files specifed by the list and move them to the
+# subirectory subdir. For example below, the search pattern (first line) matches the file name
+# (second line) found by running the first command. The file is then moved to the new
+# subdirectory with the second command.
+#
+# file_name_???
+# dir/new_file_name123.bin
+# dir/subdir/new_file_name123.bin
+#
 #JCL Apr 2023
 
 TAB="   "
