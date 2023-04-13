@@ -38,7 +38,6 @@ for prog in \
     fix_bad_extensions \
     log \
     ls_test \
-    merge_history \
     rmbin \
     sec2elap \
     sort_history \

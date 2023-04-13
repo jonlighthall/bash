@@ -18,7 +18,7 @@ function add_marker () {
     start=33
     end=126
     span=$(( $end - $start + 1 ))
-    escape_list="36 42 47 91 92"
+    escape_list="36 42 45 47 91 92"
     valid=.false.
     while [ $valid == .false. ]; do
 	N_dec=$(($RANDOM % span + start))
@@ -127,13 +127,13 @@ echo "${TAB}merge orphaned lines..."
 sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_out}
 
 echo "${TAB}login..."
-sed -i "s/ LOGIN/! LOGIN/;s/ LOGOUT/~ LOGOUT/" ${hist_out}
+sed -i "s/ LOGOUT/~ LOGOUT/" ${hist_out}
 
 # sort history
 echo "${TAB}sorting lines..."
 sort -u ${hist_out} -o ${hist_out}
 echo "${TAB}login..."
-sed -i "s/! LOGIN/ LOGIN/;s/~ LOGOUT/ LOGOUT/" ${hist_out}
+sed -i "s/~ LOGOUT/ LOGOUT/" ${hist_out}
 
 # unmerge commands
 echo "${TAB}unmerge commands..."
@@ -143,7 +143,10 @@ cp -Lpv ${hist_out} ${hist_ref}
 
 if [[ ! -z ${list_del} ]]; then
     echo "${TAB}removing merged files..."
-    rm -v ${list_del}
+    for file in ${list_del}
+    do
+	rm -v $file{,~} 2>/dev/null
+    done
 fi
 
 # print time at exit
