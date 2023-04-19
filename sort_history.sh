@@ -18,7 +18,7 @@ function add_marker () {
     start=33
     end=126
     span=$(( $end - $start + 1 ))
-    escape_list="36 42 45 47 91 92"
+    escape_list="36 42 45 47 91 92 125"
     valid=.false.
     while [ $valid == .false. ]; do
 	N_dec=$(($RANDOM % span + start))
@@ -36,7 +36,7 @@ function gen_marker () {
     while [[ ! -z $(find_marker) ]]; do
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
 	echo -ne "found     "
-	find_marker | sed "s/${marker}/${esc}[0;44m${marker}${esc}[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/${esc}[4m${TS_MARKER}${esc}[0m/" )
+	find_marker | sed "s/${marker}/${esc}[1;31m${marker}${esc}[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/${esc}[1;31m${esc}[4m${TS_MARKER}${esc}[0m/" )
 	add_marker
     done
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
