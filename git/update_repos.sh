@@ -27,7 +27,7 @@ dir_script="utils/"
 list+="${dir_script}bash \
        ${dir_script}batch \
        ${dir_script}powershell "
-list_remote=${HOME}/${dir_script}bash/list_remote_url.txt
+list_remote=${HOME}/${dir_script}bash/git/list_remote_url.txt
 
 # programming utilities
 dir_prog="utils/"
@@ -48,7 +48,7 @@ list+="${dir_matlab} \
        ${dir_matlab}macros "
 
 # private
-fname_private=${HOME}/${dir_script}bash/list_private_dir.txt
+fname_private=${HOME}/${dir_script}bash/git/list_private_dir.txt
 if [ -f ${fname_private} ]; then
     while IFS= read -r line
     do

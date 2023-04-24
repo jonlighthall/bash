@@ -36,17 +36,17 @@ for prog in \
     find_matching \
     find_missing_and_empty \
     fix_bad_extensions \
+    git/undel_repo \
+    git/update_repos \
     log \
     ls_test \
     rmbin \
     sec2elap \
     sort_history \
     test_file \
-    undel_repo \
     unfix_bad_extensions \
     untar \
     update_packages \
-    update_repos \
     whatsup \
     xtest \
 
