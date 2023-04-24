@@ -51,9 +51,16 @@ for prog in \
     xtest \
 
 do
-    target=${source_dir}/${prog}${ext}
+    sub_dir=$(dirname "$prog")
+    progname=$(basename "$prog")
+    if [ $sub_dir = "." ]; then
+	target=${source_dir}/${prog}${ext}
+    else
+	target=${source_dir}/${prog}${ext}
+	prog=$progname
+    fi
     link=${user_bin}/${prog}
-
+       
     echo -n "program $target... "
     if [ -e $target ]; then
         echo -n "exists and is "
