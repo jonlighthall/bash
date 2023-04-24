@@ -28,7 +28,12 @@ fi
 
 # deinfe horizontal line
 hline() {
-    for i in {1..38}; do echo -n "-"; done
+    if [ "$#" -ne 1 ]; then
+	N=38
+    else
+	N=$1
+    fi
+    for (( i=1;i<=$N; i++ )); do echo -n "-"; done
     echo
 }
 
@@ -92,10 +97,10 @@ do
                 echo "does not exist"
             fi
             # then link
-	    hline
+	    echo -n "${TAB}";hline 72;
 	    echo -n "${TAB}making link... "
 	    ln -sv $target $link
-	    hline
+	    echo -n "${TAB}";hline 72;
         else
             echo -e "${BAD}not executable${NORMAL}"
         fi
