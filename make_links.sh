@@ -52,12 +52,11 @@ for prog in \
 
 do
     sub_dir=$(dirname "$prog")
-    progname=$(basename "$prog")
     if [ $sub_dir = "." ]; then
 	target=${source_dir}/${prog}${ext}
     else
 	target=${source_dir}/${prog}${ext}
-	prog=$progname
+	prog=$(basename "$prog")
     fi
     link=${user_bin}/${prog}
        
