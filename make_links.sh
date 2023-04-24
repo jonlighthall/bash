@@ -1,6 +1,9 @@
 #!/bin/bash
 echo $BASH_SOURCE
 TAB="   "
+  GOOD='\033[0;32m'
+   BAD='\033[0;31m'
+NORMAL='\033[0m'
 
 # set source and target directories
 source_dir=$PWD
@@ -23,9 +26,15 @@ else
     mkdir -pv $user_bin
 fi
 
-echo "--------------------------------------"
+# deinfe horizontal line
+hline() {
+    for i in {1..38}; do echo -n "-"; done
+    echo
+}
+
+hline
 echo "------ Start Linking Repo Files-------"
-echo "--------------------------------------"
+hline
 
 # list files to be linked
 ext=.sh
@@ -70,7 +79,7 @@ do
             if [ -L $link ] || [ -f $link ] || [ -d $link ]; then
                 echo -n "exists and "
                 if [[ $target -ef $link ]]; then
-                    echo "already points to ${prog}"
+                    echo -e "${GOOD}already points to ${prog}${NORMAL}"
                     echo -n "${TAB}"
                     ls -lhG --color=auto $link
                     echo "${TAB}skipping..."
@@ -83,17 +92,19 @@ do
                 echo "does not exist"
             fi
             # then link
-            echo -n "${TAB}making link... "
-            ln -sv $target $link
+	    hline
+	    echo -n "${TAB}making link... "
+	    ln -sv $target $link
+	    hline
         else
-            echo "not executable"
+            echo -e "${BAD}not executable${NORMAL}"
         fi
     else
-        echo "does not exist"
+        echo -e"${BAD}does not exist${NORMAL}"
     fi
 done
-echo "--------------------------------------"
+hline
 echo "--------- Done Making Links ----------"
-echo "--------------------------------------"
+hline
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
