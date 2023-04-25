@@ -12,11 +12,6 @@ fi
 
 TAB="   "
 
-# deinfe horizontal line
-hline() {
-    for i in {1..70}; do echo -n "-"; done
-    echo
-}
 esc=$(printf '\033')
 
 # list repository paths, relative to home
@@ -70,7 +65,7 @@ push_fail=""
 mods=""
 for repo in $list
 do
-    hline
+    hline 70
     echo -e "locating $repo... \c"
     if [ -e ${HOME}/$repo ]; then
 	echo -e "${GOOD}OK${NORMAL}"
@@ -116,7 +111,7 @@ do
 	loc_fail+="$repo "
 	test_file ${HOME}/$repo
     fi
-    hline
+    hline 70
     echo
 done
 

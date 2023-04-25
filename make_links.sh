@@ -28,20 +28,9 @@ else
     mkdir -pv $user_bin
 fi
 
-# deinfe horizontal line
-hline() {
-    if [ "$#" -ne 1 ]; then
-	N=38
-    else
-	N=$1
-    fi
-    for (( i=1;i<=$N; i++ )); do echo -n "-"; done
-    echo
-}
-
-hline
+hline 38
 echo "------ Start Linking Repo Files-------"
-hline
+hline 38
 
 # list files to be linked
 ext=.sh
@@ -110,8 +99,8 @@ do
         echo -e"${BAD}does not exist${NORMAL}"
     fi
 done
-hline
+hline 38
 echo "--------- Done Making Links ----------"
-hline
+hline 38
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
