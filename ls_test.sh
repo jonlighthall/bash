@@ -1,9 +1,10 @@
 #!/bin/bash
 echo $BASH_SOURCE
 
-  GOOD='\033[1;32m'
-   BAD='\033[1;31m'
-NORMAL='\033[0m'
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
 
 # get list of deleted files
 list=$(\ls -l | awk '{print $9}')
@@ -17,9 +18,9 @@ do
     RETVAL=$?
     echo -n "$fname "
     if [[ $RETVAL -eq 137 ]]; then
-	echo -e "${BAD}timed out${NORMAL}"
+	echo -e "${BROKEN}timed out${NORMAL}"
     else
-	echo -e "${GOOD}OK${NORMAL}"
+	echo -e "${BGOOD}OK${NORMAL}"
 	test_file $fname
     fi
 done

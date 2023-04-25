@@ -1,9 +1,11 @@
 #!/bin/bash
 echo $BASH_SOURCE
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+
 TAB="   "
-  GOOD='\033[0;32m'
-   BAD='\033[0;31m'
-NORMAL='\033[0m'
 
 # set source and target directories
 source_dir=$PWD

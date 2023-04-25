@@ -1,13 +1,9 @@
 #!/bin/bash
-# define highligt colors
-  GOOD='\033[0;32m' # green
-   BAD='\033[0;31m' # red
-NORMAL='\033[0m'    # reset
-    UL='\033[4m'    # underline
-
- VALID='\033[1;36m' # bold cyan: valid link
-BROKEN='\033[1;31m' # bold red : broken link
-   DIR='\033[1;34m' # bold blue: directory
+echo $BASH_SOURCE
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
 #
 # check for input
 if [ $# -eq 0 ]; then

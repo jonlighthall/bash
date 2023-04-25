@@ -3,12 +3,14 @@
 # update_repos.sh - push and pull a specified list of git repositories and print summaryories and print summary
 #
 # JCL Apr 2022
-   TAB="   "
-  GOOD='\033[0;32m'
-   BAD='\033[0;31m'
-NORMAL='\033[0m'
-
 echo "${0##*/}"
+
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+
+TAB="   "
 
 # deinfe horizontal line
 hline() {
