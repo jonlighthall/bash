@@ -28,9 +28,7 @@ else
     mkdir -pv $user_bin
 fi
 
-hline 38
-echo "------ Start Linking Repo Files-------"
-hline 38
+bar 38 "------ Start Linking Repo Files-------"
 
 # list files to be linked
 ext=.sh
@@ -99,8 +97,6 @@ do
         echo -e"${BAD}does not exist${NORMAL}"
     fi
 done
-hline 38
-echo "--------- Done Making Links ----------"
-hline 38
+bar 38 "--------- Done Making Links ----------"
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

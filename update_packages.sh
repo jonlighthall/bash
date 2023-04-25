@@ -11,14 +11,6 @@ if [ -e $fpretty ]; then
     source $fpretty
 fi
 
-# deinfe bar
-bar() {
-    echo
-    hline 69
-    echo "$1"
-    hline 69
-}
-
 # update
 bar "update..."
 sudo apt update
