@@ -6,21 +6,21 @@
 #
 # Adapted from find_missing_and_empty.sh
 #
-# First arguemtn is the list file of patterns
+# First argument is the list file of patterns
 #
-# Second arguemnt is the name of the output file
+# Second argument is the name of the output file
 #
-# Third argument specifies the named subdirectory to move the matching files
+# Third argument specifies the named sub-directory to move the matching files
 #
 # Use example:
 # find_matching list_of_patterns.txt output.txt
 # find_matching output.txt dummy subdir
 #
 # the first command will locate the files matching the pattern and write the matches to file. the
-# second command will take the located files specifed by the list and move them to the
-# subirectory subdir. For example below, the search pattern (first line) matches the file name
+# second command will take the located files specified by the list and move them to the
+# sub-directory subdir. For example below, the search pattern (first line) matches the file name
 # (second line) found by running the first command. The file is then moved to the new
-# subdirectory with the second command.
+# sub-directory with the second command.
 #
 # file_name_???
 # dir/new_file_name123.bin
@@ -59,7 +59,7 @@ else
 	# check if input and output are the same file
 	echo -n " input file ${file_in} is... "
 	while [ ${file_in} -ef ${file_out} ]; do
-            eqcho "the same file as ${file_out}"
+            echo "the same file as ${file_out}"
             echo -n "${TAB}renaming output... "
 	    file_out=${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
 	    echo ${file_out}
@@ -106,7 +106,7 @@ else
 
     done < $file_in
     echo
-    echo $k "filenames checked"
+    echo $k "file names checked"
     if [ $# -lt 3 ]; then
 	echo $(cat ${file_out} | wc -l) "files found"
     fi
