@@ -16,9 +16,7 @@ bar "update..."
 sudo apt update
 
 # upgrade
-bar "upgrade..."
-sudo apt upgrade -y
-bar "upgrade (again) and fix missing..."
+bar "upgrade and fix missing..."
 sudo apt upgrade -y --fix-missing
 
 # cleanup
