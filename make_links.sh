@@ -39,6 +39,7 @@ for prog in \
     find_matching \
     find_missing_and_empty \
     fix_bad_extensions \
+    git/gita \
     git/undel_repo \
     git/update_repos \
     log \
@@ -86,10 +87,10 @@ do
                 echo "does not exist"
             fi
             # then link
-	    echo -n "${TAB}";hline 72;
-	    echo -n "${TAB}making link... "
-	    ln -sv $target $link
-	    echo -n "${TAB}";hline 72;
+	    echo -en "${TAB}${GRH}";hline 72;
+	    echo "${TAB}making link... "
+	    ln -sv $target $link | sed "s/^/${TAB}/"
+	    echo -ne "${TAB}";hline 72;echo -en "${NORMAL}"
         else
             echo -e "${BAD}not executable${NORMAL}"
         fi

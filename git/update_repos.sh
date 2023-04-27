@@ -12,8 +12,6 @@ fi
 
 TAB="   "
 
-esc=$(printf '\033')
-
 # list repository paths, relative to home
 # settings
 list="config \
@@ -80,7 +78,7 @@ do
 
 	    # pull
 	    echo "pulling..."
-	    git pull --all --tags --prune 2> >(sed $"s/.*/${esc}[1;31m&${esc}[m/;s/^/${TAB}/">&2) | sed "s/^/${TAB}/"
+	    git pull --all --tags --prune 2> >(sed $"s/.*/\x1b[1;31m&\x1b[m/;s/^/${TAB}/">&2) | sed "s/^/${TAB}/"
 	    if [[ $? != 0 ]]; then
 		echo "pull: $?"
 		pull_fail+="$repo "
@@ -88,7 +86,7 @@ do
 
 	    # push
 	    echo "pushing..."
-	    git push --all 2> >(sed $"s/.*/${esc}[1;32m&${esc}[m/;s/^/${TAB}/">&2) | sed "s/^/hello${TAB}/"
+	    git push --all 2> >(sed $"s/.*/\x1b[1;32m&\x1b[m/;s/^/${TAB}/">&2) | sed "s/^/hello${TAB}/"
 	    if [[ $? != 0 ]]; then
 		echo "push: $?"
 		push_fail+="$repo "
