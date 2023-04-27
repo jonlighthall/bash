@@ -3,18 +3,15 @@
 # update_repos.sh - push and pull a specified list of git repositories and print summaryories and print summary
 #
 # JCL Apr 2022
-   TAB="   "
-  GOOD='\033[0;32m'
-   BAD='\033[0;31m'
-NORMAL='\033[0m'
-
 echo "${0##*/}"
 
-# deinfe horizontal line
-hline() {
-    for i in {1..70}; do echo -n "-"; done
-    echo
-}
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+
+TAB="   "
+
 esc=$(printf '\033')
 
 # list repository paths, relative to home
@@ -68,7 +65,7 @@ push_fail=""
 mods=""
 for repo in $list
 do
-    hline
+    hline 70
     echo -e "locating $repo... \c"
     if [ -e ${HOME}/$repo ]; then
 	echo -e "${GOOD}OK${NORMAL}"
@@ -114,7 +111,7 @@ do
 	loc_fail+="$repo "
 	test_file ${HOME}/$repo
     fi
-    hline
+    hline 70
     echo
 done
 

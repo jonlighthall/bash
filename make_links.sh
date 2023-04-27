@@ -1,9 +1,11 @@
 #!/bin/bash
 echo $BASH_SOURCE
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+
 TAB="   "
-  GOOD='\033[0;32m'
-   BAD='\033[0;31m'
-NORMAL='\033[0m'
 
 # set source and target directories
 source_dir=$PWD
@@ -26,20 +28,7 @@ else
     mkdir -pv $user_bin
 fi
 
-# deinfe horizontal line
-hline() {
-    if [ "$#" -ne 1 ]; then
-	N=38
-    else
-	N=$1
-    fi
-    for (( i=1;i<=$N; i++ )); do echo -n "-"; done
-    echo
-}
-
-hline
-echo "------ Start Linking Repo Files-------"
-hline
+bar 38 "------ Start Linking Repo Files-------"
 
 # list files to be linked
 ext=.sh
@@ -108,8 +97,6 @@ do
         echo -e"${BAD}does not exist${NORMAL}"
     fi
 done
-hline
-echo "--------- Done Making Links ----------"
-hline
+bar 38 "--------- Done Making Links ----------"
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
