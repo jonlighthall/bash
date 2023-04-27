@@ -39,6 +39,7 @@ for prog in \
     find_matching \
     find_missing_and_empty \
     fix_bad_extensions \
+    git/gita \
     git/undel_repo \
     git/update_repos \
     log \
