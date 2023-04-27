@@ -8,8 +8,6 @@
 TAB="   "
 
 # define random marker functions
-esc=$(printf '\033')
-
 function find_marker () {
     \grep -m 1 -n ${marker} ${hist_out}
 }
@@ -36,7 +34,7 @@ function gen_marker () {
     while [[ ! -z $(find_marker) ]]; do
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
 	echo -ne "found     "
-	find_marker | sed "s/${marker}/${esc}[1;31m${marker}${esc}[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/${esc}[1;31m${esc}[4m${TS_MARKER}${esc}[0m/" )
+	find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/" )
 	add_marker
     done
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
