@@ -6,17 +6,10 @@
 #
 echo "${0##*/}"
 
-# deinfe horizontal line
-hline() {
-    for i in {1..69}; do echo -n "-"; done
-    echo
-}
-bar() {
-    echo
-    hline
-    echo "$1"
-    hline
-}
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
 
 # update
 bar "update..."
