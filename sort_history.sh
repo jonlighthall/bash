@@ -5,6 +5,8 @@
 #
 # JCL Apr 2023
 
+LC_ALL=C
+
 TAB="   "
 
 # define random marker functions
@@ -13,14 +15,14 @@ function find_marker () {
 }
 
 function add_marker () {
-    start=33
-    end=126
+    start=48
+    end=122
     span=$(( $end - $start + 1 ))
-    escape_list="36 42 45 47 91 92 125"
+    bad_list=$(echo -n {58..64} echo {91..96})
     valid=.false.
     while [ $valid == .false. ]; do
 	N_dec=$(($RANDOM % span + start))
-	if [[ ! $escape_list =~ ${N_dec} ]]; then
+	if [[ ! $bad_list =~ ${N_dec} ]]; then
 	    valid=.true.
 	fi
     done
