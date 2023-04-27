@@ -5,4 +5,6 @@ git filter-repo --commit-callback '
        commit.author_email = correct_email
     if commit.committer_email in auth_list:
        commit.committer_email = correct_email
+    if commit.tagger_email in auth_list:
+       commit.tagger_email = correct_email
   '
