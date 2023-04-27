@@ -1,17 +1,22 @@
-#!/bin/sh
+#!/bin/bash
+export FILTER_BRANCH_SQUELCH_WARNING=1
+rm -rdv ./.git-rewrite
 
 git filter-branch --env-filter '
-
-WRONG_EMAIL="lighthall@2b1ce1e5-f9e2-4de2-b566-7fb11778057d"
+WRONG_EMAILS="lighthall@lsu.eud \
+              jlighthall@fsu.edu"
 CORRECT_NAME="Jon Lighthall"
 CORRECT_EMAIL="jon.lighthall@gmail.com"
 
-if [ "$GIT_COMMITTER_EMAIL" = "$WRONG_EMAIL" ]; then
-    GIT_COMMITTER_NAME="$CORRECT_NAME"
-    GIT_COMMITTER_EMAIL="$CORRECT_EMAIL"
-fi
-if [ "$GIT_AUTHOR_EMAIL" = "$WRONG_EMAIL" ]; then
-    GIT_AUTHOR_NAME="$CORRECT_NAME"
-    GIT_AUTHOR_EMAIL="$CORRECT_EMAIL"
-fi
+for EMAIL in $WRONG_EMAILS
+do
+    if [ "$GIT_COMMITTER_EMAIL" = "$EMAIL" ]; then
+        GIT_COMMITTER_NAME="$CORRECT_NAME"
+        GIT_COMMITTER_EMAIL="$CORRECT_EMAIL"
+    fi
+    if [ "$GIT_AUTHOR_EMAIL" = "$EMAIL" ]; then
+        GIT_AUTHOR_NAME="$CORRECT_NAME"
+        GIT_AUTHOR_EMAIL="$CORRECT_EMAIL"
+    fi
+done
 ' --tag-name-filter cat -- --branches --tags
