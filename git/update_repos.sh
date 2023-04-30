@@ -14,8 +14,7 @@ TAB="   "
 
 # list repository paths, relative to home
 # settings
-list="config \
-       home "
+list="config "
 
 # scripting utilities
 dir_script="utils/"
