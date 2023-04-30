@@ -1,4 +1,4 @@
-git filter-repo $1 --partial --commit-callback '
+git filter-repo $@ --partial --commit-callback '
     correct_name = b"Jon Lighthall"
     auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
     auth_list.append(b"jonathan.lighthall@")
