@@ -75,6 +75,16 @@ do
 	    echo -e "${GOOD}OK${NORMAL}"
 	    # add remotes to list
 	    git remote -v | awk -F " " '{print $2}' | uniq >> ${list_remote}
+	    if [ $# -gt 0 ]; then
+		echo "matching argument $1..."
+		url=$(git remote -v | head -n 1 | awk '{print $2}')
+		if [[ $url =~ $1 ]]; then
+		    echo "$repo url $url matches $1"
+		else
+		    echo "skipping..."
+		    continue
+		fi
+	    fi
 
 	    # pull
 	    echo "pulling..."
