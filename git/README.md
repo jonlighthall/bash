@@ -47,7 +47,9 @@ hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
 hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
 hash_remote=$(git log origin/master | grep -B4 "$(git log $hash_local --format=%s -n 1)" | head -n 1 | awk '{print $2}')
 git reset $hash_remote
-git cherry-pick ${hash_start}^..$hash_end
+if [ ! -z ${hash_start} ]; then
+   git cherry-pick ${hash_start}^..$hash_end
+fi
 
 ```
 
