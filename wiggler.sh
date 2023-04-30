@@ -5,5 +5,6 @@ while [ .true ]; do
     dx=$(($RANDOM % range + start))
     dy=$(($RANDOM % range + start))
     xdotool mousemove_relative -- dx dy
-    sleep 1s
+    echo -n "."
+    sleep 2m
 done
