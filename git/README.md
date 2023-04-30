@@ -36,7 +36,24 @@ If the most recent local commit does not match a remote commit, identify the mos
 or
 `git log origin/master | grep -B4 "$(git log HEAD~ --format=%s -n 1)"`
 
+get the most recent common local commit with the following command
+`git log | grep -B4 "$(git log origin/master --format=%s -n 1)" | head -n 1 | awk '{print $2}'`
+or
+```
+hash_local=$(git log | grep -B4 "$(git log origin/master --format=%s -n 1)" | head -n 1 | awk '{print $2}')
+echo $hash_local
+git rev-list $hash_local..HEAD
+hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
+hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
+hash_remote=$(git log origin/master | grep -B4 "$(git log $hash_local --format=%s -n 1)" | head -n 1 | awk '{print $2}')
+git reset $hash_remote
+git cherry-pick ${hash_start}^..$hash_end
+
+```
+
 Note the commit hashes of the local commits that are not on the remote
+git rev-list $(git log | grep -B4 "$(git log origin/master --format=%s -n 1)" | head -n 1 | awk '{print $2}')..HEAD
+
 
 Reset the local branch to the most recent common commit message on the remote
 `git reset $(git log origin/master | grep -B4 "$(git log --format=%s -n 1)" | head -n 1 | awk '{print $2}')`
