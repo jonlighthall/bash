@@ -37,7 +37,7 @@ while [ -z ${hash_local} ]; do
     else
 	echo "not found"
     fi
-    tracking=${tracking}+"~"
+    tracking="${tracking}~"
 done
 exit
 unset hash_remote
