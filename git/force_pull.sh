@@ -1,5 +1,4 @@
 #/bin/bash
-
 # git/force_pull.sh - the remote name and branch can be optionally specified by the first and
 # second arguments, respectively. The default remote tracking branch is origin/master.
 
@@ -35,15 +34,15 @@ while [ -z ${hash_local} ]; do
 	if [ ! -z ${hash_start} ]; then
 	    echo
 	    git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
-	    N=$(git rev-list $hash_local..HEAD | wc -l)
-	    if [ $N -gt 1 ]; then
+	    N_local=$(git rev-list $hash_local..HEAD | wc -l)
+	    if [ $N_local -gt 1 ]; then
 		echo -n "or ${hash_start}^.."
 		hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
 		echo ${hash_end}
 	    else
 		hash_end=$hash_start
 	    fi
-	    echo "${TAB}local branch is $N commits ahead of remote"
+	    echo "${TAB}local branch is $N_local commits ahead of remote"
 	else
 	    echo "none"
 	fi
@@ -91,25 +90,32 @@ else
     echo "none"
 fi
 
-exit
 # stash local changes
 echo "stashing changes..."
 git stash -u
 
 # initiate pull
 echo "resetting HEAD to $hash_remote..."
-if [ ! -z ${hash_start} ]; then
-    git reset --hard $hash_remote
+git reset --hard $hash_remote
+if [ $N_remote -gt 0 ];then
+    echo "no need to pull"
+else
+    echo "pulling remote changes..."
+    git pull
+fi
+
+if [ $N_local -gt 0 ];then
+    echo "no need to pull"
+else
     echo "cherry-picking local changes..."
-    if [ ${hash_start} == ${hash_end} ]; then
+    if [ $N_local -gt 1 ];then
+	git cherry-pick ${hash_start}^..$hash_end
+    else
 	echo "single commit to cherry-pick"
 	git cherry-pick ${hash_start}
-    else
-	git cherry-pick ${hash_start}^..$hash_end
     fi
-else
-    git reset $hash_remote
 fi
+
 exit
 echo "applying stash..."
 git stash apply
