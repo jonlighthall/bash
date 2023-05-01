@@ -12,30 +12,33 @@ if [ $# -lt 2 ]; then
 else
     name_branch=$2
 fi
-echo "pulling from ${name_remote}/${name_branch}"
-subj_remote=$(git log ${name_remote}/${name_branch} --format=%s -n 1)
-echo "remote commit subject: $subj_remote"
+tracking=${name_remote}/${name_branch}
 unset hash_local
-hash_local=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
-
-echo -n "corresponding local commit hash: "
-if [ ! -z ${hash_local} ]; then
-    echo "$hash_local"
-    echo "trailing local commits: "
-    unset hash_start
-    hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
-    if [ ! -z ${hash_start} ]; then
-	git rev-list $hash_local..HEAD
-	echo -n "or ${hash_start}^.."
-	unset hash_end
-	hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
-	echo ${hash_end}
+while [ -z ${hash_local} ]; do
+    echo "pulling from ${tracking}"
+    subj_remote=$(git log ${tracking} --format=%s -n 1)
+    echo "remote commit subject: $subj_remote"
+    hash_local=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
+    echo -n "corresponding local commit hash: "
+    if [ ! -z ${hash_local} ]; then
+	echo "$hash_local"
+	echo "trailing local commits: "
+	unset hash_start
+	hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
+	if [ ! -z ${hash_start} ]; then
+	    git rev-list $hash_local..HEAD
+	    echo -n "or ${hash_start}^.."
+	    unset hash_end
+	    hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
+	    echo ${hash_end}
+	else
+	    echo "none"
+	fi
     else
-	echo "none"
+	echo "not found"
     fi
-else
-    echo "not found"
-fi
+    tracking=${tracking}+"~"
+done
 exit
 unset hash_remote
 hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "$(git log $hash_local --format=%s -n 1)" | head -n 1 | awk '{print $2}')
