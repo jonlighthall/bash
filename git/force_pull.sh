@@ -125,7 +125,7 @@ fi
 
 # get back to where you were....
 echo "applying stash..."
-git stash apply
+git stash pop
 echo -n "stash made... "
 if [ -z $(git diff) ]; then
     echo "no changes"
