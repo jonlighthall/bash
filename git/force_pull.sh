@@ -55,13 +55,14 @@ if [ $hash_local == $hash_remote ]; then
     echo "no need to pull changes?"
     git merge-base ${name_branch} ${name_remote}/${name_branch}
     hash_merge=$(git merge-base ${name_branch} ${name_remote}/${name_branch})
-    ehco -n "common hash is... "
+    echo -n "common hash is... "
     if [ $hash_local == $hash_merge ]; then
-	ehco "the same as merge base"
+	echo "the same as merge base"
     else
-	ehco "not the same as merge base"
+	echo "not the same as merge base"
     fi
 fi
+exit
 echo "stashing changes..."
 git stash -u
 echo "resetting HEAD to $hash_remote..."
