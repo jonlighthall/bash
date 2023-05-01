@@ -29,10 +29,16 @@ while [ -z ${hash_local} ]; do
 	if [ ! -z ${hash_start} ]; then
 	    echo
 	    git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
+	    N=$(git rev-list $hash_local..HEAD | wc -l)
+	    if [ $N > 1 ]; then
 	    echo -n "or ${hash_start}^.."
 	    unset hash_end
 	    hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
 	    echo ${hash_end}
+	    else
+		hash_end=$hash_start
+	    fi
+	    echo "${TAB}local branch is $N commits ahead of remote"
 	else
 	    echo "none"
 	fi
@@ -47,9 +53,8 @@ echo -n "${TAB}corresponding remote commit hash: "
 echo $hash_remote
 if [ $hash_local == $hash_remote ]; then
     echo "no need to pull changes?"
-    #    exit
     git merge-base ${name_branch} ${name_remote}/${name_branch}
-    hash_merge = $(git merge-base ${name_branch} ${name_remote}/${name_branch})
+    hash_merge=$(git merge-base ${name_branch} ${name_remote}/${name_branch})
     ehco -n "common hash is... "
     if [ $hash_local == $hash_merge ]; then
 	ehco "the same as merge base"
