@@ -41,19 +41,21 @@ get the most recent common local commit with the following command
 or
 ```
 hash_local=$(git log | grep -B4 "$(git log origin/master --format=%s -n 1)" | head -n 1 | awk '{print $2}')
-echo $hash_local
-git rev-list $hash_local..HEAD
-hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
-hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
+if [ ! -z ${hash_local} ]; then
+   echo $hash_local
+   git rev-list $hash_local..HEAD
+   hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
+   hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
+fi
 hash_remote=$(git log origin/master | grep -B4 "$(git log $hash_local --format=%s -n 1)" | head -n 1 | awk '{print $2}')
 git stash
 if [ ! -z ${hash_start} ]; then
    git reset --hard $hash_remote
    git cherry-pick ${hash_start}^..$hash_end
-   else
+else
    git reset $hash_remote
 fi
-
+git pull
 ```
 
 Note the commit hashes of the local commits that are not on the remote
