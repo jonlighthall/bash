@@ -96,7 +96,7 @@ exit
 echo "stashing changes..."
 git stash -u
 
-# intiate pull
+# initiate pull
 echo "resetting HEAD to $hash_remote..."
 if [ ! -z ${hash_start} ]; then
     git reset --hard $hash_remote
