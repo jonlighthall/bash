@@ -46,19 +46,33 @@ hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "${subj_remote}" 
 echo -n "${TAB}corresponding remote commit hash: "
 echo $hash_remote
 if [ $hash_local == $hash_remote ]; then
-    echo "no need to pull changes"
-    exit
+    echo "no need to pull changes?"
+    #    exit
+    git merge-base ${name_branch} ${name_remote}/${name_branch}
+    hash_merge = $(git merge-base ${name_branch} ${name_remote}/${name_branch})
+    ehco -n "common hash is... "
+    if [ $hash_local == $hash_merge ]; then
+	ehco "the same as merge base"
+    else
+	ehco "not the same as merge base"
+    fi
 fi
 echo "stashing changes..."
-git stash --all
+git stash -u
 echo "resetting HEAD to $hash_remote..."
 if [ ! -z ${hash_start} ]; then
     git reset --hard $hash_remote
     echo "cherry-picking local changes..."
-    git cherry-pick ${hash_start}^..$hash_end
+    if [ ${hash_start} == ${hash_end} ]; then
+	echo "single commit to cherry-pick"
+	git cherry-pick ${hash_start}
+    else
+	git cherry-pick ${hash_start}^..$hash_end
+    fi
 else
     git reset $hash_remote
 fi
+exit
 echo "applying stash..."
 git stash apply
 echo -n "stash made... "
