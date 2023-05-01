@@ -45,6 +45,10 @@ unset hash_remote
 hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "${subj_remote}" | head -n 1 | awk '{print $2}')
 echo -n "${TAB}corresponding remote commit hash: "
 echo $hash_remote
+if [ $hash_local == $hash_remote ]; then
+    echo "no need to pull changes"
+    exit
+fi
 echo "stashing changes..."
 git stash --all
 echo "resetting HEAD to $hash_remote..."
