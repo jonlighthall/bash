@@ -5,7 +5,7 @@ if [ -f ./.git-rewirte ]; then
 fi
 
 git filter-branch $@ --env-filter '
-WRONG_EMAILS="lighthall@lsu.eud \
+WRONG_EMAILS="lighthall@lsu.edu \
               jlighthall@fsu.edu \
 	      jonathan.lighthall@ \
 	      jonathan.c.lighthall@"
