@@ -45,6 +45,7 @@ while [ -z ${hash_local} ]; do
 	    echo "${TAB}local branch is $N_local commits ahead of remote"
 	else
 	    echo "none"
+	    N_local=0
 	fi
     else
 	echo "not found"
@@ -88,25 +89,29 @@ if [ ! -z ${hash_start_remote} ]; then
     echo "${TAB}remote branch is $N_remote commits ahead of remote"
 else
     echo "none"
+    N_remote=0
 fi
 
 # stash local changes
 echo "stashing changes..."
 git stash -u
 
-# initiate pull
+# initiate HEAD
 echo "resetting HEAD to $hash_remote..."
-git reset --hard $hash_remote
+git reset --hard $hash_remote | sed "s/^/${TAB}/"
+
+# pull remote commits
+echo "${TAB}remote branch is $N_remote commits ahead of remote"
 if [ $N_remote -gt 0 ];then
-    echo "no need to pull"
-else
-    echo "pulling remote changes..."
+    echo "${TAB}pulling remote changes..."
     git pull
+else
+    echo "${TAB}no need to pull"
 fi
 
+# push local commits
+echo "${TAB}local branch is $N_local commits ahead of remote"
 if [ $N_local -gt 0 ];then
-    echo "no need to pull"
-else
     echo "cherry-picking local changes..."
     if [ $N_local -gt 1 ];then
 	git cherry-pick ${hash_start}^..$hash_end
@@ -114,16 +119,19 @@ else
 	echo "single commit to cherry-pick"
 	git cherry-pick ${hash_start}
     fi
+else
+    echo "no need to cherry-pick"
 fi
 
-exit
+# get back to where you were....
 echo "applying stash..."
 git stash apply
 echo -n "stash made... "
 if [ -z $(git diff) ]; then
     echo "no changes"
-    echo "pulling remote changes..."
-    git pull
+    echo "you're done!"
 else
     echo "changes!"
+    echo "do something!"
+    git reset HEAD
 fi
