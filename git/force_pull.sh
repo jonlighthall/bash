@@ -39,8 +39,13 @@ while [ -z ${hash_local} ]; do
     fi
     tracking="${tracking}~"
 done
-exit
 unset hash_remote
+hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "${subj_remote}" | head -n 1 | awk '{print $2}')
+echo -n "corresponding remote commit hash: "
+echo $hash_remote
+exit
+
+
 hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "$(git log $hash_local --format=%s -n 1)" | head -n 1 | awk '{print $2}')
 git stash
 if [ ! -z ${hash_start} ]; then
