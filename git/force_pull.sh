@@ -1,8 +1,14 @@
 #/bin/bash
+
+# git/force_pull.sh - the remote name and branch can be optionally specified by the first and
+# second arguments, respectively. The default remote tracking branch is origin/master.
+
+# JCL Apr 2023
+
 TAB="   "
 set -e
-#set -x
-unset hash_remote_head
+
+# parse arguments
 if [ $# -lt 1 ]; then
     name_remote=origin
 else
@@ -13,9 +19,9 @@ if [ $# -lt 2 ]; then
 else
     name_branch=$2
 fi
-tracking=${name_remote}/${name_branch}
-unset hash_local
 
+# determine latest common local commit, based on commit message
+tracking=${name_remote}/${name_branch}
 while [ -z ${hash_local} ]; do
     echo "pulling from ${tracking}"
     subj_remote=$(git log ${tracking} --format=%s -n 1)
@@ -25,17 +31,15 @@ while [ -z ${hash_local} ]; do
     if [ ! -z ${hash_local} ]; then
 	echo "$hash_local"
 	echo -n "${TAB}trailing local commits: "
-	unset hash_start
 	hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
 	if [ ! -z ${hash_start} ]; then
 	    echo
 	    git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
 	    N=$(git rev-list $hash_local..HEAD | wc -l)
 	    if [ $N -gt 1 ]; then
-	    echo -n "or ${hash_start}^.."
-	    unset hash_end
-	    hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
-	    echo ${hash_end}
+		echo -n "or ${hash_start}^.."
+		hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
+		echo ${hash_end}
 	    else
 		hash_end=$hash_start
 	    fi
@@ -48,13 +52,14 @@ while [ -z ${hash_local} ]; do
     fi
     tracking="${tracking}~"
 done
-exit
-unset hash_remote
+
+# determine local commits not found on remote
 hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "${subj_remote}" | head -n 1 | awk '{print $2}')
 echo -n "${TAB}corresponding remote commit hash: "
 echo $hash_remote
+echo -n "common commit has... "
 if [ $hash_local == $hash_remote ]; then
-    echo "no need to pull changes?"
+    echo "the same hash"
     git merge-base ${name_branch} ${name_remote}/${name_branch}
     hash_merge=$(git merge-base ${name_branch} ${name_remote}/${name_branch})
     echo -n "common hash is... "
@@ -63,10 +68,35 @@ if [ $hash_local == $hash_remote ]; then
     else
 	echo "not the same as merge base"
     fi
+else
+    echo "a different hash (diverged)"
 fi
+
+# determine remote commits not found locally
+echo -n "${TAB}leading remote commits: "
+hash_start_remote=$(git rev-list $hash_remote..${name_remote}/${name_branch} | tail -n 1)
+if [ ! -z ${hash_start_remote} ]; then
+    echo
+    git rev-list $hash_remote..${name_remote}/${name_branch} | sed "s/^/${TAB}/"
+    N_remote=$(git rev-list $hash_remote..${name_remote}/${name_branch} | wc -l)
+    if [ $N_remote -gt 1 ]; then
+	echo -n "or ${hash_start_remote}^.."
+	hash_end_remote=$(git rev-list $hash_remote..${name_remote}/${name_branch} | head -n 1)
+	echo ${hash_end_remote}
+    else
+	hash_end_remote=$hash_start_remote
+    fi
+    echo "${TAB}remote branch is $N_remote commits ahead of remote"
+else
+    echo "none"
+fi
+
 exit
+# stash local changes
 echo "stashing changes..."
 git stash -u
+
+# intiate pull
 echo "resetting HEAD to $hash_remote..."
 if [ ! -z ${hash_start} ]; then
     git reset --hard $hash_remote
