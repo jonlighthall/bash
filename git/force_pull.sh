@@ -1,4 +1,5 @@
 #/bin/bash
+TAB="   "
 set -e
 #set -x
 unset hash_remote_head
@@ -17,16 +18,17 @@ unset hash_local
 while [ -z ${hash_local} ]; do
     echo "pulling from ${tracking}"
     subj_remote=$(git log ${tracking} --format=%s -n 1)
-    echo "remote commit subject: $subj_remote"
+    echo "${TAB}remote commit subject: $subj_remote"
     hash_local=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
-    echo -n "corresponding local commit hash: "
+    echo -n "${TAB}corresponding local commit hash: "
     if [ ! -z ${hash_local} ]; then
 	echo "$hash_local"
-	echo "trailing local commits: "
+	echo -n "${TAB}trailing local commits: "
 	unset hash_start
 	hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
 	if [ ! -z ${hash_start} ]; then
-	    git rev-list $hash_local..HEAD
+	    echo
+	    git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
 	    echo -n "or ${hash_start}^.."
 	    unset hash_end
 	    hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
@@ -41,10 +43,9 @@ while [ -z ${hash_local} ]; do
 done
 unset hash_remote
 hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "${subj_remote}" | head -n 1 | awk '{print $2}')
-echo -n "corresponding remote commit hash: "
+echo -n "${TAB}corresponding remote commit hash: "
 echo $hash_remote
 exit
-
 
 hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "$(git log $hash_local --format=%s -n 1)" | head -n 1 | awk '{print $2}')
 git stash
