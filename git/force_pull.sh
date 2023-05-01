@@ -124,14 +124,18 @@ else
 fi
 
 # get back to where you were....
-echo "applying stash..."
-git stash pop
-echo -n "stash made... "
-if [ -z $(git diff) ]; then
-    echo "no changes"
-    echo "you're done!"
-else
-    echo "changes!"
-    echo "do something!"
-    git reset HEAD
+N_stash=$(git stash list | wc -l)
+if [ $N_stash -gt 0 ]; then
+    echo "there are $N_stash entries in stash"
+    echo "applying stash..."
+    git stash pop
+    echo -n "stash made... "
+    if [ -z $(git diff) ]; then
+	echo "no changes"
+    else
+	echo "changes!"
+	git reset HEAD
+	echo "do something!"
+    fi
 fi
+echo "you're done!"
