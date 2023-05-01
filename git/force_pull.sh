@@ -15,6 +15,7 @@ else
 fi
 tracking=${name_remote}/${name_branch}
 unset hash_local
+
 while [ -z ${hash_local} ]; do
     echo "pulling from ${tracking}"
     subj_remote=$(git log ${tracking} --format=%s -n 1)
@@ -30,7 +31,7 @@ while [ -z ${hash_local} ]; do
 	    echo
 	    git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
 	    N=$(git rev-list $hash_local..HEAD | wc -l)
-	    if [ $N > 1 ]; then
+	    if [ $N -gt 1 ]; then
 	    echo -n "or ${hash_start}^.."
 	    unset hash_end
 	    hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
@@ -47,6 +48,7 @@ while [ -z ${hash_local} ]; do
     fi
     tracking="${tracking}~"
 done
+exit
 unset hash_remote
 hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "${subj_remote}" | head -n 1 | awk '{print $2}')
 echo -n "${TAB}corresponding remote commit hash: "
