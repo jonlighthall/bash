@@ -45,14 +45,23 @@ unset hash_remote
 hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "${subj_remote}" | head -n 1 | awk '{print $2}')
 echo -n "${TAB}corresponding remote commit hash: "
 echo $hash_remote
-exit
-
-hash_remote=$(git log ${name_remote}/${name_branch} | grep -B4 "$(git log $hash_local --format=%s -n 1)" | head -n 1 | awk '{print $2}')
-git stash
+echo "stashing changes..."
+git stash --all
+echo "resetting HEAD to $hash_remote..."
 if [ ! -z ${hash_start} ]; then
     git reset --hard $hash_remote
+    echo "cherry-picking local changes..."
     git cherry-pick ${hash_start}^..$hash_end
 else
     git reset $hash_remote
 fi
-git pull
+echo "applying stash..."
+git stash apply
+echo -n "stash made... "
+if [ -z $(git diff) ]; then
+    echo "no changes"
+    echo "pulling remote changes..."
+    git pull
+else
+    echo "changes!"
+fi
