@@ -39,6 +39,8 @@ for prog in \
     find_matching \
     find_missing_and_empty \
     fix_bad_extensions \
+    git/filter-repo-author.sh \
+    git/force_pull \
     git/gita \
     git/undel_repo \
     git/update_repos \
@@ -52,7 +54,7 @@ for prog in \
     untar \
     update_packages \
     whatsup \
-    xtest \
+    xtest 
 
 do
     sub_dir=$(dirname "$prog")
@@ -63,7 +65,7 @@ do
 	prog=$(basename "$prog")
     fi
     link=${user_bin}/${prog}
-       
+    
     echo -n "program $target... "
     if [ -e $target ]; then
         echo -n "exists and is "
