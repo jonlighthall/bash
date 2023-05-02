@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# update_repos.sh - push and pull a specified list of git repositories and print summaryories and print summary
+# update_repos.sh - push and pull a specified list of git repositories and print summaries and print summary
 #
 # JCL Apr 2022
 echo "${0##*/}"
@@ -67,14 +67,14 @@ do
     if [ -e ${HOME}/$repo ]; then
 	echo -e "${GOOD}OK${NORMAL}"
 	cd ${HOME}/$repo
-	echo -n "checking repsoitory status... "
+	echo -n "checking repository status... "
 	git rev-parse --is-inside-work-tree >/dev/null 2>&1
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
 	    echo -e "${GOOD}OK${NORMAL}"
 	    # add remotes to list
 	    git remote -v | awk -F " " '{print $2}' | uniq >> ${list_remote}
-	    # check against arugment
+	    # check against argument
 	    if [ $# -gt 0 ]; then
 		echo -n "matching argument $1..."
 		url=$(git remote -v | head -n 1 | awk '{print $2}')
