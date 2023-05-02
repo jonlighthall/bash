@@ -8,7 +8,7 @@ TAB="   "
 set -e
 
 # parse arguments
-branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/].*$//')
+branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
 echo "remote tracking branch is $branch_tracking"
 branch_local=$(git branch | grep \* | sed 's/^\* //')
 echo "local branch is $branch_local"
