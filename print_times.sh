@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 echo -n "UTC:   "; TZ='UTC' date
 echo -n "GPS:   "; TZ='UTC' date --date='TZ="../leaps/UTC" now -9 seconds'
 echo -n "LORAN: "; TZ='UTC' date --date='TZ="../leaps/UTC" now'
