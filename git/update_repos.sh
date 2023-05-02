@@ -92,12 +92,11 @@ do
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL}"
-#		echo "${TAB}pull return value = $RETVAL"
+		echo "${TAB}pull return value = $RETVAL"
 		pull_fail+="$repo "
 	    else
 		echo -e "${GOOD}OK${NORMAL}"
 	    fi
-	    echo "${TAB}pull return value = $RETVAL"
 	    cat pull.log | sed "s/^/${TAB}/"
 	    if [ -f pull.log ]; then
 		rm pull.log
@@ -109,13 +108,11 @@ do
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL}"
-#		echo "${TAB}push return value = $RETVAL"
+		echo "${TAB}push return value = $RETVAL"
 		push_fail+="$repo "
 	    else
 		echo -e "${GOOD}OK${NORMAL}"
-	
 	    fi
-	    echo "${TAB}push return value = $RETVAL"
 	    cat push.log | sed "s/^/${TAB}/"
 	    if [ -f push.log ]; then
 		rm push.log
