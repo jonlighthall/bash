@@ -130,13 +130,13 @@ echo "${TAB}merge orphaned lines..."
 sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_out}
 
 echo "${TAB}login..."
-sed -i "s/ LOGIN/ZLOGIN/;s/ LOGOUT/~LOGOUT/" ${hist_out}
+sed -i "s/ LOGIN/~LOGIN/;s/ LOGOUT/ZLOGOUT/" ${hist_out}
 
 # sort history
 echo "${TAB}sorting lines..."
 sort -u ${hist_out} -o ${hist_out}
 echo "${TAB}login..."
-sed -i "s/ZLOGIN/ LOGIN/;s/~LOGOUT/ LOGOUT/" ${hist_out}
+sed -i "s/~LOGIN/ LOGIN/;s/ZLOGOUT/ LOGOUT/" ${hist_out}
 
 # unmerge commands
 echo "${TAB}unmerge commands..."
