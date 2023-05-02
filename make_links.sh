@@ -39,7 +39,7 @@ for prog in \
     find_matching \
     find_missing_and_empty \
     fix_bad_extensions \
-    git/filter-repo-author.sh \
+    git/filter-repo-author \
     git/force_pull \
     git/gita \
     git/undel_repo \
@@ -97,7 +97,7 @@ do
             echo -e "${BAD}not executable${NORMAL}"
         fi
     else
-        echo -e"${BAD}does not exist${NORMAL}"
+        echo -e "${BAD}does not exist${NORMAL}"
     fi
 done
 bar 38 "--------- Done Making Links ----------"
