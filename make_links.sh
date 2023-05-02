@@ -57,38 +57,36 @@ for prog in \
     xtest 
 
 do
+    target=${source_dir}/${prog}${ext}
     sub_dir=$(dirname "$prog")
-    if [ $sub_dir = "." ]; then
-	target=${source_dir}/${prog}${ext}
-    else
-	target=${source_dir}/${prog}${ext}
+    if [ ! $sub_dir = "." ]; then
 	prog=$(basename "$prog")
     fi
     link=${user_bin}/${prog}
-    
+
     echo -n "program $target... "
     if [ -e $target ]; then
-        echo -n "exists and is "
-        if [ -x $target ]; then
-            echo "executable"
-            echo -n "${TAB}link $link... "
-            # first, backup existing copy
-            if [ -L $link ] || [ -f $link ] || [ -d $link ]; then
-                echo -n "exists and "
-                if [[ $target -ef $link ]]; then
-                    echo -e "${GOOD}already points to ${prog}${NORMAL}"
-                    echo -n "${TAB}"
-                    ls -lhG --color=auto $link
-                    echo "${TAB}skipping..."
-                    continue
-                else
-                    echo -n "will be backed up..."
-                    mv -v $link ${link}_$(date +'%Y-%m-%d-t%H%M')
-                fi
-            else
-                echo "does not exist"
-            fi
-            # then link
+	echo -n "exists and is "
+	if [ -x $target ]; then
+	    echo "executable"
+	    echo -n "${TAB}link $link... "
+	    # first, backup existing copy
+	    if [ -L $link ] || [ -f $link ] || [ -d $link ]; then
+		echo -n "exists and "
+		if [[ $target -ef $link ]]; then
+		    echo -e "${GOOD}already points to ${prog}${NORMAL}"
+		    echo -n "${TAB}"
+		    ls -lhG --color=auto $link
+		    echo "${TAB}skipping..."
+		    continue
+		else
+		    echo -n "will be backed up..."
+		    mv -v $link ${link}_$(date +'%Y-%m-%d-t%H%M')
+		fi
+	    else
+		echo "does not exist"
+	    fi
+	    # then link
 	    echo -en "${TAB}${GRH}";hline 72;
 	    echo "${TAB}making link... "
 	    ln -sv $target $link | sed "s/^/${TAB}/"
