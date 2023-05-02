@@ -90,7 +90,7 @@ do
 	    echo "pulling..."
 	    git pull --all --tags --prune --progress 2> >(sed $"s/.*/\x1b[1;31m&\x1b[m/;s/^/${TAB}/">&2) | sed "s/^/${TAB}/"
 	    if [[ $? != 0 ]]; then
-		echo "pull: $?"
+		echo "${TAB}pull return value = $?"
 		pull_fail+="$repo "
 	    fi
 
@@ -98,7 +98,7 @@ do
 	    echo "pushing..."
 	    git push --all --progress
 	    if [[ $? != 0 ]]; then
-		echo "push: $?"
+		echo "${TAB}push return value = $?"
 		push_fail+="$repo "
 	    fi
 
@@ -110,7 +110,7 @@ do
 	    fi
 	else
 	    echo -e "${BAD}FAIL${NORMAL}"
-	    echo "${TAB}return value = $RETVAL"
+	    echo "${TAB}rev-parse return value = $RETVAL"
 	    echo "${TAB}$repo not a Git repository"
 	    loc_fail+="$repo "
 	fi
