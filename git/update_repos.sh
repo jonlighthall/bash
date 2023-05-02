@@ -87,19 +87,38 @@ do
 	    fi
 
 	    # pull
-	    echo "pulling..."
-	    git pull --all --tags --prune --progress 2> >(sed $"s/.*/\x1b[1;31m&\x1b[m/;s/^/${TAB}/">&2) | sed "s/^/${TAB}/"
-	    if [[ $? != 0 ]]; then
-		echo "${TAB}pull return value = $?"
+	    echo -n "pulling..."
+	    script -q --return /dev/null -c "git pull --all --tags --prune" > pull.log
+	    RETVAL=$?
+	    if [[ $RETVAL != 0 ]]; then
+		echo -e "${BAD}FAIL${NORMAL}"
+#		echo "${TAB}pull return value = $RETVAL"
 		pull_fail+="$repo "
+	    else
+		echo -e "${GOOD}OK${NORMAL}"
+	    fi
+	    echo "${TAB}pull return value = $RETVAL"
+	    cat pull.log | sed "s/^/${TAB}/"
+	    if [ -f pull.log ]; then
+		rm pull.log
 	    fi
 
 	    # push
-	    echo "pushing..."
-	    git push --all --progress
-	    if [[ $? != 0 ]]; then
-		echo "${TAB}push return value = $?"
+	    echo -n "pushing... "
+	    script -q --return /dev/null -c "git push --all" > push.log
+	    RETVAL=$?
+	    if [[ $RETVAL != 0 ]]; then
+		echo -e "${BAD}FAIL${NORMAL}"
+#		echo "${TAB}push return value = $RETVAL"
 		push_fail+="$repo "
+	    else
+		echo -e "${GOOD}OK${NORMAL}"
+	
+	    fi
+	    echo "${TAB}push return value = $RETVAL"
+	    cat push.log | sed "s/^/${TAB}/"
+	    if [ -f push.log ]; then
+		rm push.log
 	    fi
 
 	    # check for modified files
