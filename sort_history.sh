@@ -5,7 +5,8 @@
 #
 # JCL Apr 2023
 
-LC_ALL=C
+# set sort order (desired results with UTF-8 binary sort order)
+LC_ALL=en_US.UTF-8
 
 TAB="   "
 
@@ -44,6 +45,8 @@ function gen_marker () {
 
 # specify default history file
 hist_ref=${HOME}/.bash_history
+hist_bak=${hist_ref}_$(date +'%Y-%m-%d-t%H%M%S')
+cp -pv $hist_ref ${hist_bak}
 
 # set list of files to check
 list_in=${hist_ref}
@@ -100,7 +103,7 @@ cat ${list_out} > ${hist_out}
 
 # clean up whitespace
 echo "${TAB}${TAB}delete trailing whitespaces..."
-sed -i 's/^$//;s/[[:blank:]]*$//' ${hist_out}
+sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${hist_out}
 
 # find and mark timestamp lines
 gen_marker
@@ -127,17 +130,20 @@ echo "${TAB}merge orphaned lines..."
 sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_out}
 
 echo "${TAB}login..."
-sed -i "s/ LOGOUT/~ LOGOUT/" ${hist_out}
+sed -i "s/ LOGIN/ZLOGIN/;s/ LOGOUT/~LOGOUT/" ${hist_out}
 
 # sort history
 echo "${TAB}sorting lines..."
 sort -u ${hist_out} -o ${hist_out}
 echo "${TAB}login..."
-sed -i "s/~ LOGOUT/ LOGOUT/" ${hist_out}
+sed -i "s/ZLOGIN/ LOGIN/;s/~LOGOUT/ LOGOUT/" ${hist_out}
 
 # unmerge commands
 echo "${TAB}unmerge commands..."
-sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/" ${hist_out}
+sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_out}
+
+# save markers
+echo "#$(date +'%s') SORT $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} (LC_ALL = ${LC_ALL})" >> ${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}
 
@@ -151,3 +157,5 @@ fi
 
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+
+echo "en ${hist_ref} ${hist_bak}"
