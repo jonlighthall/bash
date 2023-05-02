@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# update_repos.sh - push and pull a specified list of git repositories and print summaries and print summary
+# update_repos.sh - push and pull a specified list of git repositories and print summaries
 #
 # JCL Apr 2022
 echo "${0##*/}"
