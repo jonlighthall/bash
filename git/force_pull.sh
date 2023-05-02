@@ -10,11 +10,12 @@ set -e
 # parse arguments
 if [ $# -lt 1 ]; then
     name_remote=origin
+    is_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/].*$//')
 else
     name_remote=$1
 fi
 if [ $# -lt 2 ]; then
-    name_branch=master
+    name_branch=$(git branch | grep \* | sed 's/^\* //')
 else
     name_branch=$2
 fi
