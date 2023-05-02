@@ -119,6 +119,7 @@ if [ $N_local -gt 0 ];then
 	echo "single commit to cherry-pick"
 	git cherry-pick ${hash_start}
     fi
+    git push --all
 else
     echo "no need to cherry-pick"
 fi
