@@ -10,8 +10,6 @@ if [ -e $fpretty ]; then
     source $fpretty
 fi
 
-TAB="   "
-
 # list repository paths, relative to home
 # settings
 list="config "
