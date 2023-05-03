@@ -5,8 +5,6 @@ if [ -e $fpretty ]; then
     source $fpretty
 fi
 
-TAB="   "
-
 # set source and target directories
 source_dir=$PWD
 user_bin=$HOME/bin

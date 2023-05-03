@@ -4,7 +4,12 @@
 
 # JCL Apr 2023
 
-TAB="   "
+# source formatting
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+
 set -e
 
 # parse arguments
