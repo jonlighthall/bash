@@ -1,5 +1,5 @@
 #!/bin/bash
-echo $BASH_SOURCE
+# no echo source since this is a utility
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
