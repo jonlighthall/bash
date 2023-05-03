@@ -7,7 +7,7 @@
 # print source name at start
 echo -n "source: $BASH_SOURCE"
 src_name=$(readlink -f $BASH_SOURCE)
-if [ $BASH_SOURCE = $src_name ]; then
+if [ "$BASH_SOURCE" = "$src_name" ]; then
     echo
 else
     echo " -> $src_name"
@@ -27,7 +27,8 @@ if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
 else
     branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
     echo -e "remote tracking branch is \033[34m${branch_tracking}\033[m"
-
+    name_remote=${branch_tracking%%/*}
+    echo "remote is name $name_remote"
     url_remote=$(git remote -v | grep ${name_remote} |  awk '{print $2}' | sort -u)
     echo "remote url is ${url_remote}"
     # parse branches
