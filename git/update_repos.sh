@@ -61,7 +61,7 @@ mods=""
 for repo in $list
 do
     hline 70
-    echo -e "locating $repo... \c"
+    echo -e "locating ${PSDIR}$repo... ${NORMAL}\c"
     if [ -e ${HOME}/$repo ]; then
 	echo -e "${GOOD}OK${NORMAL}"
 	cd ${HOME}/$repo
