@@ -21,23 +21,38 @@ fi
 
 set -e
 
-# parse arguments
-branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-echo "remote tracking branch is $branch_tracking"
-branch_local=$(git branch | grep \* | sed 's/^\* //')
-echo "local branch is $branch_local"
-if [ $# -lt 1 ]; then
-    name_remote=${branch_tracking%%/*}
+# parse remote
+if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
+    echo "no remote tracking branch set for current branch"
 else
+    branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
+    echo -e "remote tracking branch is \033[34m${branch_tracking}\033[m"
+
+    url_remote=$(git remote -v | grep ${name_remote} |  awk '{print $2}' | sort -u)
+    echo "remote url is ${url_remote}"
+    # parse branches
+    branch_remote=${branch_tracking#*/}
+    echo "remote branch is $branch_remote"
+fi
+branch_local=$(git branch | grep \* | sed 's/^\* //')
+echo -e " local branch is \033[32m${branch_local}\033[m"
+
+# parse arguments
+if [ $# -ge 1 ]; then
     name_remote=$1
 fi
-if [ $# -lt 2 ]; then
-    branch_remote=${branch_tracking#*/}
-else
+if [ $# -ge 2 ]; then
     branch_remote=$2
 fi
 branch_pull=${name_remote}/${branch_remote}
-echo "pulling from remote branch $branch_pull"
+if [ -z ${name_remote} ] || [ -z ${branch_remote} ]; then
+    echo -e "${BROKEN}ERROR: no remote tracking branch specified${NORMAL}"
+    echo " HELP: specify remote tracking branch with"
+    echo "       ${TAB}${BASH_SOURCE##*/} <repository> <refspec>"
+    exit 1
+else
+    echo "pulling from remote branch $branch_pull"
+fi
 
 # determine latest common local commit, based on commit message
 tracking=${branch_pull}
