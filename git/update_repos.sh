@@ -95,9 +95,9 @@ do
 	    else
 		echo -e "${GOOD}OK${NORMAL}"
 	    fi
-	    cat pull.log | sed "s/^/${TAB}/"
+	    cat pull.log | sed 's/^M$/\n/g' | sed 's/^.*^M//g' | sed 's/\x1B\[K//g' | sed '/^$/d' | sed "s/^/${TAB}/"
 	    if [ -f pull.log ]; then
-		ls pull.log
+		rm pull.log
 	    fi
 
 	    # push
@@ -111,9 +111,9 @@ do
 	    else
 		echo -e "${GOOD}OK${NORMAL}"
 	    fi
-	    cat push.log | sed "s/^/${TAB}/"
+	    cat push.log | sed 's/^M$/\n/g' | sed 's/^.*^M//g' | sed 's/\x1B\[K//g' | sed '/^$/d' | sed "s/^/${TAB}/"
 	    if [ -f push.log ]; then
-		ls push.log
+		rm push.log
 	    fi
 
 	    # check for modified files
