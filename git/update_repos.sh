@@ -99,7 +99,7 @@ do
 	    fi
 	    cat pull.log | sed "s/^/${TAB}/"
 	    if [ -f pull.log ]; then
-		rm pull.log
+		ls pull.log
 	    fi
 
 	    # push
@@ -115,7 +115,7 @@ do
 	    fi
 	    cat push.log | sed "s/^/${TAB}/"
 	    if [ -f push.log ]; then
-		rm push.log
+		ls push.log
 	    fi
 
 	    # check for modified files
