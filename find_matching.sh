@@ -45,7 +45,14 @@ else
 	if [ $# -ge 2 ]; then
 	    file_spec=$2
 	else
-	    file_spec=found.txt
+	    # set default output file name to match input
+	    base1="${1%.*}"
+	    if [[ "$1" == *"."* ]]; then
+		ext1="${1##*.}"
+	    else
+		ext1="txt"
+	    fi
+	    file_spec="${base1}_found.${ext1}"
 	fi
 	base="${file_spec%.*}"
 	if [[ "{file_spec}" == *"."* ]]; then
