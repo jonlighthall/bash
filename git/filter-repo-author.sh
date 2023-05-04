@@ -16,7 +16,11 @@ fi
 branch_local=$(git branch | grep \* | sed 's/^\* //')
 echo -e " local branch is \033[32m${branch_local}\033[m"
 
-git filter-repo $@ --commit-callback '
+branch_list=$(git branch -va | sed 's/^*/ /' |  awk '{print $1}' | sed 's|remotes/.*/||' | sort -u | sed '/HEAD/d')
+echo "list of branches: "
+echo "${branch_list}" | sed 's/^/   /'
+
+git filter-repo $@ --partial --commit-callback '
     correct_name = b"Jon Lighthall"
     auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
     auth_list.append(b"jonlighthall@users.noreply.github.com")
@@ -29,6 +33,3 @@ git filter-repo $@ --commit-callback '
         if commit.author_name != correct_name:
             commit.author_name = correct_name
 '
-echo "git remote add ${name_remote} ${url_remote}"
-echo "git fetch ${name_remote}"
-echo "git branch --set-upstream-to=${branch_tracking}"
