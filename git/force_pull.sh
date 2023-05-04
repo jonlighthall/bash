@@ -64,14 +64,15 @@ while [ -z ${hash_local} ]; do
     echo "${TAB}remote commit subject: $subj_remote"
 
     hash_local=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
-
-    hash_local_t=$(git log --format="%at %H " | grep 1683154483 | awk '{print $2}')
+    hash_local_t=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
 
     echo "subject and time hashes..."
     if [ $hash_local == $hash_local_t ]; then
 	echo "match"
     else
 	echo "do not match"
+	echo "subj = $hash_local"
+	echo "time = $hash_local_t"
 	exit 1
     fi
     echo -n "${TAB}corresponding local commit hash: "
