@@ -17,7 +17,8 @@ branch_local=$(git branch | grep \* | sed 's/^\* //')
 echo -e " local branch is \033[32m${branch_local}\033[m"
 
 branch_list=$(git branch -va | sed 's/^*/ /' |  awk '{print $1}' | sed 's|remotes/.*/||' | sort -u | sed '/HEAD/d')
-echo "list of branches: ${branch_list}"
+echo "list of branches: "
+echo "${branch_list}" | sed 's/^/   /'
 
 for branch in $branch_list
 do
@@ -46,6 +47,15 @@ do
 	git push -f ${name_remote} ${branch}
     else
 	echo "only one author!"
+	git log --pretty=format:"%aN %aE" | sort | uniq -c | sort -n
+	M=$(git log --pretty=format:"%aN %aE" | sort -u | wc -l)
+    if [ $M -gt 1 ]; then
+	echo "more than one author"
+	force_pull
+    else
+	echo "only one author!"
+    fi
+	
     fi
 done
 git checkout ${branch_local}
