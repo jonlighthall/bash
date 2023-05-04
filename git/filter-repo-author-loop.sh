@@ -49,13 +49,18 @@ do
 	echo "only one author!"
 	git log --pretty=format:"%aN %aE" | sort | uniq -c | sort -n
 	M=$(git log --pretty=format:"%aN %aE" | sort -u | wc -l)
-    if [ $M -gt 1 ]; then
-	echo "more than one author"
-	force_pull
-    else
-	echo "only one author!"
-    fi
-	
+	if [ $M -gt 1 ]; then
+	    echo "more than one author"
+	    force_pull
+	else
+	    echo "only one author!"
+	fi
+
+	if [ N==1 ] && [ M==1 ] && [ -z "$(git diff ${branch} ${name_remote}/${branch})" ]; then
+	    git reset ${name_remote}/${branch}
+	else
+	    echo "unsafe to reset"
+	fi
     fi
 done
 git checkout ${branch_local}
