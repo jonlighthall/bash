@@ -44,38 +44,31 @@ do
 
     N=$(git log ${name_remote}/${branch} --pretty=format:"%aN %aE" | sort -u | wc -l)
     if [ $N -gt 1 ]; then
-	echo "more than one author"
-
-	git filter-repo $@ --partial --commit-callback '
-        correct_name = b"Jon Lighthall"
-        auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
-        auth_list.append(b"jonlighthall@users.noreply.github.com")
-        auth_list.append(b"jon.lighthall@ygmail.com")
-        auth_list.append(b"jonathan.lighthall@")
-        auth_list.append(b"jonathan.c.lighthall@")
-        correct_email = b"jon.lighthall@gmail.com"
-        if commit.author_email in auth_list:
-            commit.author_email = correct_email
-            if commit.author_name != correct_name:
-                commit.author_name = correct_name
-    '
+	echo "${TAB}more than one author on remote branch ${name_remote}/${branch}"
+	filter-repo-author.sh
 	git push -f ${name_remote} ${branch}
     else
-	echo "${TAB}only one author on remote!"
+	echo "${TAB}only one author on remote branch ${name_remote}/${branch}!"
 	git log --pretty=format:"%aN %aE" | sort | uniq -c | sort -n
 	M=$(git log --pretty=format:"%aN %aE" | sort -u | wc -l)
 	if [ $M -gt 1 ]; then
-	    echo "more than one author"
+	    echo "more than one author on local branch ${branch}"
+	    ehco "force pull..."
 	    force_pull
 	else
-	    echo "${TAB}only one author on local!"
+	    echo "${TAB}only one author on local branch ${branch}!"
 	fi
 
 	if [ N==1 ] && [ M==1 ] && [ -z "$(git diff ${branch} ${name_remote}/${branch})" ]; then
+	    echo "reseting HEAD to ${name_remote}/${branch}..."
 	    git reset ${name_remote}/${branch}
+	    git pull
+	    git push
 	else
 	    echo "unsafe to reset"
 	fi
     fi
 done
+echo "done"
+echo "switching back to ${branch_local}..."
 git checkout ${branch_local}
