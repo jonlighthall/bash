@@ -40,8 +40,15 @@ git filter-repo $@ --partial --commit-callback '
     auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
     auth_list.append(b"jonlighthall@users.noreply.github.com")
     auth_list.append(b"jon.lighthall@ygmail.com")
-    auth_list.append(b"jonathan.lighthall@")
-    auth_list.append(b"jonathan.c.lighthall@")
+    text_file = open(os.path.expanduser("~/utils/bash/git/url.txt"), "r")
+    url = text_file.read()
+    text_file.close()
+    email_str="jonathan.lighthall@"+url.strip()
+    email_bin=email_str.encode("ascii")	
+    auth_list.append(email_bin)
+    email_str="jonathan.c.lighthall@"+url.strip()
+    email_bin=email_str.encode("ascii")	
+    auth_list.append(email_bin)
     correct_email = b"jon.lighthall@gmail.com"
     if commit.author_email in auth_list:
         commit.author_email = correct_email
