@@ -45,7 +45,7 @@ do
     N=$(git log ${name_remote}/${branch} --pretty=format:"%aN %aE" | sort -u | wc -l)
     if [ $N -gt 1 ]; then
 	echo "${TAB}more than one author on remote branch ${name_remote}/${branch}"
-	filter-repo-author.sh
+	filter-repo-author.sh $@
 	git push -f ${name_remote} ${branch}
     else
 	echo "${TAB}only one author on remote branch ${name_remote}/${branch}!"
