@@ -61,14 +61,14 @@ do
     '
 	git push -f ${name_remote} ${branch}
     else
-	echo "only one author!"
+	echo "${TAB}only one author on remote!"
 	git log --pretty=format:"%aN %aE" | sort | uniq -c | sort -n
 	M=$(git log --pretty=format:"%aN %aE" | sort -u | wc -l)
 	if [ $M -gt 1 ]; then
 	    echo "more than one author"
 	    force_pull
 	else
-	    echo "only one author!"
+	    echo "${TAB}only one author on local!"
 	fi
 
 	if [ N==1 ] && [ M==1 ] && [ -z "$(git diff ${branch} ${name_remote}/${branch})" ]; then
