@@ -15,7 +15,7 @@ else
 	cd $1
 	echo $PWD
 
-	if git rev-parse --git-dir > /dev/null 2>&1; then
+	if git rev-parse --git-dir &>/dev/null; then
 	    # This is a valid git repository
 	    echo "$1 is part of a Git repository"
 	    GITDIR=$(git rev-parse --git-dir)
