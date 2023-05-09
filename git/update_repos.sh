@@ -12,7 +12,8 @@ fi
 
 # list repository paths, relative to home
 # settings
-list="config "
+list="config \
+      config/private "
 
 # scripting utilities
 dir_script="utils/"
@@ -66,7 +67,7 @@ do
 	echo -e "${GOOD}OK${NORMAL}"
 	cd ${HOME}/$repo
 	echo -n "checking repository status... "
-	git rev-parse --is-inside-work-tree >/dev/null 2>&1
+	git rev-parse --is-inside-work-tree &>/dev/null
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
 	    echo -e "${GOOD}OK${NORMAL}"
