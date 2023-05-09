@@ -100,7 +100,7 @@ else
 	    if [ -f ${fname} ]; then
 		echo
 #		echo -n ${TAB}
-		mv -v ${fname} ${dir_mv} | sed 's/^/   /'
+		mv -v ${fname} ${dir_mv} | sed "s/^/${TAB}/"
 	    else
 		echo "not found"
 	    fi
