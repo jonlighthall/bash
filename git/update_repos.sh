@@ -12,7 +12,8 @@ fi
 
 # list repository paths, relative to home
 # settings
-list="config "
+list="config \
+      config/private "
 
 # scripting utilities
 dir_script="utils/"
@@ -66,7 +67,7 @@ do
 	echo -e "${GOOD}OK${NORMAL}"
 	cd ${HOME}/$repo
 	echo -n "checking repository status... "
-	git rev-parse --is-inside-work-tree >/dev/null 2>&1
+	git rev-parse --is-inside-work-tree &>/dev/null
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
 	    echo -e "${GOOD}OK${NORMAL}"
@@ -86,7 +87,7 @@ do
 
 	    # pull
 	    echo -n "pulling..."
-	    script -q --return /dev/null -c "git pull --all --tags --prune" > pull.log
+	    script -q --return /dev/null -c "git pull -4 --all --tags --prune" > pull.log
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL}"
@@ -102,7 +103,7 @@ do
 
 	    # push
 	    echo -n "pushing... "
-	    script -q --return /dev/null -c "git push --all" > push.log
+	    script -q --return /dev/null -c "git push -4 --all" > push.log
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL}"
