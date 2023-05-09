@@ -7,7 +7,7 @@ else
     TRIM=$(echo $1 | sed 's:^\./::')
     echo -e "logging $TRIM... \c"
     # test command
-    if ! command -v $1 &> /dev/null
+    if ! command -v $1 &>/dev/null
     then
 	echo "not found"
     else
@@ -17,7 +17,6 @@ else
 	mkdir -p $LOGDIR
 	echo -e "saving to $FNAME..."
  	$1 2>&1 | tee ${FNAME}
-#	$1 > ${FNAME} 2>&1
 	echo "done" 
     fi
 fi
