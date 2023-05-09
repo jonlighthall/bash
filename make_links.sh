@@ -1,21 +1,31 @@
 #!/bin/bash
-echo $BASH_SOURCE
+
+# print source name at start
+echo -n "source: $BASH_SOURCE"
+src_name=$(readlink -f $BASH_SOURCE)
+if [ "$BASH_SOURCE" = "$src_name" ]; then
+    echo
+else
+    echo " -> $src_name"
+fi
+
+# source formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
 fi
 
 # set source and target directories
-source_dir=$PWD
+source_dir=$(dirname "$src_name")
 user_bin=$HOME/bin
 
 # check directories
 echo "source directory $source_dir..."
-if [ -d $source_dir ]; then
+if [ -d "$source_dir" ]; then
     echo "exists"
 else
-    echo "does not exist"
-    return 1
+    echo -e "${BAD}does not exist${NORMAL}"
+    exit 1
 fi
 
 echo -n "target directory $user_bin... "
@@ -63,9 +73,9 @@ do
     link=${user_bin}/${prog}
 
     echo -n "program $target... "
-    if [ -e $target ]; then
+    if [ -e "$target" ]; then
 	echo -n "exists and is "
-	if [ -x $target ]; then
+	if [ -x "$target" ]; then
 	    echo "executable"
 	    echo -n "${TAB}link $link... "
 	    # first, backup existing copy
