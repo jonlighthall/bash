@@ -9,7 +9,7 @@ echo "    pwd:" $PWD
 echo "   date:" $(date)
 echo "    PID: $PPID"
 echo -n "   time: "
-if (ps -o etimes) > /dev/null 2>&1; then
+if (ps -o etimes) &>/dev/null; then
     echo "$(sec2elap $(ps -p "$PPID" -o etimes | tail -n 1))"
 else
     echo $(ps -p $PPID -o etime)
