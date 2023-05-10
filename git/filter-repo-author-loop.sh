@@ -132,7 +132,7 @@ do
 done
 echo "done"
 echo "switching back to ${branch_local}..."
-git checkout ${branch_local}
+    bar 56 "$(git checkout ${branch_local} 2>&1)" 
 if $b_stash; then
     git stash pop
 fi
