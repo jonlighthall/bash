@@ -44,28 +44,37 @@ do
 
     N=$(git log ${name_remote}/${branch} --pretty=format:"%aN %aE" | sort -u | wc -l)
     if [ $N -gt 1 ]; then
-	echo "${TAB}more than one author on remote branch ${name_remote}/${branch}"
+	echo "${TAB}more than one author on remote branch ${name_remote}/${branch} (N=$N)"
+	echo "filtering repo and force pushing..."
 	filter-repo-author.sh $@
+	echo "done filtering repo."
+	echo "force pushing rewrite..."
 	git push -f ${name_remote} ${branch}
     else
 	echo "${TAB}only one author on remote branch ${name_remote}/${branch}!"
+	echo "no need to force push"
 	git log --pretty=format:"%aN %aE" | sort | uniq -c | sort -n
 	M=$(git log --pretty=format:"%aN %aE" | sort -u | wc -l)
 	if [ $M -gt 1 ]; then
-	    echo "more than one author on local branch ${branch}"
+	    echo "more than one author on local branch ${branch} (M=$M)"
 	    ehco "force pull..."
 	    force_pull
 	else
 	    echo "${TAB}only one author on local branch ${branch}!"
+	    echo "no need to force pull"
 	fi
 
 	if [ N==1 ] && [ M==1 ] && [ -z "$(git diff ${branch} ${name_remote}/${branch})" ]; then
+	    echo "only one author on local and remote"
+	    echo "no differences between local and remote" 
 	    echo "reseting HEAD to ${name_remote}/${branch}..."
 	    git reset ${name_remote}/${branch}
-	    git pull
-	    git push
+	    git pull ${name_remote} ${branch}
+	    git push ${name_remote}
 	else
 	    echo "unsafe to reset"
+	    echo "remote authors N=$N"
+	    echo " local authors M=$M"
 	fi
     fi
 done
