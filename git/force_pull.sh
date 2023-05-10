@@ -143,7 +143,7 @@ fi
 
 # stash local changes
 echo "stashing changes..."
-git stash -u
+git stash
 
 # initiate HEAD
 echo "resetting HEAD to $hash_remote..."
