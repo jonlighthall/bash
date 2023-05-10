@@ -50,19 +50,21 @@ do
     git fetch ${name_remote} ${branch}
     git diff ${branch} ${name_remote}/${branch}
 
+    # determine number of authors on remote branch
     echo "remote:"
     git log ${name_remote}/${branch} --pretty=format:"%aN %aE" | sort | uniq -c | sort -n
     N=$(git log ${name_remote}/${branch} --pretty=format:"%aN %aE" | sort -u | wc -l)
     if [ $N -gt 1 ]; then
 	echo "${TAB}more than one author on remote branch ${name_remote}/${branch} (N=$N)"
-	echo "${TAB}filtering repo and force pushing..."
+	echo "${TAB}filtering repo..."
 	filter-repo-author.sh $@
-	echo "${TAB}done filtering repo."
+	echo "${TAB}done filtering repo"
 	echo "${TAB}force pushing rewrite..."
 	git push -f ${name_remote} ${branch}
     else
 	echo "${TAB}only one author on remote branch ${name_remote}/${branch}!"
-	echo "${TAB}no need to force push"
+	echo "${TAB}no need to filter or (force) push"
+	# determine number of authors on local branch
 	echo "local:"
 	git log --pretty=format:"%aN %aE" | sort | uniq -c | sort -n
 	M=$(git log --pretty=format:"%aN %aE" | sort -u | wc -l)
@@ -78,11 +80,13 @@ do
 	if [ N==1 ] && [ M==1 ]; then
 	    echo "only one author on local and remote"
 
+	    # determine remote tracking branch
 	    if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
 		echo "no remote tracking branch"
 		git branch --set-upstream-to=${name_remote}/${branch} ${branch}
 	    fi
 
+	    # determine number commits local branch is behind remote
 	    if [ -z $(git rev-list --left-only ${name_remote}/${branch}...${branch}) ]; then
 		echo "no commits to pull"
 	    else
@@ -90,6 +94,7 @@ do
 		git pull ${name_remote} ${branch}
 	    fi
 
+	    # determine number commits local branch is ahead of remote
 	    if [ -z $(git rev-list --right-only ${name_remote}/${branch}...${branch}) ]; then
 		echo "no commits to push"
 	    else
@@ -97,10 +102,23 @@ do
 		git push ${name_remote}
 	    fi
 
+	    # determine difference between local and remote
 	    if [ -z "$(git diff ${branch} ${name_remote}/${branch})" ]; then
 		echo "no differences between local and remote"
-		echo "reseting HEAD to ${name_remote}/${branch}..."
-		git reset ${name_remote}/${branch}
+
+		hash_remote=$(git rev-parse ${name_remote}/${branch})
+		hash_local= $(git rev-parse HEAD)
+		echo -n "${TAB}local and remote hashes..."
+		if [[ "$hash_remote" == "$hash_local" ]]; then
+		    echo "${GOOD}match${NORMAL}"
+		else
+		    echo "${BAD}no not match${NORMAL}"
+		    echo $hash_local
+		    echo $hash_remote
+		    
+		    echo "reseting HEAD to ${name_remote}/${branch}..."
+		    git reset ${name_remote}/${branch}
+		fi
 	    else
 		echo "unsafe to reset"
 	    fi
