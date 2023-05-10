@@ -40,15 +40,17 @@ if [ -z "$(git diff)" ]; then
     echo "no differences to stash"
     b_stash=false
 else
+    git status
+    echo "stashing differences..."
     git stash
     b_stash=true
 fi
 
 for branch in $branch_list
 do
-    git checkout $branch
+    bar 56 "$(git checkout $branch 2>&1)" 
     git fetch ${name_remote} ${branch}
-    git diff ${branch} ${name_remote}/${branch}
+    git --no-pager diff ${branch} ${name_remote}/${branch}
 
 # determine latest common local commit, based on commit message
 tracking==${name_remote}/${branch_remote}
@@ -197,12 +199,12 @@ do
 		echo "no differences between local and remote"
 
 		hash_remote=$(git rev-parse ${name_remote}/${branch})
-		hash_local= $(git rev-parse HEAD)
+		hash_local=$(git rev-parse HEAD)
 		echo -n "${TAB}local and remote hashes..."
 		if [[ "$hash_remote" == "$hash_local" ]]; then
-		    echo "${GOOD}match${NORMAL}"
+		    echo -e "${GOOD}match${NORMAL}"
 		else
-		    echo "${BAD}no not match${NORMAL}"
+		    echo -e "${BAD}no not match${NORMAL}"
 		    echo $hash_local
 		    echo $hash_remote
 		    
@@ -220,7 +222,7 @@ do
 done
 echo "done"
 echo "switching back to ${branch_local}..."
-git checkout ${branch_local}
+    bar 56 "$(git checkout ${branch_local} 2>&1)" 
 if $b_stash; then
     git stash pop
 fi
