@@ -67,7 +67,7 @@ while [ -z ${hash_local} ]; do
     hash_local_t=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
 
     echo "subject and time hashes..."
-    if [ $hash_local == $hash_local_t ]; then
+    if [ "$hash_local" == "$hash_local_t" ]; then
 	echo "match"
     else
 	echo "do not match"
@@ -143,7 +143,7 @@ fi
 
 # stash local changes
 echo "stashing changes..."
-git stash -u
+git stash
 
 # initiate HEAD
 echo "resetting HEAD to $hash_remote..."
