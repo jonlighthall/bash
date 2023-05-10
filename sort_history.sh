@@ -6,6 +6,16 @@
 # JCL Apr 2023
 
 # set sort order (desired results with UTF-8 binary sort order)
+set -e
+# print source name at start
+echo -n "${TAB}running $BASH_SOURCE"
+src_name=$(readlink -f $BASH_SOURCE)
+if [ "$BASH_SOURCE" = "$src_name" ]; then
+    echo
+else
+    echo " -> $src_name"
+fi
+
 LC_ALL=en_US.UTF-8
 
 TAB="   "
@@ -156,6 +166,11 @@ if [[ ! -z ${list_del} ]]; then
 fi
 
 # print time at exit
-echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+echo -en "$(date +"%R") ${BASH_SOURCE##*/} "
+if command -v sec2elap &>/dev/null; then
+    echo "$(sec2elap $SECONDS)"
+else
+    echo "elapsed time is ${SECONDS} sec"
+fi
 
 echo "en ${hist_ref} ${hist_bak}"
