@@ -88,7 +88,7 @@ do
 	    # pull
 	    echo "pulling..."
 #	    script -q --return /dev/null -c "git pull -4 --all --tags --prune" > pull.log
-	    script -qef /dev/null -c "git pull -4 --all --tags --prune" | sed 's/^M$/vvv\n/g' | sed 's/$/yyy\n/g' | sed 's/^M/zzz/g' | sed 's//+++/g' | sed 's/\x1B\[K/^^^/g' | sed "s/^/---/" >&1
+	    script -qef /dev/null -c "git pull -4 --all --tags --prune" | sed 's/$/yyy\n/g' | sed 's//+++/g' | sed 's/\x1B\[K/^^^/g' | sed "s/^/---/" >&1
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${TAB}${BAD}FAIL${NORMAL}"
@@ -105,7 +105,7 @@ do
 	    # push
 	    echo "pushing... " 
 #	    script -q --return /dev/null -c "git push -4 --all" > push.log
-	    script -qef /dev/null -c "git push -4 --all" | sed 's/^M$/vvv\n/g' | sed 's/$/yyy\n/g' | sed 's/^M/zzz/g' | sed 's//+++/g' | sed 's/\x1B\[K/^^^/g' | sed "s/^/---/" >&1
+	    script -qef /dev/null -c "git push -4 --all" | sed 's/$/yyy\n/g' | sed 's//+++/g' | sed 's/\x1B\[K/^^^/g' | sed "s/^/---/" >&1
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${TAB}${BAD}FAIL${NORMAL}"
@@ -114,7 +114,7 @@ do
 	    else
 		echo -e "${TAB}${GOOD}OK${NORMAL}"
 	    fi
-#	    cat push.log | sed 's/^M$/\n/g' | sed 's/^.*^M//g' | sed 's/\x1B\[K//g' | sed '/^$/d' | sed "s/^/${TAB}/"
+#	    cat push.log | sed 's/$/\n/g' | sed 's/^.*//g' | sed 's/\x1B\[K//g' | sed '/^$/d' | sed "s/^/${TAB}/"
 	    if [ -f push.log ]; then
 		rm push.log
 	    fi
