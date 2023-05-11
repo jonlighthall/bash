@@ -88,7 +88,7 @@ do
 	    # pull
 	    echo "pulling..."
 #	    script -q --return /dev/null -c "git pull -4 --all --tags --prune" > pull.log
-	    script -qef /dev/null -c "git pull -4 --all --tags --prune" | sed 's/^M$/\n/g' | sed 's/^.*^M//g' | sed 's/\x1B\[K//g' | sed '/^$/d' | sed "s/^/${TAB}/" >&1
+	    script -qef /dev/null -c "git pull -4 --all --tags --prune" | sed 's/^M$/\n/g' | sed 's/^.*^M/+++/g' | sed 's/\x1B\[K/^^^/g' | sed '/^$/d' | sed "s/^/---/" >&1
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${TAB}${BAD}FAIL${NORMAL}"
