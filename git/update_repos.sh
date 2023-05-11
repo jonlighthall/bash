@@ -88,7 +88,7 @@ do
 	    # pull
 	    echo "pulling..."
 #	    script -q --return /dev/null -c "git pull -4 --all --tags --prune" > pull.log
-	    script -qef /dev/null -c "git pull -4 --all --tags --prune" | sed 's/$//g' | sed 's//+++xxx/g' | sed 's/\x1B\[K/^^^\x1B\[K/g' | sed "s/^/---/" >&1
+	    script -qef /dev/null -c "git pull -4 --all --tags --prune" | sed 's/$//g' | sed 's//+++\nxxx/g' | sed 's/\x1B\[K/^^^\x1B\[K/g' | sed "s/^/---/" >&1
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${TAB}${BAD}FAIL${NORMAL}"
@@ -105,7 +105,7 @@ do
 	    # push
 	    echo "pushing... " 
 #	    script -q --return /dev/null -c "git push -4 --all" > push.log
-	    script -qef /dev/null -c "git push -4 --all" | sed 's/$//g' | sed 's//+++xxx/g' | sed 's/\x1B\[K/^^^\x1B\[K/g' | sed "s/^/---/" >&1
+	    script -qef /dev/null -c "git push -4 --all" | sed 's/$//g' | sed 's//+++\nxxx/g' | sed 's/\x1B\[K/^^^\x1B\[K/g' | sed "s/^/---/" >&1
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${TAB}${BAD}FAIL${NORMAL}"
