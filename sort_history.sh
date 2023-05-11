@@ -106,62 +106,77 @@ done
 # set output file name
 hist_out=${hist_ref}_merge
 list_del+="${hist_out} "
-echo "${TAB}output file name is ${hist_out}"
+echo "output file name is ${hist_out}"
 
 # create history file
+echo -n "${TAB}concatonate files... "
 cat ${list_out} > ${hist_out}
+echo "done"
 
 # clean up whitespace
-echo "${TAB}${TAB}delete trailing whitespaces..."
+echo -n "${TAB}delete trailing whitespaces... "
 sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${hist_out}
+echo "done"
 
 # find and mark timestamp lines
 gen_marker
 TS_MARKER=${marker}
-echo "${TAB}mark timestamp lines..."
+echo -n "${TAB}mark timestamp lines... "
 sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_out}
+echo "done"
 
 # remove marks from timestamp lines with no associated commands
-echo "${TAB}un-mark childless timestamp lines..."
+echo -n "${TAB}un-mark childless timestamp lines... "
 sed -i "/${TS_MARKER}/{N; /${TS_MARKER}\n#[0-9]\{10\}/{s/${TS_MARKER}\n#/\n#/}};P;D" ${hist_out}
+echo "done"
 
 # merge commands with timestamps
-echo "${TAB}merge commands with timestamp lines..."
+echo -n "${TAB}merge commands with timestamp lines... "
 sed -i "/${TS_MARKER}/{N; s/${TS_MARKER}\n/${TS_MARKER}/};P;D" ${hist_out}
+echo "done"
 
 # mark orphaned lines
 gen_marker
 OR_MARKER=${marker}
-echo "${TAB}mark orphaned lines..."
+echo -n "${TAB}mark orphaned lines... "
 sed -i "s/^[^#]/${OR_MARKER}&/" ${hist_out}
+echo "done"
 
 # merge commands with timestamps
-echo "${TAB}merge orphaned lines..."
+echo -n "${TAB}merge orphaned lines... "
 sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_out}
+echo "done"
 
-echo "${TAB}login..."
+echo -n "${TAB}mark login lines... "
 sed -i "s/ LOGIN/~LOGIN/;s/ LOGOUT/ZLOGOUT/" ${hist_out}
+echo "done"
 
 # sort history
-echo "${TAB}sorting lines..."
+echo -n "${TAB}sorting lines... "
 sort -u ${hist_out} -o ${hist_out}
-echo "${TAB}login..."
+echo "done"
+
+echo -n "${TAB}unmark login lines... "
 sed -i "s/~LOGIN/ LOGIN/;s/ZLOGOUT/ LOGOUT/" ${hist_out}
+echo "done"
 
 # unmerge commands
-echo "${TAB}unmerge commands..."
+echo -n "${TAB}unmerge commands... "
 sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_out}
+echo "done"
 
 # save markers
 echo "#$(date +'%s') SORT $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} (LC_ALL = ${LC_ALL})" >> ${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}
 
+echo "list del = ${list_del}"
+
 if [[ ! -z ${list_del} ]]; then
     echo "${TAB}removing merged files..."
     for file in ${list_del}
     do
-	rm -v $file{,~} 2>/dev/null
+	rm -vf $file{,~} 2>/dev/null | sed "s/^/${TAB}/"
     done
 fi
 
