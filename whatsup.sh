@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "   host:" $HOSTNAME
+echo "display: $DISPLAY"
 echo -n "     IP: ";hostname -I
 echo -n "     OS: "
 lsb_release -a 2>&1 | \grep "Description:" | sed -e 's/^Description:[\t]//'
