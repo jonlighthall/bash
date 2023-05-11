@@ -2,7 +2,21 @@
 The `filter-reo` scripts are preferred, but the `filter-branch` scripts are included for use on systems that do not have `filter-repo` installed.
 ### Settings
 Before running, check the individual scripts and confirm that the author emails are correct.
+Unlisted urls maybe saved in the file [`url.txt`](url.txt).
+To keep changes to `url.txt` unreported, the following command may be used
+```bash
+git update-index --assume-unchanged url.txt
+```
+to undo this action, use the following command
+```bash
+git update-index --no-assume-unchanged url.txt
+```
+
+
+
 The scripts can take inputs such as `--force` or `--prune-empty`
+
+
 ### Execution
 Fist, make sure your local repository is up to date
 ```
