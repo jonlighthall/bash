@@ -86,27 +86,27 @@ do
 	    fi
 
 	    # pull
-	    echo "pulling..."
+	    echo "pulling... \x1B[s"
 	    script -qef /dev/null -c "git pull -4 --all --tags --prune" | sed 's/$//g' | sed 's//${TAB}/g' | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${TAB}${BAD}FAIL${NORMAL}"
+		echo -e "\x1B[u${BAD}FAIL${NORMAL}\x1B[E"
 		echo "${TAB}pull return value = $RETVAL"
 		pull_fail+="$repo "
 	    else
-		echo -e "${TAB}${GOOD}OK${NORMAL}"
+		echo -e "\x1B[u${GOOD}OK${NORMAL}\x1B[E"
 	    fi
 
 	    # push
-	    echo "pushing... " 
+	    echo -e "pushing... \x1B[s" 
 	    script -qef /dev/null -c "git push -4 --all" | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${TAB}${BAD}FAIL${NORMAL}"
+		echo -e "\x1B[u${BAD}FAIL${NORMAL}\x1B[E"
 		echo "${TAB}push return value = $RETVAL"
 		push_fail+="$repo "
 	    else
-		echo -e "${TAB}${GOOD}OK${NORMAL}"
+		echo -e "\x1B[u${GOOD}OK${NORMAL}\x1B[E"
 	    fi
 
 	    # check for modified files
