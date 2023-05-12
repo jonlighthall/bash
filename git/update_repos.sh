@@ -3,6 +3,11 @@
 # update_repos.sh - push and pull a specified list of git repositories and print summaries
 #
 # JCL Apr 2022
+
+# clear screen at astart
+echo -e "\x1B[H\x1B[2J";
+
+# print source at start
 echo "${0##*/}"
 
 fpretty=${HOME}/utils/bash/.bashrc_pretty
