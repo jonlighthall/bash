@@ -86,7 +86,7 @@ do
 	    fi
 
 	    # pull
-	    echo "pulling... \x1B[s"
+	    echo -e "pulling... \x1B[s"
 	    script -qef /dev/null -c "git pull -4 --all --tags --prune" | sed 's/$//g' | sed 's//${TAB}/g' | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
