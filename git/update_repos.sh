@@ -70,7 +70,7 @@ do
 	git rev-parse --is-inside-work-tree &>/dev/null
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
-	    echo -e "${GOOD}OK${NORMAL}"
+	    echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
 	    # add remotes to list
 	    git remote -v | awk -F " " '{print $2}' | uniq >> ${list_remote}
 	    # check against argument
@@ -94,7 +94,7 @@ do
 		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 		pull_fail+="$repo "
 	    else
-		echo -e "${GOOD}OK${NORMAL}"
+		echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
 	    fi
 	    echo -en "\x1B[E"
 
@@ -107,7 +107,7 @@ do
 		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 		push_fail+="$repo "
 	    else
-		echo -e "${GOOD}OK${NORMAL}"
+		echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
 	    fi
 	    echo -en "\x1B[E"
 
@@ -120,8 +120,7 @@ do
 	    fi
 
 	else
-	    echo -e "${BAD}FAIL${NORMAL}"
-	    echo "${TAB}rev-parse return value = $RETVAL"
+	    echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 	    echo "${TAB}$repo not a Git repository"
 	    loc_fail+="$repo "
 	fi
