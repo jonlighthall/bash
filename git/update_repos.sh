@@ -96,7 +96,7 @@ do
 	    else
 		echo -e "${GOOD}OK${NORMAL}"
 	    fi
-	    echo -e "\x1B[E"
+	    echo -en "\x1B[E"
 
 	    # push
 	    echo -e "pushing... \x1B[s" 
@@ -109,7 +109,7 @@ do
 	    else
 		echo -e "${GOOD}OK${NORMAL}"
 	    fi
-	    echo -e "\x1B[E"
+	    echo -en "\x1B[E"
 
 	    # check for modified files
 	    if [[ ! -z $(git diff --name-only --diff-filter=M) ]]; then
