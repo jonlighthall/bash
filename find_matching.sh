@@ -37,13 +37,12 @@ else
 
     # set file names
     file_in=$(readlink -f $1)
-    echo "$1"
-    echo "${file_in}"
-
+    echo "argument 1: $1"
+    echo "input file: ${file_in}"
 
     # set default output file name to match input
     dir1=$(dirname $file_in)
-    echo "dir = $dir1"
+    echo "input dir = $dir1"
     fname1=$(basename $file_in)
     echo "input file = $fname1"
     base="${fname1%.*}"
@@ -100,7 +99,11 @@ else
 	exit 1
     fi
 #    exit 0
-    nprint=$((j/10))
+    if [ $k -lt 10 ]; then
+	nprint=1
+    else
+	nprint=$((j/10))
+    fi
     echo "printing every $nprint lines"
     while read line; do
         fname=$line
