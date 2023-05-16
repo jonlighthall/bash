@@ -86,6 +86,7 @@ else
     j=$(cat ${file_in} | wc -l)
     echo " input file ${file_in} has $j entries"
 
+    # check for search directory
     if [ $# -ge 2 ]; then
 	search_dir=$(readlink -f $2)
     else
