@@ -92,10 +92,10 @@ do
 	    script -qef /dev/null -c "git pull -4 --all --tags --prune" | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${TAB}${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 		pull_fail+="$repo "
 	    else
-		echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${TAB}${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
 	    fi
 
 	    # push
@@ -103,10 +103,10 @@ do
 	    script -qef /dev/null -c "git push -4 --all" | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${TAB}${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 		push_fail+="$repo "
 	    else
-		echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${TAB}${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
 	    fi
 
 	    # check for modified files
