@@ -170,13 +170,7 @@ echo "${TAB}${TAB}unsorted:"
 echo $MARKERS | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
 echo "${TAB}${TAB}sorted:"
 echo $MARKERS | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}/"
-
-#exit 0
-
 sed -i "s/ LOGIN/${LI_MARKER}LOGIN/;s/ LOGOUT/${LO_MARKER}LOGOUT/" ${hist_out}
-echo "done"
-
-#read -n 1 -s -r -p "Press any key to continue"
 
 # sort history
 echo -n "${TAB}sorting lines... "
