@@ -5,7 +5,6 @@
 #
 # JCL Apr 2023
 
-# set sort order (desired results with UTF-8 binary sort order)
 set -e
 # print source name at start
 echo -n "${TAB}running $BASH_SOURCE"
@@ -16,6 +15,7 @@ else
     echo " -> $src_name"
 fi
 
+# set sort order (desired results with UTF-8 binary sort order)
 #LC_ALL=en_US.UTF-8
 LC_ALL=C
 
@@ -110,7 +110,7 @@ list_del+="${hist_out} "
 echo "output file name is ${hist_out}"
 
 # create history file
-echo -n "${TAB}concatonate files... "
+echo -n "${TAB}concatenate files... "
 cat ${list_out} > ${hist_out}
 echo "done"
 
