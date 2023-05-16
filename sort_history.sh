@@ -166,10 +166,10 @@ done
 echo "${TAB}${TAB}markers = $LI_MARKER, $LO_MARKER"
 
 MARKERS=$"$TS_MARKER $OR_MARKER $LI_MARKER $LO_MARKER"
-echo "unsorted:"
-echo $MARKERS | xargs -n1
-echo "sorted:"
-echo $MARKERS | xargs -n1 | sort -u
+echo "${TAB}${TAB}unsorted:"
+echo $MARKERS | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
+echo "${TAB}${TAB}sorted:"
+echo $MARKERS | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}/"
 
 #exit 0
 
@@ -214,8 +214,6 @@ if command -v sec2elap &>/dev/null; then
 else
     echo "elapsed time is ${SECONDS} sec"
 fi
-
-
 
 echo -e "\nto compare changes"
 echo "${TAB}en ${hist_ref} ${hist_bak}"
