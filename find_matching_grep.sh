@@ -8,7 +8,7 @@
 #
 # First argument is the list file of patterns
 #
-# Second argument search directory or file
+# Second argument is the search directory or file
 #
 #
 # Use example:
@@ -37,13 +37,12 @@ else
 
     # set file names
     file_in=$(readlink -f $1)
-    echo "$1"
-    echo "${file_in}"
-
+    echo "argument 1: $1"
+    echo "input file: ${file_in}"
 
     # set default output file name to match input
     dir1=$(dirname $file_in)
-    echo "dir = $dir1"
+    echo "input dir = $dir1"
     fname1=$(basename $file_in)
     echo "input file = $fname1"
     base="${fname1%.*}"
@@ -87,26 +86,46 @@ else
     j=$(cat ${file_in} | wc -l)
     echo " input file ${file_in} has $j entries"
 
+    # check for search file
+    echo "$2 is a... "
+    if [ -f $2 ]; then
+	    # otherwise write match to file
+	echo "file"
+    else
+	echo -n "not a file, but "
+	if [ -d $2 ]; then
+	    echo "a directory"
+
+	    if [ $# -ge 2 ]; then
+		search_dir=$(readlink -f $2)
+	    else
+		search_dir=$(readlink -f $PWD)
+	    fi
+	    echo -n "search directory ${search_dir}... "
+	    if [ -d $search_dir ];then
+		echo "OK"
+	    else
+		echo "not found"
+		exit 1
+	    fi
+
+	    echo "done"
+	else
+	    echo "something else"
+	    exit 1
+	fi
+    fi
+
+
+
+    exit 0
+
     while read line; do
         fname=$line
         ((k++))
 	echo -n "$k looking for ${fname}... "
 
-	echo "$2 is a... "
-	if [ -f $2 ]; then
-	    # otherwise write match to file
-	    echo "file"
-	else
-	    echo -n "not a file, but "
-	    if [ -d $2 ]; then
-		echo "a directory"
-		find ./ -type f -name *${fname}* >> ${file_out}
-		echo "done"
-	    else
-		echo "something else"
-		exit 1
-	    fi
-	fi
+
     done < $file_in
     echo
     echo $k "file names checked"
