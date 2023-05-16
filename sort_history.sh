@@ -153,6 +153,7 @@ echo -n "${TAB}merge orphaned lines... "
 sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_out}
 echo "done"
 
+# mark log in/out lines
 echo "${TAB}mark login lines... "
 N=${#TS_MARKER}
 echo "${TAB}${TAB}time stamp marker is $N long"
@@ -164,7 +165,6 @@ do
     LO_MARKER+="Z"
 done
 echo "${TAB}${TAB}markers = $LI_MARKER, $LO_MARKER"
-
 MARKERS=$"$TS_MARKER $OR_MARKER $LI_MARKER $LO_MARKER"
 echo "${TAB}${TAB}unsorted:"
 echo $MARKERS | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
