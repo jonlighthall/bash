@@ -88,25 +88,33 @@ do
 	    fi
 
 	    # pull
-	    echo "pulling..."
-	    script -qef /dev/null -c "git pull -4 --all --tags --prune" | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
+	    echo -n "pulling... "
+	    script -qef /dev/null -c "git pull -4 --all --tags --prune" > pull.log
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${TAB}${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 		pull_fail+="$repo "
 	    else
-		echo -e "${TAB}${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
+	    fi
+	    if [ -f pull.log ]; then
+		cat pull.log | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/"
+		rm pull.log
 	    fi
 
 	    # push
-	    echo "pushing... " 
-	    script -qef /dev/null -c "git push -4 --all" | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
+	    echo -n "pushing... "
+	    script -qef /dev/null -c "git push -4 --all" > push.log
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${TAB}${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 		push_fail+="$repo "
 	    else
-		echo -e "${TAB}${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
+	    fi
+	    if [ -f push.log ]; then
+		cat push.log | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
+		rm push.log
 	    fi
 
 	    # check for modified files
@@ -116,7 +124,6 @@ do
 		echo -en "${NORMAL}"
 		mods+="$repo "
 	    fi
-
 	else
 	    echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 	    echo "${TAB}$repo not a Git repository"
