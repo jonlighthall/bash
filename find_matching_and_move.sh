@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # find_matching.sh - Reads an input list of files name patterns. Any files matching the
-# individual patterns are saved to a new list of file names. handling is included to backup any
+# individual patterns are saved to a new list of file names. Handling is included to backup any
 # duplicated input/output file names.
 #
 # Adapted from find_missing_and_empty.sh
@@ -85,6 +85,9 @@ else
     fi
 
     # read input file
+    j=$(cat ${file_in} | wc -l)
+    echo " input file ${file_in} has $j entries"
+
     while read line; do
         fname=$line
         ((k++))
@@ -110,12 +113,14 @@ else
 	    find ./ -type f -name *${fname}* >> ${file_out}
 	    echo "done"
 	fi
-
     done < $file_in
     echo
     echo $k "file names checked"
     if [ $# -lt 3 ]; then
-	echo $(cat ${file_out} | wc -l) "files found"
+	echo "$((j-k)) files not searched for"
+	l=$(cat ${file_out} | wc -l)
+	echo "$l files found"
+	echo "$((j-l)) files not found"
     fi
 fi
 # print time at exit
