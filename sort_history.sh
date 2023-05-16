@@ -16,7 +16,8 @@ else
     echo " -> $src_name"
 fi
 
-LC_ALL=en_US.UTF-8
+#LC_ALL=en_US.UTF-8
+LC_ALL=C
 
 TAB="   "
 
@@ -135,6 +136,11 @@ echo -n "${TAB}merge commands with timestamp lines... "
 sed -i "/${TS_MARKER}/{N; s/${TS_MARKER}\n/${TS_MARKER}/};P;D" ${hist_out}
 echo "done"
 
+# find orphaned timestamps
+echo -n "${TAB}remove orphaned timestamp lines... "
+sed -i '/^#[0-9]\{10\}$/d' ${hist_out}
+echo "done"
+
 # mark orphaned lines
 gen_marker
 OR_MARKER=${marker}
@@ -147,9 +153,30 @@ echo -n "${TAB}merge orphaned lines... "
 sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_out}
 echo "done"
 
-echo -n "${TAB}mark login lines... "
-sed -i "s/ LOGIN/~LOGIN/;s/ LOGOUT/ZLOGOUT/" ${hist_out}
+echo "${TAB}mark login lines... "
+N=${#TS_MARKER}
+echo "${TAB}${TAB}time stamp marker is $N long"
+LI_MARKER="~"
+LO_MARKER="Z"
+for ((i=1;i<$N;i++))
+do
+    LI_MARKER+="~"
+    LO_MARKER+="Z"
+done
+echo "${TAB}${TAB}markers = $LI_MARKER, $LO_MARKER"
+
+MARKERS=$"$TS_MARKER $OR_MARKER $LI_MARKER $LO_MARKER"
+echo "unsorted:"
+echo $MARKERS | xargs -n1
+echo "sorted:"
+echo $MARKERS | xargs -n1 | sort -u
+
+#exit 0
+
+sed -i "s/ LOGIN/${LI_MARKER}LOGIN/;s/ LOGOUT/${LO_MARKER}LOGOUT/" ${hist_out}
 echo "done"
+
+#read -n 1 -s -r -p "Press any key to continue"
 
 # sort history
 echo -n "${TAB}sorting lines... "
@@ -157,7 +184,7 @@ sort -u ${hist_out} -o ${hist_out}
 echo "done"
 
 echo -n "${TAB}unmark login lines... "
-sed -i "s/~LOGIN/ LOGIN/;s/ZLOGOUT/ LOGOUT/" ${hist_out}
+sed -i "s/${LI_MARKER}LOGIN/ LOGIN/;s/${LO_MARKER}LOGOUT/ LOGOUT/" ${hist_out}
 echo "done"
 
 # unmerge commands
@@ -188,4 +215,7 @@ else
     echo "elapsed time is ${SECONDS} sec"
 fi
 
-echo "en ${hist_ref} ${hist_bak}"
+
+
+echo -e "\nto compare changes"
+echo "${TAB}en ${hist_ref} ${hist_bak}"
