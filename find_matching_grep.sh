@@ -1,25 +1,24 @@
 #!/bin/bash
 #
-# find_matching.sh - Reads an input list of files name patterns. Any files matching the
+# find_matching.sh - Reads an input list of files name regex patterns. Any files matching the
 # individual patterns are saved to a new list of file names. Handling is included to backup any
 # duplicated input/output file names.
 #
 # Adapted from find_missing_and_empty.sh
 #
-# First argument is the list file of patterns
+# The first argument is the list file of patterns.
 #
-# Second argument is the search directory or file
-#
+# Second argument is the list of files to be searched.
 #
 # Use example:
-# find_matching list_of_patterns.txt output.txt
+# find_matching list_of_patterns.txt list_of_files.
 #
-# the command will locate the files matching the pattern and write the matches to file. For
-# example below, the search pattern (first line) matches the file name (second line) found by
-# running the command.
-#
-# file_name_???
-# dir/new_file_name123.bin
+# The command will locate the files matching the pattern and write the matches to file.
+
+# For example, if you want to locate a file matching the pattern 'file_name_???,' save that
+# pattern in a file. Call the command with the pattern file as the first argument and the search
+# location as the second argument. If the file is found, the resulting output file will have
+# content such as 'dir/new_file_name123.bin'
 #
 #JCL Apr 2023
 
