@@ -147,7 +147,7 @@ if [ -z "$(git diff)" ]; then
 else
     git status
     echo "stashing differences..."
-    git stash
+    git stash -u
     b_stash=true
 fi
 
