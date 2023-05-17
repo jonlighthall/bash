@@ -89,21 +89,12 @@ do
 		git branch --set-upstream-to=${name_remote}/${branch} ${branch}
 	    fi
 
-	    # determine number commits local branch is behind remote
-	    if [ -z $(git rev-list --left-only ${name_remote}/${branch}...${branch}) ]; then
-		echo "no commits to pull"
-	    else
-		echo "pulling commits"
-		git pull ${name_remote} ${branch}
-	    fi
+	    echo "pulling commits"
+	    git pull ${name_remote} ${branch}
 
 	    # determine number commits local branch is ahead of remote
-	    if [ -z $(git rev-list --right-only ${name_remote}/${branch}...${branch}) ]; then
-		echo "no commits to push"
-	    else
-		echo "pushing commits"
-		git push ${name_remote}
-	    fi
+	    echo "pushing commits"
+	    git push ${name_remote}
 
 	    # determine difference between local and remote
 	    if [ -z "$(git diff ${branch} ${name_remote}/${branch})" ]; then
