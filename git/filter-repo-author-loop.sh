@@ -36,6 +36,7 @@ branch_list=$(git branch -va | sed 's/^*/ /' |  awk '{print $1}' | sed 's|remote
 echo "list of branches: "
 echo "${branch_list}" | sed 's/^/   /'
 
+# stash local changes
 if [ -z "$(git diff)" ]; then
     echo "no differences to stash"
     b_stash=false
@@ -48,7 +49,7 @@ fi
 
 for branch in $branch_list
 do
-    bar 56 "$(git checkout $branch 2>&1)" 
+    bar 56 "$(git checkout $branch 2>&1)"
     git fetch ${name_remote} ${branch}
     git --no-pager diff ${branch} ${name_remote}/${branch}
 
@@ -117,7 +118,7 @@ do
 		    echo -e "${BAD}no not match${NORMAL}"
 		    echo $hash_local
 		    echo $hash_remote
-		    
+
 		    echo "reseting HEAD to ${name_remote}/${branch}..."
 		    git reset ${name_remote}/${branch}
 		fi
@@ -132,7 +133,7 @@ do
 done
 echo "done"
 echo "switching back to ${branch_local}..."
-    bar 56 "$(git checkout ${branch_local} 2>&1)" 
+bar 56 "$(git checkout ${branch_local} 2>&1)"
 if $b_stash; then
     git stash pop
 fi
