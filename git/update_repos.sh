@@ -3,6 +3,8 @@
 # update_repos.sh - push and pull a specified list of git repositories and print summaries
 #
 # JCL Apr 2022
+
+# print source at start
 echo "${0##*/}"
 
 fpretty=${HOME}/utils/bash/.bashrc_pretty
@@ -70,7 +72,7 @@ do
 	git rev-parse --is-inside-work-tree &>/dev/null
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
-	    echo -e "${GOOD}OK${NORMAL}"
+	    echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
 	    # add remotes to list
 	    git remote -v | awk -F " " '{print $2}' | uniq >> ${list_remote}
 	    # check against argument
@@ -86,18 +88,17 @@ do
 	    fi
 
 	    # pull
-	    echo -n "pulling..."
+	    echo -n "pulling... "
 	    script -qf /dev/null -c "git pull --all --tags --prune" > pull.log
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${BAD}FAIL${NORMAL}"
-		echo "${TAB}pull return value = $RETVAL"
+		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 		pull_fail+="$repo "
 	    else
-		echo -e "${GOOD}OK${NORMAL}"
+		echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
 	    fi
-	    cat pull.log | sed 's/^M$/\n/g' | sed 's/^.*^M//g' | sed 's/\x1B\[K//g' | sed '/^$/d' | sed "s/^/${TAB}/"
 	    if [ -f pull.log ]; then
+		cat pull.log | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/"
 		rm pull.log
 	    fi
 
@@ -106,14 +107,13 @@ do
 	    script -qf /dev/null -c "git push --all" > push.log
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${BAD}FAIL${NORMAL}"
-		echo "${TAB}push return value = $RETVAL"
+		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 		push_fail+="$repo "
 	    else
-		echo -e "${GOOD}OK${NORMAL}"
+		echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
 	    fi
-	    cat push.log | sed 's/^M$/\n/g' | sed 's/^.*^M//g' | sed 's/\x1B\[K//g' | sed '/^$/d' | sed "s/^/${TAB}/"
 	    if [ -f push.log ]; then
+		cat push.log | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
 		rm push.log
 	    fi
 
@@ -125,8 +125,7 @@ do
 		mods+="$repo "
 	    fi
 	else
-	    echo -e "${BAD}FAIL${NORMAL}"
-	    echo "${TAB}rev-parse return value = $RETVAL"
+	    echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
 	    echo "${TAB}$repo not a Git repository"
 	    loc_fail+="$repo "
 	fi
