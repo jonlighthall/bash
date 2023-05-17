@@ -1,4 +1,5 @@
 #!/bin/bash
+clear -x
 echo -en "\x1B[1;34mhere\x1B[0m"
 echo -en "\E[6n"
 read -sdR CURPOS
