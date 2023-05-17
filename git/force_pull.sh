@@ -4,6 +4,7 @@
 
 # JCL Apr 2023
 
+set -e
 # print source name at start
 echo -n "${TAB}running $BASH_SOURCE"
 src_name=$(readlink -f $BASH_SOURCE)
@@ -18,8 +19,6 @@ fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
 fi
-
-set -e
 
 # parse remote
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
@@ -142,8 +141,15 @@ else
 fi
 
 # stash local changes
-echo "stashing changes..."
-git stash
+if [ -z "$(git diff)" ]; then
+    echo "no differences to stash"
+    b_stash=false
+else
+    git status
+    echo "stashing differences..."
+    git stash
+    b_stash=true
+fi
 
 # initiate HEAD
 echo "resetting HEAD to $hash_remote..."
@@ -177,15 +183,20 @@ fi
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo "there are $N_stash entries in stash"
-    echo "applying stash..."
-    git stash pop
-    echo -n "stash made... "
-    if [ -z $(git diff) ]; then
-	echo "no changes"
-    else
-	echo "changes!"
-	git reset HEAD
-	echo "do something!"
+    if $b_stash; then
+	echo "applying stash..."
+	git stash pop
+	echo -n "stash made... "
+	if [ -z $(git diff) ]; then
+	    echo "no changes"
+	else
+	    echo "changes!"
+	    git reset HEAD
+	    echo "do something!"
+	fi
+	echo "... but none are from this operation"
     fi
+else
+    echo "no stash entries"
 fi
 echo "you're done!"
