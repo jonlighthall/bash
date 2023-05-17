@@ -87,7 +87,7 @@ do
 
 	    # pull
 	    echo -n "pulling..."
-	    script -q --return /dev/null -c "git pull -4 --all --tags --prune" > pull.log
+	    script -qf /dev/null -c "git pull --all --tags --prune" > pull.log
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL}"
@@ -103,7 +103,7 @@ do
 
 	    # push
 	    echo -n "pushing... "
-	    script -q --return /dev/null -c "git push -4 --all" > push.log
+	    script -qf /dev/null -c "git push --all" > push.log
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL}"
