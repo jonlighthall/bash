@@ -11,7 +11,7 @@
 # Second argument is the list of files to be searched.
 #
 # Use example:
-# find_matching list_of_patterns.txt list_of_files.
+# find_matching list_of_patterns.txt list_of_files.txt
 #
 # The command will locate the files matching the pattern and write the matches to file.
 
@@ -85,41 +85,43 @@ else
     j=$(cat ${file_in} | wc -l)
     echo " input file ${file_in} has $j entries"
 
-    # check for search file
-    echo "$2 is a... "
-    if [ -f $2 ]; then
-	    # otherwise write match to file
-	echo "file"
+    # parse arguments
+    if [ $# -lt 2 ]; then
+	echo "no file to search specified"
+	exit 1
     else
-	echo -n "not a file, but "
-	if [ -d $2 ]; then
-	    echo "a directory"
-
-	    if [ $# -ge 2 ]; then
-		search_dir=$(readlink -f $2)
-	    else
-		search_dir=$(readlink -f $PWD)
-	    fi
-	    echo -n "search directory ${search_dir}... "
-	    if [ -d $search_dir ];then
-		echo "OK"
-	    else
-		echo "not found"
-		exit 1
-	    fi
-
-	    echo "done"
+	echo "search file $2... "
+	# check for search file
+	if [ -f $2 ]; then
+	    echo "OK"
 	else
-	    echo "something else"
+	    echo "not found"
 	    exit 1
 	fi
     fi
 
+    # set print frequency
+    if [ $k -lt 10 ]; then
+	nprint=1
+    else
+	nprint=$((j/10))
+    fi
+    echo "printing every $nprint lines"
+
     while read line; do
         fname=$line
         ((k++))
-	echo -ne "\n$k/$j looking for ${fname}... "
+	if [ $(( k % $nprint)) -eq 0 ]; then
+	    echo -ne "\n$k/$j looking for ${fname}... "
+	else
+	    echo -n ","
+	fi
 	grep "${fname}" $2 >> ${file_out}
+	if [ $(( k % $nprint)) -eq 0 ]; then
+	    echo "done"
+	else
+	    echo -n "."
+	fi
     done < $file_in
     echo
     echo $k "file names checked"
@@ -127,7 +129,6 @@ else
     l=$(cat ${file_out} | wc -l)
     echo "$l files found"
     echo "$((j-l)) files not found"
-
 fi
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
