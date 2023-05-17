@@ -6,13 +6,13 @@
 #
 # Adapted from find_missing_and_empty.sh
 #
-# First argument is the list file of patterns
+# The first argument is the list file of patterns.
 #
 # Second argument is the search directory or file
 #
 #
 # Use example:
-# find_matching list_of_patterns.txt output.txt
+# find_matching list_of_patterns.txt search_dir
 #
 # the command will locate the files matching the pattern and write the matches to file. For
 # example below, the search pattern (first line) matches the file name (second line) found by
@@ -45,19 +45,19 @@ else
     echo "input dir = $dir1"
     fname1=$(basename $file_in)
     echo "input file = $fname1"
-    base="${fname1%.*}"
-    echo "base name = $base"
+    base1="${fname1%.*}"
+    echo "base name = $base1"
     if [[ $fname1 == *"."* ]]; then
 	echo "fname contains dots"
-	ext1="${fname1##*.}"
+	ext="${fname1##*.}"
     else
-	echo "fname contains not dots, using default"
-	ext1="txt"
+	echo "fname does not contains dots, using default"
+	ext="txt"
     fi
-    file_spec="${dir1}/${base}_found.${ext1}"
+    base="${base1}_found"
 
+    file_spec="${dir1}/${base}.${ext}"
     echo "file specification = $file_spec"
-
 
     file_out=${file_spec}
     echo $file_out
@@ -86,12 +86,15 @@ else
     j=$(cat ${file_in} | wc -l)
     echo " input file ${file_in} has $j entries"
 
-    # check for search directory
-    if [ $# -ge 2 ]; then
-	search_dir=$(readlink -f $2)
-    else
+    # parse arguments
+    if [ $# -lt 2 ]; then
+	echo "no search location given"
+	echo "defaulting to PWD"
 	search_dir=$(readlink -f $PWD)
+    else
+	search_dir=$(readlink -f $2)
     fi
+    # check for search directory
     echo -n "search directory ${search_dir}... "
     if [ -d $search_dir ];then
 	echo "OK"
@@ -99,13 +102,15 @@ else
 	echo "not found"
 	exit 1
     fi
-#    exit 0
+
+    # set print frequency
     if [ $k -lt 10 ]; then
 	nprint=1
     else
 	nprint=$((j/10))
     fi
     echo "printing every $nprint lines"
+
     while read line; do
         fname=$line
         ((k++))
@@ -115,7 +120,6 @@ else
 	    echo -n ","
 	fi
 	find $search_dir -type f -name *${fname}* >> ${file_out}
-#	echo "$?"
 	if [ $(( k % $nprint)) -eq 0 ]; then
 	    echo "done"
 	else
@@ -128,7 +132,6 @@ else
     l=$(cat ${file_out} | wc -l)
     echo "$l files found"
     echo "$((j-l)) files not found"
-
 fi
 # print time at exit
 echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
