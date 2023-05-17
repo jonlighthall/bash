@@ -45,19 +45,19 @@ else
     echo "input dir = $dir1"
     fname1=$(basename $file_in)
     echo "input file = $fname1"
-    base="${fname1%.*}"
-    echo "base name = $base"
+    base1="${fname1%.*}"
+    echo "base name = $base1"
     if [[ $fname1 == *"."* ]]; then
 	echo "fname contains dots"
-	ext1="${fname1##*.}"
+	ext="${fname1##*.}"
     else
-	echo "fname contains not dots, using default"
-	ext1="txt"
+	echo "fname does not contains dots, using default"
+	ext="txt"
     fi
-    file_spec="${dir1}/${base}_found.${ext1}"
+    base="${base1}_found"
 
+    file_spec="${dir1}/${base}.${ext}"
     echo "file specification = $file_spec"
-
 
     file_out=${file_spec}
     echo $file_out
@@ -116,16 +116,11 @@ else
 	fi
     fi
 
-
-
-    exit 0
-
     while read line; do
         fname=$line
         ((k++))
-	echo -n "$k looking for ${fname}... "
-
-
+	echo -ne "\n$k/$j looking for ${fname}... "
+	grep "${fname}" $2 >> ${file_out}
     done < $file_in
     echo
     echo $k "file names checked"
