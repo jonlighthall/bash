@@ -3,11 +3,10 @@
 # print source name at start
 echo -n "${TAB}running $BASH_SOURCE"
 src_name=$(readlink -f $BASH_SOURCE)
-if [ "$BASH_SOURCE" = "$src_name" ]; then
-    echo
-else
-    echo " -> $src_name"
+if [ ! "$BASH_SOURCE" = "$src_name" ]; then
+    echo -n " -> $src_name"
 fi
+echo "..."
 
 # source formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
@@ -17,10 +16,10 @@ fi
 
 # set source and target directories
 source_dir=$(dirname "$src_name")
-user_bin=$HOME/bin
+target_dir=$HOME/bin
 
 # check directories
-echo "source directory $source_dir..."
+echo -n "source directory ${source_dir}... "
 if [ -d "$source_dir" ]; then
     echo "exists"
 else
@@ -28,77 +27,82 @@ else
     exit 1
 fi
 
-echo -n "target directory $user_bin... "
-if [ -d $user_bin ]; then
+echo -n "target directory ${target_dir}... "
+if [ -d $target_dir ]; then
     echo "exists"
 else
     echo "does not exist"
-    mkdir -pv $user_bin
+    mkdir -pv $target_dir
 fi
 
 bar 38 "------ Start Linking Repo Files-------"
 
-# list files to be linked
+# list of files to be linked
 ext=.sh
-for prog in \
+for my_link in \
     add_path \
-    bell \
-    clean_mac \
-    find_matching \
-    find_missing_and_empty \
-    fix_bad_extensions \
-    git/filter-repo-author \
-    git/force_pull \
-    git/gita \
-    git/undel_repo \
-    git/update_repos \
-    log \
-    ls_test \
-    rmbin \
-    sec2elap \
-    sort_history \
-    test_file \
-    unfix_bad_extensions \
-    untar \
-    update_packages \
-    whatsup \
-    xtest 
+	bell \
+	clean_mac \
+	find_matching \
+	find_missing_and_empty \
+	fix_bad_extensions \
+	git/filter-repo-author \
+	git/force_pull \
+	git/gita \
+	git/undel_repo \
+	git/update_repos \
+	log \
+	ls_test \
+	rmbin \
+	sec2elap \
+	sort_history \
+	test_file \
+	unfix_bad_extensions \
+	untar \
+	update_packages \
+	whatsup \
+	xtest
 
 do
-    target=${source_dir}/${prog}${ext}
-    sub_dir=$(dirname "$prog")
+    target=${source_dir}/${my_link}${ext}
+    sub_dir=$(dirname "$my_link")
     if [ ! $sub_dir = "." ]; then
-	prog=$(basename "$prog")
+	my_link=$(basename "$my_link")
     fi
-    link=${user_bin}/${prog}
+    link=${target_dir}/${my_link}
 
-    echo -n "program $target... "
+    echo -n "source file ${target}... "
     if [ -e "$target" ]; then
 	echo -n "exists and is "
 	if [ -x "$target" ]; then
 	    echo "executable"
-	    echo -n "${TAB}link $link... "
-	    # first, backup existing copy
-	    if [ -L $link ] || [ -f $link ] || [ -d $link ]; then
-		echo -n "exists and "
-		if [[ $target -ef $link ]]; then
-		    echo -e "${GOOD}already points to ${prog}${NORMAL}"
-		    echo -n "${TAB}"
-		    ls -lhG --color=auto $link
-		    echo "${TAB}skipping..."
+	echo -n "${TAB}link $link... "
+	# first, backup existing copy
+	if [ -L $link ] || [ -f $link ] || [ -d $link ]; then
+	    echo -n "exists and "
+	    if [[ $target -ef $link ]]; then
+                echo -e "${GOOD}already points to ${my_link}${NORMAL}"
+		echo -n "${TAB}"
+		ls -lhG --color=auto $link
+		echo "${TAB}skipping..."
+		continue
+	    else
+		if [ $(diff ${target} ${link} | wc -c) -eq 0 ]; then
+		    echo "have the same contents"
 		    continue
 		else
 		    echo -n "will be backed up..."
 		    mv -v $link ${link}_$(date +'%Y-%m-%d-t%H%M')
 		fi
-	    else
-		echo "does not exist"
 	    fi
-	    # then link
-	    echo -en "${TAB}${GRH}";hline 72;
-	    echo "${TAB}making link... "
-	    ln -sv $target $link | sed "s/^/${TAB}/"
-	    echo -ne "${TAB}";hline 72;echo -en "${NORMAL}"
+	else
+	    echo "does not exist"
+	fi
+        # then link
+	echo -en "${TAB}${GRH}";hline 72;
+	echo "${TAB}making link... "
+	ln -sv $target $link | sed "s/^/${TAB}/"
+	echo -ne "${TAB}";hline 72;echo -en "${NORMAL}"
         else
             echo -e "${BAD}not executable${NORMAL}"
         fi
@@ -108,4 +112,9 @@ do
 done
 bar 38 "--------- Done Making Links ----------"
 # print time at exit
-echo -e "\n$(date +"%R") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+echo -en "$(date +"%R") ${BASH_SOURCE##*/} "
+if command -v sec2elap &>/dev/null; then
+    echo "$(sec2elap $SECONDS)"
+else
+    echo "elapsed time is ${SECONDS} sec"
+fi
