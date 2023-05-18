@@ -61,18 +61,19 @@ while [ -z ${hash_local} ]; do
     subj_remote=$(git log ${tracking} --format=%s -n 1)
     time_remote=$(git log ${tracking} --format=%at -n 1)
     echo "${TAB}remote commit subject: $subj_remote"
+    echo "${TAB}remote commit time: $time_remote"
 
-    hash_local=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
-    hash_local_t=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
+    hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
+    hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
 
     echo "subject and time hashes..."
-    if [ "$hash_local" == "$hash_local_t" ]; then
+    if [ "$hash_local" == "$hash_local_s" ]; then
 	echo "match"
     else
 	echo "do not match"
-	echo "subj = $hash_local"
-	echo "time = $hash_local_t"
-	exit 1
+	echo "subj = $hash_local_s"
+	echo "time = $hash_local"
+#	exit 1
     fi
     echo -n "${TAB}corresponding local commit hash: "
     if [ ! -z ${hash_local} ]; then
