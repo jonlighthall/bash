@@ -57,6 +57,22 @@ if [ -f ${fname_private} ]; then
     done < ${fname_private}
 fi
 
+# project
+fname_project=${HOME}/${dir_script}bash/git/list_project_dir.txt
+if [ -f ${fname_project} ]; then
+    while IFS= read -r line
+    do
+	# evaluate each line to expand defined variable names
+	eval line2=$line
+	if [[ $line == $line2 ]]; then
+	    list+=" ${line}"
+	else
+	    list+=" ${line2}"
+	fi
+    done < ${fname_project}
+fi
+
+
 loc_fail=""
 pull_fail=""
 push_fail=""
