@@ -148,7 +148,16 @@ if [ -z "$(git diff)" ]; then
 else
     git status
     echo "stashing differences..."
-    git stash -u
+    ver=$(git --version | awk '{print $3}')
+    ver_maj=$(echo $ver | awk -F. '{print $1}')
+    ver_min=$(echo $ver | awk -F. '{print $2}')
+    ver_pat=$(echo $ver | awk -F. '{print $3}')
+
+    if [ $ver_maj -lt 2 ]; then
+	git stash -u
+    else
+	git stash
+    fi
     b_stash=true
 fi
 

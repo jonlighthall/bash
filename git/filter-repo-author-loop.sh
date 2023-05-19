@@ -89,20 +89,34 @@ do
 		git branch --set-upstream-to=${name_remote}/${branch} ${branch}
 	    fi
 
+	    ver=$(git --version | awk '{print $3}')
+	    ver_maj=$(echo $ver | awk -F. '{print $1}')
+	    ver_min=$(echo $ver | awk -F. '{print $2}')
+	    ver_pat=$(echo $ver | awk -F. '{print $3}')
+
 	    # determine number commits local branch is behind remote
+	    if [ $ver_maj -lt 2 ]; then
+		echo "pulling commits"
+		git pull ${name_remote} ${branch}
+	    else
 	    if [ -z $(git rev-list --left-only ${name_remote}/${branch}...${branch}) ]; then
 		echo "no commits to pull"
 	    else
 		echo "pulling commits"
 		git pull ${name_remote} ${branch}
 	    fi
+	    fi
 
 	    # determine number commits local branch is ahead of remote
+	    if [ $ver_maj -lt 2 ]; then
+		echo "pushing commits"
+		git push ${name_remote}
 	    if [ -z $(git rev-list --right-only ${name_remote}/${branch}...${branch}) ]; then
 		echo "no commits to push"
 	    else
 		echo "pushing commits"
 		git push ${name_remote}
+	    fi
 	    fi
 
 	    # determine difference between local and remote
