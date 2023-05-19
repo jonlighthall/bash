@@ -18,9 +18,9 @@ do
     RETVAL=$?
     echo -n "$fname "
     if [[ $RETVAL -eq 137 ]]; then
-	echo -e "${BAD}timed out${NORMAL}"
+	echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
     else
-	echo -e "${GOOD}OK${NORMAL}"
+	echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	test_file $fname
     fi
 done

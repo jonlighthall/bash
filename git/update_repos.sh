@@ -72,7 +72,7 @@ do
 	git rev-parse --is-inside-work-tree &>/dev/null
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
-	    echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
+	    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    # add remotes to list
 	    git remote -v | awk -F " " '{print $2}' | uniq >> ${list_remote}
 	    # check against argument
@@ -114,10 +114,10 @@ do
 	    fi
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		pull_fail+="$repo "
 	    else
-		echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    fi
 	    if [ -f pull.log ]; then
 		cat pull.log | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/"
@@ -141,10 +141,10 @@ do
 	    fi
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		push_fail+="$repo "
 	    else
-		echo -e "${GOOD}OK${NORMAL} (RETVAL = $RETVAL)"
+		echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    fi
 	    if [ -f push.log ]; then
 		cat push.log | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
@@ -159,7 +159,7 @@ do
 		mods+="$repo "
 	    fi
 	else
-	    echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
+	    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    echo "${TAB}$repo not a Git repository"
 	    loc_fail+="$repo "
 	fi
