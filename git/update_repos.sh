@@ -87,19 +87,30 @@ do
 		fi
 	    fi
 
-	    ver=$(script --version | sed 's/[^0-9\.]//g')
-	    ver_maj=$(echo $ver | awk -F. '{print $1}')
-	    ver_min=$(echo $ver | awk -F. '{print $2}')
-	    ver_pat=$(echo $ver | awk -F. '{print $3}')
+	    script_ver=$(script --version | sed 's/[^0-9\.]//g')
+	    script_ver_maj=$(echo $script_ver | awk -F. '{print $1}')
+	    script_ver_min=$(echo $script_ver | awk -F. '{print $2}')
+	    script_ver_pat=$(echo $script_ver | awk -F. '{print $3}')
 
-
+	    git_ver=$(git --version | awk '{print $3}')
+	    git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+	    git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+	    git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')	    
 	    
 	    # pull
 	    echo -n "pulling... "
-	    if [ $ver_min -lt 18 ]; then 
-		script -qf /dev/null -c "git pull -4 --all --tags --prune" > pull.log
+	    if [ $script_ver_min -lt 18 ]; then 
+		if [ $git_ver_maj -lt 2 ]; then
+		    script -qf /dev/null -c "git pull --all --tags --prune" > pull.log
+		else
+		    script -qf /dev/null -c "git pull -4 --all --tags --prune" > pull.log
+		fi
 	    else
-		script -qef /dev/null -c "git pull -4 --all --tags --prune" > pull.log
+		    if [ $git_ver_maj -lt 2 ]; then
+			script -qef /dev/null -c "git pull --all --tags --prune" > pull.log
+		    else
+			script -qef /dev/null -c "git pull -4 --all --tags --prune" > pull.log
+		    fi
 	    fi
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
@@ -115,11 +126,18 @@ do
 
 	    # push
 	    echo -n "pushing... "
-	    if [ $ver_min -lt 18 ]; then 
-		script -qf /dev/null -c "git push -4 --all" > push.log
+	    if [ $script_ver_min -lt 18 ]; then 
+		if [ $git_ver_maj -lt 2 ]; then
+		    script -qf /dev/null -c "git push --all" > push.log
+		else
+		    script -qf /dev/null -c "git push -4 --all" > push.log
+		fi
 	    else
-		script -qef /dev/null -c "git push -4 --all" > push.log		
-	    fi
+		if [ $git_ver_maj -lt 2 ]; then
+		    script -qef /dev/null -c "git push --all" > push.log		
+		else
+		    script -qef /dev/null -c "git push -4 --all" > push.log		
+		fi
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
