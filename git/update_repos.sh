@@ -87,9 +87,20 @@ do
 		fi
 	    fi
 
+	    ver=$(script --version | sed 's/[^0-9\.]//g')
+	    ver_maj=$(echo $ver | awk -F. '{print $1}')
+	    ver_min=$(echo $ver | awk -F. '{print $2}')
+	    ver_pat=$(echo $ver | awk -F. '{print $3}')
+
+
+	    
 	    # pull
 	    echo -n "pulling... "
-	    script -qef /dev/null -c "git pull -4 --all --tags --prune" > pull.log
+	    if [ $ver_min -lt 18 ]; then 
+		script -qf /dev/null -c "git pull -4 --all --tags --prune" > pull.log
+	    else
+		script -qef /dev/null -c "git pull -4 --all --tags --prune" > pull.log
+	    fi
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
@@ -104,7 +115,11 @@ do
 
 	    # push
 	    echo -n "pushing... "
-	    script -qef /dev/null -c "git push -4 --all" > push.log
+	    if [ $ver_min -lt 18 ]; then 
+		script -qf /dev/null -c "git push -4 --all" > push.log
+	    else
+		script -qef /dev/null -c "git push -4 --all" > push.log		
+	    fi
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} (RETVAL = $RETVAL)"
