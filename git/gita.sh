@@ -1,10 +1,10 @@
 #!/bin/bash
 TAB="     "
 echo "current author name:"
-git config --get-all user.name | uniq | sed "s/^/${TAB}/"
+git config --get user.name | uniq | sed "s/^/${TAB}/"
 echo
 echo "current author email:"
-git config --get-all user.email | uniq | sed "s/^/${TAB}/"
+git config --get user.email | uniq | sed "s/^/${TAB}/"
 echo
 if [ ! -z $(git rev-parse --is-inside-work-tree 2>/dev/null) ]; then
     echo "list of authors:"
