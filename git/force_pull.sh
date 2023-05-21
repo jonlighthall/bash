@@ -52,7 +52,7 @@ else
     echo "pulling from remote branch $branch_pull"
 fi
 
-# determine latest common local commit, based on commit message
+# determine latest common local commit, based on commit time
 tracking=${branch_pull}
 while [ -z ${hash_local} ]; do
     echo "pulling from ${tracking}"
