@@ -4,7 +4,7 @@ set -e
 echo -n "running $BASH_SOURCE"
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -n " -> $src_name"
+    echo "${TAB}     -> $src_name"
 fi
 echo " ..."
 
