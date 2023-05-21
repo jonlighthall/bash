@@ -1,11 +1,9 @@
 set -e
 # print source name at start
-echo "${TAB}running $BASH_SOURCE"
+echo "${TAB}running $BASH_SOURCE..."
 src_name=$(readlink -f $BASH_SOURCE)
-if [ "$BASH_SOURCE" = "$src_name" ]; then
-    echo
-else
-    echo -n " -> $src_name"
+if [ ! "$BASH_SOURCE" = "$src_name" ]; then
+    echo "${TAB}     -> $src_name"
 fi
 
 # source formatting

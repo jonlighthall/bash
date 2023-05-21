@@ -5,12 +5,11 @@
 # JCL Apr 2022
 
 # print source at start
-echo "${TAB}running $BASH_SOURCE"
+echo "${TAB}running $BASH_SOURCE..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -n " -> $src_name"
+    echo "${TAB}     -> $src_name"
 fi
-echo "..."
 
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
