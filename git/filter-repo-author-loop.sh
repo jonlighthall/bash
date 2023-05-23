@@ -58,7 +58,7 @@ do
     if [ $N -gt 1 ]; then
 	echo "${TAB}more than one author on remote branch ${name_remote}/${branch} (N=$N)"
 	echo "${TAB}filtering repo..."
-	filter-repo-author.sh $@
+	${HOME}/utils/bash/git/filter-repo-author.sh $@
 	echo "${TAB}done filtering repo"
 	echo "${TAB}force pushing rewrite..."
 	git push -f ${name_remote} ${branch}
