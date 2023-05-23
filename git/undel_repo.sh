@@ -2,7 +2,7 @@
 # Checks a Git repository for deleted files and restores those files
 # by checking them out
 
-# source formatting
+# load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
