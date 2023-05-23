@@ -1,17 +1,16 @@
 #!/bin/bash
 set -e
-# print source name at start
-echo -n "running $BASH_SOURCE"
-src_name=$(readlink -f $BASH_SOURCE)
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
-fi
-echo " ..."
-
 # source formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
+fi
+
+# print source name at start
+echo "${TAB}running $BASH_SOURCE..."
+src_name=$(readlink -f $BASH_SOURCE)
+if [ ! "$BASH_SOURCE" = "$src_name" ]; then
+    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
 # parse remote

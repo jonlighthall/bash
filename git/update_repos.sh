@@ -3,17 +3,18 @@
 # update_repos.sh - push and pull a specified list of git repositories and print summaries
 #
 # JCL Apr 2022
+#
+# source formatting
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
 
 # print source at start
 echo "${TAB}running $BASH_SOURCE..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
-fi
-
-fpretty=${HOME}/utils/bash/.bashrc_pretty
-if [ -e $fpretty ]; then
-    source $fpretty
 fi
 
 # list repository paths, relative to home
