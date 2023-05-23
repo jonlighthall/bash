@@ -81,7 +81,7 @@ do
 	if [ -L ${link} ] || [ -f ${link} ] || [ -d ${link} ]; then
 	    echo -n "exists and "
 	    if [[ "${target}" -ef ${link} ]]; then
-                echo -e "${GOOD}already points to ${my_link}${NORMAL}"
+                echo "already points to ${my_link}"
 		echo -n "${TAB}"
 		ls -lhG --color=auto ${link}
 		echo "${TAB}skipping..."
