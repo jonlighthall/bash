@@ -2,7 +2,18 @@
 # Checks a Git repository for deleted files and restores those files
 # by checking them out
 
-echo $BASH_SOURCE
+# source formatting
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+
+# print source at start
+echo "${TAB}running $BASH_SOURCE..."
+src_name=$(readlink -f $BASH_SOURCE)
+if [ ! "$BASH_SOURCE" = "$src_name" ]; then
+    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+fi
 
 # get list of deleted files
 list=$(git ls-files -d)
