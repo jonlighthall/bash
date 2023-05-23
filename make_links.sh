@@ -39,7 +39,6 @@ bar 38 "------ Start Linking Repo Files-------"
 # list of files to be linked
 ext=.sh
 for my_link in \
-    add_path \
 	bell \
 	clean_mac \
 	find_matching \
@@ -51,15 +50,17 @@ for my_link in \
 	git/undel_repo \
 	git/update_repos \
 	log \
-	ls_test \
 	rmbin \
 	sec2elap \
 	sort_history \
+	test/get_wttr \
+	test/test_ls_color \
 	test_file \
 	unfix_bad_extensions \
 	untar \
 	update_packages \
 	whatsup \
+	add_path \
 	xtest
 
 do
