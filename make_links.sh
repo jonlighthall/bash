@@ -101,7 +101,7 @@ do
         # then link
 	echo -en "${TAB}${GRH}";hline 72;
 	echo "${TAB}making link... "
-	ln -sv $target $link | sed "s/^/${TAB}/"
+	ln -sv "$target" "$link" | sed "s/^/${TAB}/"
 	echo -ne "${TAB}";hline 72;echo -en "${NORMAL}"
         else
             echo -e "${BAD}not executable${NORMAL}"
