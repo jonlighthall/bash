@@ -4,7 +4,7 @@
 #
 # JCL Oct 2020
 #
-# source formatting
+# load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
