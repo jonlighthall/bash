@@ -21,22 +21,19 @@ fi
 
 # set sort order (desired results with UTF-8 binary sort order)
 # must 'export' setting to take effect
-export LC_COLLATE=en_US.UTF-8
+set_loc=en_US.UTF-8
+export LC_COLLATE=$set_loc
 #export LC_COLLATE=C
 
 # define random marker functions
 function find_marker () {
-    \grep -m 1 -n ${marker} ${hist_out}
+    \grep -m 1 -n "${marker}" ${hist_out}
 }
 
 function add_marker () {
-    start=48
-    end=122
-    span=$(( $end - $start + 1 ))
-    bad_list=$(echo -n {58..64}; echo " "; echo {91..96})
     valid=.false.
     while [ $valid == .false. ]; do
-	N_dec=$(($RANDOM % span + start))
+	N_dec=$(($RANDOM % m_span + m_start))
 	if [[ ! $bad_list =~ ${N_dec} ]]; then
 	    valid=.true.
 	fi
@@ -50,16 +47,45 @@ function gen_marker () {
     add_marker
     while [[ ! -z $(find_marker) ]]; do
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
-	echo -ne "found     "
+	echo -ne "found\t\t"
 	find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/" )
 	add_marker
     done
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
 }
 
+# specify forbidden characters
+bad_list="36 42 45 46 47 91 92 94"
+
+# define marker range
+m_start=32
+m_end=126
+m_span=$(( $m_end - $m_start + 1 ))
+
+# print bad list
+echo "${TAB}bad list:"
+echo -n "${TAB}${TAB}"
+for i in ${bad_list}
+do
+    printf "\\$(printf %03o "$i")"
+done
+echo
+
+# print good list
+echo "${TAB}good list:"
+echo -n "${TAB}${TAB}"
+for ((j=$m_start;j<=$m_end;j++))
+do
+    if [[ ! $bad_list =~ ${j} ]]; then
+	printf "\\$(printf %03o "$j")"
+    fi
+done
+echo
+
 # specify default history file
 hist_ref=${HOME}/.bash_history
 hist_bak=${hist_ref}_$(date +'%Y-%m-%d-t%H%M%S')
+echo "backup history file"
 cp -pv $hist_ref ${hist_bak}
 
 # set list of files to check
@@ -122,8 +148,10 @@ echo -n "${TAB}delete trailing whitespaces... "
 sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${hist_out}
 echo "done"
 
+marker_list=""
 # find and mark timestamp lines
 gen_marker
+marker_list+="$marker "
 TS_MARKER=${marker}
 echo -n "${TAB}mark timestamp lines... "
 sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_out}
@@ -146,6 +174,7 @@ echo "done"
 
 # mark orphaned lines
 gen_marker
+marker_list+="$marker "
 OR_MARKER=${marker}
 echo -n "${TAB}mark orphaned lines... "
 sed -i "s/^[^#]/${OR_MARKER}&/" ${hist_out}
@@ -160,24 +189,24 @@ echo "done"
 echo "${TAB}mark login lines... "
 N=${#TS_MARKER}
 echo "${TAB}${TAB}time stamp marker is $N long"
-LI_MARKER="~"
+LI_MARKER="!"
 LO_MARKER="Z"
 for ((i=1;i<$N;i++))
 do
-    LI_MARKER+="~"
-    LO_MARKER+="Z"
+    LI_MARKER+="$LI_MARKER"
+    LO_MARKER+="$LO_MARKER"
 done
 echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
+marker_list+=" $LI_MARKER $LO_MARKER"
 
 # check sort
 echo "${TAB}check sort... "
 LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
-echo "${TAB}${TAB}LC_COLLATE = ${LCcol}"
-MARKERS=$"$TS_MARKER $OR_MARKER $LI_MARKER $LO_MARKER"
+echo "${TAB}${TAB}LC_COLLATE = ${set_loc} (${LCcol})"
 echo "${TAB}${TAB}unsorted:"
-echo $MARKERS | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
+echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
 echo "${TAB}${TAB}sorted:"
-echo $MARKERS | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
+echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
 
 head_list="CONTIN INSERT LOGIN"
 tail_list="INDIFF LOGOUT SHUTDN SORT"
@@ -216,7 +245,7 @@ sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_out}
 echo "done"
 
 # save markers
-echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} (LC_COLLATE = ${LCcol})" >> ${hist_out}
+echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol})" >> ${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}
 
