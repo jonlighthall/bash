@@ -6,6 +6,12 @@
 # JCL Apr 2023
 
 set -e
+# load formatting
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+
 # print source name at start
 echo "${TAB}running $BASH_SOURCE..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -16,8 +22,6 @@ fi
 # set sort order (desired results with UTF-8 binary sort order)
 #LC_ALL=en_US.UTF-8
 LC_ALL=C
-
-TAB="   "
 
 # define random marker functions
 function find_marker () {
@@ -164,6 +168,9 @@ do
 done
 echo "${TAB}${TAB}markers = $LI_MARKER, $LO_MARKER"
 MARKERS=$"$TS_MARKER $OR_MARKER $LI_MARKER $LO_MARKER"
+
+locale
+
 echo "${TAB}${TAB}unsorted:"
 echo $MARKERS | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
 echo "${TAB}${TAB}sorted:"

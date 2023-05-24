@@ -10,7 +10,7 @@ if [ -e $fpretty ]; then
     source $fpretty
 fi
 
-# print source at start
+# print source name at start
 echo "${TAB}running $BASH_SOURCE..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
