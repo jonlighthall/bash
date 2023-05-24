@@ -64,8 +64,6 @@ do
     marker_list+="$marker "
     echo $marker_list
     iN=${#marker}
-#    echo "iN = ${iN}"
-    #    echo "N = ${N}"
     # determine longest marker
     if [ $iN -gt $N ]; then
 	N=${iN}
@@ -83,28 +81,24 @@ do
 done
 echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
 #bad_list=$(echo -n {58..64}; echo " "; echo {91..96})
-bad_list=
+bad_list="34"
 echo "bad list:"
 for i in ${bad_list}
 do
     printf "%03d: \\$(printf %03o "$i")\n" "$i"
 done
 
+echo "good list:"
 for ((j=32;j<=126;j++))
 do
     mkr=""
-
     if [[ ! $bad_list =~ ${j} ]]; then
-
-    
-    for ((i=1;i<=$N;i++))
-    do
-	mkr+=$(printf "\\$(printf %03o "$j")")
-    done
-    printf "%03d: %s\n" "$j" "$mkr"
-
-#    echo $mkr
-    marker_list+=" $mkr"
+	for ((i=1;i<=$N;i++))
+	do
+	    mkr+=$(printf "\\$(printf %03o "$j")")
+	done
+	printf "%03d: %s\n" "$j" "$mkr"
+	marker_list+=" $mkr"
     fi
 done
 
@@ -121,7 +115,7 @@ for isort in $(locale -a)
 do
     export LC_COLLATE=${isort}
     LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
-#    locale
+    #    locale
     echo "${TAB}${TAB}LC_COLLATE = ${LCcol}"
     echo "${TAB}${TAB}sorted:"
     echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
