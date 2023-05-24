@@ -33,7 +33,7 @@ function add_marker () {
     start=48
     end=122
     span=$(( $end - $start + 1 ))
-    bad_list=$(echo -n {58..64} echo {91..96})
+    bad_list=$(echo -n {58..64}; echo " "; echo {91..96})
     valid=.false.
     while [ $valid == .false. ]; do
 	N_dec=$(($RANDOM % span + start))
@@ -156,7 +156,7 @@ echo -n "${TAB}merge orphaned lines... "
 sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_out}
 echo "done"
 
-# mark log in/out lines
+# generate login marker
 echo "${TAB}mark login lines... "
 N=${#TS_MARKER}
 echo "${TAB}${TAB}time stamp marker is $N long"
@@ -167,7 +167,7 @@ do
     LI_MARKER+="~"
     LO_MARKER+="Z"
 done
-echo "${TAB}${TAB}markers = $LI_MARKER, $LO_MARKER"
+echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
 
 # check sort
 echo "${TAB}check sort... "
@@ -175,18 +175,39 @@ LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
 echo "${TAB}${TAB}LC_COLLATE = ${LCcol}"
 MARKERS=$"$TS_MARKER $OR_MARKER $LI_MARKER $LO_MARKER"
 echo "${TAB}${TAB}unsorted:"
-echo $MARKERS | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
+echo $MARKERS | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
 echo "${TAB}${TAB}sorted:"
-echo $MARKERS | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}/"
-sed -i "s/ LOGIN/${LI_MARKER}LOGIN/;s/ LOGOUT/${LO_MARKER}LOGOUT/" ${hist_out}
+echo $MARKERS | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
+
+head_list="CONTIN INSERT LOGIN"
+tail_list="INDIFF LOGOUT SHUTDN SORT"
+
+# mark log in/out lines
+for head in ${head_list}
+do
+sed -i "s/ ${head}/${LI_MARKER}${head}/" ${hist_out}
+done
+
+for tail in ${tail_list}
+do
+    sed -i "s/ ${tail}/${LO_MARKER}${tail}/" ${hist_out}
+done
 
 # sort history
 echo -n "${TAB}sorting lines... "
 sort -u ${hist_out} -o ${hist_out}
 echo "done"
 
+# unmark log in/out lines
 echo -n "${TAB}unmark login lines... "
-sed -i "s/${LI_MARKER}LOGIN/ LOGIN/;s/${LO_MARKER}LOGOUT/ LOGOUT/" ${hist_out}
+for head in ${head_list}
+do
+sed -i "s/${LI_MARKER}${head}/ ${head}/" ${hist_out}
+done
+for tail in ${tail_list}
+do
+    sed -i "s/${LO_MARKER}${tail}/ ${tail}/" ${hist_out}
+done
 echo "done"
 
 # unmerge commands
