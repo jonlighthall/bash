@@ -25,13 +25,10 @@ function find_marker () {
 }
 
 function add_marker () {
-    start=48
-    end=122
-    span=$(( $end - $start + 1 ))
-    bad_list=$(echo -n {58..64}; echo " "; echo {91..96})
     valid=.false.
     while [ $valid == .false. ]; do
-	N_dec=$(($RANDOM % span + start))
+	N_dec=$(($RANDOM % m_span + m_start))
+	printf "${TAB}${TAB}%03d: \\$(printf %03o "$N_dec")\n" "$N_dec"
 	if [[ ! $bad_list =~ ${N_dec} ]]; then
 	    valid=.true.
 	fi
@@ -54,6 +51,32 @@ function gen_marker () {
 
 # specify default history file
 hist_out=${HOME}/.bash_history
+
+# specify forbidden characters
+bad_list="36 42 45 46 47 91 92 94"
+m_start=32
+m_end=126
+m_span=$(( $m_end - $m_start + 1 ))
+echo "start = $m_start"
+echo "  end = $m_end"
+echo " m_span = $m_span"
+
+# print bad list
+echo "${TAB}bad list:"
+for i in ${bad_list}
+do
+    echo -n "${TAB}${TAB}"
+    printf "%03d: \\$(printf %03o "$i")\n" "$i"
+done
+# print good list
+echo "${TAB}good list:"
+for ((j=$m_start;j<=$m_end;j++))
+do
+    if [[ ! $bad_list =~ ${j} ]]; then
+	echo -n "${TAB}${TAB}"
+	printf "%03d: \\$(printf %03o "$j")\n" "$j"
+    fi
+done
 
 mark_list=""
 N=0
@@ -80,18 +103,12 @@ do
     LO_MARKER+="$LO_MARKER"
 done
 echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
-bad_list="36 42 45 46 47 91 92 94"
-echo
-echo "bad list:"
-for i in ${bad_list}
-do
-    echo -n "${TAB}${TAB}"
-    printf "%03d: \\$(printf %03o "$i")\n" "$i"
-done
-echo
+
 good_list=$(echo -n {32..48}; echo " "; echo {57..65}; echo " "; echo {90..97}; echo " "; echo {122..126})
-echo "good list:"
-for ((j=32;j<=126;j++))
+# print good list
+echo
+echo "test good list:"
+for ((j=$m_start;j<=$m_end;j++))
 do
     marker=""
     if [[ ! $bad_list =~ ${j} ]]; then
@@ -120,6 +137,7 @@ marker_list+=" $LI_MARKER $LO_MARKER"
 echo "${TAB}${TAB}unsorted:"
 echo $marker_list | tr ' ' '\n'
 
+# loop over locales
 k=0
 loc_list=$(locale -a)
 echo "list of locales:"
