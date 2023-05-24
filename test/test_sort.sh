@@ -81,7 +81,7 @@ do
 done
 echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
 #bad_list=$(echo -n {58..64}; echo " "; echo {91..96})
-bad_list="34"
+bad_list="34 39"
 echo "bad list:"
 for i in ${bad_list}
 do
@@ -115,7 +115,6 @@ for isort in $(locale -a)
 do
     export LC_COLLATE=${isort}
     LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
-    #    locale
     echo "${TAB}${TAB}LC_COLLATE = ${LCcol}"
     echo "${TAB}${TAB}sorted:"
     echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
