@@ -204,9 +204,9 @@ echo "${TAB}check sort... "
 LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
 echo "${TAB}${TAB}LC_COLLATE = ${set_loc} (${LCcol})"
 echo "${TAB}${TAB}unsorted:"
-echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
+echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
 echo "${TAB}${TAB}sorted:"
-echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
+echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}/"
 
 head_list="CONTIN INSERT LOGIN"
 tail_list="INDIFF LOGOUT SHUTDN SORT"
