@@ -46,7 +46,7 @@ function gen_marker () {
     while [[ ! -z $(find_marker) ]]; do
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
 	echo -ne "found\t\t"
-	find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/" ) # | cut -c -72
+	find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/" )
 	add_marker
     done
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
@@ -72,15 +72,15 @@ done
 
 # generate login marker
 echo "${TAB}${TAB}time stamp marker is $N long"
-LI_MARKER="~"
+LI_MARKER="!"
 LO_MARKER="Z"
 for ((i=1;i<$N;i++))
 do
-    LI_MARKER+="~"
-    LO_MARKER+="Z"
+    LI_MARKER+="$LI_MARKER"
+    LO_MARKER+="$LO_MARKER"
 done
 echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
-bad_list="42 45 47 91 92"
+bad_list="36 42 45 46 47 91 92 94"
 echo
 echo "bad list:"
 for i in ${bad_list}
@@ -104,8 +104,9 @@ do
 	if [[ -z $(find_marker) ]]; then
 	    echo "not found"
 	else
-	    echo -ne "found\t\t"
-	    find_marker | sed "s/${marker}/\x1b[1;47;31m${marker}\x1b[0m/" #| cut -c -72
+	    echo -ne "grep:\t\t"
+	    find_marker | sed "s/${marker}/\x1b[1;47;31m${marker}\x1b[0m/"
+	    sed -n -e "s/${marker}/\x1b[1;47;31m${marker}\x1b[0m/p" ${hist_out} | sed "s/^/${TAB}${TAB}\t\t\tsed:\t\t/" | head -1
 	fi
 	if [[ $good_list =~ ${j} ]]; then
 	    marker_list+=" $marker"
