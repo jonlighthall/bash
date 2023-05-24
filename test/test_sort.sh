@@ -21,7 +21,7 @@ fi
 
 # define random marker functions
 function find_marker () {
-    \grep -m 1 -n ${marker} ${hist_out}
+    \grep -m 1 -n "${marker}" ${hist_out}
 }
 
 function add_marker () {
@@ -62,7 +62,7 @@ for ((i=1;i<=5;i++))
 do
     gen_marker
     marker_list+="$marker "
-    echo $marker_list
+    echo "${TAB}${TAB}marker list: $marker_list"
     iN=${#marker}
     # determine longest marker
     if [ $iN -gt $N ]; then
@@ -81,34 +81,41 @@ do
 done
 echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
 #bad_list=$(echo -n {58..64}; echo " "; echo {91..96})
-bad_list="34 39"
+bad_list="42 45 47 91"
+#$(echo -n {32..40}; echo " 42 43 44 45 58")
+echo
 echo "bad list:"
 for i in ${bad_list}
 do
     printf "%03d: \\$(printf %03o "$i")\n" "$i"
 done
-
+echo
 echo "good list:"
 for ((j=32;j<=126;j++))
 do
-    mkr=""
+    marker=""
     if [[ ! $bad_list =~ ${j} ]]; then
 	for ((i=1;i<=$N;i++))
 	do
-	    mkr+=$(printf "\\$(printf %03o "$j")")
+	    marker+=$(printf "\\$(printf %03o "$j")")
 	done
-	printf "%03d: %s\n" "$j" "$mkr"
-	marker_list+=" $mkr"
+	printf "%03d: %s\t" "$j" "$marker"
+	if [[ -z $(find_marker) ]]; then
+	    echo "not found"
+	else
+	    echo -ne "found\t"
+	    find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/"
+	fi
+	marker_list+=" $marker"
     fi
 done
 
 # check sort
 echo "${TAB}check sort... "
 marker_list+=" $LI_MARKER $LO_MARKER"
-
 echo "${TAB}${TAB}unsorted:"
-echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
-
+echo $marker_list | tr ' ' '\n'
+#echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
 
 #for isort in C.UTF-8 en_US.UTF-8
 for isort in $(locale -a)
@@ -117,7 +124,8 @@ do
     LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
     echo "${TAB}${TAB}LC_COLLATE = ${LCcol}"
     echo "${TAB}${TAB}sorted:"
-    echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
+    sort -u <( echo $marker_list | tr ' ' '\n' )
+#    echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
 done
 
 # print time at exit
