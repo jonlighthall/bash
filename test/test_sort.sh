@@ -45,8 +45,8 @@ function gen_marker () {
     add_marker
     while [[ ! -z $(find_marker) ]]; do
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
-	echo -ne "found     "
-	find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/" )
+	echo -ne "found\t\t"
+	find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/" ) # | cut -c -72
 	add_marker
     done
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
@@ -81,15 +81,17 @@ do
 done
 echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
 #bad_list=$(echo -n {58..64}; echo " "; echo {91..96})
-bad_list="42 45 47 91"
+bad_list="42 45 47 91 92"
 #$(echo -n {32..40}; echo " 42 43 44 45 58")
 echo
 echo "bad list:"
 for i in ${bad_list}
 do
+    echo -n "${TAB}${TAB}"
     printf "%03d: \\$(printf %03o "$i")\n" "$i"
 done
 echo
+good_list=$(echo -n {32..48}; echo " "; echo {57..65}; echo " "; echo {90..97}; echo " "; echo {122..126})
 echo "good list:"
 for ((j=32;j<=126;j++))
 do
@@ -99,14 +101,17 @@ do
 	do
 	    marker+=$(printf "\\$(printf %03o "$j")")
 	done
-	printf "%03d: %s\t" "$j" "$marker"
+	echo -n "${TAB}${TAB}"
+	printf "%03d: %s\t\t" "$j" "$marker"
 	if [[ -z $(find_marker) ]]; then
 	    echo "not found"
 	else
-	    echo -ne "found\t"
-	    find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/"
+	    echo -ne "found\t\t"
+	    find_marker | sed "s/${marker}/\x1b[1;47;31m${marker}\x1b[0m/" #| cut -c -72
 	fi
-	marker_list+=" $marker"
+	if [[ $good_list =~ ${j} ]]; then
+	    marker_list+=" $marker"
+	fi
     fi
 done
 
@@ -115,17 +120,24 @@ echo "${TAB}check sort... "
 marker_list+=" $LI_MARKER $LO_MARKER"
 echo "${TAB}${TAB}unsorted:"
 echo $marker_list | tr ' ' '\n'
-#echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
 
-#for isort in C.UTF-8 en_US.UTF-8
-for isort in $(locale -a)
+k=0
+loc_list=$(locale -a)
+echo "list of locales:"
+echo "$loc_list" | sed "s/^/${TAB}/"
+set +e
+for isort in $loc_list
 do
     export LC_COLLATE=${isort}
     LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
-    echo "${TAB}${TAB}LC_COLLATE = ${LCcol}"
+    ((k++))
+    echo
+    echo "k=$k"
+    echo "${TAB}${TAB}LC_COLLATE = $(echo $loc_list | awk '{print $'$k'}') (${LCcol})"
+
     echo "${TAB}${TAB}sorted:"
     sort -u <( echo $marker_list | tr ' ' '\n' )
-#    echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}'/;s/$/'/"
+    echo "here"
 done
 
 # print time at exit
