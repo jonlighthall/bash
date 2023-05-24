@@ -49,11 +49,10 @@ function gen_marker () {
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
 }
 
-# specify default history file
-hist_out=${HOME}/.bash_history
-
 # specify forbidden characters
 bad_list="36 42 45 46 47 91 92 94"
+
+# define marker range
 m_start=32
 m_end=126
 m_span=$(( $m_end - $m_start + 1 ))
@@ -68,6 +67,7 @@ do
     echo -n "${TAB}${TAB}"
     printf "%03d: \\$(printf %03o "$i")\n" "$i"
 done
+
 # print good list
 echo "${TAB}good list:"
 for ((j=$m_start;j<=$m_end;j++))
@@ -78,8 +78,11 @@ do
     fi
 done
 
-mark_list=""
+# specify default history file
+hist_out=${HOME}/.bash_history
+
 N=0
+marker_list=""
 # find and mark timestamp lines
 for ((i=1;i<=5;i++))
 do
@@ -103,6 +106,7 @@ do
     LO_MARKER+="$LO_MARKER"
 done
 echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
+marker_list+=" $LI_MARKER $LO_MARKER"
 
 good_list=$(echo -n {32..48}; echo " "; echo {57..65}; echo " "; echo {90..97}; echo " "; echo {122..126})
 # print good list
@@ -133,7 +137,6 @@ done
 
 # check sort
 echo "${TAB}check sort... "
-marker_list+=" $LI_MARKER $LO_MARKER"
 echo "${TAB}${TAB}unsorted:"
 echo $marker_list | tr ' ' '\n'
 
