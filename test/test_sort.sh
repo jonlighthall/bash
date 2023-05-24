@@ -80,9 +80,7 @@ do
     LO_MARKER+="Z"
 done
 echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
-#bad_list=$(echo -n {58..64}; echo " "; echo {91..96})
 bad_list="42 45 47 91 92"
-#$(echo -n {32..40}; echo " 42 43 44 45 58")
 echo
 echo "bad list:"
 for i in ${bad_list}
@@ -137,7 +135,6 @@ do
 
     echo "${TAB}${TAB}sorted:"
     sort -u <( echo $marker_list | tr ' ' '\n' )
-    echo "here"
 done
 
 # print time at exit
