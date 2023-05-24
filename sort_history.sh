@@ -168,10 +168,12 @@ do
     LO_MARKER+="Z"
 done
 echo "${TAB}${TAB}markers = $LI_MARKER, $LO_MARKER"
+
+# check sort
+echo "${TAB}check sort... "
+LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
+echo "${TAB}${TAB}LC_COLLATE = ${LCcol}"
 MARKERS=$"$TS_MARKER $OR_MARKER $LI_MARKER $LO_MARKER"
-
-locale
-
 echo "${TAB}${TAB}unsorted:"
 echo $MARKERS | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
 echo "${TAB}${TAB}sorted:"
@@ -193,7 +195,6 @@ sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_out}
 echo "done"
 
 # save markers
-LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
 echo "#$(date +'%s') SORT $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} (LC_COLLATE = ${LCcol})" >> ${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}
