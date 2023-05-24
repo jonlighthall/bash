@@ -20,8 +20,9 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 fi
 
 # set sort order (desired results with UTF-8 binary sort order)
-#LC_ALL=en_US.UTF-8
-LC_ALL=C
+# must 'export' setting to take effect
+export LC_COLLATE=en_US.UTF-8
+#export LC_COLLATE=C
 
 # define random marker functions
 function find_marker () {
