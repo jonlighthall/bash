@@ -119,23 +119,21 @@ do
 	    fi
 
 	    # pull
-	    hline 35 "<"
 	    echo "pulling... "
 	    if [ $git_ver_maj -lt 2 ]; then
 		cmd="git pull --all --tags --prune"
 	    else
 		cmd="git pull -4 --all --tags --prune"
 	    fi
-	    echo ${cmd}
 	    ${cmd}
 	    RETVAL=$?
+	    echo -en "\x1b[1;47;34mpull status${NORMAL}: "
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		pull_fail+="$repo "
 	    else
 		echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    fi
-	    hline 35 "="
 	    # push
 	    echo "pushing... "
 	    if [ $git_ver_maj -lt 2 ]; then
@@ -143,16 +141,15 @@ do
 	    else
 		cmd="git push -4 --all"
 	    fi
-	    echo ${cmd}
 	    ${cmd}
 	    RETVAL=$?
+	    echo -en "\x1b[0;47;35mpush status${NORMAL}: "
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		push_fail+="$repo "
 	    else
 		echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    fi
-	    hline 35 ">"
 
 	    # check for modified files
 	    if [[ ! -z $(git diff --name-only --diff-filter=M) ]]; then
