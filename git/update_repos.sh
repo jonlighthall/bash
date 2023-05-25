@@ -77,11 +77,21 @@ if [ -f ${fname_project} ]; then
     done < ${fname_project}
 fi
 
+script_ver=$(script --version | sed 's/[^0-9\.]//g')
+script_ver_maj=$(echo $script_ver | awk -F. '{print $1}')
+script_ver_min=$(echo $script_ver | awk -F. '{print $2}')
+script_ver_pat=$(echo $script_ver | awk -F. '{print $3}')
+
+git_ver=$(git --version | awk '{print $3}')
+git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 
 loc_fail=""
 pull_fail=""
 push_fail=""
 mods=""
+
 for repo in $list
 do
     hline 70
@@ -108,31 +118,16 @@ do
 		fi
 	    fi
 
-	    script_ver=$(script --version | sed 's/[^0-9\.]//g')
-	    script_ver_maj=$(echo $script_ver | awk -F. '{print $1}')
-	    script_ver_min=$(echo $script_ver | awk -F. '{print $2}')
-	    script_ver_pat=$(echo $script_ver | awk -F. '{print $3}')
-
-	    git_ver=$(git --version | awk '{print $3}')
-	    git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-	    git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-	    git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-
 	    # pull
-	    echo -n "pulling... "
-	    if [ $script_ver_min -lt 18 ]; then
-		if [ $git_ver_maj -lt 2 ]; then
-		    script -qf /dev/null -c "git pull --all --tags --prune" > pull.log
-		else
-		    script -qf /dev/null -c "git pull -4 --all --tags --prune" > pull.log
-		fi
+	    hline 35 "<"
+	    echo "pulling... "
+	    if [ $git_ver_maj -lt 2 ]; then
+		cmd="git pull --all --tags --prune"
 	    else
-		if [ $git_ver_maj -lt 2 ]; then
-		    script -qef /dev/null -c "git pull --all --tags --prune" > pull.log
-		else
-		    script -qef /dev/null -c "git pull -4 --all --tags --prune" > pull.log
-		fi
+		cmd="git pull -4 --all --tags --prune"
 	    fi
+	    echo ${cmd}
+	    ${cmd}
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
@@ -140,26 +135,16 @@ do
 	    else
 		echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    fi
-	    if [ -f pull.log ]; then
-		cat pull.log | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/"
-		rm pull.log
-	    fi
-
+	    hline 35 "="
 	    # push
-	    echo -n "pushing... "
-	    if [ $script_ver_min -lt 18 ]; then
-		if [ $git_ver_maj -lt 2 ]; then
-		    script -qf /dev/null -c "git push --all" > push.log
-		else
-		    script -qf /dev/null -c "git push -4 --all" > push.log
-		fi
+	    echo "pushing... "
+	    if [ $git_ver_maj -lt 2 ]; then
+		cmd="git push --all"
 	    else
-		if [ $git_ver_maj -lt 2 ]; then
-		    script -qef /dev/null -c "git push --all" > push.log
-		else
-		    script -qef /dev/null -c "git push -4 --all" > push.log
-		fi
+		cmd="git push -4 --all"
 	    fi
+	    echo ${cmd}
+	    ${cmd}
 	    RETVAL=$?
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
@@ -167,10 +152,7 @@ do
 	    else
 		echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    fi
-	    if [ -f push.log ]; then
-		cat push.log | sed 's/$//g' | sed "s//${TAB}/g" | sed 's/\x1B\[K//g' | sed "s/^/${TAB}/" >&1
-		rm push.log
-	    fi
+	    hline 35 ">"
 
 	    # check for modified files
 	    if [[ ! -z $(git diff --name-only --diff-filter=M) ]]; then
