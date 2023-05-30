@@ -139,6 +139,11 @@ else
     N_remote=0
 fi
 
+git_ver=$(git --version | awk '{print $3}')
+git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
+
 # stash local changes
 if [ -z "$(git diff)" ]; then
     echo "no differences to stash"
@@ -146,15 +151,13 @@ if [ -z "$(git diff)" ]; then
 else
     git status
     echo "stashing differences..."
-    git_ver=$(git --version | awk '{print $3}')
-    git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-    git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-    git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 
     if [ $git_ver_maj -lt 2 ]; then
-	git stash -u
-    else
+	# old command
 	git stash
+    else
+	# modern command
+	git stash -u
     fi
     b_stash=true
 fi
@@ -177,11 +180,31 @@ echo "${TAB}local branch is $N_local commits ahead of remote"
 if [ $N_local -gt 0 ];then
     echo "cherry-picking local changes..."
     if [ $N_local -gt 1 ];then
-	git cherry-pick ${hash_start}^..$hash_end
+	if [ $git_ver_maj -lt 2 ]; then
+	# old command
+	    echo "${TAB}cherry picking multiple individual commits..."
+	    git rev-list $hash_local..HEAD
+	    echo -n "${TAB}in case of automatic cherry-pick failure, remember to push"
+	    if $b_stash; then
+		echo "and apply stash"
+	    else
+		echo
+	    fi
+	    hash_list=$(git rev-list $hash_local..HEAD)
+	    for ihash in $hash_list
+	    do
+		echo "${TAB}cherry-picking $ihash..."
+		git cherry-pick $ihash
+	    done
+	else
+	# modern command
+	    git cherry-pick ${hash_start}^..$hash_end
+	fi
     else
 	echo "single commit to cherry-pick"
 	git cherry-pick ${hash_start}
     fi
+    echo "pushing local changes..."
     git push --all
 else
     echo "no need to cherry-pick"
@@ -195,14 +218,14 @@ if [ $N_stash -gt 0 ]; then
 	echo "applying stash..."
 	git stash pop
 	echo -n "stash made... "
-	if [ -z $(git diff) ]; then
+	if [ -z "$(git diff)" ]; then
 	    echo "no changes"
 	else
 	    echo "changes!"
 	    git reset HEAD
-	    echo "do something!"
 	fi
-	echo "... but none are from this operation"
+    else
+	echo "${TAB}... but none are from this operation"
     fi
 else
     echo "no stash entries"
