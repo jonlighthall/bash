@@ -92,7 +92,7 @@ do
 		    continue
 		else
 		    echo -n "will be backed up..."
-		    mv -v ${link} ${link}_$(date +'%Y-%m-%d-t%H%M')
+		    mv -v ${link} ${link}_$(date -r ${link} +'%Y-%m-%d-t%H%M')
 		fi
 	    fi
 	else
