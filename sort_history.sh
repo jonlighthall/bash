@@ -84,7 +84,7 @@ echo
 
 # specify default history file
 hist_ref=${HOME}/.bash_history
-hist_bak=${hist_ref}_$(date +'%Y-%m-%d-t%H%M%S')
+hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
 echo "backup history file"
 cp -pv $hist_ref ${hist_bak}
 
