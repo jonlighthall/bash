@@ -64,14 +64,13 @@ while [ -z ${hash_local} ]; do
     hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
     hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
 
-    echo "subject and time hashes..."
+    echo -n "subject and time hashes..."
     if [ "$hash_local" == "$hash_local_s" ]; then
 	echo "match"
     else
 	echo "do not match"
-	echo "subj = $hash_local_s"
-	echo "time = $hash_local"
-#	exit 1
+	echo "${TAB}subj = $hash_local_s"
+	echo "${TAB}time = $hash_local"
     fi
     echo -n "${TAB}corresponding local commit hash: "
     if [ ! -z ${hash_local} ]; then
@@ -104,12 +103,13 @@ done
 hash_remote=$(git log ${branch_pull} | grep -B4 "${subj_remote}" | head -n 1 | awk '{print $2}')
 echo -n "${TAB}corresponding remote commit hash: "
 echo $hash_remote
-echo -n "common commit has... "
+echo -n "${TAB}common commit has... "
 if [ $hash_local == $hash_remote ]; then
     echo "the same hash"
+    echo -n "${TAB}merge base: "
     git merge-base ${branch_local} ${branch_pull}
     hash_merge=$(git merge-base ${branch_local} ${branch_pull})
-    echo -n "common hash is... "
+    echo -n "${TAB}common hash is... "
     if [ $hash_local == $hash_merge ]; then
 	echo "the same as merge base"
     else
@@ -215,7 +215,7 @@ N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo "there are $N_stash entries in stash"
     if $b_stash; then
-	echo "applying stash..."
+	echo "${TAB}applying stash..."
 	git stash pop
 	echo -n "stash made... "
 	if [ -z "$(git diff)" ]; then
