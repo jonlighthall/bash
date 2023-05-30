@@ -127,7 +127,7 @@ do
 	    fi
 	    ${cmd}
 	    RETVAL=$?
-	    echo -en "\x1b[1;47;34mpull status${NORMAL}: "
+	    echo -en "\x1b[0;47;30mpull status${NORMAL}: "
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		pull_fail+="$repo "
@@ -143,7 +143,7 @@ do
 	    fi
 	    ${cmd}
 	    RETVAL=$?
-	    echo -en "\x1b[0;47;35mpush status${NORMAL}: "
+	    echo -en "\x1b[0;47;30mpush status${NORMAL}: "
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		push_fail+="$repo "
