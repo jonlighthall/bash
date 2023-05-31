@@ -120,10 +120,9 @@ do
 
 	    # pull
 	    echo "pulling... "
-	    if [ $git_ver_maj -lt 2 ]; then
-		cmd="git pull --all --tags --prune"
-	    else
-		cmd="git pull -4 --all --tags --prune"
+	    cmd="timeout -s 9 5s git pull --all --tags --prune"
+	    if [ $git_ver_maj -ge 2 ]; then
+		cmd+=" -4"
 	    fi
 	    ${cmd}
 	    RETVAL=$?
@@ -136,10 +135,9 @@ do
 	    fi
 	    # push
 	    echo "pushing... "
-	    if [ $git_ver_maj -lt 2 ]; then
-		cmd="git push --all"
-	    else
-		cmd="git push -4 --all"
+	    cmd="timeout -s 9 5s git push --all"
+	    if [ $git_ver_maj -ge 2 ]; then
+		cmd+=" -4"
 	    fi
 	    ${cmd}
 	    RETVAL=$?
