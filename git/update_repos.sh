@@ -135,7 +135,7 @@ do
 	    fi
 	    # push
 	    echo "pushing... "
-	    cmd="timeout -s 9 5s git push -v --all --progress"
+	    cmd="timeout -s 9 5s git push -v --progress"
 	    if [ $git_ver_maj -ge 2 ]; then
 		cmd+=" -4"
 	    fi
