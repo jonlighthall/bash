@@ -142,6 +142,8 @@ echo "output file name is ${hist_out}"
 echo -n "${TAB}concatenate files... "
 cat ${list_out} > ${hist_out}
 echo "done"
+L=$(cat ${hist_out} | wc -l)
+echo "${TAB}${TAB} ${hist_out} has $L lines"
 
 # clean up whitespace
 echo -n "${TAB}delete trailing whitespaces... "
@@ -189,12 +191,14 @@ echo "done"
 echo "${TAB}mark login lines... "
 N=${#TS_MARKER}
 echo "${TAB}${TAB}time stamp marker is $N long"
-LI_MARKER="!"
-LO_MARKER="Z"
+beg_mark="!"
+end_mark="Z"
+LI_MARKER=$beg_mark
+LO_MARKER=$end_mark
 for ((i=1;i<$N;i++))
 do
-    LI_MARKER+="$LI_MARKER"
-    LO_MARKER+="$LO_MARKER"
+    LI_MARKER+="$beg_mark"
+    LO_MARKER+="$end_mark"
 done
 echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
 marker_list+=" $LI_MARKER $LO_MARKER"
@@ -226,6 +230,7 @@ done
 echo -n "${TAB}sorting lines... "
 sort -u ${hist_out} -o ${hist_out}
 echo "done"
+echo -e "${TAB}\x1b[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
 
 # unmark log in/out lines
 echo -n "${TAB}unmark login lines... "
