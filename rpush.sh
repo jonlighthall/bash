@@ -1,13 +1,21 @@
 #!/bin/bash
+# set paths
 source rpath.sh
-SOURCE=$LOCAL
-DEST=$REMOTE
+SOURCE=${LOCAL%/}
+DEST=${REMOTE%/}
+
+# set command
 CMD='rsync -vihtu --progress'
+
+# set copy pattern
 if [ $# -eq 0 ]; then
     echo "No pattern given. Coppying all."
-    echo "$CMD $SOURCE/* $DEST"
-    $CMD $SOURCE/* $DEST
+    PAT=""
 else
-    echo "$CMD $SOURCE/$1 $DEST"
-    $CMD $SOURCE/$1 $DEST
+    PAT="$1"
 fi
+
+# push
+echo "pushing local changes..."
+echo "$CMD $SOURCE/$PAT $DEST/"
+$CMD $SOURCE/$PAT $DEST/
