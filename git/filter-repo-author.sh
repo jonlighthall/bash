@@ -1,4 +1,10 @@
 set -e
+# set tab
+if [ ! -z $TAB ]; then
+    fTAB="   "
+    TAB+=$fTAB
+fi
+
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
@@ -42,10 +48,10 @@ git filter-repo $@ --partial --commit-callback '
     url = text_file.read()
     text_file.close()
     email_str="jonathan.lighthall@"+url.strip()
-    email_bin=email_str.encode("ascii")	
+    email_bin=email_str.encode("ascii")
     auth_list.append(email_bin)
     email_str="jonathan.c.lighthall@"+url.strip()
-    email_bin=email_str.encode("ascii")	
+    email_bin=email_str.encode("ascii")
     auth_list.append(email_bin)
     correct_email = b"jon.lighthall@gmail.com"
     if commit.author_email in auth_list:
@@ -53,3 +59,5 @@ git filter-repo $@ --partial --commit-callback '
         if commit.author_name != correct_name:
             commit.author_name = correct_name
 '
+
+TAB=${TAB#$fTAB}
