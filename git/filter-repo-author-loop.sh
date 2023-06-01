@@ -14,8 +14,7 @@ fi
 
 # parse remote
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
-    echo "no remote tracking branch"
-    exit 1
+    echo "no remote tracking branch set for current branch"
 else
     branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
     echo -e "remote tracking branch is ${blue}${branch_tracking}${NORMAL}"
@@ -97,24 +96,24 @@ do
 		echo "pulling commits"
 		git pull ${name_remote} ${branch}
 	    else
-	    if [ -z $(git rev-list --left-only ${name_remote}/${branch}...${branch}) ]; then
-		echo "no commits to pull"
-	    else
-		echo "pulling commits"
-		git pull ${name_remote} ${branch}
-	    fi
+		if [ -z $(git rev-list --left-only ${name_remote}/${branch}...${branch}) ]; then
+		    echo "no commits to pull"
+		else
+		    echo "pulling commits"
+		    git pull ${name_remote} ${branch}
+		fi
 	    fi
 
 	    # determine number commits local branch is ahead of remote
 	    if [ $ver_maj -lt 2 ]; then
 		echo "pushing commits"
 		git push ${name_remote}
-	    if [ -z $(git rev-list --right-only ${name_remote}/${branch}...${branch}) ]; then
-		echo "no commits to push"
-	    else
-		echo "pushing commits"
-		git push ${name_remote}
-	    fi
+		if [ -z $(git rev-list --right-only ${name_remote}/${branch}...${branch}) ]; then
+		    echo "no commits to push"
+		else
+		    echo "pushing commits"
+		    git push ${name_remote}
+		fi
 	    fi
 
 	    # determine difference between local and remote
