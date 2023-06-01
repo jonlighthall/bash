@@ -4,6 +4,9 @@
 #
 # JCL Apr 2022
 #
+# set tab
+TAB=""
+
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
