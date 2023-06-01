@@ -14,8 +14,7 @@ fi
 
 # parse remote
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
-    echo "no remote tracking branch"
-    exit 1
+    echo "no remote tracking branch set for current branch"
 else
     branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
     echo -e "remote tracking branch is ${blue}${branch_tracking}${NORMAL}"
@@ -34,6 +33,7 @@ branch_list=$(git branch -va | sed 's/^*/ /' |  awk '{print $1}' | sed 's|remote
 echo "list of branches: "
 echo "${branch_list}" | sed 's/^/   /'
 
+# stash local changes
 if [ -z "$(git diff)" ]; then
     echo "no differences to stash"
     b_stash=false
@@ -46,9 +46,9 @@ fi
 
 for branch in $branch_list
 do
-    bar 56 "$(git checkout $branch 2>&1)" 
+    bar 56 "$(git checkout $branch 2>&1)"
     git fetch ${name_remote} ${branch}
-    git --no-pager diff ${branch} ${name_remote}/${branch}
+    git --no-pager diff --name-only ${branch} ${name_remote}/${branch}
 
 # determine latest common local commit, based on commit message
 tracking==${name_remote}/${branch_remote}
@@ -145,9 +145,9 @@ do
     git log ${name_remote}/${branch} --pretty=format:"%aN %aE" | sort | uniq -c | sort -n
     N=$(git log ${name_remote}/${branch} --pretty=format:"%aN %aE" | sort -u | wc -l)
     if [ $N -gt 1 ]; then
-	echo "${TAB}more than one author on remote branch ${name_remote}/${branch} (N=$N)"
+	echo "${TAB}${GRH}more than one author on remote branch ${name_remote}/${branch} (N=$N)${NORMAL}"
 	echo "${TAB}filtering repo..."
-	filter-repo-author.sh $@
+	${HOME}/utils/bash/git/filter-repo-author.sh $@
 	echo "${TAB}done filtering repo"
 	echo "${TAB}force pushing rewrite..."
 	git push -f ${name_remote} ${branch}
@@ -176,20 +176,34 @@ do
 		git branch --set-upstream-to=${name_remote}/${branch} ${branch}
 	    fi
 
+	    ver=$(git --version | awk '{print $3}')
+	    ver_maj=$(echo $ver | awk -F. '{print $1}')
+	    ver_min=$(echo $ver | awk -F. '{print $2}')
+	    ver_pat=$(echo $ver | awk -F. '{print $3}')
+
 	    # determine number commits local branch is behind remote
-	    if [ -z $(git rev-list --left-only ${name_remote}/${branch}...${branch}) ]; then
-		echo "no commits to pull"
-	    else
+	    if [ $ver_maj -lt 2 ]; then
 		echo "pulling commits"
 		git pull ${name_remote} ${branch}
+	    else
+		if [ -z $(git rev-list --left-only ${name_remote}/${branch}...${branch}) ]; then
+		    echo "no commits to pull"
+		else
+		    echo "pulling commits"
+		    git pull ${name_remote} ${branch}
+		fi
 	    fi
 
 	    # determine number commits local branch is ahead of remote
-	    if [ -z $(git rev-list --right-only ${name_remote}/${branch}...${branch}) ]; then
-		echo "no commits to push"
-	    else
+	    if [ $ver_maj -lt 2 ]; then
 		echo "pushing commits"
 		git push ${name_remote}
+		if [ -z $(git rev-list --right-only ${name_remote}/${branch}...${branch}) ]; then
+		    echo "no commits to push"
+		else
+		    echo "pushing commits"
+		    git push ${name_remote}
+		fi
 	    fi
 
 	    # determine difference between local and remote
@@ -205,7 +219,7 @@ do
 		    echo -e "${BAD}no not match${NORMAL}"
 		    echo $hash_local
 		    echo $hash_remote
-		    
+
 		    echo "reseting HEAD to ${name_remote}/${branch}..."
 		    git reset ${name_remote}/${branch}
 		fi
@@ -220,7 +234,7 @@ do
 done
 echo "done"
 echo "switching back to ${branch_local}..."
-    bar 56 "$(git checkout ${branch_local} 2>&1)" 
+bar 56 "$(git checkout ${branch_local} 2>&1)"
 if $b_stash; then
     git stash pop
 fi
