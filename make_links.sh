@@ -47,6 +47,7 @@ for my_link in \
 	git/filter-repo-author \
 	git/force_pull \
 	git/gita \
+	git/pull_all_branches \
 	git/undel_repo \
 	git/update_repos \
 	log \
