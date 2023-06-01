@@ -41,6 +41,7 @@ ext=.sh
 for my_link in \
 	bell \
 	clean_mac \
+	file_age \
 	find_matching \
 	find_missing_and_empty \
 	fix_bad_extensions \
