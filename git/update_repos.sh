@@ -37,7 +37,7 @@ dir_prog="utils/"
 list+="${dir_prog}fortran_utilities "
 
 # tutorial examples
-dir_examp="examples/"
+dir_examp="examp/"
 list+="${dir_examp}cpp \
        ${dir_examp}hello \
        ${dir_examp}fortran \
