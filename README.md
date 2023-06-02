@@ -12,23 +12,25 @@ A collection of bash scripts of varying utility.
 
 | script               | description                           | 
 | -------------------- | ------------------------------------  | 
-| [`update_packages`](update_packages.sh) | update all system packages with `apt install`  |
+| [`update_packages`](update_packages.sh) | update, upgrade, and autoremove installed packages with `apt install`  then check for a release upgrade |
 | log |
-| add_paths |
+| add_paths | add arguments to PATH|
 |bell|
-|whats up|
-|xtest|
-| untar |
+|whats up| print host, display, user, path, and PID information |
+| xtest | test X11 functionality |
+| untar | unpack an archive |
 
 ## Time
-| script               | description                           | 
-|date2time|
-|file age|
-|print_times|
-|sec2elap|
+| script               | description                           | useage |
+| -------------------- | ------------------------------------  | -- |
+|date2time| | `ls -tr --color=no | xargs -n 1 date +%s -r | xargs -n 1 date2age` |
+|file age| | `\ls -tr | xargs -n 1 file_age` |
+|print_times | print different time standards \
+| sec2elap | convert an integer to a human-readable interval string |
 
 ## File cleanup
 | script               | description                           | 
+| -------------------- | ------------------------------------  | 
 |cleam_mac|
 |fix_bad_extensions |
 |rmbin |
@@ -36,12 +38,14 @@ A collection of bash scripts of varying utility.
 
 # bash history
 | script               | description                           | 
+| -------------------- | ------------------------------------  | 
 |dedup_history|
 |sort_history |
 | ps hist cp link |
 
 # copying files
 | script               | description                           | 
+| -------------------- | ------------------------------------  | 
 |cp tar |
 | rpath |
 | rpull |
@@ -50,6 +54,7 @@ A collection of bash scripts of varying utility.
 
 # finding files
 | script               | description                           | 
+| -------------------- | ------------------------------------  | 
 | find matching |
 | find matching and move |
 | find missing and empty |
