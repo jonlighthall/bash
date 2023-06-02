@@ -6,7 +6,7 @@
 #
 # Adapted from find_missing_and_empty.sh
 #
-# First argument is the list file of patterns
+# The first argument is the list file of patterns.
 #
 # Second argument is the name of the output file
 #
