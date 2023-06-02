@@ -1,5 +1,23 @@
+# git
+Git bash scripts.
+
 ## git filter-
-The `filter-reo` scripts are preferred, but the `filter-branch` scripts are included for use on systems that do not have `filter-repo` installed.
+The `filter-repo` scripts are preferred, but the `filter-branch` scripts are included for use on systems that do not or cannot have `filter-repo` installed.
+
+#### `filter-branch`
+Author names can be rewritten with the following code
+
+from <https://help.github.com/articles/changing-author-info/>
+
+````bash
+./change.sh
+git push --force --tags origin 'refs/heads/*'
+````
+
+
+#### `filter-repo`
+
+
 ### Settings
 Before running, check the individual scripts and confirm that the author emails are correct.
 Unlisted urls maybe saved in the file [`url.txt`](url.txt).
@@ -12,10 +30,7 @@ to undo this action, use the following command
 git update-index --no-assume-unchanged url.txt
 ```
 
-
-
 The scripts can take inputs such as `--force` or `--prune-empty`
-
 
 ### Execution
 Fist, make sure your local repository is up to date
@@ -31,6 +46,7 @@ bash ~/utils/bash/git/filter-repo-author.sh
 git fetch
 git push --force-with-lease
 ```
+
 ### Aftermath
 If the filter scripts are utilized, it will case diverging commits with the remote repository.
 To address this, the following steps must be taken.
@@ -79,7 +95,6 @@ git pull
 Note the commit hashes of the local commits that are not on the remote
 git rev-list $(git log | grep -B4 "$(git log origin/master --format=%s -n 1)" | head -n 1 | awk '{print $2}')..HEAD
 
-
 Reset the local branch to the most recent common commit message on the remote
 `git reset $(git log origin/master | grep -B4 "$(git log --format=%s -n 1)" | head -n 1 | awk '{print $2}')`
 
@@ -90,9 +105,8 @@ git diff origin/master
 git reset $(git log origin/master | grep -B4 "$(git log --format=%s -n 1)" | head -n 1 | awk '{print $2}')
 ```
 
-
 If necessary, merge, fast-forward, or cherry-pick the outstanding commits from the local repository
 Similaryly, pull the remainign commits from the remote.
 
 That should be it.
-Your local branch should have updated history.qy
+Your local branch should have updated history.
