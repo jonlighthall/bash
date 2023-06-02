@@ -1,10 +1,24 @@
 # git
 Git bash scripts.
 
+## general
+| script               | description                           | 
+| -------------------- | ------------------------------------  | 
+| [`apply_hashes`](apply_hashes.sh) |
+| [`force_pull`](force_pull.sh) |
+| [`gita`](gita.sh) |
+| [`gitac`](gitac.sh) |
+| [`gitact`](gitact.sh) |
+| [`pull_all_branches`](pull_all_branches.sh) |
+| [`set_config`](set_config.sh) |
+| [`sort_hash`](sort_hash.sh) |
+| [`undel_repo`](undel_repo.sh) |
+| [`update_repos`](update_repos.sh) |
+
 ## git filter-
 The `filter-repo` scripts are preferred, but the `filter-branch` scripts are included for use on systems that do not or cannot have `filter-repo` installed.
 
-#### `filter-branch`
+### `filter-branch`
 Author names can be rewritten with the following code
 
 from <https://help.github.com/articles/changing-author-info/>
@@ -14,9 +28,21 @@ from <https://help.github.com/articles/changing-author-info/>
 git push --force --tags origin 'refs/heads/*'
 ````
 
+| script               | description                           | 
+| -------------------- | ------------------------------------  | 
+| [`filter-branch-author`](filter-branch-author.sh) |
+| [`filter-branch-committer`](filter-branch-committer.sh) |
+| [`filter-branch-email`](filter-branch-email.sh) |
+| [`filter-branch-hello`](filter-branch-hello.sh) |
 
-#### `filter-repo`
-
+### `filter-repo`
+| script               | description                           | 
+| -------------------- | ------------------------------------  | 
+| [`filter-repo-author`](filter-repo-author.sh) |
+| [`filter-repo-author-loop`](filter-repo-author-loop.sh) |
+| [`filter-repo-committer`](filter-repo-committer.sh) |
+| [`filter-repo-email`](filter-repo-email.sh) |
+| [`unfilter-repo-author`](unfilter-repo-author.sh) |
 
 ### Settings
 Before running, check the individual scripts and confirm that the author emails are correct.
