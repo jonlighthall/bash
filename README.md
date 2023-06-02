@@ -17,7 +17,6 @@ A collection of bash scripts of varying utility.
 | [`log`](log.sh) |
 | [`untar`](untar.sh) | unpack an archive |
 | [`update_packages`](update_packages.sh) | update, upgrade, and autoremove installed packages with `apt install`  then check for a release upgrade |
-
 | [`whatsup`](whatsup.sh) | print host, display, user, path, and PID information |
 | [`xtest`](xtest.sh) | test X11 functionality |
 
