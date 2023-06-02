@@ -12,53 +12,64 @@ A collection of bash scripts of varying utility.
 
 | script               | description                           | 
 | -------------------- | ------------------------------------  | 
+| [`add_path`](add_path.sh) | add arguments to PATH |
+| [`bell`](bell.sh) |
+| [`log`](log.sh) |
+| [`untar`](untar.sh) | unpack an archive |
 | [`update_packages`](update_packages.sh) | update, upgrade, and autoremove installed packages with `apt install`  then check for a release upgrade |
-| log |
-| add_paths | add arguments to PATH|
-|bell|
-|whats up| print host, display, user, path, and PID information |
-| xtest | test X11 functionality |
-| untar | unpack an archive |
+
+| [`whatsup`](whatsup.sh) | print host, display, user, path, and PID information |
+| [`xtest`](xtest.sh) | test X11 functionality |
 
 ## Time
 | script               | description                           | useage |
 | -------------------- | ------------------------------------  | -- |
-|date2time| | `ls -tr --color=no | xargs -n 1 date +%s -r | xargs -n 1 date2age` |
-|file age| | `\ls -tr | xargs -n 1 file_age` |
-|print_times | print different time standards \
-| sec2elap | convert an integer to a human-readable interval string |
+| [`date2age`](date2age.sh) | | `ls -tr --color=no \| xargs -n 1 date +%s -r \| xargs -n 1 date2age` |
+| [`date2time`](date2time.sh) |
+| [`file_age`](file_age.sh) | | `\ls -tr \| xargs -n 1 file_age` |
+| [`print_times`](print_times.sh) | print different time standards |
+| [`sec2elap`](sec2elap.sh) | convert an integer to a human-readable interval string |
 
 ## File cleanup
 | script               | description                           | 
 | -------------------- | ------------------------------------  | 
-|cleam_mac|
-|fix_bad_extensions |
-|rmbin |
-|unfix bad extensions |
+| [`clean_mac`](clean_mac.sh) |
+| [`fix_bad_extensions`](fix_bad_extensions.sh) |
+| [`rmbin`](rmbin.sh) |
+| [`unfix_bad_extensions`](unfix_bad_extensions.sh) |
 
 # bash history
 | script               | description                           | 
 | -------------------- | ------------------------------------  | 
-|dedup_history|
-|sort_history |
-| ps hist cp link |
+| [`dedup_history`](dedup_history.sh) |
+| [`ps_hist_cp_lnk`](ps_hist_cp_lnk.sh) |
+| [`sort_history`](sort_history.sh) |
 
 # copying files
 | script               | description                           | 
 | -------------------- | ------------------------------------  | 
-|cp tar |
-| rpath |
-| rpull |
-| rpush |
-| rsync2 |
+| [`cp_tar`](cp_tar.sh) |
+| [`rpath`](rpath.sh) |
+| [`rpull`](rpull.sh) |
+| [`rpush`](rpush.sh) |
+| [`rsync2`](rsync2.sh) |
 
 # finding files
 | script               | description                           | 
 | -------------------- | ------------------------------------  | 
-| find matching |
-| find matching and move |
-| find missing and empty |
-| grep matching |
+| [`find_matching`](find_matching.sh) |
+| [`find_matching_and_move`](find_matching_and_move.sh) |
+| [`find_missing_and_empty`](find_missing_and_empty.sh) |
+| [`grep_matching`](grep_matching.sh) |
+
+# other scripts
+| script               | description                           | 
+| -------------------- | ------------------------------------  | 
+| [`ls2md`](ls2md.sh) |
+| [`set_path`](set_path.sh) |
+| [`test_file`](test_file.sh) |
+| [`wiggler`](wiggler.sh) |
+| [`write_test_dirs`](write_test_dirs.sh) |
 
 ## Git
 see [git](git)
