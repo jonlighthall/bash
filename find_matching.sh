@@ -70,7 +70,7 @@ else
 	file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
 	echo ${file_out}
     done
-    echo "OK"
+    echo "uniquely named"
 
     # check if output exists
     echo -n "output file ${file_out}... "
@@ -80,7 +80,7 @@ else
 	file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
 	echo ${file_out}
     done
-    echo "OK"
+    echo "${TAB}unique file name found"
 
     # read input file
     j=$(cat ${file_in} | wc -l)
@@ -104,12 +104,12 @@ else
     fi
 
     # set print frequency
-    if [ $k -lt 10 ]; then
+    if [ $j -lt 10 ]; then
 	nprint=1
     else
 	nprint=$((j/10))
     fi
-    echo "printing every $nprint lines"
+    echo "${TAB}printing one results for every $nprint lines"
 
     while read line; do
         fname=$line
