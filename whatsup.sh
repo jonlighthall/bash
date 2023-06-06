@@ -7,11 +7,15 @@ lsb_release -a 2>&1 | \grep "Description:" | sed -e 's/^Description:[\t]//'
 echo "   user:" $USER$USERNAME
 echo " groups:" `id -nG`
 echo "    pwd:" $PWD
-echo "   date:" $(date)
+echo -n "   date:"; date
 echo "    PID: $PPID"
 echo -n "   time: "
 if (ps -o etimes) &>/dev/null; then
-    echo "$(sec2elap $(ps -p "$PPID" -o etimes | tail -n 1))"
+    if command -v sec2elap &>/dev/null; then
+	echo "$(sec2elap $(ps -p "$PPID" -o etimes | tail -n 1))"
+    else
+	echo "elapsed time is $(ps -p "$PPID" -o etimes | tail -n 1) sec"
+    fi
 else
     echo $(ps -p $PPID -o etime)
 fi
