@@ -1,24 +1,37 @@
 #!/bin/bash
 #
-# find_matching.sh - Reads an input list of files name regex patterns. Any files matching the
+# grep_matching.sh - Reads an input list of files name regex patterns. Any files matching the
 # individual patterns are saved to a new list of file names. Handling is included to backup any
 # duplicated input/output file names.
 #
-# Adapted from find_missing_and_empty.sh
+# Adapted from find_matching.sh
 #
-# The first argument is the list file of patterns.
+# The first argument is the FILE containing a list regex patterns corresponding to the desired
+# files.
 #
-# Second argument is the list of files to be searched.
+# The second argument is the FILE containing a list of files to be searched, e.g. the 'ls'
+# contents of a directory.
 #
 # Use example:
-# find_matching list_of_patterns.txt list_of_files.txt
+#
+# Say ./big_dir is a huge directory for which using 'find' iteratively is too slow. Use the
+# command
+#
+# \ls -L ./big_dir > list_of_files.txt
+# then perhpas cat list_of_files | awk '{print $9}' | sed '/^$/d' > list_of_files.txt
+# or just \ls -L -1 ./big_dir > list_of_files.txt
+#
+# Then, run the following command.
+#
+# grepd_matching list_of_patterns.txt list_of_files.txt
 #
 # The command will locate the files matching the pattern and write the matches to file.
 
-# For example, if you want to locate a file matching the pattern 'file_name_???,' save that
-# pattern in a file. Call the command with the pattern file as the first argument and the search
-# location as the second argument. If the file is found, the resulting output file will have
-# content such as 'dir/new_file_name123.bin'
+# For example, if you want to locate a file matching the pattern 'file_name_[0-9]\{6\},' save
+# that pattern in a file, replacing all \ with \\. Call the command with the pattern file as the
+# first argument and the search location as the second argument. If pattern matches a line in the
+# search file, the resulting output file big_dir_found.txt will have content such as
+# 'dir/new_file_name_123456.bin'
 #
 #JCL Apr 2023
 
@@ -69,7 +82,7 @@ else
 	file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
 	echo ${file_out}
     done
-    echo "OK"
+    echo "uniquely named"
 
     # check if output exists
     echo -n "output file ${file_out}... "
@@ -79,7 +92,7 @@ else
 	file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
 	echo ${file_out}
     done
-    echo "OK"
+    echo "${TAB}unique file name found"
 
     # read input file
     j=$(cat ${file_in} | wc -l)
@@ -90,7 +103,7 @@ else
 	echo "no file to search specified"
 	exit 1
     else
-	echo "search file $2... "
+	echo -n "search file $2... "
 	# check for search file
 	if [ -f $2 ]; then
 	    echo "OK"
@@ -101,12 +114,12 @@ else
     fi
 
     # set print frequency
-    if [ $k -lt 10 ]; then
+    if [ $j -lt 10 ]; then
 	nprint=1
     else
 	nprint=$((j/10))
     fi
-    echo "printing every $nprint lines"
+    echo "${TAB}printing one results for every $nprint lines"
 
     while read line; do
         fname=$line
