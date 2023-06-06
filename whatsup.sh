@@ -7,7 +7,7 @@ lsb_release -a 2>&1 | \grep "Description:" | sed -e 's/^Description:[\t]//'
 echo "   user:" $USER$USERNAME
 echo " groups:" `id -nG 2>/dev/null`
 echo "    pwd:" $PWD
-echo -n "   date:"; date
+echo -n "   date: "; date
 echo "    PID: $PPID"
 echo -n "   time: "
 if (ps -o etimes) &>/dev/null; then
