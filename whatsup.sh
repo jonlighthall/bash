@@ -5,7 +5,7 @@ echo -n "     IP: ";hostname -I
 echo -n "     OS: "
 lsb_release -a 2>&1 | \grep "Description:" | sed -e 's/^Description:[\t]//'
 echo "   user:" $USER$USERNAME
-echo " groups:" `id -nG`
+echo " groups:" `id -nG 2>/dev/null`
 echo "    pwd:" $PWD
 echo -n "   date:"; date
 echo "    PID: $PPID"
