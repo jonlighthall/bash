@@ -14,7 +14,7 @@ if (ps -o etimes) &>/dev/null; then
     if command -v sec2elap &>/dev/null; then
 	echo "$(sec2elap $(ps -p "$PPID" -o etimes | tail -n 1))"
     else
-	echo "elapsed time is $(ps -p "$PPID" -o etimes | tail -n 1) sec"
+	echo "elapsed time is $(ps -p "$PPID" -o etimes | tail -n 1 | sed 's/\s//g') sec"
     fi
 else
     echo $(ps -p $PPID -o etime)
