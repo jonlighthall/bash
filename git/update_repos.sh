@@ -130,7 +130,7 @@ do
 	    ${cmd}
 	    RETVAL=$?
 	    GIT_HIGHLIGHT='\x1b[100;37m'
-	    echo -en "${GIT_HIGHLIGHT}pull status${NORMAL}: "
+	    echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		pull_fail+="$repo "
@@ -145,7 +145,7 @@ do
 	    fi
 	    ${cmd}
 	    RETVAL=$?
-	    echo -en "${GIT_HIGHLIGHT}push status${NORMAL}: "
+	    echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
 	    if [[ $RETVAL != 0 ]]; then
 		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		push_fail+="$repo "
