@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# set tab
+${TAB:=""}
+
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
@@ -12,6 +15,8 @@ src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
+
+TAB+=${fTAB:='   '}
 
 # set source and target directories
 source_dir=$(dirname "$src_name")
@@ -114,6 +119,7 @@ do
     fi
 done
 bar 38 "--------- Done Making Links ----------"
+TAB=${TAB#$fTAB}
 # print time at exit
 echo -en "$(date +"%a %b %d %I:%M %p %Z") ${BASH_SOURCE##*/} "
 if command -v sec2elap &>/dev/null; then
