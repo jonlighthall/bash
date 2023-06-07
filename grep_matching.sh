@@ -120,20 +120,27 @@ else
 	nprint=$((j/10))
     fi
     echo "${TAB}printing one results for every $nprint lines"
+    m=0
 
     while read line; do
         fname=$line
         ((k++))
+	((m++))
 	if [ $(( k % $nprint)) -eq 0 ]; then
 	    echo -ne "\n$k/$j looking for ${fname}... "
 	else
-	    echo -n ","
+	    echo -ne "\x1b[2K\r$k/$j"
 	fi
 	grep "${fname}" $2 >> ${file_out}
 	if [ $(( k % $nprint)) -eq 0 ]; then
 	    echo "done"
+	    m=0
 	else
-	    echo -n "."
+	    if [ $((m%((nprint/3)))) -eq 0 ]; then
+		echo
+		m=0
+	    fi
+
 	fi
     done < $file_in
     echo
