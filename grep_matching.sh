@@ -117,14 +117,14 @@ else
     if [ $j -lt 10 ]; then
 	nprint=1
     else
-	nprint=$((j/10))
+	nprint=$((j/10+1))
     fi
     echo "${TAB}printing one results for every $nprint lines"
 
     while read line; do
         fname=$line
         ((k++))
-	echo -ne "\x1b[2K\r$k/$j"
+	printf "\x1b[2K\r%4d/$j %3d%%" $k $((((k*100))/j))
 	if [ $(( k % $nprint)) -eq 0 ]; then
 	    echo -ne " looking for ${fname}... "
 	fi
