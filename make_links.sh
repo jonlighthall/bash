@@ -43,6 +43,7 @@ for my_link in \
 	clean_mac \
 	file_age \
 	find_matching \
+	find_matching_and_move \
 	find_missing_and_empty \
 	fix_bad_extensions \
 	git/filter-repo-author \
