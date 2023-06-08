@@ -5,7 +5,7 @@
 # JCL Apr 2022
 #
 # set tab
-TAB=""
+${TAB:=''}
 
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
@@ -19,6 +19,8 @@ src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
+
+TAB+=${fTAB:='   '}
 
 # list repository paths, relative to home
 # settings
@@ -90,10 +92,10 @@ git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
 git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
 git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 
-loc_fail=""
-pull_fail=""
-push_fail=""
-mods=""
+loc_fail=''
+pull_fail=''
+push_fail=''
+mods=''
 
 for repo in $list
 do

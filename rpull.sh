@@ -10,7 +10,7 @@ CMD='rsync -vihtu --progress'
 # set copy pattern
 if [ $# -eq 0 ]; then
     echo "No pattern given. Coppying all."
-    PAT=""
+    PAT=''
 else
     PAT="$1"
 fi

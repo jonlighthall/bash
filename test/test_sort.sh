@@ -38,7 +38,7 @@ function add_marker () {
 
 function gen_marker () {
     echo "${TAB}generating unique marker..."
-    marker=""
+    marker=''
     add_marker
     while [[ ! -z $(find_marker) ]]; do
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
@@ -82,7 +82,7 @@ done
 hist_out=${HOME}/.bash_history
 
 N=0
-marker_list=""
+marker_list=''
 # find and mark timestamp lines
 for ((i=1;i<=5;i++))
 do
@@ -114,7 +114,7 @@ echo
 echo "test good list:"
 for ((j=$m_start;j<=$m_end;j++))
 do
-    marker=""
+    marker=''
     if [[ ! $bad_list =~ ${j} ]]; then
 	for ((i=1;i<=$N;i++))
 	do
