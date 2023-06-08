@@ -43,7 +43,7 @@ function add_marker () {
 
 function gen_marker () {
     echo "${TAB}generating unique marker..."
-    marker=""
+    marker=''
     add_marker
     while [[ ! -z $(find_marker) ]]; do
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
@@ -106,8 +106,8 @@ if [ $# -gt 0 ]; then
 fi
 
 # check list of files
-list_out=""
-list_del=""
+list_out=''
+list_del=''
 for hist_in in $list_in
 do
     echo -n "${hist_in}... "
@@ -150,7 +150,7 @@ echo -n "${TAB}delete trailing whitespaces... "
 sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${hist_out}
 echo "done"
 
-marker_list=""
+marker_list=''
 # find and mark timestamp lines
 gen_marker
 marker_list+="$marker "

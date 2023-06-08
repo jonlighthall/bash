@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # set tab
-${TAB:=""}
+${TAB:=''}
 
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
