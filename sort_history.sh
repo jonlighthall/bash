@@ -250,7 +250,7 @@ sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_out}
 echo "done"
 
 # save markers
-echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol})" >> ${hist_out}
+echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*}" >> ${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}
 
