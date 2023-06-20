@@ -46,10 +46,11 @@ function gen_marker () {
     echo "${TAB}generating unique marker..."
     marker=''
     add_marker
+    line_width=$(( $(tput cols) - 1 ))
     while [[ ! -z $(find_marker) ]]; do
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
 	echo -ne "found\t\t"
-	find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/" )
+	find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/" ) | cut -c -$line_width
 	add_marker
     done
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
