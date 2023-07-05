@@ -63,4 +63,4 @@ git filter-repo $@ --partial --commit-callback '
 TAB=${TAB#$fTAB}
 
 # print time at exit
-echo -e "\n$(date +"%a %b %d %I:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+echo -e "\n$(date +"%a %b %-d %I:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
