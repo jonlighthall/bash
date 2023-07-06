@@ -2,7 +2,7 @@
 # git/force_pull.sh - the remote name and branch can be optionally specified by the first and
 # second arguments, respectively. The default remote tracking branch is origin/master.
 
-# JCL Apr 2023
+# Apr 2023 JCL
 
 set -e
 # load formatting

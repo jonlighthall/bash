@@ -2,7 +2,7 @@
 #
 # update_packages.sh - update, upgrade, and clean installed packages
 #
-# JCL Oct 2020
+# Oct 2020 JCL
 #
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty

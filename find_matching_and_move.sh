@@ -23,7 +23,7 @@
 # dir/new_file_name123.bin
 # dir/subdir/new_file_name123.bin
 #
-#JCL Apr 2023
+# Apr 2023 JCL
 
 TAB="   "
 

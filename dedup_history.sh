@@ -8,7 +8,7 @@
 # this scrip assumes a cron job of the folling form is active
 # 0 0 * * 1 cp ~/.bash_history ~/.bash_history_$(date +'\%Y-\%m-\%d')
 #
-# JCL Dec 2021
+# Dec 2021 JCL
 fname=hist_list.txt
 find ${HOME} -maxdepth 1 -type f -name ".bash_history_*" | sort -n > $fname
 N=$(wc -l < $fname)
