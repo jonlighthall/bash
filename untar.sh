@@ -2,7 +2,7 @@
 #
 # untar.sh - untar archvies - why isn't this an intrinsic?
 #
-# JCL May 2022
+# May 2022 JCL
 
 echo "${0##*/}"
 if [ $# -eq 0 ]; then

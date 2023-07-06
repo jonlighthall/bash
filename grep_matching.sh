@@ -33,7 +33,7 @@
 # search file, the resulting output file big_dir_found.txt will have content such as
 # 'dir/new_file_name_123456.bin'
 #
-#JCL Apr 2023
+# Apr 2023 JCL
 
 TAB="   "
 

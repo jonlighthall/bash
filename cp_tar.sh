@@ -6,7 +6,7 @@
 #
 # Adapted from find_missing_and_empty.sh
 #
-#JCL Apr 2023
+# Apr 2023 JCL
 
 TAB="   "
 # set file names

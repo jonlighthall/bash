@@ -2,7 +2,7 @@
 # found in a Git repository will be removed from the repository. The
 # .git directory will not be searched.
 
-# JCL Nov 2021
+# Nov 2021 JCL
 
 if [ $# -eq 0 ]
 then

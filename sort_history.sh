@@ -3,7 +3,7 @@
 # sort_history.sh - this script will merge all commands in .bash_history with their corresponding
 # timestamps, sort the result, and unmerge the sorted list.
 #
-# JCL Apr 2023
+# Apr 2023 JCL
 
 set -e
 # load formatting

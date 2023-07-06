@@ -2,7 +2,7 @@
 
 # used to un-fix bad file extensions for OneDrive
 
-# JCL Nov 2021
+# Nov 2021 JCL
 
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
