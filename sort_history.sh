@@ -21,7 +21,8 @@ fi
 
 # set sort order (desired results with UTF-8 binary sort order)
 # must 'export' setting to take effect
-set_loc=en_US.UTF-8
+#set_loc=en_US.UTF-8
+set_loc=C
 export LC_COLLATE=$set_loc
 
 # define random marker functions
@@ -192,7 +193,7 @@ echo "${TAB}mark login lines... "
 N=${#TS_MARKER}
 echo "${TAB}${TAB}time stamp marker is $N long"
 beg_mark="!"
-end_mark="Z"
+end_mark="~"
 LI_MARKER=$beg_mark
 LO_MARKER=$end_mark
 for ((i=1;i<$N;i++))
@@ -275,3 +276,5 @@ fi
 echo -e "\nto compare changes"
 echo "${TAB}diffy ${hist_bak} ${hist_ref}"
 echo "${TAB}en ${hist_bak} ${hist_ref}"
+
+diff --color=auto --suppress-common-lines -yiEZbwB ${hist_bak} ${hist_ref}
