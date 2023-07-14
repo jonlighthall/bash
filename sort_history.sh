@@ -19,9 +19,8 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
-# set sort order (desired results with UTF-8 binary sort order)
+# set sort order (C sorting is the most consistient)
 # must 'export' setting to take effect
-#set_loc=en_US.UTF-8
 set_loc=C
 export LC_COLLATE=$set_loc
 
@@ -56,11 +55,12 @@ function gen_marker () {
 }
 
 # specify forbidden characters
-bad_list=$(echo {58..64} {91..96})
+#bad_list=$(echo {58..64} {91..96})
+bad_list="36 38 39 42 45 46 47 91 92 94"
 
 # define marker range
-m_start=48
-m_end=122
+m_start=34
+m_end=125
 m_span=$(( $m_end - $m_start + 1 ))
 
 # print bad list
@@ -251,7 +251,9 @@ sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_out}
 echo "done"
 
 # save markers
-echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*}" >> ${hist_out}
+N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_out} | wc -l)
+echo "${TAB}number of differences = $N"
+echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >> ${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}
 
