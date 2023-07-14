@@ -59,7 +59,7 @@ function gen_marker () {
 bad_list="36 38 39 42 45 46 47 91 92 94"
 
 # define marker range
-m_start=34
+m_start=35
 m_end=125
 m_span=$(( $m_end - $m_start + 1 ))
 
