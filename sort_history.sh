@@ -22,9 +22,7 @@ fi
 # set sort order (desired results with UTF-8 binary sort order)
 # must 'export' setting to take effect
 set_loc=en_US.UTF-8
-set_loc=C
 export LC_COLLATE=$set_loc
-#export LC_COLLATE=C
 
 # define random marker functions
 function find_marker () {
@@ -57,11 +55,11 @@ function gen_marker () {
 }
 
 # specify forbidden characters
-bad_list="32 36 39 42 45 46 47 91 92 94"
+bad_list=$(echo {58..64} {91..96})
 
 # define marker range
-m_start=32
-m_end=126
+m_start=48
+m_end=122
 m_span=$(( $m_end - $m_start + 1 ))
 
 # print bad list
@@ -212,7 +210,7 @@ echo "${TAB}${TAB}LC_COLLATE = ${set_loc} (${LCcol})"
 echo "${TAB}${TAB}unsorted:"
 echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
 echo "${TAB}${TAB}sorted:"
-echo $marker_list | xargs -n1 | sort -ub | sed "s/^/${TAB}${TAB}${TAB}/"
+echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}/"
 
 head_list="CONTIN INSERT LOGIN"
 tail_list="INDIFF LOGOUT SHUTDN SORT"
@@ -230,8 +228,7 @@ done
 
 # sort history
 echo -n "${TAB}sorting lines... "
-sort -ub ${hist_out} -o ${hist_out}
-#sort -n ${hist_out} -o ${hist_out}
+sort -u ${hist_out} -o ${hist_out}
 echo "done"
 echo -e "${TAB}\x1b[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
 
@@ -276,4 +273,5 @@ else
 fi
 
 echo -e "\nto compare changes"
-echo "${TAB}en ${hist_ref} ${hist_bak}"
+echo "${TAB}diffy ${hist_bak} ${hist_ref}"
+echo "${TAB}en ${hist_bak} ${hist_ref}"
