@@ -19,12 +19,10 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
-# set sort order (desired results with UTF-8 binary sort order)
+# set sort order (C sorting is the most consistient)
 # must 'export' setting to take effect
-set_loc=en_US.UTF-8
 set_loc=C
 export LC_COLLATE=$set_loc
-#export LC_COLLATE=C
 
 # define random marker functions
 function find_marker () {
@@ -57,11 +55,12 @@ function gen_marker () {
 }
 
 # specify forbidden characters
-bad_list="32 36 39 42 45 46 47 91 92 94"
+#bad_list=$(echo {58..64} {91..96})
+bad_list="36 38 39 42 45 46 47 91 92 94"
 
 # define marker range
-m_start=32
-m_end=126
+m_start=35
+m_end=125
 m_span=$(( $m_end - $m_start + 1 ))
 
 # print bad list
@@ -194,7 +193,7 @@ echo "${TAB}mark login lines... "
 N=${#TS_MARKER}
 echo "${TAB}${TAB}time stamp marker is $N long"
 beg_mark="!"
-end_mark="Z"
+end_mark="~"
 LI_MARKER=$beg_mark
 LO_MARKER=$end_mark
 for ((i=1;i<$N;i++))
@@ -212,7 +211,7 @@ echo "${TAB}${TAB}LC_COLLATE = ${set_loc} (${LCcol})"
 echo "${TAB}${TAB}unsorted:"
 echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
 echo "${TAB}${TAB}sorted:"
-echo $marker_list | xargs -n1 | sort -ub | sed "s/^/${TAB}${TAB}${TAB}/"
+echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}/"
 
 head_list="CONTIN INSERT LOGIN"
 tail_list="INDIFF LOGOUT SHUTDN SORT"
@@ -230,8 +229,7 @@ done
 
 # sort history
 echo -n "${TAB}sorting lines... "
-sort -ub ${hist_out} -o ${hist_out}
-#sort -n ${hist_out} -o ${hist_out}
+sort -u ${hist_out} -o ${hist_out}
 echo "done"
 echo -e "${TAB}\x1b[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
 
@@ -253,7 +251,9 @@ sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_out}
 echo "done"
 
 # save markers
-echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*}" >> ${hist_out}
+N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_out} | wc -l)
+echo "${TAB}number of differences = $N"
+echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >> ${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}
 
@@ -276,4 +276,7 @@ else
 fi
 
 echo -e "\nto compare changes"
-echo "${TAB}en ${hist_ref} ${hist_bak}"
+echo "${TAB}diffy ${hist_bak} ${hist_ref}"
+echo "${TAB}en ${hist_bak} ${hist_ref}"
+
+diff --color=auto --suppress-common-lines -yiEZbwB ${hist_bak} ${hist_ref}
