@@ -125,7 +125,7 @@ do
 
 	    # pull
 	    echo "pulling... "
-	    cmd="git pull -v --ff-only --all --tags --prune"
+	    cmd="timeout -s 9 10s git pull -v --ff-only" # --all --tags --prune"
 	    if [ $git_ver_maj -ge 2 ]; then
 		cmd+=" -4"
 	    fi
@@ -141,7 +141,7 @@ do
 	    fi
 	    # push
 	    echo "pushing... "
-	    cmd="git push -v --progress"
+	    cmd="timeout -s 9 10s git push -v --progress"
 	    if [ $git_ver_maj -ge 2 ]; then
 		cmd+=" -4"
 	    fi
