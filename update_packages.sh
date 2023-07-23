@@ -3,7 +3,10 @@
 # update_packages.sh - update, upgrade, and clean installed packages
 #
 # Oct 2020 JCL
-#
+
+# set tab
+${TAB:=''}
+
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
