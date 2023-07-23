@@ -3,7 +3,7 @@
 # update_repos.sh - push and pull a specified list of git repositories and print summaries
 #
 # Apr 2022 JCL
-#
+
 # set tab
 ${TAB:=''}
 
