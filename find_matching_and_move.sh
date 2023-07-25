@@ -56,7 +56,7 @@ else
 	else
 	    nprint=$((j/10))
 	fi
-	#	echo "${TAB}printing one results for every $nprint lines"
+	echo "${TAB}printing one results for every $nprint lines"
 
 	if [ $# -eq 1 ]; then
 	    echo "Please provide a target subdirectory"
@@ -66,12 +66,10 @@ else
 	    while read line; do
 		fname=$line
 		((k++))
-		#	    if [ $(( k % $nprint)) -eq 0 ]; then
-		echo -n "$k looking for ${fname}... "
-		#	    else
-		#		echo -n $k
-		#	    fi
-
+		printf "\x1b[2K\r%4d/$j %3d%%" $k $((((k*100))/j))
+		if [ $(( k % $nprint)) -eq 0 ]; then
+		    echo -ne " looking for ${fname}... "
+		fi
 		dir_par=${fname%/*}
 		dir_mv=${dir_par}/$2
 		if ! [ -d ${dir_mv} ]; then
@@ -79,16 +77,16 @@ else
 		    mkdir -pv ${dir_mv}
 		fi
 		if [ -f ${fname} ]; then
-		    #		if [ $(( k % $nprint)) -eq 0 ]; then
-		    echo "done"
-		    #		else
-		    #		    echo -n "."
-		    #		fi
+		    if [ $(( k % $nprint)) -eq 0 ]; then
+			echo "done"
+		    fi
 
-		    #		echo -n ${TAB}
 		    mv ${fname} ${dir_mv} | sed "s/^/${TAB}/"
-		else
-		    echo "not found"
+		    #else
+		    #   echo "not found"
+		fi
+		if [ $(( k % $nprint)) -eq 0 ]; then
+		    echo "done"
 		fi
 
 	    done < $file_in
