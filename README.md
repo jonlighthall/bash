@@ -69,39 +69,47 @@ files in the xx/ directory; over 141k files in total. Using utilities like ls or
 files matching a pattern will take 10s of seconds per search. Instead, use the following
 procedure.
 
-First, 'ls' for 'find' the directory once. For example, use the command:
+First, `ls` for `find` the directory once. For example, use the command:
 
-       find ./ -type f -name "*_f00500_*o.bin" > file_list/find_f00500_obin.txt
+````bash
+find ./ -type f -name "*_f00500_*o.bin" > file_list/find_f00500_obin.txt
+````
 
 to generate a list of files matching a particular pattern within a directory. In this example
-find_f00500_obin.txt is a list of all xxxxxx files with _f00500 in the file name, corresponding
-to 500Hz frequency.
+`find_f00500_obin.txt` is a list of all xxxxxx files with `_f00500` in the file name,
+corresponding to 500Hz frequency.
 
 Then the ouput file, not the directory can be interrogated very quickly. The
 list can be further wittled down with `grep` or `sed` commands. For example:
 
-     grep "_d0010_f00500" find_500_obin.txt | sort -u > find_d0100_f00500_obin.txt
+````bash
+grep "_d0010_f00500" find_500_obin.txt | sort -u > find_d0100_f00500_obin.txt
+````
 
-where find_d0010_f00500_obin.txt is a list of all files with _d0010_f00500 in the file name,
+where `find_d0010_f00500_obin.txt` is a list of all files with `_d0010_f00500` in the file name,
  corresponding to 10m depth and 500Hz frequency.
 
 Once the list has been appropriately reduced, it can be searched using the function
 grep_matching. Take for example, a list of file patterns, such as
 
-       $ head out_grep_2023-07-11-t1255/xxxxxx_bathy_cluster_01.txt
-       ens0[0-1][0-9]_2020[0-9]\\{6\\}_xxxx_000081_d0010_f00500_[0-9]\\{6\\}o.bin
+````bash
+$ head out_grep_2023-07-11-t1255/xxxxxx_bathy_cluster_01.txt
+ens0[0-1][0-9]_2020[0-9]\\{6\\}_xxxx_000081_d0010_f00500_[0-9]\\{6\\}o.bin
+````
 
 using the command, 
 
-      grep_matching out_grep_2023-07-11-t1255/xxxxxx_bathy_cluster_01.txt find_d0010_f00500_obin.txt
+````bash
+grep_matching out_grep_2023-07-11-t1255/xxxxxx_bathy_cluster_01.txt find_d0010_f00500_obin.txt
+````
 
 will generate a list of found files matching the pattern.
 
 Further, the loop command may be used to find several matches
 
+````bash
 for n in {1..10}; do grep_matching out_grep_2023-07-11-t1255/xxxxxx_bathy_cluster_$(printf "%02d" $n).txt find_d0010_f00500_obin.txt ; done
-
-
+````
 
 ## other scripts
 | script               | description                           | 
