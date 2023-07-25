@@ -40,12 +40,9 @@ else
     # set file names
     file_in=$(readlink -f $1)
     echo "argument 1: $1"
-    echo "input file: ${file_in}"
-
     echo -n " input file ${file_in}... "
     if [ -f ${file_in} ]; then
 	echo "exits"
-
 	# read input file
 	j=$(cat ${file_in} | wc -l)
 	echo "${TAB}and has $j entries"
@@ -54,10 +51,11 @@ else
 	if [ $j -lt 10 ]; then
 	    nprint=1
 	else
-	    nprint=$((j/10))
+	    nprint=$((j/10+1))
 	fi
 	echo "${TAB}printing one results for every $nprint lines"
 
+	# parse arguments
 	if [ $# -eq 1 ]; then
 	    echo "Please provide a target subdirectory"
 	    exit 1
