@@ -2,8 +2,8 @@
 Git bash scripts.
 
 ## general
-| script               | description                           | 
-| -------------------- | ------------------------------------  | 
+| script               | description                           |
+| -------------------- | ------------------------------------  |
 | [`apply_hashes`](apply_hashes.sh) |
 | [`force_pull`](force_pull.sh) |
 | [`gita`](gita.sh) |
@@ -28,16 +28,16 @@ from <https://help.github.com/articles/changing-author-info/>
 git push --force --tags origin 'refs/heads/*'
 ````
 
-| script               | description                           | 
-| -------------------- | ------------------------------------  | 
+| script               | description                           |
+| -------------------- | ------------------------------------  |
 | [`filter-branch-author`](filter-branch-author.sh) |
 | [`filter-branch-committer`](filter-branch-committer.sh) |
 | [`filter-branch-email`](filter-branch-email.sh) |
 | [`filter-branch-hello`](filter-branch-hello.sh) |
 
 ### `filter-repo`
-| script               | description                           | 
-| -------------------- | ------------------------------------  | 
+| script               | description                           |
+| -------------------- | ------------------------------------  |
 | [`filter-repo-author`](filter-repo-author.sh) |
 | [`filter-repo-author-loop`](filter-repo-author-loop.sh) |
 | [`filter-repo-committer`](filter-repo-committer.sh) |
@@ -99,21 +99,21 @@ or
 unset hash_local
 hash_local=$(git log | grep -B4 "$(git log origin/master --format=%s -n 1)" | head -n 1 | awk '{print $2}')
 if [ ! -z ${hash_local} ]; then
-   echo $hash_local   
-   git rev-list $hash_local..HEAD
-   unset hash_start
-   hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
-   unset hash_end
-   hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
+    echo $hash_local
+    git rev-list $hash_local..HEAD
+    unset hash_start
+    hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
+    unset hash_end
+    hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
 fi
 unset hash_remote
 hash_remote=$(git log origin/master | grep -B4 "$(git log $hash_local --format=%s -n 1)" | head -n 1 | awk '{print $2}')
 git stash
 if [ ! -z ${hash_start} ]; then
-   git reset --hard $hash_remote
-   git cherry-pick ${hash_start}^..$hash_end
+    git reset --hard $hash_remote
+    git cherry-pick ${hash_start}^..$hash_end
 else
-   git reset $hash_remote
+    git reset $hash_remote
 fi
 git pull
 ```
