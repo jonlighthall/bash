@@ -6,7 +6,7 @@ space='\x1B[30;106m'
 
 # set tab
 thisTAB='   '
-for var in TAB fTAB profTAB comTAB
+for var in TAB #fTAB profTAB comTAB
 do
     val=${!var}
     i=${#val}
