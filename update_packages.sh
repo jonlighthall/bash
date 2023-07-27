@@ -5,7 +5,7 @@
 # Oct 2020 JCL
 
 # set tab
-${TAB:=''}
+:${TAB:=''}
 
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
