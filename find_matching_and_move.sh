@@ -60,36 +60,42 @@ else
 	    echo "Please provide a target subdirectory"
 	    exit 1
 	else
-	    echo "argument 2: $2"
-	    while read line; do
-		fname=$line
-		((k++))
-		printf "\x1b[2K\r%4d/$j %3d%%" $k $((((k*100))/j))
-		if [ $(( k % $nprint)) -eq 0 ]; then
-		    echo -ne " looking for ${fname}... "
-		fi
-		# define subdir
-		dir_par=${fname%/*}
-		dir_mv=${dir_par}/$2
-		if ! [ -d ${dir_mv} ]; then
-		    echo "${dir_mv} not found"
-		    mkdir -pv ${dir_mv}
-		fi
-		# move matches
-		if [ -f ${fname} ]; then
-		    mv ${fname} ${dir_mv} | sed "s/^/${TAB}/"
-		fi
-		if [ $(( k % $nprint)) -eq 0 ]; then
-		    if [ -f ${fname} ]; then
-			echo "done"
-		    else
-			echo "not found"
-		    fi
-		fi
-	    done < $file_in
-	    echo
-	    echo $k "file names checked"
+	    echo "target subdirectory: $2"
 	fi
+
+	# process input file
+    	while read line; do
+            fname=$line
+            ((k++))
+	    # print status
+	    printf "\x1b[2K\r%4d/$j %3d%%" $k $((((k*100))/j))
+	    if [ $(( k % $nprint)) -eq 0 ]; then
+		echo -ne " looking for ${fname}... "
+	    fi
+	    # define subdir
+	    dir_par=${fname%/*}
+	    dir_mv=${dir_par}/$2
+	    if ! [ -d ${dir_mv} ]; then
+		echo "${dir_mv} not found"
+		mkdir -pv ${dir_mv}
+	    fi
+	    # move matches
+	    if [ -f ${fname} ]; then
+		mv ${fname} ${dir_mv} | sed "s/^/${TAB}/"
+	    fi
+	    # print result
+	    if [ $(( k % $nprint)) -eq 0 ]; then
+		if [ -f ${fname} ]; then
+		    echo "done"
+		else
+		    echo "not found"
+		fi
+	    fi
+	done < $file_in
+	echo
+	# print summary
+	echo $k "file names checked"
+	echo "$((j-k)) files not searched for"
     else
 	echo "does not exit"
 	exit 1
