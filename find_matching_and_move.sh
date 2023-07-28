@@ -11,7 +11,7 @@
 # The second argument is the DIRECTORY specifying the named sub-directory to move the matching files
 #
 # Use example:
-
+#
 # find_matching output.txt subdir
 #
 #  the command will take the located files specified by the list and move them to the

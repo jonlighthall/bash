@@ -122,7 +122,18 @@ else
 	    fi
 	fi
 
-	while read line; do
+	# read input file
+	j=$(cat ${file_in} | wc -l)
+	echo " input file ${file_in} has $j entries"
+
+	# set print frequency
+	if [ $j -lt 10 ]; then
+            nprint=1
+	else
+            nprint=$((j/10+1))
+	fi
+
+    	while read line; do
             fname=$line
             ((k++))
 	    printf "\x1b[2K\r%4d/$j %3d%%" $k $((((k*100))/j))
@@ -144,7 +155,6 @@ else
 	echo "does not exit"
 	exit 1
     fi
-
 fi
 # print time at exit
 echo -e "\n$(date +"%a %b %-d %I:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
