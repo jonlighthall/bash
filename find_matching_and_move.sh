@@ -68,25 +68,24 @@ else
 		if [ $(( k % $nprint)) -eq 0 ]; then
 		    echo -ne " looking for ${fname}... "
 		fi
+		# define subdir
 		dir_par=${fname%/*}
 		dir_mv=${dir_par}/$2
 		if ! [ -d ${dir_mv} ]; then
 		    echo "${dir_mv} not found"
 		    mkdir -pv ${dir_mv}
 		fi
+		# move matches
 		if [ -f ${fname} ]; then
-		    if [ $(( k % $nprint)) -eq 0 ]; then
-			echo "done"
-		    fi
-
 		    mv ${fname} ${dir_mv} | sed "s/^/${TAB}/"
-		    #else
-		    #   echo "not found"
 		fi
 		if [ $(( k % $nprint)) -eq 0 ]; then
-		    echo "done"
+		    if [ -f ${fname} ]; then
+			echo "done"
+		    else
+			echo "not found"
+		    fi
 		fi
-
 	    done < $file_in
 	    echo
 	    echo $k "file names checked"
