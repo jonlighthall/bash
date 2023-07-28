@@ -122,35 +122,38 @@ else
 	    fi
 	fi
 
-	# read input file
-	j=$(cat ${file_in} | wc -l)
-	echo " input file ${file_in} has $j entries"
-
-	# set print frequency
-	if [ $j -lt 10 ]; then
-            nprint=1
-	else
-            nprint=$((j/10+1))
-	fi
-
+	# process input file
     	while read line; do
             fname=$line
             ((k++))
+	    # print status
 	    printf "\x1b[2K\r%4d/$j %3d%%" $k $((((k*100))/j))
 	    if [ $(( k % $nprint)) -eq 0 ]; then
 		echo -ne " looking for ${fname}... "
 	    fi
+	    # save matches to file
 	    grep "${fname}" $2 >> ${file_out}
+	    RETVAL=$?
+	    # print result
 	    if [ $(( k % $nprint)) -eq 0 ]; then
-		echo "done"
+		if [[ $RETVAL != 0 ]]; then
+		    echo "done"
+		else
+		    echo "not found"
+		fi
 	    fi
 	done < $file_in
 	echo
+	# print summary
 	echo $k "file names checked"
 	echo "$((j-k)) files not searched for"
 	l=$(cat ${file_out} | wc -l)
 	echo "$l files found"
-	echo "$((j-l)) files not found"
+	if [ $j -lt $l ]; then
+	    printf "%0.2f files found for each pattern" $(bc <<< "scale=2; $l / $j")
+	   else
+	       echo "$((j-l)) files not found"
+	fi
     else
 	echo "does not exit"
 	exit 1
