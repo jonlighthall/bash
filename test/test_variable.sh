@@ -56,33 +56,36 @@ if [ ! -z ${VB+dummy} ]; then # set
 	echo -e "${FALSE}"
     fi
 
-    echo -e -n "           quotes : " # fails when unset: command not found
-    if "${VB}"; then
-	echo -e " ${TRUE}"
-    else
-	echo -e "${FALSE}"
-    fi
-    echo -e -n "        test [] t : " # fails when unset: unary operator expected
-    if [ $VB = 'true' ]; then
-	echo -e " ${TRUE}"
-    else
-	echo -e "${FALSE}"
-    fi
-    echo -e -n "    brackets [] t : " # fails when unset: unary operator expected
-    if [ ${VB} = 'true' ]; then
-	echo -e " ${TRUE}"
-    else
-	echo -e "${FALSE}"
-    fi
-
-    echo -e -n "   no quotes [] t : " # fails when unset: unary operator expected
-    if [ ${VB} = true ]; then
-	echo -e " ${TRUE}"
-    else
-	echo -e "${FALSE}"
-    fi
-
     if [ ! -z ${VB-dummy} ]; then # not null
+
+	echo -e -n "           quotes : " # fails when unset or null: command not found
+	if "${VB}"; then
+	    echo -e " ${TRUE}"
+	else
+	    echo -e "${FALSE}"
+	fi
+
+	echo -e -n "        test [] t : " # fails when unset or null: unary operator expected
+	if [ $VB = 'true' ]; then
+	    echo -e " ${TRUE}"
+	else
+	    echo -e "${FALSE}"
+	fi
+	echo -e -n "    brackets [] t : " # fails when unset or null: unary operator expected
+	if [ ${VB} = 'true' ]; then
+	    echo -e " ${TRUE}"
+	else
+	    echo -e "${FALSE}"
+	fi
+
+	echo -e -n "   no quotes [] t : " # fails when unset or null: unary operator expected
+	if [ ${VB} = true ]; then
+	    echo -e " ${TRUE}"
+	else
+	    echo -e "${FALSE}"
+	fi
+
+
 	if [ ${VB} = true ] || [ ${VB} = false ]; then # boolean
 	    :
 	fi
