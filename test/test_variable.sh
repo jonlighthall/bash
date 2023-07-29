@@ -91,26 +91,7 @@ if [ ! -z ${VB+dummy} ]; then # set
     fi
 fi
 
-echo -e -n "          test [] : "
-if [ $VB ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-echo -e -n "      brackets [] : "
-if [ ${VB} ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-
-echo -e -n "         quotes []: "
-if [ "${VB}" ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-
+# NB [] tests must include a comparison, otherwise any non-null (including false) will test as true 
 echo -e -n "      quotes [] t : "
 if [ "${VB}" = "true" ]; then
     echo -e " ${TRUE}"
@@ -141,6 +122,7 @@ else
     echo -e "${FALSE}"
 fi
 
+# NB -n arguments must be in quotes
 echo -e -n "      set and true: "
 if [ -n "${VB:+dummy}" ] && [ ${VB} = true ]; then
     echo -e " ${TRUE}"
@@ -238,6 +220,7 @@ else
 fi
 
 # not null, quotes
+# NB -n arguments must be in quotes
 echo -e "----------------------------------------------------"
 echo -e -n "NOT NULL (-n \"\")      : "
 if [ -n "${VB}" ]; then
@@ -312,6 +295,7 @@ else
 fi
 echo -e "----------------------------------------------------"
 # not null ands, quotes
+# NB -n arguments must be in quotes
 echo -e "----------------------------------------------------"
 echo -e -n "NOT NULL (! -z && -n \"\")    : "
 if [ ! -z ${VB} ] && [ -n "${VB}"  ]; then
@@ -359,6 +343,7 @@ fi
 
 echo -e "----------------------------------------------------"
 # impossible and
+# NB -n arguments must be in quotes
 echo -e "----------------------------------------------------"
 echo -e -n "    NULL and NOT NULL (-z && -n \"\")     : "
 if [ -z ${VB} ] && [ -n "${VB}"  ]; then
