@@ -46,13 +46,6 @@ echo -e -n "             bare : "
 	echo -e "${FALSE}"
 fi
 
-echo -e -n "           quotes : " # fails for null
-if "${VB}"; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-
 echo -e -n "          test [] : "
 if [ $VB ]; then
     echo -e " ${TRUE}"
@@ -66,27 +59,14 @@ else
     echo -e "${FALSE}"
 fi
 
-echo -e -n "         quotes []: "
+echo -e -n "        quotes [] : "
 if [ "${VB}" ]; then
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
 fi
 
-echo -e -n "        test [] t : "  # fails for null
-if [ $VB = 'true' ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-echo -e -n "    brackets [] t : " # fails for null
-if [ ${VB} = 'true' ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-
-echo -e -n "      quotes [] t :"
+echo -e -n "      quotes [] t : "
 if [ "${VB}" = "true" ]; then
     echo -e " ${TRUE}"
 else
