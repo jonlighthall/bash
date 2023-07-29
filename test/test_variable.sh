@@ -43,6 +43,32 @@ echo -e "----------------------------------------------------"
 echo -e "----------------------------------------------------"
 
 if [ ! -z ${VB+dummy} ]; then # set
+    echo -e -n "           quotes : " # fails when unset: command not found
+    if "${VB}"; then
+	echo -e " ${TRUE}"
+    else
+	echo -e "${FALSE}"
+    fi
+    echo -e -n "        test [] t : " # fails when unset: unary operator expected
+    if [ $VB = 'true' ]; then
+	echo -e " ${TRUE}"
+    else
+	echo -e "${FALSE}"
+    fi
+    echo -e -n "    brackets [] t : " # fails when unset: unary operator expected
+    if [ ${VB} = 'true' ]; then
+	echo -e " ${TRUE}"
+    else
+	echo -e "${FALSE}"
+    fi
+
+    echo -e -n "   no quotes [] t : " # fails when unset: unary operator expected
+    if [ ${VB} = true ]; then
+	echo -e " ${TRUE}"
+    else
+	echo -e "${FALSE}"
+    fi
+
     if [ ! -z ${VB-dummy} ]; then # not null
 	if [ ${VB} = true ] || [ ${VB} = false ]; then # boolean
 	    :
@@ -58,12 +84,6 @@ else
 fi
 echo -e -n "         brackets : " # true when null or unset
 if ${VB}; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-echo -e -n "           quotes : " # fails for null
-if "${VB}"; then
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
@@ -89,19 +109,6 @@ else
     echo -e "${FALSE}"
 fi
 
-echo -e -n "        test [] t : "  # fails for null
-if [ $VB = 'true' ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-echo -e -n "    brackets [] t : " # fails for null
-if [ ${VB} = 'true' ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-
 echo -e -n "      quotes [] t : "
 if [ "${VB}" = "true" ]; then
     echo -e " ${TRUE}"
@@ -111,13 +118,6 @@ fi
 
 echo -e -n " quotes [] t bare : "
 if [ "${VB}" = true ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-
-echo -e -n "   no quotes [] t : "
-if [ ${VB} = true ]; then
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
