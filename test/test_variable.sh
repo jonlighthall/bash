@@ -9,21 +9,30 @@ echo "VB = '${VB}'"
 echo -e "----------------------------------------------------"
 # what is it?
 echo -e "----------------------------------------------------"
-echo -n "is VB set : "
+echo -n "is VB set    : "
 if [ ! -z ${VB+dummy} ]; then
     echo -e " ${TRUE}: set"
-    echo -n "is VB null: "
+    echo -n "is VB null   : "
     if [ -z ${VB-dummy} ]; then
 	echo -e " ${TRUE}: null (empty)"
-	echo -e "\n\x1B[1mVB is set and null"
+	echo -e "\n\x1B[1mVB is set and null\x1B[0m"
     else
 	echo -e "${FALSE}: not null"
-	echo -n "is VB true: "
-	if ${VB}; then # fails when what
+	echo -n "is VB boolean: "
+	if [ ${VB} = true ] || [ ${VB} = false ]; then
 	    echo -e " ${TRUE}"
+	    echo -n "is VB true: "
+	    if ${VB}; then # fails when what
+		echo -e " ${TRUE}"
+		echo -e "\n\x1B[1mVB is set and ${TRUE}"
+	    else
+		echo -e "${FALSE}"
+		echo -e "\n\x1B[1mVB is set and ${FALSE}"
+	    fi
 	else
-	    echo -e "${FALSE}"
-	fi	
+	    echo -e "${FALSE}: not boolean"
+	fi
+
     fi
 else
     echo -e "${FALSE}: ${UNSET}"
@@ -33,48 +42,38 @@ echo -e "----------------------------------------------------"
 
 # true false
 echo -e "----------------------------------------------------"
-echo -e -n "             bare : " # true when null or unset
-    if $VB ; then # fails when what
-	echo -e " ${TRUE}"
-    else
-	echo -e "${FALSE}"
+
+if [ ! -z ${VB+dummy} ]; then # set
+    if [ ! -z ${VB-dummy} ]; then # not null
+	if [ ${VB} = true ] || [ ${VB} = false ]; then # boolean
+
+	    echo -e -n "             bare : " # true when null or unset
+	    if $VB ; then
+		echo -e " ${TRUE}"
+	    else
+		echo -e "${FALSE}"
+	    fi
+	    echo -e -n "         brackets : " # true when null or unset
+	    if ${VB}; then
+		echo -e " ${TRUE}"
+	    else
+		echo -e "${FALSE}"
+	    fi
+
+	    echo -e -n "   no quotes [] t : "
+	    if [ ${VB} = true ]; then
+		echo -e " ${TRUE}"
+	    else
+		echo -e "${FALSE}"
+	    fi
+
+	fi
     fi
-    echo -e -n "         brackets : " # true when null or unset
-    if ${VB}; then # fails when what
-	echo -e " ${TRUE}"
-    else
-	echo -e "${FALSE}"
 fi
 
-echo -e -n "          test [] : " # true when 'false'
-if [ $VB ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-echo -e -n "      brackets [] : " # true when 'false'
-if [ ${VB} ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-
-echo -e -n "        quotes [] : " # true when 'false'
-if [ "${VB}" ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
 
 echo -e -n "      quotes [] t : "
 if [ "${VB}" = "true" ]; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-
-echo -e -n "     quotes [] t' : "
-if [ "${VB}" = 'true' ]; then
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
@@ -87,8 +86,6 @@ else
     echo -e "${FALSE}"
 fi
 
-
-
 # practical tests
 echo -e "----------------------------------------------------"
 echo -e -n "        not unset\x1B[0m : "
@@ -99,27 +96,25 @@ else
 fi
 
 echo -e -n "not unset\x1B[0m and true\x1B[0m: "
-if [ ! -z ${VB:+dummy} ] && ${VB}; then
+if [ ! -z ${VB:+dummy} ] && [ ${VB} = true ]; then
     echo -e " ${TRUE}" # fails when what
 else
     echo -e "${FALSE}"
 fi
 
-echo -e -n "      set and true: "  # true for null or unset
-if [ -n ${VB:+dummy} ] && ${VB}; then # fails when what
+echo -e -n "      set and true: "
+if [ -n "${VB:+dummy}" ] && [ ${VB} = true ]; then
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
 fi
-
 
 echo -e -n "     set and false: "
-if [ -n ${VB:+dummy} ] && ! ${VB}; then
+if [ -n "${VB:+dummy}" ] && [ ${VB} = false ]; then
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
 fi
-
 
 echo -e "----------------------------------------------------"
 # null, no quotes
@@ -145,7 +140,7 @@ if [ -z ${VB:-dummy} ]; then
 else
     echo -e "${FALSE}: ?? set and not null"
     # unset - false
-    
+
     # set not null - false
     # set null - false
 fi
