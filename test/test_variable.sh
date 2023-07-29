@@ -19,7 +19,7 @@ if [ ! -z ${VB+dummy} ]; then
     else
 	echo -e "${FALSE}: not null"
 	echo -n "is VB true: "
-	if ${VB}; then
+	if ${VB}; then # fails when what
 	    echo -e " ${TRUE}"
 	else
 	    echo -e "${FALSE}"
@@ -33,33 +33,33 @@ echo -e "----------------------------------------------------"
 
 # true false
 echo -e "----------------------------------------------------"
-echo -e -n "             bare : "
-    if $VB ; then
+echo -e -n "             bare : " # true when null or unset
+    if $VB ; then # fails when what
 	echo -e " ${TRUE}"
     else
 	echo -e "${FALSE}"
     fi
-    echo -e -n "         brackets : "
-    if ${VB}; then
+    echo -e -n "         brackets : " # true when null or unset
+    if ${VB}; then # fails when what
 	echo -e " ${TRUE}"
     else
 	echo -e "${FALSE}"
 fi
 
-echo -e -n "          test [] : "
+echo -e -n "          test [] : " # true when 'false'
 if [ $VB ]; then
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
 fi
-echo -e -n "      brackets [] : "
+echo -e -n "      brackets [] : " # true when 'false'
 if [ ${VB} ]; then
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
 fi
 
-echo -e -n "        quotes [] : "
+echo -e -n "        quotes [] : " # true when 'false'
 if [ "${VB}" ]; then
     echo -e " ${TRUE}"
 else
@@ -73,6 +73,24 @@ else
     echo -e "${FALSE}"
 fi
 
+echo -e -n "     quotes [] t' : "
+if [ "${VB}" = 'true' ]; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
+
+echo -e -n " quotes [] t bare : "
+if [ "${VB}" = true ]; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
+
+
+
+# practical tests
+echo -e "----------------------------------------------------"
 echo -e -n "        not unset\x1B[0m : "
 if [ ! -z ${VB:+dummy} ]; then
     echo -e " ${TRUE}"
@@ -82,17 +100,26 @@ fi
 
 echo -e -n "not unset\x1B[0m and true\x1B[0m: "
 if [ ! -z ${VB:+dummy} ] && ${VB}; then
+    echo -e " ${TRUE}" # fails when what
+else
+    echo -e "${FALSE}"
+fi
+
+echo -e -n "      set and true: "  # true for null or unset
+if [ -n ${VB:+dummy} ] && ${VB}; then # fails when what
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
 fi
 
-echo -e -n "      set and true: "  # fails for null
-if [ -n ${VB:+dummy} ] && ${VB}; then
+
+echo -e -n "     set and false: "
+if [ -n ${VB:+dummy} ] && ! ${VB}; then
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
 fi
+
 
 echo -e "----------------------------------------------------"
 # null, no quotes
