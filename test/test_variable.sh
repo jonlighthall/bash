@@ -71,13 +71,7 @@ do
 
     if [ ! -z ${!VAR+dummy} ]; then # set
 	if [ ! -z ${!VAR-dummy} ]; then # not null
-	    echo -e -n "        test [] t : " # fails when unset or null: unary operator expected
-	    if [ $!VAR = 'true' ]; then
-		echo -e " ${TRUE}"
-	    else
-		echo -e "${FALSE}"
-	    fi
-
+	    # NB when using indirect reference, the parameter must be in brackets
 	    echo -e -n "    brackets [] t : " # fails when unset or null: unary operator expected
 	    if [ ${!VAR} = 'true' ]; then
 		echo -e " ${TRUE}"
