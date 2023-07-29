@@ -77,6 +77,7 @@ do
 	    else
 		echo -e "${FALSE}"
 	    fi
+
 	    echo -e -n "    brackets [] t : " # fails when unset or null: unary operator expected
 	    if [ ${!VAR} = 'true' ]; then
 		echo -e " ${TRUE}"
@@ -92,12 +93,7 @@ do
 	    fi
 
 	    if [ ${!VAR} = true ] || [ ${!VAR} = false ]; then # boolean
-		echo -e -n "             bare : " # true when unset or null; fails when non-boolean: command not found
-		if $!VAR ; then
-		    echo -e " ${TRUE}"
-		else
-		    echo -e "${FALSE}"
-		fi
+		# NB when using indirect reference, the parameter must be in brackets
 		echo -e -n "         brackets : " # true when unset or null; fails when non-boolean: command not found
 		if ${!VAR}; then
 		    echo -e " ${TRUE}"
@@ -111,7 +107,6 @@ do
 		else
 		    echo -e "${FALSE}"
 		fi
-
 	    fi
 	fi
     fi
@@ -182,13 +177,12 @@ do
     echo -e -n "    NULL (-z :-)      : "
     if [ -z ${!VAR:-dummy} ]; then
 	echo -e " ${TRUE}: ?? ${UNSET}"
-
+	# set and null, different than -
     else
 	echo -e "${FALSE}: ?? set and not null"
-	# unset - false
+	# unset - false, same as -
 
 	# set not null - false
-	# set null - false
     fi
 
 
