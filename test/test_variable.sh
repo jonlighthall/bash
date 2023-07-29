@@ -32,7 +32,6 @@ if [ ! -z ${VB+dummy} ]; then
 	else
 	    echo -e "${FALSE}: not boolean"
 	fi
-
     fi
 else
     echo -e "${FALSE}: ${UNSET}"
@@ -46,31 +45,62 @@ echo -e "----------------------------------------------------"
 if [ ! -z ${VB+dummy} ]; then # set
     if [ ! -z ${VB-dummy} ]; then # not null
 	if [ ${VB} = true ] || [ ${VB} = false ]; then # boolean
-
-	    echo -e -n "             bare : " # true when null or unset
-	    if $VB ; then
-		echo -e " ${TRUE}"
-	    else
-		echo -e "${FALSE}"
-	    fi
-	    echo -e -n "         brackets : " # true when null or unset
-	    if ${VB}; then
-		echo -e " ${TRUE}"
-	    else
-		echo -e "${FALSE}"
-	    fi
-
-	    echo -e -n "   no quotes [] t : "
-	    if [ ${VB} = true ]; then
-		echo -e " ${TRUE}"
-	    else
-		echo -e "${FALSE}"
-	    fi
-
+	    :
 	fi
     fi
 fi
 
+echo -e -n "             bare : " # true when null or unset
+if $VB ; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
+echo -e -n "         brackets : " # true when null or unset
+if ${VB}; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
+echo -e -n "           quotes : " # fails for null
+if "${VB}"; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
+
+echo -e -n "          test [] : "
+if [ $VB ]; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
+echo -e -n "      brackets [] : "
+if [ ${VB} ]; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
+
+echo -e -n "         quotes []: "
+if [ "${VB}" ]; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
+
+echo -e -n "        test [] t : "  # fails for null
+if [ $VB = 'true' ]; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
+echo -e -n "    brackets [] t : " # fails for null
+if [ ${VB} = 'true' ]; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
 
 echo -e -n "      quotes [] t : "
 if [ "${VB}" = "true" ]; then
@@ -81,6 +111,13 @@ fi
 
 echo -e -n " quotes [] t bare : "
 if [ "${VB}" = true ]; then
+    echo -e " ${TRUE}"
+else
+    echo -e "${FALSE}"
+fi
+
+echo -e -n "   no quotes [] t : "
+if [ ${VB} = true ]; then
     echo -e " ${TRUE}"
 else
     echo -e "${FALSE}"
