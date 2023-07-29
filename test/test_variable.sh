@@ -21,7 +21,7 @@ if [ ! -z ${VB+dummy} ]; then
 	echo -n "is VB boolean: "
 	if [ ${VB} = true ] || [ ${VB} = false ]; then
 	    echo -e " ${TRUE}"
-	    echo -n "is VB true: "
+	    echo -n "is VB true   : "
 	    if ${VB}; then # fails when what
 		echo -e " ${TRUE}"
 		echo -e "\n\x1B[1mVB is set and ${TRUE}"
@@ -43,20 +43,20 @@ echo -e "----------------------------------------------------"
 echo -e "----------------------------------------------------"
 
 if [ ! -z ${VB+dummy} ]; then # set
-    echo -e -n "             bare : " # true when null or unset
-    if $VB ; then
-	echo -e " ${TRUE}"
-    else
-	echo -e "${FALSE}"
-    fi
-    echo -e -n "         brackets : " # true when null or unset
-    if ${VB}; then
-	echo -e " ${TRUE}"
-    else
-	echo -e "${FALSE}"
-    fi
 
     if [ ! -z ${VB-dummy} ]; then # not null
+	echo -e -n "             bare : " # true when unset or null
+	if $VB ; then
+	    echo -e " ${TRUE}"
+	else
+	    echo -e "${FALSE}"
+	fi
+	echo -e -n "         brackets : " # true when unset or null
+	if ${VB}; then
+	    echo -e " ${TRUE}"
+	else
+	    echo -e "${FALSE}"
+	fi
 
 	echo -e -n "           quotes : " # fails when unset or null: command not found
 	if "${VB}"; then
@@ -84,7 +84,6 @@ if [ ! -z ${VB+dummy} ]; then # set
 	else
 	    echo -e "${FALSE}"
 	fi
-
 
 	if [ ${VB} = true ] || [ ${VB} = false ]; then # boolean
 	    :
@@ -128,7 +127,7 @@ fi
 
 # practical tests
 echo -e "----------------------------------------------------"
-echo -e -n "        not unset\x1B[0m : "
+echo -e -n "   not unset (set): "
 if [ ! -z ${VB:+dummy} ]; then
     echo -e " ${TRUE}"
 else
