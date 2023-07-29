@@ -31,6 +31,7 @@ if [ ! -z ${VB+dummy} ]; then
 	    fi
 	else
 	    echo -e "${FALSE}: not boolean"
+	    echo -e "\n\x1B[1mVB is set and not boolean"
 	fi
     fi
 else
@@ -39,31 +40,11 @@ else
 fi
 echo -e "----------------------------------------------------"
 
-# true false
+# true/false
 echo -e "----------------------------------------------------"
 
 if [ ! -z ${VB+dummy} ]; then # set
-
     if [ ! -z ${VB-dummy} ]; then # not null
-	echo -e -n "             bare : " # true when unset or null
-	if $VB ; then
-	    echo -e " ${TRUE}"
-	else
-	    echo -e "${FALSE}"
-	fi
-	echo -e -n "         brackets : " # true when unset or null
-	if ${VB}; then
-	    echo -e " ${TRUE}"
-	else
-	    echo -e "${FALSE}"
-	fi
-
-	echo -e -n "           quotes : " # fails when unset or null: command not found
-	if "${VB}"; then
-	    echo -e " ${TRUE}"
-	else
-	    echo -e "${FALSE}"
-	fi
 
 	echo -e -n "        test [] t : " # fails when unset or null: unary operator expected
 	if [ $VB = 'true' ]; then
@@ -86,12 +67,31 @@ if [ ! -z ${VB+dummy} ]; then # set
 	fi
 
 	if [ ${VB} = true ] || [ ${VB} = false ]; then # boolean
-	    :
+	    echo -e -n "             bare : " # true when unset or null; fails when non-boolean: command not found
+	    if $VB ; then
+		echo -e " ${TRUE}"
+	    else
+		echo -e "${FALSE}"
+	    fi
+	    echo -e -n "         brackets : " # true when unset or null; fails when non-boolean: command not found
+	    if ${VB}; then
+		echo -e " ${TRUE}"
+	    else
+		echo -e "${FALSE}"
+	    fi
+
+	    echo -e -n "           quotes : " # fails when unset or null or non-boolean: command not found
+	    if "${VB}"; then
+		echo -e " ${TRUE}"
+	    else
+		echo -e "${FALSE}"
+	    fi
+
 	fi
     fi
 fi
 
-# NB [] tests must include a comparison, otherwise any non-null (including false) will test as true 
+# NB [] tests must include a comparison, otherwise any non-null (including false) will test as true
 echo -e -n "      quotes [] t : "
 if [ "${VB}" = "true" ]; then
     echo -e " ${TRUE}"
