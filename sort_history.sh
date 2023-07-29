@@ -279,4 +279,4 @@ echo -e "\nto compare changes"
 echo "${TAB}diffy ${hist_bak} ${hist_ref}"
 echo "${TAB}en ${hist_bak} ${hist_ref}"
 
-diff --color=auto --suppress-common-lines -yiEZbwB ${hist_bak} ${hist_ref}
+diff --color=auto --suppress-common-lines -yiEZbwB ${hist_bak} ${hist_ref} | head -n 20
