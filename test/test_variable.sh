@@ -43,6 +43,19 @@ echo -e "----------------------------------------------------"
 echo -e "----------------------------------------------------"
 
 if [ ! -z ${VB+dummy} ]; then # set
+    echo -e -n "             bare : " # true when null or unset
+    if $VB ; then
+	echo -e " ${TRUE}"
+    else
+	echo -e "${FALSE}"
+    fi
+    echo -e -n "         brackets : " # true when null or unset
+    if ${VB}; then
+	echo -e " ${TRUE}"
+    else
+	echo -e "${FALSE}"
+    fi
+
     echo -e -n "           quotes : " # fails when unset: command not found
     if "${VB}"; then
 	echo -e " ${TRUE}"
@@ -74,19 +87,6 @@ if [ ! -z ${VB+dummy} ]; then # set
 	    :
 	fi
     fi
-fi
-
-echo -e -n "             bare : " # true when null or unset
-if $VB ; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
-fi
-echo -e -n "         brackets : " # true when null or unset
-if ${VB}; then
-    echo -e " ${TRUE}"
-else
-    echo -e "${FALSE}"
 fi
 
 echo -e -n "          test [] : "
