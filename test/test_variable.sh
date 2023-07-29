@@ -78,6 +78,14 @@ do
 	echo -e "${FALSE}: ${UNSET} or not null"
     fi
 
+    echo -e -n "    NULL (-z :-)      : "
+    if [ -z ${!VAR:-dummy} ]; then
+	echo -e " ${TRUE}: ??set and null (empty)"
+    else
+	echo -e "${FALSE}: ??${UNSET} or not null"
+    fi
+
+
     echo -e -n "    NULL (-z +)       : "
     if [ -z ${!VAR+dummy} ]; then
 	echo -e " ${TRUE}: ${UNSET}"
@@ -107,6 +115,14 @@ do
     else
 	echo -e "${FALSE}: set and null"
     fi
+    
+    echo -e -n "NOT NULL (! -z :-)     : "
+    if [ ! -z ${!VAR:-dummy} ]; then
+	echo -e " ${TRUE}: ?? ${UNSET} or not null"
+    else
+	echo -e "${FALSE}: ?? set and null"
+    fi
+
 
     echo -e -n "NOT NULL (! -z +)     : "
     if [ ! -z ${!VAR+dummy} ]; then
@@ -138,6 +154,13 @@ do
 	echo -e "${FALSE}: set and null"
     fi
 
+    echo -e -n "NOT NULL (-n :- \"\")    : "
+    if [ -n "${!VAR:-dummy}" ]; then
+	echo -e " ${TRUE}: ?? ${UNSET} or not null (empty)"
+    else
+	echo -e "${FALSE}: ?? set and null"
+    fi
+
     echo -e -n "NOT NULL (-n + \"\")    : "
     if [ -n "${!VAR+dummy}" ]; then
 	echo -e " ${TRUE}: set (maybe null)"
@@ -166,6 +189,13 @@ do
 	echo -e " ${TRUE}: set and null"
     else
 	echo -e "${FALSE}: ${UNSET} or not null"
+    fi
+
+    echo -e -n "    NULL (! -n :- \"\") : "
+    if [ ! -n "${!VAR:-dummy}" ]; then
+	echo -e " ${TRUE}: ??set and null"
+    else
+	echo -e "${FALSE}: ??${UNSET} or not null"
     fi
 
     echo -e -n "    NULL (! -n + \"\")  : "
