@@ -1,5 +1,5 @@
 #!/bin/bash
-echo -e "elapsed time is \c"
+echo -n "elapsed time is "
 if [ $# -eq 0 ]
 then
     echo "NULL"
@@ -14,7 +14,7 @@ else
 	    if (( $HR < 24 )); then
 		echo $(date -d @${1} +"$HR hours %M min %S sec")
 	    else
-		DY=$(($HR/24)) 
+		DY=$(($HR/24))
 		HR=$(($HR - $DY*24))
 		if (( $DY < $((365)) )); then
 		    echo $(date -d @${1} +"$DY days $HR hours %M min %S sec")
