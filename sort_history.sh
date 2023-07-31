@@ -270,7 +270,7 @@ fi
 # print time at exit
 echo -en "$(date +"%a %b %d %I:%M %p %Z") ${BASH_SOURCE##*/} "
 if command -v sec2elap &>/dev/null; then
-    echo "$(sec2elap $SECONDS)"
+    sec2elap ${SECONDS}
 else
     echo "elapsed time is ${SECONDS} sec"
 fi

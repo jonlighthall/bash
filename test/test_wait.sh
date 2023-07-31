@@ -14,5 +14,5 @@ echo -en "\n$(date), "
 if [ -z sesc2elap ]; then
     echo "$SECONDS"
 else
-    echo "$(sec2elap $SECONDS)"
+    sec2elap ${SECONDS}
 fi
