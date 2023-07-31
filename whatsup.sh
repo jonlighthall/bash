@@ -12,7 +12,7 @@ echo "    PID: $PPID"
 echo -n "   time: "
 if (ps -o etimes) &>/dev/null; then
     if command -v sec2elap &>/dev/null; then
-	echo "$(sec2elap $(ps -p "$PPID" -o etimes | tail -n 1))"
+	sec2elap $(ps -p "$PPID" -o etimes | tail -n 1)
     else
 	echo "elapsed time is $(ps -p "$PPID" -o etimes | tail -n 1 | sed 's/\s//g') sec"
     fi
