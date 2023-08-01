@@ -1,24 +1,50 @@
+# test the value of a variable
+#
+# expected values are null, true, false
+#
+# Jul 2023 JCL
+
+# print source name at start
+echo -e "${TAB}running ${PSDIR}$BASH_SOURCE${NORMAL}..."
+src_name=$(readlink -f $BASH_SOURCE)
+if [ ! "$BASH_SOURCE" = "$src_name" ]; then
+    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+fi
+
+# define colors
 TRUE='\x1B[1;32mtrue\x1B[0m'
 FALSE='\x1B[1;31mfalse\x1B[0m'
 UNSET='\x1B[1;33munset\x1B[0m'
 
 clear -x
 
+# check if sourced
+if (return 0 2>/dev/null); then
+    echo "script is sourced"
+else
+    echo "CAUTION: script has not been sourced. Results may not reflect current shell."
+fi
+
 # parse inputs
 if [ $# -eq 0 ]; then
-    echo "no arguments given"
+    echo "no input received"
+    echo "possibilities:"
+    echo "   - no argument given"
+    echo "   - value passed (e.g. \$VB) instead of name (e.g. VB)"
+    echo -e "      - input is $UNSET"
+    echo "      - input is null"
+
+    if ! (return 0 2>/dev/null); then
+	echo "   - input is not exported"
+    fi
+    echo "using default argument"
     input=VB
 else
     echo "arguments: $@"
     input=$@
 fi
-echo "testing variables $input"
 
-    if (return 0 2>/dev/null); then
-	echo "script is sourced"
-    else
-	echo "CAUTION: script has not been sourced. Results may not reflect current shell."
-    fi
+echo "testing variables $input..."
 
 # test inputs
 for VAR in $input
@@ -30,7 +56,6 @@ do
 	echo "value of variable name matches FOR loop variable name"
 	break
     fi
-
 
     echo -e "----------------------------------------------------"
     # what is it?
@@ -179,7 +204,6 @@ do
 	# set not null - false
     fi
 
-
     echo -e -n "    NULL (-z +)       : "
     if [ -z ${!VAR+dummy} ]; then
 	echo -e " ${TRUE}: ${UNSET}"
@@ -216,7 +240,6 @@ do
     else
 	echo -e "${FALSE}: ?? set and null"
     fi
-
 
     echo -e -n "NOT NULL (! -z +)     : "
     if [ ! -z ${!VAR+dummy} ]; then
