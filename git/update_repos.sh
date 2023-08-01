@@ -125,7 +125,7 @@ do
 
             # push/pull setting
 	    GIT_HIGHLIGHT='\x1b[100;37m'
-	    to="timeout -s 9 10s "
+	    to="timeout -s 9 5s "
 
 	    # pull
 	    echo "pulling... "
@@ -145,6 +145,10 @@ do
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		fi
 	    done
+	    if [[ $RETVAL != 0 ]]; then
+		pull_fail+="$repo "
+	    fi
+
 	    # push
 	    echo "pushing... "
 	    cmd="${to}git push -v --progress"
@@ -158,11 +162,14 @@ do
 		echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
 		if [[ $RETVAL != 0 ]]; then
 		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		    push_fail+="$repo "
+		    #push_fail+="$repo "
 		else
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		fi
 	    done
+	    if [[ $RETVAL != 0 ]]; then
+		push_fail+="$repo "
+	    fi
 
 	    # check for modified files
 	    if [[ ! -z $(git diff --name-only --diff-filter=M) ]]; then
