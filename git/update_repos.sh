@@ -123,37 +123,46 @@ do
 		fi
 	    fi
 
+            # push/pull setting
+	    GIT_HIGHLIGHT='\x1b[100;37m'
+	    to="timeout -s 9 10s "
+
 	    # pull
 	    echo "pulling... "
-	    cmd="timeout -s 9 10s git pull -v --ff-only" # --all --tags --prune"
+	    cmd="${to}git pull -v --ff-only" # --all --tags --prune"
 	    if [ $git_ver_maj -ge 2 ]; then
 		cmd+=" -4"
 	    fi
-	    ${cmd}
-	    RETVAL=$?
-	    GIT_HIGHLIGHT='\x1b[100;37m'
-	    echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
-	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		pull_fail+="$repo "
-	    else
-		echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-	    fi
+	    RETVAL=-1
+	    while [ $RETVAL -ne 0 ]; do
+		${cmd}
+		RETVAL=$?
+		echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
+		if [[ $RETVAL != 0 ]]; then
+		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+		    pull_fail+="$repo "
+		else
+		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+		fi
+	    done
 	    # push
 	    echo "pushing... "
-	    cmd="timeout -s 9 10s git push -v --progress"
+	    cmd="${to}git push -v --progress"
 	    if [ $git_ver_maj -ge 2 ]; then
 		cmd+=" -4"
 	    fi
-	    ${cmd}
-	    RETVAL=$?
-	    echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
-	    if [[ $RETVAL != 0 ]]; then
-		echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		push_fail+="$repo "
-	    else
-		echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-	    fi
+	    RETVAL=-1
+	    while [ $RETVAL -ne 0 ]; do
+		${cmd}
+		RETVAL=$?
+		echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
+		if [[ $RETVAL != 0 ]]; then
+		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+		    push_fail+="$repo "
+		else
+		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+		fi
+	    done
 
 	    # check for modified files
 	    if [[ ! -z $(git diff --name-only --diff-filter=M) ]]; then
