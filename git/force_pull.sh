@@ -64,7 +64,7 @@ while [ -z ${hash_local} ]; do
     hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
     hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
 
-    echo -n "subject and time hashes..."
+    echo -n "${TAB}subject and time hashes..."
     if [ "$hash_local" == "$hash_local_s" ]; then
 	echo "match"
     else
@@ -74,7 +74,9 @@ while [ -z ${hash_local} ]; do
     fi
     echo -n "${TAB}corresponding local commit hash: "
     if [ ! -z ${hash_local} ]; then
+	TAB+=${fTAB:='   '}
 	echo "$hash_local"
+        # determine local commits not found on remote
 	echo -n "${TAB}trailing local commits: "
 	hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
 	if [ ! -z ${hash_start} ]; then
@@ -88,21 +90,23 @@ while [ -z ${hash_local} ]; do
 	    else
 		hash_end=$hash_start
 	    fi
-	    echo "${TAB}local branch is $N_local commits ahead of remote"
+	    echo "${TAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
 	else
 	    echo "none"
 	    N_local=0
 	fi
+	TAB=${TAB%$fTAB}
     else
 	echo "not found"
     fi
     tracking="${tracking}~"
 done
 
-# determine local commits not found on remote
+# compare local commit to remote commit
 hash_remote=$(git log ${branch_pull} | grep -B4 "${subj_remote}" | head -n 1 | awk '{print $2}')
 echo -n "${TAB}corresponding remote commit hash: "
 echo $hash_remote
+TAB+=${fTAB:='   '}
 echo -n "${TAB}common commit has... "
 if [ $hash_local == $hash_remote ]; then
     echo "the same hash"
@@ -118,6 +122,7 @@ if [ $hash_local == $hash_remote ]; then
 else
     echo "a different hash (diverged)"
 fi
+TAB=${TAB%$fTAB}
 
 # determine remote commits not found locally
 echo -n "${TAB}leading remote commits: "
@@ -183,19 +188,14 @@ if [ $N_local -gt 0 ];then
 	if [ $git_ver_maj -lt 2 ]; then
 	# old command
 	    echo "${TAB}cherry picking multiple individual commits..."
-	    git rev-list $hash_local..HEAD
+	    git rev-list ${hash_start}^..${hash_end}
 	    echo -n "${TAB}in case of automatic cherry-pick failure, remember to push"
 	    if $b_stash; then
 		echo "and apply stash"
 	    else
 		echo
 	    fi
-	    hash_list=$(git rev-list $hash_local..HEAD)
-	    for ihash in $hash_list
-	    do
-		echo "${TAB}cherry-picking $ihash..."
-		git cherry-pick $ihash
-	    done
+	    git rev-list ${hash_start}^..${hash_end} | tac | xargs -r -n1 git cherry-pick
 	else
 	# modern command
 	    git cherry-pick ${hash_start}^..$hash_end
