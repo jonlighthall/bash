@@ -84,13 +84,13 @@ while [ -z ${hash_local} ]; do
 	    git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
 	    N_local=$(git rev-list $hash_local..HEAD | wc -l)
 	    if [ $N_local -gt 1 ]; then
-		echo -n "or ${hash_start}^.."
+		echo -n "${TAB}or ${hash_start}^.."
 		hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
 		echo ${hash_end}
 	    else
 		hash_end=$hash_start
 	    fi
-	    echo "${TAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
+	    echo -e "${TAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
 	else
 	    echo "none"
 	    N_local=0
@@ -179,6 +179,7 @@ if [ $N_remote -gt 0 ];then
 else
     echo "${TAB}no need to pull"
 fi
+cbar "done pulling"
 
 # push local commits
 echo "${TAB}local branch is $N_local commits ahead of remote"
@@ -188,7 +189,7 @@ if [ $N_local -gt 0 ];then
 	if [ $git_ver_maj -lt 2 ]; then
 	# old command
 	    echo "${TAB}cherry picking multiple individual commits..."
-	    git rev-list ${hash_start}^..${hash_end}
+	    git rev-list ${hash_start}^..${hash_end} | sed "s/^/${TAB}/"
 	    echo -n "${TAB}in case of automatic cherry-pick failure, remember to push"
 	    if $b_stash; then
 		echo "and apply stash"
@@ -209,6 +210,7 @@ if [ $N_local -gt 0 ];then
 else
     echo "no need to cherry-pick"
 fi
+cbar "done pushing"
 
 # get back to where you were....
 N_stash=$(git stash list | wc -l)
@@ -230,4 +232,5 @@ if [ $N_stash -gt 0 ]; then
 else
     echo "no stash entries"
 fi
+cbar "done un-stashing"
 echo "you're done!"
