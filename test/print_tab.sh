@@ -1,12 +1,12 @@
 #!/bin/bash
-yellow='\033[33m'
-GOOD='\033[0;32m' # green
+yellow='\033[0;33m'
+  GOOD='\033[0;32m' # green
 NORMAL='\033[0m'    # reset
-space='\x1B[30;106m'
+ space='\x1B[30;106m'
 
 # set tab
 thisTAB='   '
-for var in TAB #fTAB profTAB comTAB
+for var in TAB fTAB
 do
     val=${!var}
     i=${#val}
