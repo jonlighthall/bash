@@ -133,8 +133,8 @@ do
 	    if [ $git_ver_maj -ge 2 ]; then
 		cmd+=" -4"
 	    fi
-	    RETVAL=-1
-	    while [ $RETVAL -ne 0 ]; do
+	    RETVAL=137
+	    while [ $RETVAL -eq 137 ]; do
 		${cmd}
 		RETVAL=$?
 		echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
@@ -155,8 +155,8 @@ do
 	    if [ $git_ver_maj -ge 2 ]; then
 		cmd+=" -4"
 	    fi
-	    RETVAL=-1
-	    while [ $RETVAL -ne 0 ]; do
+	    RETVAL=137
+	    while [ $RETVAL -eq 137 ]; do
 		${cmd}
 		RETVAL=$?
 		echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
