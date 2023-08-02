@@ -143,10 +143,10 @@ do
 	    fi
 	    RETVAL=137
 	    while [ $RETVAL -eq 137 ]; do
-		t_start=$SECONDS
+		t_start=$(date +%s%N)
 		${cmd}
 		RETVAL=$?
-		t_end=$SECONDS
+		t_end=$(date +%s%N)
 		dt_pull=$(( ${t_end} - ${t_start} ))
 		echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
 		if [[ $RETVAL != 0 ]]; then
@@ -174,10 +174,10 @@ do
 	    fi
 	    RETVAL=137
 	    while [ $RETVAL -eq 137 ]; do
-		t_start=$SECONDS
+		t_start=$(date +%s%N)
 		${cmd}
 		RETVAL=$?
-		t_end=$SECONDS
+		t_end=$(date +%s%N)
 		dt_push=$(( ${t_end} - ${t_start} ))
 		echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
 		if [[ $RETVAL != 0 ]]; then
@@ -251,8 +251,8 @@ else
 fi
 
 echo "max times (N=$n)"
-echo "${TAB}pull: ${t_pull_max} sec"
-echo "${TAB}push: ${t_push_max} sec"
+echo "${TAB}pull: ${t_pull_max} ns or $(bc <<< "scale=3;$t_pull_max/1000000000") sec"
+echo "${TAB}push: ${t_push_max} ns or $(bc <<< "scale=3;$t_push_max/1000000000") sec"
 
 # print time at exit
 echo -en "\n$(date +"%a %b %-d %I:%M %p %Z") ${BASH_SOURCE##*/} "
