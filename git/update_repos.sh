@@ -92,10 +92,16 @@ git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
 git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
 git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 
+# track failures and modifications
 loc_fail=''
 pull_fail=''
 push_fail=''
 mods=''
+
+# track push/pull times
+t_pull_max=0
+t_push_max=0
+n=0
 
 for repo in $list
 do
@@ -127,7 +133,9 @@ do
 	    GIT_HIGHLIGHT='\x1b[100;37m'
 	    to="timeout -s 9 5s "
 
+	    #------------------------------------------------------
 	    # pull
+	    #------------------------------------------------------
 	    echo "pulling... "
 	    cmd="${to}git pull -v --ff-only" # --all --tags --prune"
 	    if [ $git_ver_maj -ge 2 ]; then
@@ -135,21 +143,30 @@ do
 	    fi
 	    RETVAL=137
 	    while [ $RETVAL -eq 137 ]; do
+		t_start=$SECONDS
 		${cmd}
 		RETVAL=$?
+		t_end=$SECONDS
+		dt_pull=$(( ${t_end} - ${t_start} ))
 		echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
 		if [[ $RETVAL != 0 ]]; then
 		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		    pull_fail+="$repo "
+		    #pull_fail+="$repo "
 		else
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+		    ((n++))
 		fi
 	    done
+	    if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
+		t_pull_max=${dt_pull}
+	    fi
 	    if [[ $RETVAL != 0 ]]; then
 		pull_fail+="$repo "
 	    fi
 
+	    #------------------------------------------------------
 	    # push
+	    #------------------------------------------------------
 	    echo "pushing... "
 	    cmd="${to}git push -v --progress"
 	    if [ $git_ver_maj -ge 2 ]; then
@@ -157,8 +174,11 @@ do
 	    fi
 	    RETVAL=137
 	    while [ $RETVAL -eq 137 ]; do
+		t_start=$SECONDS
 		${cmd}
 		RETVAL=$?
+		t_end=$SECONDS
+		dt_push=$(( ${t_end} - ${t_start} ))
 		echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
 		if [[ $RETVAL != 0 ]]; then
 		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
@@ -167,6 +187,9 @@ do
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		fi
 	    done
+	    if [[ ${dt_push} -gt ${t_push_max} ]]; then
+		t_push_max=${dt_push}
+	    fi
 	    if [[ $RETVAL != 0 ]]; then
 		push_fail+="$repo "
 	    fi
@@ -226,6 +249,10 @@ if [ -z "$mods" ]; then
 else
     echo "$mods"
 fi
+
+echo "max times (N=$n)"
+echo "${TAB}pull: ${t_pull_max} sec"
+echo "${TAB}push: ${t_push_max} sec"
 
 # print time at exit
 echo -en "\n$(date +"%a %b %-d %I:%M %p %Z") ${BASH_SOURCE##*/} "
