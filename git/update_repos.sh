@@ -102,6 +102,7 @@ mods=''
 t_pull_max=0
 t_push_max=0
 n=0
+loop_counter=0
 
 for repo in $list
 do
@@ -131,7 +132,7 @@ do
 
             # push/pull setting
 	    GIT_HIGHLIGHT='\x1b[100;37m'
-	    to="timeout -s 9 5s "
+	    to="timeout -s 9 4s "
 
 	    #------------------------------------------------------
 	    # pull
@@ -142,12 +143,13 @@ do
 		cmd+=" -4"
 	    fi
 	    RETVAL=137
-	    while [ $RETVAL -eq 137 ]; do
+	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
 		t_start=$(date +%s%N)
 		${cmd}
 		RETVAL=$?
 		t_end=$(date +%s%N)
 		dt_pull=$(( ${t_end} - ${t_start} ))
+		((loop_counter++))
 		echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
 		if [[ $RETVAL != 0 ]]; then
 		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
@@ -164,6 +166,8 @@ do
 		pull_fail+="$repo "
 	    fi
 
+	    to="timeout -s 9 2s "
+	    loop_counter=0
 	    #------------------------------------------------------
 	    # push
 	    #------------------------------------------------------
@@ -173,7 +177,7 @@ do
 		cmd+=" -4"
 	    fi
 	    RETVAL=137
-	    while [ $RETVAL -eq 137 ]; do
+	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
 		t_start=$(date +%s%N)
 		${cmd}
 		RETVAL=$?
