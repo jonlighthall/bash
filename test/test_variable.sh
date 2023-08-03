@@ -1,6 +1,6 @@
-# test the value of a variable
+#!/bin/bash
 #
-# expected values are null, true, false
+# test_variable.sh - test the value of a variable. expected values are null, true, false
 #
 # Jul 2023 JCL
 

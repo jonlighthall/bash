@@ -14,10 +14,20 @@ if [ -e $fpretty ]; then
 fi
 
 # print source name at start
-echo -e "${TAB}running ${PSDIR}$BASH_SOURCE${NORMAL}..."
+if (return 0 2>/dev/null); then
+    RUN_TYPE="sourcing"
+else
+    RUN_TYPE="executing"
+fi
+echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+fi
+
+if ! (return 0 2>/dev/null); then
+    echo "NB: ${BASH_SOURCE##*/} has not been sourced"
+    echo "    user SSH config settings not loaded"
 fi
 
 TAB+=${fTAB:='   '}
