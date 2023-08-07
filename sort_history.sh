@@ -224,7 +224,7 @@ tail_list="INDIFF LOGOUT SHUTDN SORT"
 # mark log in/out lines
 for head in ${head_list}
 do
-sed -i "s/ ${head}/${LI_MARKER}${head}/" ${hist_out}
+    sed -i "s/ ${head}/${LI_MARKER}${head}/" ${hist_out}
 done
 
 for tail in ${tail_list}
@@ -242,7 +242,7 @@ echo -e "${TAB}\x1b[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
 echo -n "${TAB}unmark login lines... "
 for head in ${head_list}
 do
-sed -i "s/${LI_MARKER}${head}/ ${head}/" ${hist_out}
+    sed -i "s/${LI_MARKER}${head}/ ${head}/" ${hist_out}
 done
 for tail in ${tail_list}
 do
@@ -253,6 +253,21 @@ echo "done"
 # unmerge commands
 echo -n "${TAB}unmerge commands... "
 sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_out}
+echo "done"
+
+# fix unmatched quotes
+echo -n "${TAB}find unmatched quotes... "
+sed -i 's/^[^\n\"]*\"[^\"]*$(?!\")/&;\" # unmatched quote SORT/' ${hist_out}
+echo "done"
+
+# fix unmatched graves
+echo -n "${TAB}find unmatched graves... "
+sed -i 's/^[^\n`]*`[^\n`]*$/&;` # unmatched grave SORT/' ${hist_out}
+echo "done"
+
+# fix unmatched apostrophes
+echo -n "${TAB}find unmatched apostrophes... "
+sed -i "s/^[^\n'\"]*'[^\n'\"]*$/&;' # unmatched apostrophe SORT/" ${hist_out}
 echo "done"
 
 # save markers
