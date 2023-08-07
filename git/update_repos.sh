@@ -5,7 +5,7 @@
 # Apr 2022 JCL
 
 # set tab
-:${TAB:=''}
+TAB+=${fTAB:='   '}
 
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
@@ -29,8 +29,6 @@ if ! (return 0 2>/dev/null); then
     echo "NB: ${BASH_SOURCE##*/} has not been sourced"
     echo "    user SSH config settings not loaded"
 fi
-
-TAB+=${fTAB:='   '}
 
 # list repository paths, relative to home
 # settings
