@@ -1,4 +1,6 @@
 #!/bin/bash
+# set tab
+TAB+=${fTAB:='   '}
 # no echo source since this is a utility
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
@@ -28,12 +30,14 @@ else
 	    else
 		if [ -d $arg ]; then
 		    echo -e "is a ${DIR}${UL}directory${NORMAL}"
+		    exit 1
 		else
 		    echo -e "${UL} is not a link, file, or directory"
 		fi
 	    fi
 	else
 	    echo -e "${BAD}${UL}does not exist${NORMAL}"
+	    exit 1
 	fi
     done
 fi
