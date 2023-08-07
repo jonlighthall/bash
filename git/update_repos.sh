@@ -151,9 +151,10 @@ do
 		cmd+=" -4"
 	    fi
 	    RETVAL=137
+	    loop_counter=0
 	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
 		((loop_counter++))
-		if [ loop_counter -gt 1 ]; then
+		if [ $loop_counter -gt 1 ]; then
 		    echo "${TAB}PULL attempt $loop_counter..."
 		fi
 		t_start=$(date +%s%N)
@@ -179,7 +180,6 @@ do
 	    fi
 
 	    to="timeout -s 9 2s "
-	    loop_counter=0
 	    #------------------------------------------------------
 	    # push
 	    #------------------------------------------------------
@@ -189,9 +189,10 @@ do
 		cmd+=" -4"
 	    fi
 	    RETVAL=137
+	    loop_counter=0
 	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
 		((loop_counter++))
-		if [ loop_counter -gt 1 ]; then
+		if [ $loop_counter -gt 1 ]; then
 		    echo "${TAB}PUSH attempt $loop_counter..."
 		fi
 		t_start=$(date +%s%N)
