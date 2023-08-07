@@ -262,13 +262,20 @@ echo "done"
 
 # fix unmatched graves
 echo -n "${TAB}find unmatched graves... "
-sed -i 's/^[^\n`]*`[^\n`]*$/&;` # unmatched grave SORT/' ${hist_out}
+sed -i 's/(?!^#)^[^\n`]*`[^\n`]*$/&;` # unmatched grave SORT/' ${hist_out}
 echo "done"
 
 # fix unmatched apostrophes
 echo -n "${TAB}find unmatched apostrophes... "
 sed -i "s/^[^\n'\"]*'[^\n'\"]*$/&;' # unmatched apostrophe SORT/" ${hist_out}
+#sed -i "s/^[^#][^\n'\"]*'[^\n'\"]*$/&;' # unmatched apostrophe SORT" ${hist_out}
+#sed -i "s/^[^#\n'\"`]*(?<!\\)'[^\n'\"`]*$/&;' # unmatched apostrophe SORT" ${hist_out}
+#sed -i "s/(?!^.*\".*'+.*\".*$)^[^\n']*'[^\n']*$/&;' # unmatched apostrophe SORT/" ${hist_out}
 echo "done"
+
+#(?!^.*".*'+.*".*$)^[^\n']*'[^\n']*$ works with quotes
+#(?!^.*".*'+.*".*$)(?!^.*`.*'+.*`.*$)^[^\n']*'[^\n']*$ quotes and graves
+#(?!^.*".*'+.*".*$)(?!^.*`.*'+.*`.*$)^[^\n']*(?<!\\)'[^\n']*$
 
 # save markers
 N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_out} | wc -l)
