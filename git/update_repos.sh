@@ -153,7 +153,7 @@ do
 	    RETVAL=137
 	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
 		((loop_counter++))
-		if [ loop_counter -gr 1 ]; then
+		if [ loop_counter -gt 1 ]; then
 		    echo "${TAB}PULL attempt $loop_counter..."
 		fi
 		t_start=$(date +%s%N)
@@ -191,7 +191,7 @@ do
 	    RETVAL=137
 	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
 		((loop_counter++))
-		if [ loop_counter -gr 1 ]; then
+		if [ loop_counter -gt 1 ]; then
 		    echo "${TAB}PUSH attempt $loop_counter..."
 		fi
 		t_start=$(date +%s%N)
