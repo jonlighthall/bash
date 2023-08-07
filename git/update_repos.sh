@@ -152,12 +152,16 @@ do
 	    fi
 	    RETVAL=137
 	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
+		((loop_counter++))
+		if [ loop_counter -gr 1 ]; then
+		    echo "${TAB}PULL attempt $loop_counter..."
+		fi
 		t_start=$(date +%s%N)
 		${cmd}
 		RETVAL=$?
 		t_end=$(date +%s%N)
 		dt_pull=$(( ${t_end} - ${t_start} ))
-		((loop_counter++))
+
 		echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
 		if [[ $RETVAL != 0 ]]; then
 		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
@@ -186,6 +190,10 @@ do
 	    fi
 	    RETVAL=137
 	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
+		((loop_counter++))
+		if [ loop_counter -gr 1 ]; then
+		    echo "${TAB}PUSH attempt $loop_counter..."
+		fi
 		t_start=$(date +%s%N)
 		${cmd}
 		RETVAL=$?
