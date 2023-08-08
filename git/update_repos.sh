@@ -179,11 +179,12 @@ do
 		pull_fail+="$repo "
 	    fi
 
-	    to="timeout -s 9 2s "
-	    #------------------------------------------------------
+	    nsec=2
+            #------------------------------------------------------
 	    # push
 	    #------------------------------------------------------
 	    echo "pushing... "
+	    to="timeout -s 9 ${nsec}s "
 	    cmd="${to}git push -v --progress"
 	    if [ $git_ver_maj -ge 2 ]; then
 		cmd+=" -4"
@@ -207,6 +208,7 @@ do
 		else
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		fi
+		((nsec++))
 	    done
 	    if [[ ${dt_push} -gt ${t_push_max} ]]; then
 		t_push_max=${dt_push}
