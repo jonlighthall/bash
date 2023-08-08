@@ -5,7 +5,7 @@
 # Apr 2022 JCL
 
 # set tab
-TAB+=${fTAB:='   '}
+TAB+=${TAB+${fTAB:='   '}}
 
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
