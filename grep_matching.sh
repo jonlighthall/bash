@@ -25,7 +25,7 @@
 #    or
 #       find ./big_dir -type f > list_of_files.txt
 #
-# Generating the list of patterns: 
+# Generating the list of patterns:
 #
 #    For example, if you want to locate a file matching the pattern 'file_name_[0-9]\{6\},' save
 #    that pattern in a file, replacing all \ with \\.
@@ -34,13 +34,21 @@
 #
 #    Call the command with the pattern file as the first argument and the file to be searched as
 #    the second argument. If pattern matches a line in the search file, the resulting output
-#    file, big_dir_found.txt, will have content such as 'big_dir/new_file_name_123456.bin'
+#    file, list_of_patterns_found.txt, will have content such as
+#    'big_dir/new_file_name_123456.bin'
+#
+# Next steps:
+#
+#    Use rsync to copy the list of files:
+#
+#       rsync -av --files-from=list_of_patterns_found.txt . user@remote.url:/dir
 #
 # Adapted from find_matching.sh
 #
 # Apr 2023 JCL
 
-TAB="   "
+# set tab
+TAB+=${TAB+${fTAB:='   '}}
 
 # initialize counters
 k=0 # files in list
@@ -55,11 +63,13 @@ else
     # set file names
     file_in=$(readlink -f $1)
     echo "argument 1: $1"
-    echo -n " input file ${file_in}... "
+    TAB+=${fTAB:='   '}
+    echo -n "${TAB}input file ${file_in}... "
     if [ -f ${file_in} ]; then
 	echo "exits"
 	# read input file
 	j=$(cat ${file_in} | wc -l)
+	TAB+=${fTAB:='   '}
 	echo "${TAB}and has $j entries"
 
 	# set print frequency
@@ -70,23 +80,28 @@ else
 	fi
 	echo "${TAB}printing one results for every $nprint lines"
 
-	# set default output file name to match input
+	# parse input
 	dir1=$(dirname $file_in)
-	echo "input dir = $dir1"
+	echo "${TAB}input dir = $dir1"
 	fname1=$(basename $file_in)
-	echo "input file = $fname1"
+	echo "${TAB}input file = $fname1"
 	base1="${fname1%.*}"
-	echo "base name = $base1"
+	echo "${TAB}base name = $base1"
+	TAB+=${fTAB}
 	if [[ $fname1 == *"."* ]]; then
-	    echo "fname contains dots"
+	    echo "${TAB}fname contains dots"
 	    ext="${fname1##*.}"
 	else
-	    echo "fname does not contains dots, using default"
+	    echo "${TAB}fname does not contains dots, using default"
 	    ext="txt"
 	fi
-	base="${base1}_found"
+	TAB=${TAB%$fTAB}
 
+	# set default output file name to match input
+	base="${base1}_found"
 	file_spec="${dir1}/${base}.${ext}"
+
+	TAB=${TAB%$fTAB}
 	echo "file specification = $file_spec"
 
 	file_out=${file_spec}
@@ -104,18 +119,23 @@ else
 
 	# check if output exists
 	echo -n "output file ${file_out}... "
-	while [ -f ${file_out} ]; do
+	if [ -f ${file_out} ]; then
             echo "exists"
-            echo -n "${TAB}renaming output... "
-	    file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
-	    echo ${file_out}
-	done
-	echo "${TAB}unique file name found"
+	    while [ -f ${file_out} ]; do
+		echo "${file_out##*/} exists"
+		echo -n "${TAB}renaming output... "
+		file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
+		echo ${file_out##*/}
+	    done
+	    echo "${TAB}unique file name found"
+	else
+	    echo "uniquely named"
+	fi
 
 	# parse arguments
 	if [ $# -lt 2 ]; then
-		echo "no file to search specified"
-		exit 1
+	    echo "no file to search specified"
+	    exit 1
 	else
 	    echo -n "search file $2... "
 	    # check for search file
