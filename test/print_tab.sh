@@ -9,11 +9,11 @@ thisTAB='   '
 for var in TAB fTAB
 do
     val=${!var}
-    i=${#val}
     echo -n "${thisTAB}$var "
     if [ -z ${!var+dummy} ]; then
 	echo -e "${yellow}unset${NORMAL}"
     else
+	i=${#val}
 	echo -en "${GOOD}set${NORMAL} to ${space}${val}${NORMAL}"
 	[ $i -gt 0 ] && echo -n " "
 	echo "length = $i"
