@@ -5,7 +5,12 @@
 # Apr 2022 JCL
 
 # set tab
-TAB+=${TAB+${fTAB:='   '}}
+called_by=$(ps -o comm= $PPID)
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
+    TAB=''
+else
+    TAB+=${TAB+${fTAB:='   '}}
+fi
 
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
@@ -27,8 +32,11 @@ fi
 
 if ! (return 0 2>/dev/null); then
     echo "NB: ${BASH_SOURCE##*/} has not been sourced"
-    echo "    user SSH config settings not loaded"
+    echo "    user SSH config settings MAY not be loaded??"
 fi
+
+start_dir=$PWD
+echo "starting directory = ${start_dir}"
 
 # list repository paths, relative to home
 # settings
@@ -105,6 +113,7 @@ loc_fail=''
 pull_fail=''
 push_fail=''
 mods=''
+unset this_list
 
 # track push/pull times
 t_pull_max=0
@@ -125,22 +134,47 @@ do
 	if [[ $RETVAL -eq 0 ]]; then
 	    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    # add remotes to list
-	    git remote -v | awk -F " " '{print $2}' | uniq >> ${list_remote}
+	    this_remote=$(git remote -v | awk -F " " '{print $2}' | uniq)
+	    echo "  remote: ${this_remote}"
+	    echo "${this_remote}" >> ${list_remote}
+	    proto=$(echo ${this_remote} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+	    echo "protocol: ${proto}"
+
+	    n_remotes=$(echo ${this_remote} | wc -l)
+
+	    if [ "${n_remotes}" -gt 1 ]; then
+		echo "${n_remotes} remotes found"
+	    fi
+
 	    # check against argument
 	    if [ $# -gt 0 ]; then
 		echo -n "matching argument ""$1""... "
 		url=$(git remote -v | head -n 1 | awk '{print $2}')
 		if [[ $url =~ $1 ]]; then
 		    echo -e "${GOOD}OK${NORMAL}"
+		    # add to list
+		    if [ ! -z ${this_list:+dummy} ]; then
+			this_list+=$'\n'
+		    fi
+		    this_list+=${this_remote}
 		else
 		    echo "skipping..."
 		    continue
 		fi
+	    else
+		# add to list
+		if [ ! -z ${this_list:+dummy} ]; then
+		    this_list+=$'\n'
+		fi
+		this_list+=${this_remote}
 	    fi
+
+	    echo "remote list: ${this_list}"
 
             # push/pull setting
 	    GIT_HIGHLIGHT='\x1b[100;37m'
-	    to="timeout -s 9 4s "
+	    nsec=4
+	    to="timeout -s 9 ${nsec}s "
 
 	    #------------------------------------------------------
 	    # pull
@@ -179,6 +213,7 @@ do
 		pull_fail+="$repo "
 	    fi
 
+	    # secify number of seconds before kill
 	    nsec=2
             #------------------------------------------------------
 	    # push
@@ -209,6 +244,9 @@ do
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		fi
 		((nsec++))
+		if [ $loop_counter -gt 1 ]; then
+		    echo "${TAB}increasing timeout to ${nsen}"
+		fi
 	    done
 	    if [[ ${dt_push} -gt ${t_push_max} ]]; then
 		t_push_max=${dt_push}
@@ -234,9 +272,13 @@ do
 	loc_fail+="$repo "
 	test_file ${HOME}/$repo
     fi
-    hline 70
-    echo
+#    hline 70
+ #   echo
 done
+
+echo "done updating repositories"
+echo "returning to starting directory..."
+cd ${starting_dir}
 
 # sort and uniquify remotes list
 sort -u ${list_remote} -o ${list_remote}
@@ -245,6 +287,8 @@ sort -u ${list_remote} -o ${list_remote}
 echo -n "      remotes: "
 head -n 1 ${list_remote}
 tail -n +2 ${list_remote} | sed 's/^/               /'
+echo
+echo "${this_list}"
 echo
 
 # print push/pull summary
