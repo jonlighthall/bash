@@ -113,7 +113,7 @@ loc_fail=''
 pull_fail=''
 push_fail=''
 mods=''
-unset this_list
+unset OK_list
 
 # track push/pull times
 t_pull_max=0
@@ -153,23 +153,21 @@ do
 		if [[ $url =~ $1 ]]; then
 		    echo -e "${GOOD}OK${NORMAL}"
 		    # add to list
-		    if [ ! -z ${this_list:+dummy} ]; then
-			this_list+=$'\n'
+		    if [ ! -z ${OK_list:+dummy} ]; then
+			OK_list+=$'\n'
 		    fi
-		    this_list+=${this_remote}
+		    OK_list+=${this_remote}
 		else
 		    echo "skipping..."
 		    continue
 		fi
 	    else
 		# add to list
-		if [ ! -z ${this_list:+dummy} ]; then
-		    this_list+=$'\n'
+		if [ ! -z ${OK_list:+dummy} ]; then
+		    OK_list+=$'\n'
 		fi
-		this_list+=${this_remote}
+		OK_list+=${this_remote}
 	    fi
-
-	    echo "remote list: ${this_list}"
 
             # push/pull setting
 	    GIT_HIGHLIGHT='\x1b[100;37m'
@@ -211,6 +209,11 @@ do
 	    fi
 	    if [[ $RETVAL != 0 ]]; then
 		pull_fail+="$repo "
+	    else
+		prog=make_links.sh
+		if [ -f ${prog} ]; then
+		   : #./${prog}
+		fi
 	    fi
 
 	    # secify number of seconds before kill
@@ -288,7 +291,7 @@ echo -n "      remotes: "
 head -n 1 ${list_remote}
 tail -n +2 ${list_remote} | sed 's/^/               /'
 echo
-echo "${this_list}"
+echo "${OK_list}"
 echo
 
 # print push/pull summary
