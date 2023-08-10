@@ -1,18 +1,5 @@
 set -e
 # load formatting
-if [ -z ${TAB+dummy} ]; then
-    echo -e " TAB ${yellow}unset\x1B[0m"
-else
-    j=${#TAB}
-    echo -e " TAB = \x1B[106m${TAB}\x1B[0m length $j"
-fi
-if [ -z ${fTAB+dummy} ]; then
-    echo -e "fTAB ${yellow}unset\x1B[0m"
-else
-    k=${#fTAB}
-    echo -e "fTAB = \x1B[106m${fTAB}\x1B[0m length $k"
-fi
-
 TAB=${TAB:=''}
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
