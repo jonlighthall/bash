@@ -245,7 +245,7 @@ do
 		fi
 		((nsec++))
 		if [ $loop_counter -gt 1 ]; then
-		    echo "${TAB}increasing timeout to ${nsen}"
+		    echo "${TAB}increasing timeout to ${nsec}"
 		fi
 	    done
 	    if [[ ${dt_push} -gt ${t_push_max} ]]; then
