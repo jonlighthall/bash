@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e # exit on non-zero status
+T_start=$(date +%s%N)
 # print source name at start
+echo "source----------------------"
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
@@ -11,6 +13,16 @@ src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
+
+
+echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
+echo "  running ${0}"
+echo "running ${0##*/}"
+
+
+
+echo "directory--------------------"
+echo "in ${0%/*}"
 
 source_dir=$(dirname $BASH_SOURCE)
 echo "source directory ${source_dir}"
@@ -25,26 +37,45 @@ echo "             PWD ${start_dir}"
 echo "         logical" $(\pwd -L)
 echo "        physical" $(\pwd -P)
 
-
-echo "running ${0}"
+echo "parent----------------------"
 
 if [ "${0}" = "$BASH_SOURCE"  ];then
-    echo "0 same as bash source"
-    echo "This script is not called by another process."
+    echo "   0 same as bash source"
+    echo "   This script is called by another process."
 else
-    echo "0 NOT same as bash source"
-    echo "This script is called by another process."
+    echo "   0 NOT same as bash source"
+    echo "   This script is not called by another process."
 fi
 
-echo "running ${0##*/}"
-echo "in ${0%/*}"
 echo "       PID = $$"
 echo "parent PID = $PPID"
 
-[[ $SHLVL -gt 2 ]] &&
+
+echo "$SHLVL"
+
+
+ if (return 0 2>/dev/null); then
+     echo "sourced"
+     nstack=1
+ else
+     echo "not sourced"
+     nstack=2
+ fi
+
+[[ $SHLVL -gt ${nstack} ]] &&
   echo "called from parent" ||
       echo "called directly"
 
 echo "called by $(ps -o comm= $PPID)"
 # print time at exit
-echo -e "\n$(date +"%a %b %-d %I:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+echo -en "${TAB}${PSDIR}$(basename $BASH_SOURCE)${NORMAL} "
+T_end=$(date +%s%N)
+dT_ns=$((${T_end}-${T_start}))
+dT_sec=$(bc <<< "scale=3;$dT_ns/1000000000")
+if command -v sec2elap &>/dev/null
+then
+    echo -n "$(sec2elap $dT_sec | tr -d '\n')" 
+else
+    echo -n "elapsed time is ${dT_sec} sec"
+fi
+echo " on $(date +"%a %b %-d at %I:%M %p %Z")"
