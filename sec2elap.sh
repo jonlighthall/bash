@@ -1,6 +1,7 @@
 #!/bin/bash
 echo -n "elapsed time is "
 # check if input is empty
+echo -ne "\x1B[1;37m"
 if [ $# -eq 0 ]
 then
     echo "NULL"
@@ -59,3 +60,4 @@ else
 	fi
     fi
 fi
+echo -ne "\x1B[0m"
