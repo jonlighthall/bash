@@ -13,7 +13,7 @@ else
     arg=$@
 fi
 
-fname=ls2md.mdy
+fname=ls2md.md
 
 for ext in $arg
 do
