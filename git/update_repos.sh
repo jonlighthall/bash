@@ -4,6 +4,7 @@
 #
 # Apr 2022 JCL
 
+start_time=$(date +%s%N)
 # set tab
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
@@ -325,9 +326,14 @@ echo "${TAB}pull: ${t_pull_max} ns or $(bc <<< "scale=3;$t_pull_max/1000000000")
 echo "${TAB}push: ${t_push_max} ns or $(bc <<< "scale=3;$t_push_max/1000000000") sec"
 
 # print time at exit
-echo -en "\n$(date +"%a %b %-d %I:%M %p %Z") ${BASH_SOURCE##*/} "
-if command -v sec2elap &>/dev/null; then
-    sec2elap ${SECONDS}
+echo -en "\n${BASH_SOURCE##*/} "
+end_time=$(date +%s%N)
+elap_time=$((${end_time}-${start_time}))
+dT_sec=$(bc <<< "scale=3;$elap_time/1000000000")
+if command -v sec2elap &>/dev/null
+then
+    echo -n "$(sec2elap $dT_sec | tr -d '\n')"
 else
-    echo "elapsed time is ${SECONDS} sec"
+    echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
 fi
+echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"
