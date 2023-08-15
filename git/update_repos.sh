@@ -290,9 +290,13 @@ sort -u ${list_remote} -o ${list_remote}
 # print list of remotes
 echo -n "      remotes: "
 head -n 1 ${list_remote}
-tail -n +2 ${list_remote} | sed 's/^/               /'
+list_indent='               '
+tail -n +2 ${list_remote} | sed "s/^/${list_indent}/"
 echo
-echo "${OK_list}"
+echo -n "      remotes: "
+OK_list=$(echo ${OK_list} | sort -n | sed 's/ /\n/g')
+echo "${OK_list}" | head -n 1
+echo "${OK_list}" | tail -n +2 | sed "s/^/${list_indent}/"
 echo
 
 # print push/pull summary
@@ -321,9 +325,9 @@ else
     echo "$mods"
 fi
 
-echo "max times (N=$n)"
-echo "${TAB}pull: ${t_pull_max} ns or $(bc <<< "scale=3;$t_pull_max/1000000000") sec"
-echo "${TAB}push: ${t_push_max} ns or $(bc <<< "scale=3;$t_push_max/1000000000") sec"
+echo "        found: ${n}"
+echo "pull max time: ${t_pull_max} ns or $(bc <<< "scale=3;$t_pull_max/1000000000") sec"
+echo "push max time: ${t_push_max} ns or $(bc <<< "scale=3;$t_push_max/1000000000") sec"
 
 # print time at exit
 echo -en "\n${BASH_SOURCE##*/} "
