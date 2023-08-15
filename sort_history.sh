@@ -250,6 +250,15 @@ do
 done
 echo "done"
 
+ignore_list=("bg" "exit" "ls" "pwd" "history" "la" "lt" "gits" "gitd" "git status" "git log" "git diff")
+
+for igno in "${ignore_list[@]}"; do
+    echo -n "${TAB}deleting ${igno}... "
+    sed -i "/${TS_MARKER}${igno}$/d" ${hist_out}
+    sed -i "s/${OR_MARKER}${igno}$//" ${hist_out}
+    echo "done"
+done
+
 # unmerge commands
 echo -n "${TAB}unmerge commands... "
 sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_out}
@@ -279,7 +288,7 @@ echo "done"
 
 # save markers
 N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_out} | wc -l)
-echo "${TAB}number of differences = $N"
+echo -e "${TAB}\x1b[1;31mnumber of differences = $N${NORMAL}"
 echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >> ${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}
@@ -306,4 +315,4 @@ echo -e "\nto compare changes"
 echo "${TAB}diffy ${hist_bak} ${hist_ref}"
 echo "${TAB}en ${hist_bak} ${hist_ref}"
 
-diff --color=auto --suppress-common-lines -yiEZbwB ${hist_bak} ${hist_ref} | head -n 20
+diff --color=auto --suppress-common-lines -yiEZbwB ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
