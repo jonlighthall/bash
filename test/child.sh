@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e # exit on non-zero status
-T_start=$(date +%s%N)
+start_time=$(date +%s%N)
 # print source name at start
 echo "source----------------------"
 if (return 0 2>/dev/null); then
@@ -69,13 +69,13 @@ echo "$SHLVL"
 echo "called by $(ps -o comm= $PPID)"
 # print time at exit
 echo -en "${TAB}${PSDIR}$(basename $BASH_SOURCE)${NORMAL} "
-T_end=$(date +%s%N)
-dT_ns=$((${T_end}-${T_start}))
-dT_sec=$(bc <<< "scale=3;$dT_ns/1000000000")
+end_time=$(date +%s%N)
+elap_time=$((${end_time}-${start_time}))
+dT_sec=$(bc <<< "scale=3;$elap_time/1000000000")
 if command -v sec2elap &>/dev/null
 then
     echo -n "$(sec2elap $dT_sec | tr -d '\n')" 
 else
     echo -n "elapsed time is ${dT_sec} sec"
 fi
-echo " on $(date +"%a %b %-d at %I:%M %p %Z")"
+echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"

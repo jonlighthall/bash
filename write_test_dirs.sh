@@ -25,4 +25,4 @@ done < $FILE1
 echo $i "directories checked"
 echo $j "of" $i "failed write"
 # print time at exit
-echo -e "\n$(date +"%a %b %-d %I:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
