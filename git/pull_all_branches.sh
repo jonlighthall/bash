@@ -1,21 +1,17 @@
 set -e
+# set tab
+called_by=$(ps -o comm= $PPID)
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
+    TAB=''
+    : ${fTAB:='   '}
+else
+    TAB+=${TAB+${fTAB:='   '}}
+fi
+
 # load formatting
-TAB=${TAB:=''}
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-fi
-if [ -z ${TAB+dummy} ]; then
-    echo -e " TAB ${yellow}unset${NORMAL}"
-else
-    j=${#TAB}
-    echo -e " TAB = \x1B[106m${TAB}\x1B[0m length $j"
-fi
-if [ -z ${fTAB+dummy} ]; then
-    echo -e "fTAB ${yellow}unset${NORMAL}"
-else
-    k=${#fTAB}
-    echo -e "fTAB = \x1B[106m${fTAB}\x1B[0m length $k"
 fi
 
 # print source name at start
@@ -31,6 +27,7 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 fi
 
 # parse remote
+bar 56 "remote"
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "no remote tracking branch set for current branch"
 else
@@ -44,6 +41,7 @@ else
     echo "remote branch is $branch_remote"
 fi
 
+bar 56 "branch"
 # parse branches
 branch_local=$(git branch | grep \* | sed 's/^\* //')
 echo -e " local branch is ${green}${branch_local}${NORMAL}"
@@ -58,6 +56,10 @@ echo "${branch_list_remote}" | sed "s/^/${fTAB}/"
 branch_list_track=$(git branch -vva | grep "\[" | sed 's/^*/ /' |  awk '{print $1}')
 echo "list of local branches with remote tracking: "
 echo "${branch_list_track}" | sed "s/^/${fTAB}/"
+
+branch_list_no_track=$(git branch -vva | sed '/remote/d' | sed '/\[/d' |  awk '{print $1}')
+echo "list of local branches with no remote tracking: "
+echo "${branch_list_no_track}" | sed "s/^/${fTAB}/"
 
 branch_list_pull=$(echo $branch_list_remote $branch_list_track | sed 's/ /\n/g' | sort -u)
 echo "list of branches to loop through: "
@@ -75,6 +77,7 @@ else
     b_stash=true
 fi
 
+echo "start looping through branches..."
 for branch in $branch_list_pull
 do
     bar 56 "$(git checkout $branch 2>&1)"
@@ -86,17 +89,17 @@ do
 	list_fmod=$(git --no-pager diff --name-only ${branch} ${remote_tracking_branch})
 	if [ ${#list_fmod} -gt 0 ]; then
 	    echo "list of modified files:"
-	    echo ${list_fmod} | sed "s/^/${fTAB}/"
+	    echo ${list_fmod} | sed "s/ /\n/g" | sed "s/^/${fTAB}/g"
 	fi
 	list_comm_loc=$(git rev-list ${branch}..${remote_tracking_branch})
-	if [ ${#list_fmod} -gt 0 ]; then
+	if [ ${#list_comm_loc} -gt 0 ]; then
 	    echo "list of trailing commits:"
-	    echo ${list_comm_loc} | sed "s/^/${fTAB}/"
+	    echo ${list_comm_loc} | sed "s/ /\n/g" | sed "s/^/${fTAB}/g"
 	fi
 	list_comm_rem=$(git rev-list ${remote_tracking_branch}..${branch})
-	if [ ${#list_fmod} -gt 0 ]; then
+	if [ ${#list_comm_rem} -gt 0 ]; then
 	    echo "list of leading commits:"
-	    echo ${list_comm_loc} | sed "s/^/${fTAB}/"
+	    echo ${list_comm_rem} | sed "s/ /\n/g" | sed "s/^/${fTAB}/g"
 	fi
 
 done
