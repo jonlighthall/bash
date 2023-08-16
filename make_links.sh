@@ -66,6 +66,7 @@ for my_link in \
     rmbin \
     sec2elap \
     sort_history \
+    sort_hosts \
     test/get_wttr \
     test/test_ls_color \
     test_file \

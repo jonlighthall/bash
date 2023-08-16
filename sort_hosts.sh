@@ -102,7 +102,7 @@ sort -u ${host_out} -o ${host_out}
 echo "done"
 echo -e "${TAB}\x1b[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
 
-# save markers
+# print number of differences
 N=$(diff --suppress-common-lines -yiEbwB ${host_bak} ${host_out} | wc -l)
 echo -e "${TAB}\x1b[1;31mnumber of differences = $N${NORMAL}"
 
@@ -118,6 +118,17 @@ if [[ ! -z ${list_del} ]]; then
     done
 fi
 
+# delete backup if no changes were made
+if [ "${N}" -gt 0 ]; then
+    echo -e "\nto compare changes"
+    echo "${TAB}diffy ${host_bak} ${host_ref}"
+    echo "${TAB}en ${host_bak} ${host_ref}"
+
+    diff --color=auto --suppress-common-lines -yiEZbwB ${host_bak} ${host_ref} | sed '/<$/d' | head -n 20
+else
+    rm -vf $host_bak{,~} 2>/dev/null | sed "s/^/${TAB}/"
+fi
+
 # print time at exit
 echo -en "$(date +"%a %b %d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
 if command -v sec2elap &>/dev/null; then
@@ -125,9 +136,3 @@ if command -v sec2elap &>/dev/null; then
 else
     echo "elapsed time is ${white}${SECONDS} sec${NORMAL}"
 fi
-
-echo -e "\nto compare changes"
-echo "${TAB}diffy ${host_bak} ${host_ref}"
-echo "${TAB}en ${host_bak} ${host_ref}"
-
-diff --color=auto --suppress-common-lines -yiEZbwB ${host_bak} ${host_ref} | sed '/<$/d' | head -n 20
