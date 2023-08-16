@@ -250,7 +250,7 @@ do
 done
 echo "done"
 
-ignore_list=("bg" "exit" "ls" "pwd" "history" "la" "lt" "gits" "gitd" "git status" "git log" "git diff")
+ignore_list=("bg" "exit" "ls" "pwd" "history" "la" "lt" "gits" "gitd" "git status" "git log" "git diff" "git push" "git pull" "gitr" "update_repos" "cd \.\.\/")
 
 for igno in "${ignore_list[@]}"; do
     echo -n "${TAB}deleting ${igno}... "
