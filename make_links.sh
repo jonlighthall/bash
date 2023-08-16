@@ -99,11 +99,11 @@ do
 	    echo "${permOK}"
 	    TAB+=${fTAB:='   '}
 	    echo -n "${TAB}checking permissions... "
-	    perm=$(stat -c "%a" ${target})
+	    perm=$(stat -c "%a" "${target}")
 	    echo ${perm}
 	    if [[ ${perm} -gt ${permOK}  ]]; then
 		echo -n "${TAB}changing permissions to ${permOK}... "
-		chmod u+x ${target}
+		chmod u+x "${target}"
 		RETVAL=$?
 		if [ $RETVAL -eq 0 ]; then
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
