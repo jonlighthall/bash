@@ -86,7 +86,19 @@ echo "compare pstree"
 pstree -Apu -H $$
 pstree -Apu -H $PPID
 
+echo "parent: "
+pstree -Apu -H $$ | grep $PPID
+pstree -Apu -H $$ | grep $PPID | tr -d "$PPID"
+pstree -Apu -H $$ | grep $PPID | sed "s/$PPID.*//"
+pstree -Apu -H $$ | grep $PPID | sed "s/$PPID.*//" | grep -o "\-\-\-" | wc -l
+
+
+echo "child: "
 pstree -Apu -H $$ | grep $$
+pstree -Apu -H $$ | grep $$ | sed "s/$$.*//" | grep -o "\-\-\-"
+pstree -Apu -H $$ | grep $$ | sed "s/$$.*//" | grep -c "\-\-\-" | wc -l
+
+
 
 echo
 echo "calling child process..."
