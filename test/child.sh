@@ -18,19 +18,6 @@ fi
 echo -e "          \$0 = ${0}"
 
 echo "    \$0 running ${0##*/}"
-echo
-echo "directory--------------------"
-echo -e "     \$ directory ${0%/*}"
-source_dir=$(dirname $BASH_SOURCE)
-echo "source directory ${source_dir}"
-link_dir=$(dirname "${src_name}")
-echo "  link directory ${link_dir}"
-real_dir=$(dirname "$(realpath $BASH_SOURCE)"	 )
-echo "  real directory ${real_dir}"
-start_dir=$PWD
-echo "             PWD ${start_dir}"
-echo "         logical" $(\pwd -L)
-echo "        physical" $(\pwd -P)
 
 echo
 echo "parent----------------------"
@@ -46,11 +33,6 @@ fi
 echo "compare PID..."
 echo "          PID = $$"
 echo "   parent PID = $PPID"
-if [ "$$" = "$PPID"  ];then
-    echo "   PID = PPID"
-else
-    echo "   PID ne PPID"
-fi
 
 BASE_LVL=0
 echo "compare shell level..."
