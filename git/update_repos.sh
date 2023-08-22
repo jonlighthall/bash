@@ -261,7 +261,7 @@ do
 
 	    # check for modified files
 	    if [[ ! -z $(git diff --name-only --diff-filter=M) ]]; then
-		echo -e "modified: ${GRH}"
+		echo -e "modified: ${red}"
 		git diff --name-only --diff-filter=M | sed "s/^/${TAB}/"
 		echo -en "${NORMAL}"
 		mods+="$repo "
