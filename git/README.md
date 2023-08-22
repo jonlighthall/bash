@@ -68,7 +68,7 @@ git diff origin/master
 ```
 Then rewrite history and push the changes
 ```
-bash ~/utils/bash/git/filter-repo-author.sh
+bash ${HOME}/utils/bash/git/filter-repo-author.sh
 git fetch
 git push --force-with-lease
 ```

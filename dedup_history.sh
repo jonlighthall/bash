@@ -6,7 +6,7 @@
 #
 # Dependencies:
 # this scrip assumes a cron job of the folling form is active
-# 0 0 * * 1 cp ~/.bash_history ~/.bash_history_$(date +'\%Y-\%m-\%d')
+# 0 0 * * 1 cp ${HOME}/.bash_history ${HOME}/.bash_history_$(date +'\%Y-\%m-\%d')
 #
 # Dec 2021 JCL
 fname=hist_list.txt

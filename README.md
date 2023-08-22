@@ -6,7 +6,7 @@ A collection of bash scripts of varying utility.
 | script               | description                           | 
 | -------------------- | ------------------------------------  | 
 | [`install_packages`](install_packages.sh) | install dependencies  |
-| [`make_links`](make_links.sh) | link scripts to `~/bin`  |
+| [`make_links`](make_links.sh) | link scripts to `${HOME}/bin`  |
 
 ## General utilities
 
