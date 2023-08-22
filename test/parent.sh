@@ -52,17 +52,21 @@ else
     echo "   PID ne PPID"
 fi
 
+BASE_LVL=0
 echo "compare shell level..."
 if (return 0 2>/dev/null); then
-    echo "   sourced"
+    echo -e "\x1b[33m   sourced\x1b[0m"
     nstack=1
+
 else
-    echo "   not sourced"
+    echo -e "\x1b[34m   not sourced\x1b[0m"
     nstack=2
+    BASE_LVL=$((BASE_LVL+1))
 fi
 
 echo "   assuming stack size is ${nstack}"
 echo "   shell level = $SHLVL"
+echo "BASE_LVL = $BASE_LVL"
 
 [[ $SHLVL -gt ${nstack} ]] &&
     echo "   called from parent" ||
@@ -74,31 +78,47 @@ echo "   called by ${called_by}"
 echo -en "${white}"
 echo "   ----------------------"
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-    echo "   envoked by shell"
+    echo -e "\x1b[0;36m   envoked by shell\x1b[0m"
+
 else
-    echo "   envoked by another process"
+    echo -e "\x1b[0;31m   envoked by another process\x1b[0m"
+
 fi
 echo "   ----------------------"
 echo -en "${NORMAL}"
 
 echo
 echo "compare pstree"
-pstree -Apu -H $$
-pstree -Apu -H $PPID
+pstree -Apu | grep $$ | xargs
+pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/"
+pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//"
+SH_LEV=$(pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//" | grep -o "\-\-\-" | wc -l)
+echo "ps tree shell level $SH_LEV"
+echo -n "same as SHLVL? "
+if [ "$SHLVL" = "$SH_LEV" ]; then
+    echo "yes"
+else
+    echo "no"
+fi
+SHELL_NAME=${SHELL##*/}
+echo "shell is $SHELL_NAME"
+pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//" | sed "s/\-\-\-$SHELL_NAME([^)]*)//g"
+PS_LEV=$(pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//" | sed "s/\-\-\-$SHELL_NAME([^)]*)//g" | grep -o "\-\-\-" | wc -l)
+echo "process level $PS_LEV"
+PSH_LEV=$((SH_LEV - PS_LEV))
+echo "prompt shell level is $PSH_LEV"
 
-echo "parent: "
-pstree -Apu -H $$ | grep $PPID
-pstree -Apu -H $$ | grep $PPID | tr -d "$PPID"
-pstree -Apu -H $$ | grep $PPID | sed "s/$PPID.*//"
-pstree -Apu -H $$ | grep $PPID | sed "s/$PPID.*//" | grep -o "\-\-\-" | wc -l
+echo "BASE_LVL = $BASE_LVL"
+echo "process level $PS_LEV"
+echo -n "PS lev > $BASE_LVL " 
 
-
-echo "child: "
-pstree -Apu -H $$ | grep $$
-pstree -Apu -H $$ | grep $$ | sed "s/$$.*//" | grep -o "\-\-\-"
-pstree -Apu -H $$ | grep $$ | sed "s/$$.*//" | grep -c "\-\-\-" | wc -l
-
-
+if [ "$PS_LEV" -gt "$BASE_LVL" ]; then
+    echo true
+    echo -e "\x1b[0;35m$(basename $BASH_SOURCE) was envoked by another process\x1b[0m"
+else
+    echo false
+    echo -e "\x1b[0;32m$(basename $BASH_SOURCE) was envoked by $SHELL_NAME shell\x1b[0m"
+fi
 
 echo
 echo "calling child process..."
