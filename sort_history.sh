@@ -59,14 +59,17 @@ function gen_marker () {
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
 }
 
-# specify forbidden characters
-#bad_list=$(echo {58..64} {91..96})
-bad_list="36 38 39 42 45 46 47 91 92 94"
+#-----------------#
+# DON'T BE CLEVER #
+#-----------------#
 
 # define marker range
-m_start=35
-m_end=125
+m_start=48
+m_end=122
 m_span=$(( $m_end - $m_start + 1 ))
+
+# specify forbidden characters
+bad_list=$(echo {58..64} {91..96})
 
 # print bad list
 echo "${TAB}bad list:"
