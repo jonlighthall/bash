@@ -37,10 +37,10 @@ echo "   ps tree shell level = $SH_LEV"
 #echo "           shell level = $SHLVL"
 #echo -n "   same as SHLVL? "
 if [ "$SHLVL" = "$SH_LEV" ]; then
-:
+    :
     #   echo "yes"
 else
-  #  echo "no"
+    #  echo "no"
     exit 1
 fi
 
@@ -63,9 +63,9 @@ echo "  parent process level = $PPS_LEV"
 echo "    prompt shell level = $PSH_LEV"
 echo "-----------------------------------"
 
+echo -n "parent process level = 0? "
 if [ "$PPS_LEV" -eq 0 ]; then
     echo "yes"
-
     # only works if sourced
     if [ "${0}" = "$BASH_SOURCE"  ];then
 	echo -e "      \$0 same as \$BASH_SOURCE"
@@ -74,8 +74,6 @@ if [ "$PPS_LEV" -eq 0 ]; then
 	echo -e "      \$0 NOT same as \$BASH_SOURCE"
 	echo "      This script is not called by another process."
     fi
-
-    
 else
     echo "no"
 fi
@@ -109,16 +107,9 @@ echo "BASE_LVL = $BASE_LVL"
 echo "process level $PS_LEV"
 echo "PS lev > $BASE_LVL " 
 
-echo -n "$SHLVL  -gt $PS_LEV "
-
-#if [ "$PS_LEV"  ]; then
-#if [ "$PS_LEV" -gt "$BASE_LVL" ]; then
-
-
+echo -n "(shell level $SHLVL) -gt (process level $PS_LEV) ? "
 
 if [ "$PS_LEV" -gt 1 ] || ( [ "$PS_LEV" -gt "$PPS_LEV" ] ) || ( [ "$SH_LEV" -gt "$PSH_LEV" ] && [ "$PS_LEV" -gt 1 ] ); then
-
-    
     echo true
     echo -e "\x1b[0;35m$(basename $BASH_SOURCE) was envoked by another process\x1b[0m"
 else
