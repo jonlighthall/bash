@@ -137,10 +137,10 @@ do
 	    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    # add remotes to list
 	    this_remote=$(git remote -v | awk -F " " '{print $2}' | uniq)
-	    echo "  remote: ${this_remote}"
+	    echo "  remote ${this_remote}"
 	    echo "${this_remote}" >> ${list_remote}
 	    proto=$(echo ${this_remote} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-	    echo "protocol: ${proto}"
+	    echo "protocol ${proto}"
 
 	    n_remotes=$(echo ${this_remote} | wc -l)
 
@@ -287,8 +287,8 @@ do
 done
 
 echo "done updating repositories"
-echo "returning to starting directory..."
-cd ${starting_dir}
+echo "returning to starting directory ${start_dir}..."
+cd ${start_dir}
 
 # sort and uniquify remotes list
 sort -u ${list_remote} -o ${list_remote}
