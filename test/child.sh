@@ -27,6 +27,10 @@ else
     #(return child)
 fi
 
+echo "compare PID..."
+echo "          PID = $$"
+echo "   parent PID = $PPID"
+
 echo
 echo "compare pstree"
 pstree -Apu | grep $$ | xargs
