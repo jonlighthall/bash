@@ -128,7 +128,7 @@ then
 else
     echo -en "elapsed time is ${white}${dT_sec} sec${NORMAL}"
 fi
-echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"
+echo " on $(date +"%a %b %-d at %-l:%M %p %Z") DUMMY=$DUMMY"
 
 #./ par pslvl 1, child pslvl 2; par by shell, child by other; both not sourced
 
