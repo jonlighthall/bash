@@ -18,13 +18,13 @@ fi
 echo
 echo "compare process name..."
 called_by=$(ps -o comm= $PPID)
-echo "   called by ${called_by}"
+echo -n "   called by ${called_by}: "
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-    echo -e "\x1b[0;36m   envoked by shell\x1b[0m"
-
+    echo -e "\x1b[0;36menvoked by shell\x1b[0m"
+    #(return not_child)
 else
-    echo -e "\x1b[0;31m   envoked by another process\x1b[0m"
-
+    echo -e "\x1b[0;35menvoked by another process\x1b[0m"
+    #(return child)
 fi
 
 echo
