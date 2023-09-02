@@ -62,6 +62,7 @@ for my_link in \
     git/undel_repo \
     git/update_repos \
     log \
+    mv_date \
     rmbin \
     sec2elap \
     sort_history \
