@@ -57,7 +57,6 @@ else
 
 	# check if output exists
 	echo "output file ${file_out}... "
-	touch ${file_out}
 	if [ -f ${file_out} ]; then
             echo "${TAB}exists"
 	    echo -n "${TAB}waiting for new time stamp... "
@@ -79,3 +78,6 @@ else
 	exit 1
     fi
 fi
+
+# now move file
+mv -nv ${file_in} ${file_out}
