@@ -44,12 +44,10 @@ else
 	out_base="${in_base}"
 	file_out="${in_dir}/${out_base}${ext}"
 
-	echo "${TAB}output file: $file_out"
-
 	# check if input and output are the same file
-	echo -n " input file ${file_in} is... "
+        echo -e "output file ${file_out} is ..."
 	while [ ${file_in} -ef ${file_out} ]; do
-            echo -e "\n${TAB}the same file as output file ${file_out}"
+	    echo "${TAB}the same file as input file ${file_in}"
             echo -n "${TAB}renaming output... "
 	    # NB: don't rename any existing files; change the ouput file name to something unique
 	    file_out=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
@@ -59,17 +57,19 @@ else
 
 	# check if output exists
 	echo "output file ${file_out}... "
+	touch ${file_out}
 	if [ -f ${file_out} ]; then
             echo "${TAB}exists"
+	    echo -n "${TAB}waiting for new time stamp... "
 	    while [ -f ${file_out} ]; do
-		echo "${file_out##*/} exists"
-		echo -n "${TAB}renaming output... "
 		# NB: don't rename any existing files; change the ouput file name to something
 		# unique
 		file_out=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
-		echo ${file_out##*/}
 	    done
+	    echo "done"
 	    echo "${TAB}unique file name found"
+	    file_out=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
+	    echo "output file ${file_out}"
 	else
 	    echo "${TAB}does not exist (uniquely named)"
 	fi
