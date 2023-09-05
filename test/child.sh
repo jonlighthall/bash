@@ -53,11 +53,19 @@ echo
 echo "compare with shell"
 echo "   shell is $SHELL_NAME"
 echo "-----------------------------------"
+echo "process shell level: "
 pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//" | sed "s/\-\-\-$SHELL_NAME([^)]*)//g"
 PS_LEV=$(pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//" | sed "s/\-\-\-$SHELL_NAME([^)]*)//g" | grep -o "\-\-\-" | wc -l)
+if [ "${PS_LEV}" -eq 0 ]; then
+    echo "EMPTY!"
+fi
 
+echo "parent process shell level: "
 pstree -Apu | grep $PPID | xargs | sed "s/\($PPID[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//" | sed "s/\-\-\-$SHELL_NAME([^)]*)//g"
 PPS_LEV=$(pstree -Apu | grep $PPID | xargs | sed "s/\($PPID[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//" | sed "s/\-\-\-$SHELL_NAME([^)]*)//g" | grep -o "\-\-\-" | wc -l)
+if [ "${PPS_LEV}" -eq 0 ]; then
+    echo "EMPTY!"
+fi
 
 PSH_LEV=$((SH_LEV - PS_LEV))
 echo "-----------------------------------"
@@ -93,7 +101,7 @@ if (return 0 2>/dev/null); then
 	echo "      This script is called by another process."
     else
 	echo -e "      \$0 NOT same as \$BASH_SOURCE"
-	echo "      This script is not called by another process."
+	echo "      This script is NOT called by another process."
     fi
     BASE_LVL=0
 else
