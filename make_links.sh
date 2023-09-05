@@ -62,6 +62,7 @@ for my_link in \
     git/undel_repo \
     git/update_repos \
     log \
+    mv_date \
     rmbin \
     sec2elap \
     sort_history \
@@ -94,13 +95,13 @@ do
 	# next, check file permissions
 	if true; then
 	    echo -n "${TAB}${target##*/} requires specific permissions: "
-	    permOK=700
+	    permOK=500
 	    echo "${permOK}"
 	    TAB+=${fTAB:='   '}
 	    echo -n "${TAB}checking permissions... "
 	    perm=$(stat -c "%a" "${target}")
 	    echo ${perm}
-	    if [[ ${perm} -gt ${permOK}  ]]; then
+	    if [[ ${perm} -le ${permOK}  ]] || [[ ! ( -f "${target}" && -x "${target}" ) ]]; then
 		echo -n "${TAB}changing permissions to ${permOK}... "
 		chmod u+x "${target}"
 		RETVAL=$?
