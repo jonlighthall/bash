@@ -9,6 +9,7 @@ start_time=$(date +%s%N)
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
     TAB=''
+    : ${fTAB:='   '}
 else
     TAB+=${TAB+${fTAB:='   '}}
 fi
@@ -136,10 +137,10 @@ do
 	    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 	    # add remotes to list
 	    this_remote=$(git remote -v | awk -F " " '{print $2}' | uniq)
-	    echo "  remote: ${this_remote}"
+	    echo "  remote ${this_remote}"
 	    echo "${this_remote}" >> ${list_remote}
 	    proto=$(echo ${this_remote} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-	    echo "protocol: ${proto}"
+	    echo "protocol ${proto}"
 
 	    n_remotes=$(echo ${this_remote} | wc -l)
 
@@ -204,6 +205,11 @@ do
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		    ((n++))
 		fi
+		((nsec++))
+		if [ $loop_counter -gt 1 ]; then
+		    echo "${TAB}increasing timeout to ${nsec}"
+		fi
+
 	    done
 	    if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
 		t_pull_max=${dt_pull}
@@ -213,7 +219,7 @@ do
 	    else
 		prog=make_links.sh
 		if [ -f ${prog} ]; then
-		   : #./${prog}
+		    : #./${prog}
 		fi
 	    fi
 
@@ -261,8 +267,8 @@ do
 
 	    # check for modified files
 	    if [[ ! -z $(git diff --name-only --diff-filter=M) ]]; then
-		echo -e "modified: ${red}"
-		git diff --name-only --diff-filter=M | sed "s/^/${TAB}/"
+		echo -e "modified: ${GRH}"
+		git diff --name-only --diff-filter=M | sed "s/^/${fTAB}/"
 		echo -en "${NORMAL}"
 		mods+="$repo "
 	    fi
@@ -276,13 +282,13 @@ do
 	loc_fail+="$repo "
 	test_file ${HOME}/$repo
     fi
-#    hline 70
- #   echo
+    #    hline 70
+    #   echo
 done
 
 echo "done updating repositories"
-echo "returning to starting directory..."
-cd ${starting_dir}
+echo "returning to starting directory ${start_dir}..."
+cd ${start_dir}
 
 # sort and uniquify remotes list
 sort -u ${list_remote} -o ${list_remote}
