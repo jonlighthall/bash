@@ -38,14 +38,17 @@ pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/"
 pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//"
 SH_LEV=$(pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//" | grep -o "\-\-\-" | wc -l)
 echo "   ps tree shell level = $SH_LEV"
-#echo "           shell level = $SHLVL"
-#echo -n "   same as SHLVL? "
+echo "           shell level = $SHLVL"
+echo -n "   same as SHLVL? "
+
 if [ "$SHLVL" = "$SH_LEV" ]; then
-    :
-    #   echo "yes"
+    echo "yes"
 else
-    #  echo "no"
-    exit 1
+    echo "no"
+    echo -e "\x1b[0;31mSHELL LEVEL MISMATCH\x1b[0m"
+    echo "           shell level = $SHLVL"
+    echo "           shell level = $SH_LEV"
+    #  exit 1
 fi
 
 SHELL_NAME=${SHELL##*/}
