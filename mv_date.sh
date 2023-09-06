@@ -50,7 +50,7 @@ else
 	    echo "${TAB}the same file as input file ${file_in}"
             echo -n "${TAB}renaming output... "
 	    # NB: don't rename any existing files; change the ouput file name to something unique
-	    file_out=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
+	    file_out=${in_dir}/${out_base}_$(date -r ${file_out} +'%Y-%m-%d-t%H%M%S')${ext}
 	    echo ${file_out}
 	done
 	echo "${TAB}uniquely named"
