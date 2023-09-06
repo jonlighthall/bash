@@ -117,6 +117,7 @@ fi
 # check list of files
 list_out=''
 list_del=''
+set +e
 for hist_in in $list_in
 do
     echo -n "${hist_in}... "
@@ -124,15 +125,32 @@ do
 	echo -e "is a regular ${UL}file${NORMAL}"
 	list_out+="${hist_in} "
 	if [ ! ${hist_in} -ef ${hist_ref} ]; then
-	    echo "${hist_in} is not the same as ${hist_ref}"
+	    echo "${TAB}${hist_in} is not the same as ${hist_ref}"
 	    list_del+="${hist_in} "
 	else
-	    echo "${hist_ref} and ${hist_in} are the same file"
+	    echo "${TAB}${hist_ref} and ${hist_in} are the same file"
+	fi
+
+# add check for initial orphaned lines
+	(head -n 1 ${hist_in} | grep "#[0-9]\{10\}") >/dev/null
+	if [ $? -eq 0 ]; then 
+	    echo "${TAB}${hist_in} starts with timestamp"
+	else
+	    echo "${TAB}${hist_in} DOES NOT start with timestamp"
+	    TS=$(grep "#[0-9]\{10\}" .bash_history -m 1 | sed 's/^#\([0-9]\{10\}\)[ \n].*/\1/')
+	    echo "${TAB}   TS = $TS"
+	    preTS=$((TS-1))
+	    echo "${TAB}preTS = $preTS"
+	    hist_temp=${hist_in}_$(date +'%s')
+j	    echo "${TAB}$hist_temp"
+	    echo "#$preTS INSERT MISSING TIMESTAMP" | cat - ${hist_in} > ${hist_temp}
+	    mv -v ${hist_temp} ${hist_in}
 	fi
     else
 	echo -e "${BAD}${UL}does not exist${NORMAL}"
     fi
 done
+set -e
 echo "list out = ${list_out}"
 echo "list del = ${list_del}"
 
@@ -197,7 +215,7 @@ sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_out}
 echo "done"
 
 # generate login marker
-echo "${TAB}mark login lines... "
+echo "${TAB}generate superior/inferior markers... "
 N=${#TS_MARKER}
 echo "${TAB}${TAB}time stamp marker is $N long"
 beg_mark="!"
@@ -221,10 +239,11 @@ echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
 echo "${TAB}${TAB}sorted:"
 echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}/"
 
+# mark log in/out lines
+echo -n "${TAB}mark superior/inferior lines... "
 head_list="CONTIN INSERT LOGIN"
 tail_list="INDIFF LOGOUT SHUTDN SORT"
 
-# mark log in/out lines
 for head in ${head_list}
 do
     sed -i "s/ ${head}/${LI_MARKER}${head}/" ${hist_out}
@@ -234,6 +253,7 @@ for tail in ${tail_list}
 do
     sed -i "s/ ${tail}/${LO_MARKER}${tail}/" ${hist_out}
 done
+echo "done"
 
 # sort history
 echo -n "${TAB}sorting lines... "
@@ -318,4 +338,4 @@ echo -e "\nto compare changes"
 echo "${TAB}diffy ${hist_bak} ${hist_ref}"
 echo "${TAB}en ${hist_bak} ${hist_ref}"
 
-diff --color=auto --suppress-common-lines -yiEZbwB ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
+diffy  ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
