@@ -103,21 +103,16 @@ if (return 0 2>/dev/null); then
 	echo -e "      \$0 NOT same as \$BASH_SOURCE"
 	echo "      This script is NOT called by another process."
     fi
-    BASE_LVL=0
 else
     echo -e "\x1b[34m   not sourced\x1b[0m"
-    BASE_LVL=1
 fi
 
-echo "BASE_LVL = $BASE_LVL"
 
 [[ $SHLVL -gt ${nstack} ]] &&
     echo "   called from parent" ||
 	echo "   called directly"
 
-echo "BASE_LVL = $BASE_LVL"
 echo "process level $PS_LEV"
-echo "PS lev > $BASE_LVL " 
 
 echo -n "(shell level $SHLVL) -gt (process level $PS_LEV) ? "
 
