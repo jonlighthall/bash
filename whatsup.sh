@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "   host:" $HOSTNAME
 echo "display: $DISPLAY"
-echo -n "     IP: ";hostname -I | sed 's/ .*$//'
+echo -n "     IP: ";hostname -i
 echo -n "     OS: "
 \grep -i pretty /etc/os-release | sed 's/.*="\([^"].*\)"/\1/'
 echo "   user:" $USER$USERNAME
