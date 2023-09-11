@@ -1,9 +1,9 @@
 #!/bin/bash
 echo "   host:" $HOSTNAME
 echo "display: $DISPLAY"
-echo -n "     IP: ";hostname -I
+echo -n "     IP: ";hostname -I | sed 's/ .*$//'
 echo -n "     OS: "
-lsb_release -a 2>&1 | \grep "Description:" | sed -e 's/^Description:[\t]//'
+\grep -i pretty /etc/os-release | sed 's/.*="\([^"].*\)"/\1/'
 echo "   user:" $USER$USERNAME
 echo "user ID:" $UID
 echo " groups:" `id -nG 2>/dev/null`
