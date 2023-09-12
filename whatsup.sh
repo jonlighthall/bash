@@ -3,7 +3,11 @@ echo "   host:" $HOSTNAME
 echo "display: $DISPLAY"
 echo -n "     IP: ";hostname -i
 echo -n "     OS: "
-\grep -i pretty /etc/os-release | sed 's/.*="\([^"].*\)"/\1/'
+if [ -f /etc/os-release ]; then
+    \grep -i pretty /etc/os-release | sed 's/.*="\([^"].*\)"/\1/'
+else
+    lsb_release -a 2>&1 | \grep "Description:" | sed -e 's/^Description:[\t]//'
+fi
 echo "   user:" $USER$USERNAME
 echo "user ID:" $UID
 echo " groups:" `id -nG 2>/dev/null`
