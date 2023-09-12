@@ -30,7 +30,7 @@ else
 fi
 
 if [ -z $(hostname -d) ]; then
-    echo "   path: $USER$USERNAME@$(hostname -I):$PWD"
+    echo "   path: $USER$USERNAME@$(hostname -I | sed 's/[ ]//'):$PWD"
 else
     echo "   path: $USER$USERNAME@$HOSTNAME:$PWD"
 fi
