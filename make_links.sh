@@ -104,7 +104,7 @@ do
 	    # the target files will have the required permissions added to the existing permissions
 	    if [[ ${perm} -le ${permOK}  ]] || [[ ! ( -f "${target}" && -x "${target}" ) ]]; then
 		echo -n "${TAB}changing permissions to ${permOK}... "
-		chmod +${permOK} "${target}"
+		chmod +${permOK} "${target}" || chmod u+rx "${target}"
 		RETVAL=$?
 		if [ $RETVAL -eq 0 ]; then
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
