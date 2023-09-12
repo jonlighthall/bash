@@ -280,7 +280,7 @@ do
     else
 	echo "not found"
 	loc_fail+="$repo "
-	test_file ${HOME}/$repo
+	bash test_file ${HOME}/$repo
     fi
     #    hline 70
     #   echo
