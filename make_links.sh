@@ -88,6 +88,7 @@ do
     fi
     link=${link_dir}/${my_link}
 
+    # check if target exists
     echo -n "target file ${target}... "
     if [ -e "${target}" ]; then
 	echo "exists "
@@ -103,7 +104,7 @@ do
 	    echo ${perm}
 	    # the target files will have the required permissions added to the existing permissions
 	    if [[ ${perm} -le ${permOK}  ]] || [[ ! ( -f "${target}" && -x "${target}" ) ]]; then
-		echo -n "${TAB}changing permissions to ${permOK}... "
+		echo -en "${TAB}${GRH}changing permissions${NORMAL} to ${permOK}... "
 		chmod +${permOK} "${target}" || chmod u+rx "${target}"
 		RETVAL=$?
 		if [ $RETVAL -eq 0 ]; then
@@ -117,9 +118,10 @@ do
 	    TAB=${TAB%$fTAB}
 	fi
 
+	# begin linking...
 	echo -n "${TAB}link $link... "
 	TAB+=${fTAB:='   '}
-	# first, backup existing copy
+	# first, check for existing copy
 	if [ -L ${link} ] || [ -f ${link} ] || [ -d ${link} ]; then
 	    echo -n "exists and "
 	    if [[ "${target}" -ef ${link} ]]; then
@@ -130,8 +132,9 @@ do
 		TAB=${TAB%$fTAB}
 		continue
 	    else
+		# next, delete or backup existing copy
 		if [ $(diff -ebwB "${target}" ${link} | wc -c) -eq 0 ]; then
-		    echo "have the same contents"
+		    echo "has the same contents"
 		    echo -n "${TAB}deleting... "
 		    rm -v ${link}
 		else
