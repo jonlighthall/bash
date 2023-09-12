@@ -28,4 +28,10 @@ if (ps -o etimes) &>/dev/null; then
 else
     echo $(ps -p $PPID -o etime)
 fi
-echo "   path: $USER$USERNAME@$HOSTNAME:$PWD"
+
+if [ -z $(hostname -d) ]; then
+    echo "   path: $USER$USERNAME@$(hostname -I):$PWD"
+else
+    echo "   path: $USER$USERNAME@$HOSTNAME:$PWD"
+fi
+   
