@@ -93,7 +93,11 @@ echo
 
 # specify default history file
 hist_ref=${HOME}/.bash_history
-hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
+if [ -d "${HOME}/home" ]; then
+    hist_bak=${HOME}/home/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
+else
+    hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
+fi
 echo "backup history file"
 cp -pv $hist_ref ${hist_bak}
 
@@ -338,4 +342,6 @@ echo -e "\nto compare changes"
 echo "${TAB}diffy ${hist_bak} ${hist_ref}"
 echo "${TAB}en ${hist_bak} ${hist_ref}"
 
-diffy  ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
+if command -v diffy &>/dev/null; then
+    diffy  ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
+fi
