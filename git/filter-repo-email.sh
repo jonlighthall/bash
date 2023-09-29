@@ -1,4 +1,3 @@
-set -e
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
@@ -10,6 +9,7 @@ if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
+    set -e
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -19,7 +19,7 @@ fi
 
 # parse remote
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
-    echo "no remote tracking branch"
+    echo "no remote tracking branch set for current branch"
 else
     branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
     echo -e "remote tracking branch is ${blue}${branch_tracking}${NORMAL}"
@@ -39,20 +39,31 @@ echo "list of branches: "
 echo "${branch_list}" | sed 's/^/   /'
 
 git filter-repo $@ --partial --commit-callback '
+    # define correct name
     correct_name = b"Jon Lighthall"
+
+    # list emails to replace
     auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
     auth_list.append(b"jonlighthall@users.noreply.github.com")
     auth_list.append(b"jon.lighthall@ygmail.com")
-    text_file = open(os.path.expanduser("${HOME}/utils/bash/git/url.txt"), "r")
+
+    # load url from file
+    text_file = open(os.path.expanduser("~/utils/bash/git/url.txt"), "r")
     url = text_file.read()
     text_file.close()
+
+    # add emails with url from files
     email_str="jonathan.lighthall@"+url.strip()
-    email_bin=email_str.encode("ascii")	
+    email_bin=email_str.encode("ascii")
     auth_list.append(email_bin)
     email_str="jonathan.c.lighthall@"+url.strip()
     email_bin=email_str.encode("ascii")	
     auth_list.append(email_bin)
+
+    # define correct email
     correct_email = b"jon.lighthall@gmail.com"
+
+    # conditionally replace emails and names
     if commit.author_email in auth_list:
         commit.author_email = correct_email
         if commit.author_name != correct_name:
