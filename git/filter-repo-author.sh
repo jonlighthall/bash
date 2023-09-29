@@ -1,4 +1,3 @@
-set -e
 # set tab
 if [ ! -z $TAB ]; then
     fTAB="   "
@@ -16,6 +15,7 @@ if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
+    set -e
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -49,7 +49,7 @@ git filter-repo $@ --partial --commit-callback '
     auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
     auth_list.append(b"jonlighthall@users.noreply.github.com")
     auth_list.append(b"jon.lighthall@ygmail.com")
-    text_file = open(os.path.expanduser("${HOME}/utils/bash/git/url.txt"), "r")
+    text_file = open(os.path.expanduser("~/utils/bash/git/url.txt"), "r")
     url = text_file.read()
     text_file.close()
     email_str="jonathan.lighthall@"+url.strip()
