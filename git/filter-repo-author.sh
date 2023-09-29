@@ -45,20 +45,31 @@ echo "list of branches: "
 echo "${branch_list}" | sed 's/^/   /'
 
 git filter-repo $@ --partial --commit-callback '
+    # define correct name
     correct_name = b"Jon Lighthall"
+
+    # list emails to replace
     auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
     auth_list.append(b"jonlighthall@users.noreply.github.com")
     auth_list.append(b"jon.lighthall@ygmail.com")
+
+    # load url from file
     text_file = open(os.path.expanduser("~/utils/bash/git/url.txt"), "r")
     url = text_file.read()
     text_file.close()
+
+    # add emails with url from files
     email_str="jonathan.lighthall@"+url.strip()
     email_bin=email_str.encode("ascii")
     auth_list.append(email_bin)
     email_str="jonathan.c.lighthall@"+url.strip()
-    email_bin=email_str.encode("ascii")
+    email_bin=email_str.encode("ascii")	
     auth_list.append(email_bin)
+
+    # define correct email
     correct_email = b"jon.lighthall@gmail.com"
+
+    # conditionally replace author email and name
     if commit.author_email in auth_list:
         commit.author_email = correct_email
         if commit.author_name != correct_name:
