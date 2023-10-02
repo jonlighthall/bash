@@ -185,4 +185,9 @@ else
     fi
 fi
 # print time at exit
-echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+echo -en "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
+if command -v sec2elap &>/dev/null; then
+    bash sec2elap $SECONDS
+else
+    echo "elapsed time is $SECONDS sec"
+fi
