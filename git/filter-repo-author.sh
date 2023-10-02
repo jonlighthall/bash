@@ -25,7 +25,7 @@ fi
 
 # parse remote
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
-    echo "no remote tracking branch"
+    echo "no remote tracking branch set for current branch"
 else
     branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
     echo -e "remote tracking branch is ${blue}${branch_tracking}${NORMAL}"
