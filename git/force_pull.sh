@@ -160,7 +160,7 @@ if [ ! -z ${hash_start_remote} ]; then
     git rev-list $hash_remote..${branch_pull} | sed "s/^/${TAB}/"
     N_remote=$(git rev-list $hash_remote..${branch_pull} | wc -l)
     if [ $N_remote -gt 1 ]; then
-	echo -n "or ${hash_start_remote}^.."
+	echo -n "${TAB}or ${hash_start_remote}^.."
 	hash_end_remote=$(git rev-list $hash_remote..${branch_pull} | head -n 1)
 	echo ${hash_end_remote}
     else
@@ -195,6 +195,7 @@ else
     b_stash=true
 fi
 
+# copy leading commits to new branch
 git checkout -b ${branch_local}.temp
 git checkout ${branch_local}
 
