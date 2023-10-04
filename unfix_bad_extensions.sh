@@ -35,7 +35,7 @@ else
     if [[ -d $1 ]]; then
 	echo "found"
 	TAB+=$fTAB
-	for bad in bat bin cmd csh exe gz prf out osx
+	for bad in bat bin cmd csh exe gz osx out prf ps
 	do
 	    echo "${TAB}replacing \"${sep}${bad}\" with \".$bad\"..."
 	    for fname in $(find $1 -name "*$sep$bad"); do
