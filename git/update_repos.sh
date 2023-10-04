@@ -201,15 +201,16 @@ do
 		if [[ $RETVAL != 0 ]]; then
 		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		    #pull_fail+="$repo "
+		    nsec=$(( nsec * 2 ))
+		    if [ $loop_counter -gt 1 ]; then
+			echo "${TAB}increasing timeout to ${nsec}"
+			to="timeout -s 9 ${nsec}s "
+			cmd="${to}git pull -v --ff-only" # --all --tags --prune"
+		    fi
 		else
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		    ((n++))
 		fi
-		((nsec++))
-		if [ $loop_counter -gt 1 ]; then
-		    echo "${TAB}increasing timeout to ${nsec}"
-		fi
-
 	    done
 	    if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
 		t_pull_max=${dt_pull}
@@ -255,9 +256,11 @@ do
 		else
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		fi
-		((nsec++))
+		nsec=$((nsec * 2))
 		if [ $loop_counter -gt 1 ]; then
 		    echo "${TAB}increasing timeout to ${nsec}"
+		    to="timeout -s 9 ${nsec}s "
+		    cmd="${to}git push -v --progress"
 		fi
 	    done
 	    if [[ ${dt_push} -gt ${t_push_max} ]]; then
