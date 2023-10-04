@@ -65,6 +65,9 @@ git filter-repo $@ --partial --commit-callback '
     email_str="jonathan.c.lighthall@"+url.strip()
     email_bin=email_str.encode("ascii")	
     auth_list.append(email_bin)
+    email_str="jlighthall@snuffleupagus."+url.strip()
+    email_bin=email_str.encode("ascii")	
+    auth_list.append(email_bin)   
 
     # define correct email
     correct_email = b"jon.lighthall@gmail.com"
