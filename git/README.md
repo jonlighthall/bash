@@ -47,13 +47,13 @@ git push --force --tags origin 'refs/heads/*'
 ### Settings
 Before running, check the individual scripts and confirm that the author emails are correct.
 Unlisted urls maybe saved in the file [`url.txt`](url.txt).
-To keep changes to `url.txt` unreported, the following command may be used
+To keep changes to `url.txt` unreported (and ignore upstream changes), the following command may be used
 ```bash
-git update-index --assume-unchanged url.txt
+git update-index --skip-worktree url.txt
 ```
 to undo this action, use the following command
 ```bash
-git update-index --no-assume-unchanged url.txt
+git update-index --no-skip-worktree url.txt
 ```
 
 The scripts can take inputs such as `--force` or `--prune-empty`

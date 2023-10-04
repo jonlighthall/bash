@@ -157,6 +157,8 @@ do
 done
 bar 38 "--------- Done Making Links ----------"
 
+git update-index --skip-worktree git/url.txt
+
 # print time at exit
 echo -en "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
 if command -v sec2elap &>/dev/null; then
