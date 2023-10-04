@@ -43,10 +43,15 @@ if (ps -o etimes) &>/dev/null; then
 else
     echo $(ps -p $PPID -o etime)
 fi
-
-if [ -z $(hostname -d) ]; then
-    echo "   path: $UNAME@$(hostname -I | sed 's/[ ]//'):$PWD"
+echo -n "   path: $UNAME@"
+if [[ "$HOSTNAME" == *"."* ]]; then
+    echo -n "$HOSTNAME"
 else
-    echo "   path: $UNAME$HOSTNAME:$PWD"
+    if [ -z $(hostname -d) ]; then
+        echo -n  "$(hostname -I | sed 's/ .*$//')"
+    else
+	echo "fail"
+    fi  
 fi
+echo ":$PWD"
    
