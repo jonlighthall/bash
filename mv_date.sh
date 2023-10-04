@@ -73,7 +73,7 @@ else
 	    echo "${TAB}does not exist (uniquely named)"
 	fi
     else
-	echo "does not exist"
+	echo "is not a file"
 	echo "${TAB}exiting..."
 	exit 1
     fi
