@@ -220,7 +220,7 @@ do
 		prog=make_links.sh
 		if [ -f ${prog} ]; then
 		    if [[ ! ( ("$(hostname -f)"  == *"navy.mil") && ($repo =~ "private") ) ]]; then
-			./${prog}
+			bash ${prog}
 		    fi
 		fi
 	    fi
