@@ -8,6 +8,7 @@
 set -e
 
 # set tab
+TAB=''
 TAB+=${TAB+${fTAB:='   '}}
 
 # load formatting
@@ -32,14 +33,14 @@ fi
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "no remote tracking branch set for current branch"
 else
-    branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "remote tracking branch is ${blue}${branch_tracking}${NORMAL}"
-    name_remote=${branch_tracking%%/*}
+    remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
+    echo -e "remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
+    name_remote=${remote_tracking_branch%%/*}
     echo "remote is name $name_remote"
     url_remote=$(git remote -v | grep ${name_remote} |  awk '{print $2}' | sort -u)
     echo "remote url is ${url_remote}"
     # parse branches
-    branch_remote=${branch_tracking#*/}
+    branch_remote=${remote_tracking_branch#*/}
     echo "remote branch is $branch_remote"
 fi
 branch_local=$(git branch | grep \* | sed 's/^\* //')
@@ -48,9 +49,15 @@ echo -e " local branch is ${green}${branch_local}${NORMAL}"
 # parse arguments
 if [ $# -ge 1 ]; then
     name_remote=$1
+else
+    echo "no remote specified"
+    echo "${fTAB}using $name_remote"
 fi
 if [ $# -ge 2 ]; then
     branch_remote=$2
+else
+    echo "no remote branch specified"
+    echo "${fTAB}using $branch_remote"
 fi
 branch_pull=${name_remote}/${branch_remote}
 if [ -z ${name_remote} ] || [ -z ${branch_remote} ]; then
@@ -59,15 +66,26 @@ if [ -z ${name_remote} ] || [ -z ${branch_remote} ]; then
     echo "       ${TAB}${BASH_SOURCE##*/} <repository> <refspec>"
     exit 1
 else
-    echo "pulling from remote branch $branch_pull"
+    echo "comparing local branch $branch_local with remote branch $branch_pull"
 fi
 
+echo -n "pull branch and remote tracking branch... "
+if [ "$branch_pull" == "$remote_tracking_branch" ]; then
+    echo "match"
+else
+    echo "do not match"
+fi
+
+# before starting, fetch remote
+echo "fetching ${name_remote}..."
+git fetch ${name_remote}
+
 # determine latest common local commit, based on commit time
-tracking=${branch_pull}
+iHEAD=${branch_pull}
 while [ -z ${hash_local} ]; do
-    echo "pulling from ${tracking}"
-    subj_remote=$(git log ${tracking} --format=%s -n 1)
-    time_remote=$(git log ${tracking} --format=%at -n 1)
+    echo "checking ${iHEAD}..."
+    subj_remote=$(git log ${iHEAD} --format=%s -n 1)
+    time_remote=$(git log ${iHEAD} --format=%at -n 1)
     echo "${TAB}remote commit subject: $subj_remote"
     echo "${TAB}remote commit time: $time_remote"
 
@@ -109,7 +127,7 @@ while [ -z ${hash_local} ]; do
     else
 	echo "not found"
     fi
-    tracking="${tracking}~"
+    iHEAD="${iHEAD}~"
 done
 
 # compare local commit to remote commit
@@ -132,7 +150,7 @@ if [ $hash_local == $hash_remote ]; then
 else
     echo "a different hash (diverged)"
 fi
-TAB=${TAB%$fTAB}
+#TAB=${TAB%$fTAB}
 
 # determine remote commits not found locally
 echo -n "${TAB}leading remote commits: "
@@ -148,7 +166,7 @@ if [ ! -z ${hash_start_remote} ]; then
     else
 	hash_end_remote=$hash_start_remote
     fi
-    echo "${TAB}remote branch is $N_remote commits ahead of local"
+    echo "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
 else
     echo "none"
     N_remote=0
@@ -209,6 +227,7 @@ if [ $N_local -gt 0 ];then
 	    git rev-list ${hash_start}^..${hash_end} | tac | xargs -r -n1 git cherry-pick
 	else
 	# modern command
+	    #git rev-list --reverse ${hash_start}^..$hash_end . | git cherry-pick --stdin
 	    git cherry-pick ${hash_start}^..$hash_end
 	fi
     else
