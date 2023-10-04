@@ -1,6 +1,10 @@
 #!/bin/bash
 echo "   host:" $HOSTNAME
-echo "display: $DISPLAY"
+echo -n "display: "
+if [ -z $DISPLAY ]; then
+    echo -e "\x1b[31mnot set\x1b[0m"
+fi
+echo "$DISPLAY"
 echo -n "     IP: ";hostname -i
 echo -n "     OS: "
 if [ -f /etc/os-release ]; then
@@ -12,7 +16,18 @@ else
 	cat /etc/*release | sort -u
     fi
 fi
-echo "   user:" $USER$USERNAME
+echo -n "   user: "
+if [ -z $USER ]; then
+    if [ -z $USERNAME ]; then
+	echo -e "\x1b[31mnot set\x1b[0m"
+	UNAME=''
+    else
+	UNAME=$USERNAME
+    fi
+else
+    UNAME=$USER
+fi
+echo $UNAME
 echo "user ID:" $UID
 echo " groups:" `id -nG 2>/dev/null`
 echo "    pwd:" $PWD
@@ -30,8 +45,8 @@ else
 fi
 
 if [ -z $(hostname -d) ]; then
-    echo "   path: $USER$USERNAME@$(hostname -I | sed 's/[ ]//'):$PWD"
+    echo "   path: $UNAME@$(hostname -I | sed 's/[ ]//'):$PWD"
 else
-    echo "   path: $USER$USERNAME@$HOSTNAME:$PWD"
+    echo "   path: $UNAME$HOSTNAME:$PWD"
 fi
    
