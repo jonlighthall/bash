@@ -5,7 +5,7 @@ if [ -z $DISPLAY ]; then
     echo -e "\x1b[31mnot set\x1b[0m"
 fi
 echo "$DISPLAY"
-echo -n "     IP: ";hostname -i
+echo -n "     IP: ";hostname -i | sed 's/^[^\.]* //'
 echo -n "     OS: "
 if [ -f /etc/os-release ]; then
     \grep -i pretty /etc/os-release | sed 's/.*="\([^"].*\)"/\1/'
