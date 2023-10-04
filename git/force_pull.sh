@@ -166,7 +166,7 @@ if [ ! -z ${hash_start_remote} ]; then
     else
 	hash_end_remote=$hash_start_remote
     fi
-    echo "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
+    echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
 else
     echo "none"
     N_remote=0
@@ -194,6 +194,9 @@ else
     fi
     b_stash=true
 fi
+
+git checkout -b ${branch_local}.temp
+git checkout ${branch_local}
 
 # initiate HEAD
 echo "resetting HEAD to $hash_remote..."
@@ -224,11 +227,16 @@ if [ $N_local -gt 0 ];then
 	    else
 		echo
 	    fi
-	    git rev-list ${hash_start}^..${hash_end} | tac | xargs -r -n1 git cherry-pick
+	    git rev-list --reverse ${hash_start}^..${hash_end} | xargs -r -n1 git cherry-pick
 	else
 	# modern command
 	    #git rev-list --reverse ${hash_start}^..$hash_end . | git cherry-pick --stdin
-	    git cherry-pick ${hash_start}^..$hash_end
+	    #git cherry-pick ${hash_start}^..$hash_end
+	    git checkout ${branch_local}.temp
+	    git rebase ${branch_local}
+	    git checkout ${branch_local}
+	    git merge ${branch_local}.temp
+	    git branch -d ${branch_local}.temp
 	fi
     else
 	echo "single commit to cherry-pick"
