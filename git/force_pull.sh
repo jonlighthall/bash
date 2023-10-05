@@ -199,7 +199,7 @@ else
 fi
 
 # copy leading commits to new branch
-if [ $N_local -gt 0 ] && [ $N_remote -gt 0];then
+if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
     cbar "${yello}copying local commits to new branch${NORMAL}"
     git checkout -b ${branch_local}.temp
     git checkout ${branch_local}
