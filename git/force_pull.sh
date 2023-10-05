@@ -237,7 +237,7 @@ else
     echo "${TAB}${fTAB}no need to merge"
 fi
 if [ $N_local -gt 0 ];then 
-    echo -e "${yellow}pushing local changes...${NORMAL}"
+    echo -e "${TAB}${fTAB}${yellow}pushing local changes...${NORMAL}"
     git push --all
     cbar "done pushing"
 else
