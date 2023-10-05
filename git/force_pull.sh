@@ -181,12 +181,12 @@ git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 
 # stash local changes
 if [ -z "$(git diff)" ]; then
-    echo "no differences to stash"
+    echo -e "${green}no differences to stash${NORMAL}"
     b_stash=false
 else
     echo "${TAB}status:"
     git status
-    cbar "stashing differences..."
+    cbar "${yellow}stashing differences...{NORMAL}"
 
     if [ $git_ver_maj -lt 2 ]; then
 	# old command
@@ -199,8 +199,8 @@ else
 fi
 
 # copy leading commits to new branch
-if [ $N_local -gt 0 ];then
-    echo "${TAB}copying local commits to new branch"
+if [ $N_local -gt 0 ] && [ $N_remote -gt 0];then
+    cbar "${yello}copying local commits to new branch${NORMAL}"
     git checkout -b ${branch_local}.temp
     git checkout ${branch_local}
 else
@@ -208,23 +208,25 @@ else
 fi
 
 # initiate HEAD
+if [ $N_remote -gt 0 ];then
 echo "resetting HEAD to $hash_remote..."
 git reset --hard $hash_remote | sed "s/^/${TAB}/"
+fi
 
 # pull remote commits
 echo "${TAB}remote branch is $N_remote commits ahead of remote"
 if [ $N_remote -gt 0 ];then
     echo "${TAB}pulling remote changes..."
     git pull
+    cbar "done pulling"
 else
-    echo "${TAB}no need to pull"
+    echo "${TAB}${fTAB}no need to pull"
 fi
-cbar "done pulling"
 
 # push local commits
 echo "${TAB}local branch is $N_local commits ahead of remote"
-if [ $N_local -gt 0 ];then
-    echo "merging local changes..."
+if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
+    cbar "merging local changes..."
     if [ $N_local -gt 1 ];then
 	if [ $git_ver_maj -lt 2 ]; then
 	# old command
@@ -252,12 +254,16 @@ if [ $N_local -gt 0 ];then
 	echo "single commit to cherry-pick"
 	git cherry-pick ${hash_start}
     fi
-    echo "pushing local changes..."
-    git push --all
 else
-    echo "no need to merge"
+    echo "${TAB}${fTAB}no need to merge"
 fi
-cbar "done pushing"
+if [ $N_local -gt 0 ];then 
+    echo -e "${yellow}pushing local changes...${NORMAL}"
+    git push --all
+    cbar "done pushing"
+else
+    echo -e "${green}no updates to push${NORMAL}"
+fi
 
 # get back to where you were....
 N_stash=$(git stash list | wc -l)
@@ -276,8 +282,8 @@ if [ $N_stash -gt 0 ]; then
     else
 	echo "${TAB}... but none are from this operation"
     fi
+cbar "done un-stashing"
 else
     echo "no stash entries"
 fi
-cbar "done un-stashing"
 echo "you're done!"
