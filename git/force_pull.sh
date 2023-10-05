@@ -214,7 +214,7 @@ if [ $N_remote -gt 0 ];then
 fi
 
 # pull remote commits
-echo "${TAB}${yellow}remote branch is $N_remote commits ahead of remote${NORMAL}"
+echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of remote${NORMAL}"
 if [ $N_remote -gt 0 ];then
     echo "${TAB}pulling remote changes..."
     git pull
