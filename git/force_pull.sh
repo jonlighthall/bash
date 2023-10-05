@@ -214,7 +214,7 @@ git reset --hard $hash_remote | sed "s/^/${TAB}/"
 fi
 
 # pull remote commits
-echo "${TAB}remote branch is $N_remote commits ahead of remote"
+echo "${TAB}${yellow}remote branch is $N_remote commits ahead of remote${NORMAL}"
 if [ $N_remote -gt 0 ];then
     echo "${TAB}pulling remote changes..."
     git pull
