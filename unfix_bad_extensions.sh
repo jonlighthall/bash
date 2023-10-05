@@ -39,7 +39,7 @@ else
 	do
 	    echo "${TAB}replacing \"${sep}${bad}\" with \".$bad\"..."
 	    for fname in $(find $1 -name "*$sep$bad"); do
-		mv -nv "$fname" "`echo $fname | sed "s/$sep$bad/.$bad/"`";
+		mv -nv "$fname" "`echo $fname | sed "s/$sep$bad/.$bad/"`" | sed "s/^/${TAB}${fTAB}/"
 	    done
 	done
 	TAB=${TAB#$fTAB}
