@@ -209,8 +209,8 @@ fi
 
 # initiate HEAD
 if [ $N_remote -gt 0 ];then
-echo "resetting HEAD to $hash_remote..."
-git reset --hard $hash_remote | sed "s/^/${TAB}/"
+    echo "resetting HEAD to $hash_remote..."
+    git reset --hard $hash_remote | sed "s/^/${TAB}/"
 fi
 
 # pull remote commits
@@ -227,33 +227,12 @@ fi
 echo "${TAB}local branch is $N_local commits ahead of remote"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
     cbar "merging local changes..."
-    if [ $N_local -gt 1 ];then
-	if [ $git_ver_maj -lt 2 ]; then
-	# old command
-	    echo "${TAB}cherry picking multiple individual commits..."
-	    git rev-list ${hash_start}^..${hash_end} | sed "s/^/${TAB}/"
-	    echo -n "${TAB}in case of automatic cherry-pick failure, remember to push"
-	    if $b_stash; then
-		echo "and apply stash"
-	    else
-		echo
-	    fi
-	    git rev-list --reverse ${hash_start}^..${hash_end} | xargs -r -n1 git cherry-pick
-	else
-	# modern command
-	    #git rev-list --reverse ${hash_start}^..$hash_end . | git cherry-pick --stdin
-	    #git cherry-pick ${hash_start}^..$hash_end
-	    echo "${TAB}rebase and merge..."
-	    git checkout ${branch_local}.temp
-	    git rebase ${branch_local}
-	    git checkout ${branch_local}
-	    git merge ${branch_local}.temp
-	    git branch -d ${branch_local}.temp
-	fi
-    else
-	echo "single commit to cherry-pick"
-	git cherry-pick ${hash_start}
-    fi
+    echo "${TAB}rebase and merge..."
+    git checkout ${branch_local}.temp
+    git rebase ${branch_local}
+    git checkout ${branch_local}
+    git merge ${branch_local}.temp
+    git branch -d ${branch_local}.temp
 else
     echo "${TAB}${fTAB}no need to merge"
 fi
@@ -282,7 +261,7 @@ if [ $N_stash -gt 0 ]; then
     else
 	echo "${TAB}... but none are from this operation"
     fi
-cbar "done un-stashing"
+    cbar "done un-stashing"
 else
     echo "no stash entries"
 fi
