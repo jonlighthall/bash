@@ -146,7 +146,7 @@ do
 	    preTS=$((TS-1))
 	    echo "${TAB}preTS = $preTS"
 	    hist_temp=${hist_in}_$(date +'%s')
-j	    echo "${TAB}$hist_temp"
+	    echo "${TAB}$hist_temp"
 	    echo "#$preTS INSERT MISSING TIMESTAMP" | cat - ${hist_in} > ${hist_temp}
 	    mv -v ${hist_temp} ${hist_in}
 	fi
