@@ -184,9 +184,10 @@ if [ -z "$(git diff)" ]; then
     echo -e "${green}no differences to stash${NORMAL}"
     b_stash=false
 else
+    git reset HEAD
     echo "${TAB}status:"
     git status
-    cbar "${yellow}stashing differences...{NORMAL}"
+    cbar "${yellow}stashing differences...${NORMAL}"
 
     if [ $git_ver_maj -lt 2 ]; then
 	# old command
