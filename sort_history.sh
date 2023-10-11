@@ -303,7 +303,7 @@ echo "done"
 
 # fix unmatched apostrophes
 echo -n "${TAB}find unmatched apostrophes... "
-sed -i "s/^[^\n'\"]*'[^\n'\"]*$/&;' # unmatched apostrophe SORT/" ${hist_out}
+sed -i "s/^[^\n'\"\`]*'[^\n'\"\`]*$/&;' # unmatched apostrophe SORT/" ${hist_out}
 #sed -i "s/^[^#][^\n'\"]*'[^\n'\"]*$/&;' # unmatched apostrophe SORT" ${hist_out}
 #sed -i "s/^[^#\n'\"`]*(?<!\\)'[^\n'\"`]*$/&;' # unmatched apostrophe SORT" ${hist_out}
 #sed -i "s/(?!^.*\".*'+.*\".*$)^[^\n']*'[^\n']*$/&;' # unmatched apostrophe SORT/" ${hist_out}
