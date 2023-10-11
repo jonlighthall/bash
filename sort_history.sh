@@ -210,7 +210,7 @@ gen_marker
 marker_list+="$marker "
 OR_MARKER=${marker}
 echo -n "${TAB}mark orphaned lines... "
-sed -i "s/^[^#]/${OR_MARKER}&/" ${hist_out}
+sed -i "/^#[0-9]\{10\}.*$/!s/^.*$/${OR_MARKER}&/" ${hist_out}
 echo "done"
 
 # merge commands with timestamps
