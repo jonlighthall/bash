@@ -105,6 +105,16 @@ script_ver_maj=$(echo $script_ver | awk -F. '{print $1}')
 script_ver_min=$(echo $script_ver | awk -F. '{print $2}')
 script_ver_pat=$(echo $script_ver | awk -F. '{print $3}')
 
+# check if Git is defined
+vecho -n "${TAB}Checking Git... "
+if  command -v git &>/dev/null; then
+    vecho -e "${GOOD}OK${NORMAL} Git is defined"
+else
+    vecho -e "${BAD}FAIL${NORMAL} Git not defined"
+    exit 1
+fi
+
+# get Git version
 git_ver=$(git --version | awk '{print $3}')
 git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
 git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
