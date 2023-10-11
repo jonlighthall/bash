@@ -253,7 +253,7 @@ else
 fi
 if [ $N_local -gt 0 ];then 
     echo -e "${TAB}${fTAB}${yellow}pushing local changes...${NORMAL}"
-    git push --all
+    git push
     cbar "done pushing"
 else
     echo -e "${TAB}${fTAB}${green}no need to push${NORMAL}"
