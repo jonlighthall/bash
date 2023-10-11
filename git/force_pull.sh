@@ -202,7 +202,8 @@ fi
 # copy leading commits to new branch
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
     cbar "${yello}copying local commits to new branch${NORMAL}"
-    git checkout -b ${branch_local}.temp
+    branch_temp=${branch_local}.temp
+    git checkout -b ${branch_temp}
     git checkout ${branch_local}
 else
     echo -e "${TAB}${green}no local commits to copy${NORMAL}"
@@ -229,11 +230,11 @@ echo "${TAB}local branch is $N_local commits ahead of remote"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
     cbar "merging local changes..."
     echo "${TAB}rebase and merge..."
-    git checkout ${branch_local}.temp
+    git checkout ${branch_temp}
     git rebase ${branch_local}
     git checkout ${branch_local}
-    git merge ${branch_local}.temp
-    git branch -d ${branch_local}.temp
+    git merge ${branch_temp}
+    git branch -d ${branch_temp}
 else
     echo "${TAB}${fTAB}no need to merge"
 fi
