@@ -4,9 +4,6 @@
 
 # Apr 2023 JCL
 
-# exit on errors
-set -e
-
 # set tab
 TAB=''
 fTAB='   '
@@ -22,6 +19,8 @@ if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
+    # exit on errors
+    set -e
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -203,6 +202,20 @@ fi
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
     cbar "${yello}copying local commits to new branch${NORMAL}"
     branch_temp=${branch_local}.temp
+    echo "generating temporary branch..."
+    i=0
+    set +e
+    while [[ ! -z $(git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep ${branch_temp}) ]]; do
+	echo "${TAB}${fTAB}${branch_temp}"
+	((i++))
+	branch_temp=${branch_local}.temp${i}
+	echo "${TAB}${fTAB}checking ${branch_temp}"
+    done
+    echo "${TAB}${fTAB}found unused branch name ${branch_temp}"
+    if (! return 0 2>/dev/null); then
+	echo "${TAB}${fTAB}resetting error"
+	set -e
+    fi
     git checkout -b ${branch_temp}
     git checkout ${branch_local}
 else
@@ -243,7 +256,7 @@ if [ $N_local -gt 0 ];then
     git push --all
     cbar "done pushing"
 else
-    echo -e "${green}no updates to push${NORMAL}"
+    echo -e "${TAB}${fTAB}${green}no need to push${NORMAL}"
 fi
 
 # get back to where you were....
