@@ -298,7 +298,7 @@ echo "done"
 
 # fix unmatched graves
 echo -n "${TAB}find unmatched graves... "
-sed -i 's/^[^\n`]*`[^\n`]*$/&;` # unmatched grave SORT/' ${hist_out}
+sed -i 's/^[^\n`"]*`[^\n`"]*$/&;` # unmatched grave SORT/' ${hist_out}
 echo "done"
 
 # fix unmatched apostrophes
