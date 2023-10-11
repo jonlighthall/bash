@@ -106,11 +106,11 @@ script_ver_min=$(echo $script_ver | awk -F. '{print $2}')
 script_ver_pat=$(echo $script_ver | awk -F. '{print $3}')
 
 # check if Git is defined
-vecho -n "${TAB}Checking Git... "
+echo -n "${TAB}Checking Git... "
 if  command -v git &>/dev/null; then
-    vecho -e "${GOOD}OK${NORMAL} Git is defined"
+    echo -e "${GOOD}OK${NORMAL} Git is defined"
 else
-    vecho -e "${BAD}FAIL${NORMAL} Git not defined"
+    echo -e "${BAD}FAIL${NORMAL} Git not defined"
     exit 1
 fi
 
