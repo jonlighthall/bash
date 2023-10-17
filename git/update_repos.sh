@@ -190,9 +190,9 @@ do
 	    # pull
 	    #------------------------------------------------------
 	    echo "pulling... "
-	    cmd="${to}git pull -v --ff-only" # --all --tags --prune"
+	    cmd="${to}git pull --all --ff-only --progress --tags --verbose" #--prune"
 	    if [ $git_ver_maj -ge 2 ]; then
-		cmd+=" -4"
+		cmd+=" --ipv4"
 	    fi
 	    RETVAL=137
 	    loop_counter=0
@@ -243,9 +243,9 @@ do
 	    #------------------------------------------------------
 	    echo "pushing... "
 	    to="timeout -s 9 ${nsec}s "
-	    cmd="${to}git push -v --progress"
+	    cmd="${to}git push --progress --verbose"
 	    if [ $git_ver_maj -ge 2 ]; then
-		cmd+=" -4"
+		cmd+=" --ipv4"
 	    fi
 	    RETVAL=137
 	    loop_counter=0
