@@ -174,127 +174,127 @@ echo "output file name is ${hist_out}"
 
 for hist_edit in ${hist_bak} ${hist_out}
 do
-# create history file
-echo -n "${TAB}concatenate files... "
-cat ${list_out} > ${hist_edit}
-echo "done"
-L=$(cat ${hist_edit} | wc -l)
-echo "${TAB}${TAB} ${hist_edit} has $L lines"
-
-# clean up whitespace
-echo -n "${TAB}delete trailing whitespaces... "
-sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${hist_edit}
-echo "done"
-
-marker_list=''
-# find and mark timestamp lines
-gen_marker "${hist_edit}"
-marker_list+="$marker "
-TS_MARKER=${marker}
-echo -n "${TAB}mark timestamp lines... "
-sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_edit}
-echo "done"
-
-# remove marks from timestamp lines with no associated commands
-echo -n "${TAB}un-mark childless timestamp lines... "
-sed -i "/${TS_MARKER}/{N; /${TS_MARKER}\n#[0-9]\{10\}/{s/${TS_MARKER}\n#/\n#/}};P;D" ${hist_edit}
-echo "done"
-
-# merge commands with timestamps
-echo -n "${TAB}merge commands with timestamp lines... "
-sed -i "/${TS_MARKER}/{N; s/${TS_MARKER}\n/${TS_MARKER}/};P;D" ${hist_edit}
-echo "done"
-
-# find orphaned timestamps
-echo -n "${TAB}remove orphaned timestamp lines... "
-sed -i '/^#[0-9]\{10\}$/d' ${hist_edit}
-echo "done"
-
-# mark orphaned lines
-gen_marker "${hist_edit}"
-marker_list+="$marker "
-OR_MARKER=${marker}
-echo -n "${TAB}mark orphaned lines... "
-sed -i "/^#[0-9]\{10\}.*$/!s/^.*$/${OR_MARKER}&/" ${hist_edit}
-echo "done"
-
-# merge commands with timestamps
-echo -n "${TAB}merge orphaned lines... "
-sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_edit}
-echo "done"
-
-# generate login marker
-echo "${TAB}generate superior/inferior markers... "
-N=${#TS_MARKER}
-echo "${TAB}${TAB}time stamp marker is $N long"
-beg_mark="!"
-end_mark="~"
-LI_MARKER=$beg_mark
-LO_MARKER=$end_mark
-for ((i=1;i<$N;i++))
-do
-    LI_MARKER+="$beg_mark"
-    LO_MARKER+="$end_mark"
-done
-echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
-marker_list+=" $LI_MARKER $LO_MARKER"
-
-# check sort
-echo "${TAB}check sort... "
-LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
-echo "${TAB}${TAB}LC_COLLATE = ${set_loc} (${LCcol})"
-echo "${TAB}${TAB}unsorted:"
-echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
-echo "${TAB}${TAB}sorted:"
-echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}/"
-
-# mark log in/out lines
-echo -n "${TAB}mark superior/inferior lines... "
-head_list="CONTIN INSERT LOGIN"
-tail_list="INDIFF LOGOUT SHUTDN SORT"
-
-for head in ${head_list}
-do
-    sed -i "s/ ${head}/${LI_MARKER}${head}/" ${hist_edit}
-done
-
-for tail in ${tail_list}
-do
-    sed -i "s/ ${tail}/${LO_MARKER}${tail}/" ${hist_edit}
-done
-echo "done"
-
-# sort history
-echo -n "${TAB}sorting lines... "
-sort -u ${hist_edit} -o ${hist_edit}
-echo "done"
-echo -e "${TAB}\x1b[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
-
-# unmark log in/out lines
-echo -n "${TAB}unmark login lines... "
-for head in ${head_list}
-do
-    sed -i "s/${LI_MARKER}${head}/ ${head}/" ${hist_edit}
-done
-for tail in ${tail_list}
-do
-    sed -i "s/${LO_MARKER}${tail}/ ${tail}/" ${hist_edit}
-done
-echo "done"
-
-ignore_list=("bg" "exit" "ls" "pwd" "history" "la" "lt" "gits" "gitd" "git status" "git log" "git diff" "git push" "git pull" "gitr" "update_repos" "cd \.\.\/")
-
-for igno in "${ignore_list[@]}"; do
-    echo -n "${TAB}deleting ${igno}... "
-    sed -i "/${TS_MARKER}${igno}$/d" ${hist_edit}
-    sed -i "s/${OR_MARKER}${igno}$//" ${hist_edit}
+    # create history file
+    echo -n "${TAB}concatenate files... "
+    cat ${list_out} > ${hist_edit}
     echo "done"
-done
+    L=$(cat ${hist_edit} | wc -l)
+    echo "${TAB}${TAB} ${hist_edit} has $L lines"
 
-# unmerge commands
-echo -n "${TAB}unmerge commands... "
-sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_edit}
-echo "done"
+    # clean up whitespace
+    echo -n "${TAB}delete trailing whitespaces... "
+    sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${hist_edit}
+    echo "done"
+
+    marker_list=''
+    # find and mark timestamp lines
+    gen_marker "${hist_edit}"
+    marker_list+="$marker "
+    TS_MARKER=${marker}
+    echo -n "${TAB}mark timestamp lines... "
+    sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_edit}
+    echo "done"
+
+    # remove marks from timestamp lines with no associated commands
+    echo -n "${TAB}un-mark childless timestamp lines... "
+    sed -i "/${TS_MARKER}/{N; /${TS_MARKER}\n#[0-9]\{10\}/{s/${TS_MARKER}\n#/\n#/}};P;D" ${hist_edit}
+    echo "done"
+
+    # merge commands with timestamps
+    echo -n "${TAB}merge commands with timestamp lines... "
+    sed -i "/${TS_MARKER}/{N; s/${TS_MARKER}\n/${TS_MARKER}/};P;D" ${hist_edit}
+    echo "done"
+
+    # find orphaned timestamps
+    echo -n "${TAB}remove orphaned timestamp lines... "
+    sed -i '/^#[0-9]\{10\}$/d' ${hist_edit}
+    echo "done"
+
+    # mark orphaned lines
+    gen_marker "${hist_edit}"
+    marker_list+="$marker "
+    OR_MARKER=${marker}
+    echo -n "${TAB}mark orphaned lines... "
+    sed -i "/^#[0-9]\{10\}.*$/!s/^.*$/${OR_MARKER}&/" ${hist_edit}
+    echo "done"
+
+    # merge commands with timestamps
+    echo -n "${TAB}merge orphaned lines... "
+    sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_edit}
+    echo "done"
+
+    # generate login marker
+    echo "${TAB}generate superior/inferior markers... "
+    N=${#TS_MARKER}
+    echo "${TAB}${TAB}time stamp marker is $N long"
+    beg_mark="!"
+    end_mark="~"
+    LI_MARKER=$beg_mark
+    LO_MARKER=$end_mark
+    for ((i=1;i<$N;i++))
+    do
+	LI_MARKER+="$beg_mark"
+	LO_MARKER+="$end_mark"
+    done
+    echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
+    marker_list+=" $LI_MARKER $LO_MARKER"
+
+    # check sort
+    echo "${TAB}check sort... "
+    LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
+    echo "${TAB}${TAB}LC_COLLATE = ${set_loc} (${LCcol})"
+    echo "${TAB}${TAB}unsorted:"
+    echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
+    echo "${TAB}${TAB}sorted:"
+    echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}/"
+
+    # mark log in/out lines
+    echo -n "${TAB}mark superior/inferior lines... "
+    head_list="CONTIN INSERT LOGIN"
+    tail_list="INDIFF LOGOUT SHUTDN SORT"
+
+    for head in ${head_list}
+    do
+	sed -i "s/ ${head}/${LI_MARKER}${head}/" ${hist_edit}
+    done
+
+    for tail in ${tail_list}
+    do
+	sed -i "s/ ${tail}/${LO_MARKER}${tail}/" ${hist_edit}
+    done
+    echo "done"
+
+    # sort history
+    echo -n "${TAB}sorting lines... "
+    sort -u ${hist_edit} -o ${hist_edit}
+    echo "done"
+    echo -e "${TAB}\x1b[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
+
+    # unmark log in/out lines
+    echo -n "${TAB}unmark login lines... "
+    for head in ${head_list}
+    do
+	sed -i "s/${LI_MARKER}${head}/ ${head}/" ${hist_edit}
+    done
+    for tail in ${tail_list}
+    do
+	sed -i "s/${LO_MARKER}${tail}/ ${tail}/" ${hist_edit}
+    done
+    echo "done"
+
+    ignore_list=("bg" "exit" "ls" "pwd" "history" "la" "lt" "gits" "gitd" "git status" "git log" "git diff" "git push" "git pull" "gitr" "update_repos" "cd \.\.\/")
+
+    for igno in "${ignore_list[@]}"; do
+	echo -n "${TAB}deleting ${igno}... "
+	sed -i "/${TS_MARKER}${igno}$/d" ${hist_edit}
+	sed -i "s/${OR_MARKER}${igno}$//" ${hist_edit}
+	echo "done"
+    done
+
+    # unmerge commands
+    echo -n "${TAB}unmerge commands... "
+    sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_edit}
+    echo "done"
 done
 
 # fix unmatched quotes
