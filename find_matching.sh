@@ -131,7 +131,11 @@ else
     echo "$((j-k)) files not searched for"
     l=$(cat ${file_out} | wc -l)
     echo "$l files found"
-    echo "$((j-l)) files not found"
+    if [ $j -lt $l ]; then
+	printf "%0.2f files found for each pattern" $(bc <<< "scale=2; $l / $j")
+    else
+	echo "$((j-l)) files not found"
+    fi
 fi
 # print time at exit
 echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
