@@ -111,7 +111,11 @@ if  command -v git &>/dev/null; then
     echo -e "${GOOD}OK${NORMAL} Git is defined"
 else
     echo -e "${BAD}FAIL${NORMAL} Git not defined"
-    exit 1
+    if (return 0 2>/dev/null); then
+	return
+    else
+        exit 1
+    fi
 fi
 
 # get Git version
