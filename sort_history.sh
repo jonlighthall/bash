@@ -172,12 +172,14 @@ hist_out=${hist_ref}_merge
 list_del+="${hist_out} "
 echo "output file name is ${hist_out}"
 
+# create history file
+echo -n "${TAB}concatenate files... "
+cat ${list_out} > ${hist_out}
+echo "done"
+
 for hist_edit in ${hist_bak} ${hist_out}
 do
-    # create history file
-    echo -n "${TAB}concatenate files... "
-    cat ${list_out} > ${hist_edit}
-    echo "done"
+    # get file length 
     L=$(cat ${hist_edit} | wc -l)
     echo "${TAB}${TAB} ${hist_edit} has $L lines"
 
