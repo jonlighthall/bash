@@ -357,7 +357,7 @@ elap_time=$((${end_time}-${start_time}))
 dT_sec=$(bc <<< "scale=3;$elap_time/1000000000")
 if command -v sec2elap &>/dev/null
 then
-    echo -n "$(sec2elap $dT_sec | tr -d '\n')"
+    echo -n "$(bash sec2elap $dT_sec | tr -d '\n')"
 else
     echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
 fi
