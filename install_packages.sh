@@ -1,17 +1,52 @@
-#!/bin/sh
+#!/bin/bash
+#
+# install_packages.sh - install packages for xtest
+#
+# Oct 2020 JCL
 
-# update and upgrade
+# set tab
+:${TAB:=''}
+
+# load formatting
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+
+# print source name at start
+if (return 0 2>/dev/null); then
+    RUN_TYPE="sourcing"
+else
+    RUN_TYPE="executing"
+fi
+echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
+src_name=$(readlink -f $BASH_SOURCE)
+if [ ! "$BASH_SOURCE" = "$src_name" ]; then
+    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+fi
+
+# update
+bar "update..."
 sudo apt update
-sudo apt upgrade -y
+
+# upgrade
+bar "upgrade and fix missing..."
+sudo apt upgrade -y --fix-missing
 
 # install packages
-sudo apt install -y dbus-x11
-sudo apt install -y x11-apps
-sudo apt install -y xterm
+for PACK in dbus-x11 x11-apps xterm
+do
+    bar "installing ${PACK}..."
+    sudo apt install -y --fix-missing ${PACK}
+done
 
-# re-check and cleanup
-sudo apt upgrade -y --fix-missing
-sudo apt autoremove -y
+# cleanup
+bar "autoremove and purge..."
+sudo apt autoremove --purge -y
+bar "autoclean..."
+sudo apt autoclean
+bar "clean..."
+sudo apt clean
 
 # print time at exit
 echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
