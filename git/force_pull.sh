@@ -29,6 +29,7 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 fi
 
 # parse remote
+cbar "${BOLD}parse arguments...${NORMAL}"
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "${TAB}no remote tracking branch set for current branch"
 else
@@ -65,7 +66,7 @@ if [ -z ${name_remote} ] || [ -z ${branch_remote} ]; then
     echo "${TAB}       ${TAB}${BASH_SOURCE##*/} <repository> <refspec>"
     exit 1
 else
-    cbar "comparing local branch ${green}$branch_local${NORMAL} with remote branch ${blue}$branch_pull${NORMAL}"
+    cbar "${BOLD}comparing local branch ${green}$branch_local${NORMAL} with remote branch ${blue}$branch_pull${NORMAL}"
 fi
 
 echo -n "${TAB}target branch and remote tracking branch... "
@@ -118,15 +119,15 @@ while [ -z ${hash_local} ]; do
 	    else
 		hash_end=$hash_start
 	    fi
-	    echo -e "${TAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
+	    echo -e "${TAB}${yellow} local branch is $N_local commits ahead of remote${NORMAL}"
 	else
 	    echo -e "${green}none${NORMAL}"
 	    N_local=0
 	fi
-	TAB=${TAB%$fTAB}
     else
 	echo "not found"
     fi
+    TAB=${TAB%$fTAB}
     iHEAD="${iHEAD}~"
 done
 
@@ -179,15 +180,15 @@ git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
 git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 
 # stash local changes
+cbar "${BOLD}stashing local changes...${NORMAL}"
 if [ -z "$(git diff)" ]; then
     echo -e "${green}no differences to stash${NORMAL}"
     b_stash=false
 else
+    echo "prepare to stash..."
     git reset HEAD
-    echo "${TAB}status:"
     git status
-    cbar "${yellow}stashing differences...${NORMAL}"
-
+    echo "stashing..."
     if [ $git_ver_maj -lt 2 ]; then
 	# old command
 	git stash
@@ -199,8 +200,8 @@ else
 fi
 
 # copy leading commits to new branch
+cbar "${BOLD}copying local commits to new branch...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
-    cbar "${yello}copying local commits to new branch${NORMAL}"
     branch_temp=${branch_local}.temp
     echo "generating temporary branch..."
     i=0
@@ -219,7 +220,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
     git checkout -b ${branch_temp}
     git checkout ${branch_local}
 else
-    echo -e "${TAB}${green}no local commits to copy${NORMAL}"
+    echo -e "${TAB}${fTAB}no local commits to copy"
 fi
 
 # initiate HEAD
@@ -229,55 +230,58 @@ if [ $N_remote -gt 0 ];then
 fi
 
 # pull remote commits
+cbar "${BOLD}pulling remote changes...${NORMAL}"
 echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of remote${NORMAL}"
 if [ $N_remote -gt 0 ];then
-    echo "${TAB}pulling remote changes..."
     git pull
-    cbar "done pulling"
+    echo "done pulling"
 else
-    echo "${TAB}${fTAB}no need to pull"
+    echo -e "${TAB}${fTAB}no need to pull"
 fi
 
 # push local commits
-echo "${TAB}local branch is $N_local commits ahead of remote"
+cbar "${BOLD}merging local changes...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
-    cbar "merging local changes..."
+    N_temp=$(git rev-list ${branch_temp}..${branch_local} | wc -l)
+    echo -e "${TAB}${yellow}  temp branch is $N_temp commits ahead of ${branch_local}${NORMAL}"
     echo "${TAB}rebase and merge..."
     git checkout ${branch_temp}
     git rebase ${branch_local}
     git checkout ${branch_local}
+    echo "${TAB}merge..."
     git merge ${branch_temp}
     git branch -d ${branch_temp}
 else
-    echo "${TAB}${fTAB}no need to merge"
+    echo -e "${TAB}${fTAB}no need to merge"
 fi
+cbar "${BOLD}pushing local changes...${NORMAL}"
+echo -e "${TAB}${yellow} local branch is $N_local commits ahead of remote${NORMAL}"
 if [ $N_local -gt 0 ];then 
-    echo -e "${TAB}${fTAB}${yellow}pushing local changes...${NORMAL}"
     git push
-    cbar "done pushing"
+    echo "done pushing"
 else
-    echo -e "${TAB}${fTAB}${green}no need to push${NORMAL}"
+    echo -e "${TAB}${fTAB}no need to push"
 fi
 
 # get back to where you were....
+cbar "${BOLD}applying stash...${NORMAL}"
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo "there are $N_stash entries in stash"
     if $b_stash; then
-	echo "${TAB}applying stash..."
 	git stash pop
-	echo -n "stash made... "
+	echo -ne "stash made... "
 	if [ -z "$(git diff)" ]; then
-	    echo "no changes"
+	    echo "${green}no changes${NORMAL}"
 	else
-	    echo "changes!"
+	    echo -e "${yellow}changes!${NORMAL}"
 	    git reset HEAD
 	fi
     else
 	echo "${TAB}... but none are from this operation"
     fi
-    cbar "done un-stashing"
+    echo "done un-stashing"
 else
-    echo "no stash entries"
+    echo -e "${green}no stash entries${NORMAL}"
 fi
-echo "you're done!"
+echo -e "\n${BOLD}you're done!${NORMAL}"
