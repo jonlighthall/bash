@@ -9,14 +9,20 @@ for prog in $list
 do
     echo -e "opening $prog... \c"
     $prog 2>/dev/null &
-if ! command -v $prog &> /dev/null
-then
-    echo "not found"
-else
-    echo "OK"
-    list2="$list2 $prog"
-fi
+    if ! command -v $prog &> /dev/null
+    then
+	echo "not found"
+    else
+	echo "OK"
+	list2="$list2 $prog"
+    fi
 done
+
+if [ -z "${list2}" ]; then
+    echo -e " TRUE: unset or null (empty)"
+else
+    echo -e "FALSE: set and not null"
+fi
 
 # close windows
 read -n 1 -s -r -p "Press any key to continue"
