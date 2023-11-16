@@ -19,9 +19,8 @@ do
 done
 
 if [ -z "${list2}" ]; then
-    echo -e " TRUE: unset or null (empty)"
-else
-    echo -e "FALSE: set and not null"
+    echo  "FAIL: no X-programs found!"
+    exit
 fi
 
 # close windows
