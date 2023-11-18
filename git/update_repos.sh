@@ -194,9 +194,9 @@ do
 	    # pull
 	    #------------------------------------------------------
 	    echo "pulling... "
-	    cmd="${to}git pull --all --ff-only --progress --tags --verbose" #--prune"
+	    cmd="${to}git pull --all --progress --tags --verbose" #--prune"
 	    if [ $git_ver_maj -ge 2 ]; then
-		cmd+=" --ipv4"
+		cmd+=" --ff-only --ipv4"
 	    fi
 	    RETVAL=137
 	    loop_counter=0
