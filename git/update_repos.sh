@@ -187,18 +187,21 @@ do
 
             # push/pull setting
 	    GIT_HIGHLIGHT='\x1b[100;37m'
-	    nsec=4
-	    to="timeout -s 9 ${nsec}s "
-
+	    
 	    #------------------------------------------------------
 	    # pull
 	    #------------------------------------------------------
 	    echo "pulling... "
-	    cmd="${to}git pull --all --progress --tags --verbose" #--prune"
+	    cmd_base="git pull --all --progress --tags --verbose" #--prune"
 	    if [ $git_ver_maj -ge 2 ]; then
-		cmd+=" --ff-only --ipv4"
+		cmd_base+=" --ff-only --ipv4"
 	    fi
-	    RETVAL=137
+	    # secify number of seconds before kill
+	    nsec=4
+	    to="timeout -s 9 ${nsec}s "
+	    # concat commands
+	    cmd="${to}${cmd_base}"
+	    RETVAL=137	    
 	    loop_counter=0
 	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
 		((loop_counter++))
@@ -214,13 +217,10 @@ do
 		echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
 		if [[ $RETVAL != 0 ]]; then
 		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		    #pull_fail+="$repo "
 		    nsec=$(( nsec * 2 ))
-#		    if [ $loop_counter -gt 1 ]; then
-			echo "${TAB}increasing timeout to ${nsec}"
-			to="timeout -s 9 ${nsec}s "
-			cmd="${to}git pull -v --ff-only" # --all --tags --prune"
-#		    fi
+		    echo "${TAB}increasing timeout to ${nsec}"
+		    to="timeout -s 9 ${nsec}s "
+		    cmd="${to}${cmd_base}"
 		else
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		    ((n++))
@@ -230,8 +230,10 @@ do
 		t_pull_max=${dt_pull}
 	    fi
 	    if [[ $RETVAL != 0 ]]; then
+		# add to failure list
 		pull_fail+="$repo "
 	    else
+		# update links after pull
 		prog=make_links.sh
 		if [ -f ${prog} ]; then
 		    if [[ ! ( ("$(hostname -f)"  == *"navy.mil") && ($repo =~ "private") ) ]]; then
@@ -240,17 +242,19 @@ do
 		fi
 	    fi
 
-	    # secify number of seconds before kill
-	    nsec=2
             #------------------------------------------------------
 	    # push
 	    #------------------------------------------------------
 	    echo "pushing... "
-	    to="timeout -s 9 ${nsec}s "
-	    cmd="${to}git push --progress --verbose"
+	    cmd_base="git push --progress --verbose"
 	    if [ $git_ver_maj -ge 2 ]; then
-		cmd+=" --ipv4"
+		cmd_base+=" --ipv4"
 	    fi
+	    # secify number of seconds before kill
+	    nsec=2
+	    to="timeout -s 9 ${nsec}s "
+	    # concat commands
+	    cmd="${to}${cmd_base}"
 	    RETVAL=137
 	    loop_counter=0
 	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
@@ -263,24 +267,23 @@ do
 		RETVAL=$?
 		t_end=$(date +%s%N)
 		dt_push=$(( ${t_end} - ${t_start} ))
+		
 		echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
 		if [[ $RETVAL != 0 ]]; then
 		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		    #push_fail+="$repo "
+		    nsec=$((nsec * 2))
+		    echo "${TAB}increasing timeout to ${nsec}"
+		    to="timeout -s 9 ${nsec}s "
+		    cmd="${to}${cmd_base}"
 		else
 		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		fi
-		nsec=$((nsec * 2))
-#		if [ $loop_counter -gt 1 ]; then
-		    echo "${TAB}increasing timeout to ${nsec}"
-		    to="timeout -s 9 ${nsec}s "
-		    cmd="${to}git push -v --progress"
-#		fi
 	    done
 	    if [[ ${dt_push} -gt ${t_push_max} ]]; then
 		t_push_max=${dt_push}
 	    fi
 	    if [[ $RETVAL != 0 ]]; then
+		# add to failure list
 		push_fail+="$repo "
 	    fi
 
