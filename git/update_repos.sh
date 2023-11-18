@@ -149,24 +149,37 @@ do
 	RETVAL=$?
 	if [[ $RETVAL -eq 0 ]]; then
 	    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-	    # add remotes to list
-	    this_remote=$(git remote -v | awk -F " " '{print $2}' | uniq)
+
+	    # parse remote
+	    echo "parse remote..."
+	    if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
+		echo "${TAB}no remote tracking branch set for current branch"
+		continue
+	    else
+		remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
+		echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
+		
+		remote_name=${remote_tracking_branch%%/*}
+		echo "${TAB}remote is name $remote_name"  
+	    
+	    # add remote to list
+	    this_remote=$(git remote -v | grep ${remote_name} |  awk '{print $2}')
 	    echo "  remote ${this_remote}"
 	    echo "${this_remote}" >> ${list_remote}
 	    proto=$(echo ${this_remote} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
 	    echo "protocol ${proto}"
 
-	    n_remotes=$(echo ${this_remote} | wc -l)
+	    n_remotes=$(git remote | wc -l)
 
 	    if [ "${n_remotes}" -gt 1 ]; then
 		echo "${n_remotes} remotes found"
+	    fi
 	    fi
 
 	    # check against argument
 	    if [ $# -gt 0 ]; then
 		echo -n "matching argument ""$1""... "
-		url=$(git remote -v | head -n 1 | awk '{print $2}')
-		if [[ $url =~ $1 ]]; then
+		if [[ $this_remote =~ $1 ]]; then
 		    echo -e "${GOOD}OK${NORMAL}"
 		    # add to list
 		    if [ ! -z ${OK_list:+dummy} ]; then
@@ -191,6 +204,15 @@ do
 	    #------------------------------------------------------
 	    # pull
 	    #------------------------------------------------------
+	    echo "updating..."
+	    git remote update
+	    echo -n "leading remote commits:"
+	    N_local=$(git rev-list ${remote_name}..HEAD | wc -l)
+	    if [ ${N_local} -eq 0 ]; then
+		echo "none"
+	    else
+		echo "${N_local}"  
+
 	    echo "pulling... "
 	    cmd_base="git pull --all --progress --tags --verbose" #--prune"
 	    if [ $git_ver_maj -ge 2 ]; then
@@ -241,10 +263,18 @@ do
 		    fi
 		fi
 	    fi
+	    fi
 
             #------------------------------------------------------
 	    # push
 	    #------------------------------------------------------
+	    echo -n "trailing local commits:"
+	    N_remote=$(git rev-list HEAD..${remote_name} | wc -l)
+	    if [ ${N_remote} -eq 0 ]; then
+		echo "none"
+	    else
+		echo "${N_remote}"
+
 	    echo "pushing... "
 	    cmd_base="git push --progress --verbose"
 	    if [ $git_ver_maj -ge 2 ]; then
@@ -285,6 +315,7 @@ do
 	    if [[ $RETVAL != 0 ]]; then
 		# add to failure list
 		push_fail+="$repo "
+            fi
 	    fi
 
 	    # check for modified files
