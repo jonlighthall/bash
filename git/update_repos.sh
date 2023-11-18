@@ -133,7 +133,8 @@ n_push=''
 loc_fail=''
 pull_fail=''
 push_fail=''
-mods=''
+mod_repos=''
+mod_files=''
 unset OK_list
 
 # track push/pull times
@@ -331,11 +332,21 @@ do
 	    fi
 
 	    # check for modified files
-	    if [[ ! -z $(git diff --name-only --diff-filter=M) ]]; then
+	    unset list_mod
+	    list_mod=$(git diff --name-only --diff-filter=M)
+	    if [[ ! -z "${list_mod}" ]]; then
+		# print file list
 		echo -e "modified: ${GRH}"
-		git diff --name-only --diff-filter=M | sed "s/^/${fTAB}/"
+		echo "${list_mod}" | sed "s/^/${fTAB}/"
 		echo -en "${NORMAL}"
-		mods+="$repo "
+		# add repo to list
+		mod_repos+="$repo "
+		# add to files to list
+#		if [ ! -z ${mod_files:+dummy} ]; then
+#		    mod_files+=$'\n'
+#		fi
+		mod_files+=${list_mod}
+		echo "${mod_files}"
 	    fi
 	else
 	    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
@@ -384,14 +395,14 @@ if [ -z "${n_pull}" ]; then
     echo "none"
 else
     echo "${n_pull}"
-fi
-echo -n "pull failures: "
+    echo -n "pull failures: "
 if [ -z "$pull_fail" ]; then
     echo "none"
 else
     echo -e "${GRH}$pull_fail${NORMAL}"
 fi
 echo "pull max time: ${t_pull_max} ns or $(bc <<< "scale=3;$t_pull_max/1000000000") sec"
+fi
 
 # push
 echo -n " repos pushed: "
@@ -399,21 +410,22 @@ if [ -z "${n_push}" ]; then
     echo "none"
 else
     echo "${n_push}"
+    echo -n "push failures: "
+    if [ -z "$push_fail" ]; then
+	echo "none"
+    else
+	echo -e "${GRH}$push_fail${NORMAL}"
+    fi
+    echo "push max time: ${t_push_max} ns or $(bc <<< "scale=3;$t_push_max/1000000000") sec"
 fi
-echo -n "push failures: "
-if [ -z "$push_fail" ]; then
-    echo "none"
-else
-    echo -e "${GRH}$push_fail${NORMAL}"
-fi
-echo "push max time: ${t_push_max} ns or $(bc <<< "scale=3;$t_push_max/1000000000") sec"
 
 # modified
 echo -n "     modified: "
-if [ -z "$mods" ]; then
+if [ -z "$mod_repos" ]; then
     echo "none"
 else
-    echo "$mods"
+    echo "$mod_repos"
+    echo -e "${GRH}$mod_files${NORMAL}" | sed "s/^/${list_indent}/"
 fi
 
 # print time at exit
@@ -423,7 +435,7 @@ elap_time=$((${end_time}-${start_time}))
 dT_sec=$(bc <<< "scale=3;$elap_time/1000000000")
 if command -v sec2elap &>/dev/null
 then
-    echo -n "$(bash sec2elap $dT_sec | tr -d '\n')"
+    bash sec2elap $dT_sec | tr -d '\n'
 else
     echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
 fi
