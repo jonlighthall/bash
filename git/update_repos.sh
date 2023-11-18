@@ -161,19 +161,19 @@ do
 		
 		remote_name=${remote_tracking_branch%%/*}
 		echo "${TAB}remote is name $remote_name"  
-	    
-	    # add remote to list
-	    this_remote=$(git remote -v | grep ${remote_name} |  awk '{print $2}')
-	    echo "  remote ${this_remote}"
-	    echo "${this_remote}" >> ${list_remote}
-	    proto=$(echo ${this_remote} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-	    echo "protocol ${proto}"
+		
+		# add remote to list
+		this_remote=$(git remote -v | grep ${remote_name} |  awk '{print $2}')
+		echo "  remote ${this_remote}"
+		echo "${this_remote}" >> ${list_remote}
+		proto=$(echo ${this_remote} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+		echo "protocol ${proto}"
 
-	    n_remotes=$(git remote | wc -l)
+		n_remotes=$(git remote | wc -l)
 
-	    if [ "${n_remotes}" -gt 1 ]; then
-		echo "${n_remotes} remotes found"
-	    fi
+		if [ "${n_remotes}" -gt 1 ]; then
+		    echo "${n_remotes} remotes found"
+		fi
 	    fi
 
 	    # check against argument
@@ -213,56 +213,56 @@ do
 	    else
 		echo "${N_local}"  
 
-	    echo "pulling... "
-	    cmd_base="git pull --all --progress --tags --verbose" #--prune"
-	    if [ $git_ver_maj -ge 2 ]; then
-		cmd_base+=" --ff-only --ipv4"
-	    fi
-	    # secify number of seconds before kill
-	    nsec=4
-	    to="timeout -s 9 ${nsec}s "
-	    # concat commands
-	    cmd="${to}${cmd_base}"
-	    RETVAL=137	    
-	    loop_counter=0
-	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
-		((loop_counter++))
-		if [ $loop_counter -gt 1 ]; then
-		    echo "${TAB}PULL attempt $loop_counter..."
+		echo "pulling... "
+		cmd_base="git pull --all --progress --tags --verbose" #--prune"
+		if [ $git_ver_maj -ge 2 ]; then
+		    cmd_base+=" --ff-only --ipv4"
 		fi
-		t_start=$(date +%s%N)
-		${cmd}
-		RETVAL=$?
-		t_end=$(date +%s%N)
-		dt_pull=$(( ${t_end} - ${t_start} ))
+		# secify number of seconds before kill
+		nsec=4
+		to="timeout -s 9 ${nsec}s "
+		# concat commands
+		cmd="${to}${cmd_base}"
+		RETVAL=137	    
+		loop_counter=0
+		while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
+		    ((loop_counter++))
+		    if [ $loop_counter -gt 1 ]; then
+			echo "${TAB}PULL attempt $loop_counter..."
+		    fi
+		    t_start=$(date +%s%N)
+		    ${cmd}
+		    RETVAL=$?
+		    t_end=$(date +%s%N)
+		    dt_pull=$(( ${t_end} - ${t_start} ))
 
-		echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
-		if [[ $RETVAL != 0 ]]; then
-		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		    nsec=$(( nsec * 2 ))
-		    echo "${TAB}increasing timeout to ${nsec}"
-		    to="timeout -s 9 ${nsec}s "
-		    cmd="${to}${cmd_base}"
-		else
-		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		    ((n++))
+		    echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
+		    if [[ $RETVAL != 0 ]]; then
+			echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+			nsec=$(( nsec * 2 ))
+			echo "${TAB}increasing timeout to ${nsec}"
+			to="timeout -s 9 ${nsec}s "
+			cmd="${to}${cmd_base}"
+		    else
+			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+			((n++))
+		    fi
+		done
+		if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
+		    t_pull_max=${dt_pull}
 		fi
-	    done
-	    if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
-		t_pull_max=${dt_pull}
-	    fi
-	    if [[ $RETVAL != 0 ]]; then
-		# add to failure list
-		pull_fail+="$repo "
-	    else
-		# update links after pull
-		prog=make_links.sh
-		if [ -f ${prog} ]; then
-		    if [[ ! ( ("$(hostname -f)"  == *"navy.mil") && ($repo =~ "private") ) ]]; then
-			bash ${prog}
+		if [[ $RETVAL != 0 ]]; then
+		    # add to failure list
+		    pull_fail+="$repo "
+		else
+		    # update links after pull
+		    prog=make_links.sh
+		    if [ -f ${prog} ]; then
+			if [[ ! ( ("$(hostname -f)"  == *"navy.mil") && ($repo =~ "private") ) ]]; then
+			    bash ${prog}
+			fi
 		    fi
 		fi
-	    fi
 	    fi
 
             #------------------------------------------------------
@@ -275,47 +275,47 @@ do
 	    else
 		echo "${N_remote}"
 
-	    echo "pushing... "
-	    cmd_base="git push --progress --verbose"
-	    if [ $git_ver_maj -ge 2 ]; then
-		cmd_base+=" --ipv4"
-	    fi
-	    # secify number of seconds before kill
-	    nsec=2
-	    to="timeout -s 9 ${nsec}s "
-	    # concat commands
-	    cmd="${to}${cmd_base}"
-	    RETVAL=137
-	    loop_counter=0
-	    while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
-		((loop_counter++))
-		if [ $loop_counter -gt 1 ]; then
-		    echo "${TAB}PUSH attempt $loop_counter..."
+		echo "pushing... "
+		cmd_base="git push --progress --verbose"
+		if [ $git_ver_maj -ge 2 ]; then
+		    cmd_base+=" --ipv4"
 		fi
-		t_start=$(date +%s%N)
-		${cmd}
-		RETVAL=$?
-		t_end=$(date +%s%N)
-		dt_push=$(( ${t_end} - ${t_start} ))
-		
-		echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
+		# secify number of seconds before kill
+		nsec=2
+		to="timeout -s 9 ${nsec}s "
+		# concat commands
+		cmd="${to}${cmd_base}"
+		RETVAL=137
+		loop_counter=0
+		while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
+		    ((loop_counter++))
+		    if [ $loop_counter -gt 1 ]; then
+			echo "${TAB}PUSH attempt $loop_counter..."
+		    fi
+		    t_start=$(date +%s%N)
+		    ${cmd}
+		    RETVAL=$?
+		    t_end=$(date +%s%N)
+		    dt_push=$(( ${t_end} - ${t_start} ))
+		    
+		    echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
+		    if [[ $RETVAL != 0 ]]; then
+			echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+			nsec=$((nsec * 2))
+			echo "${TAB}increasing timeout to ${nsec}"
+			to="timeout -s 9 ${nsec}s "
+			cmd="${to}${cmd_base}"
+		    else
+			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+		    fi
+		done
+		if [[ ${dt_push} -gt ${t_push_max} ]]; then
+		    t_push_max=${dt_push}
+		fi
 		if [[ $RETVAL != 0 ]]; then
-		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		    nsec=$((nsec * 2))
-		    echo "${TAB}increasing timeout to ${nsec}"
-		    to="timeout -s 9 ${nsec}s "
-		    cmd="${to}${cmd_base}"
-		else
-		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+		    # add to failure list
+		    push_fail+="$repo "
 		fi
-	    done
-	    if [[ ${dt_push} -gt ${t_push_max} ]]; then
-		t_push_max=${dt_push}
-	    fi
-	    if [[ $RETVAL != 0 ]]; then
-		# add to failure list
-		push_fail+="$repo "
-            fi
 	    fi
 
 	    # check for modified files
