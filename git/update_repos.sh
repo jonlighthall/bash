@@ -215,7 +215,7 @@ do
 	    # pull
 	    #------------------------------------------------------
 	    echo "updating..."
-	    git remote update
+	    git remote --verbose update
 	    echo -n "leading remote commits: "
 	    N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
 	    if [ ${N_remote} -eq 0 ]; then
