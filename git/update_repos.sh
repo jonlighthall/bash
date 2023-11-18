@@ -239,10 +239,12 @@ do
 		    echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
 		    if [[ $RETVAL != 0 ]]; then
 			echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-			nsec=$(( nsec * 2 ))
-			echo "${TAB}increasing timeout to ${nsec}"
-			to="timeout -s 9 ${nsec}s "
-			cmd="${to}${cmd_base}"
+			if [[ $RETVAL == 137 ]]; then
+			    nsec=$((nsec * 2))
+			    echo "${TAB}increasing timeout to ${nsec}"
+			    to="timeout -s 9 ${nsec}s "
+			    cmd="${to}${cmd_base}"
+			fi
 		    else
 			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 			((n++))
@@ -301,10 +303,12 @@ do
 		    echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
 		    if [[ $RETVAL != 0 ]]; then
 			echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-			nsec=$((nsec * 2))
-			echo "${TAB}increasing timeout to ${nsec}"
-			to="timeout -s 9 ${nsec}s "
-			cmd="${to}${cmd_base}"
+			if [[ $RETVAL == 137 ]]; then
+			    nsec=$((nsec * 2))
+			    echo "${TAB}increasing timeout to ${nsec}"
+			    to="timeout -s 9 ${nsec}s "
+			    cmd="${to}${cmd_base}"
+			fi
 		    else
 			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 		    fi
