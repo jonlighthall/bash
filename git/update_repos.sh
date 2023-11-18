@@ -163,11 +163,11 @@ do
 		echo "${TAB}remote is name $remote_name"  
 		
 		# add remote to list
-		this_remote=$(git remote -v | grep ${remote_name} |  awk '{print $2}')
-		echo "  remote ${this_remote}"
-		echo "${this_remote}" >> ${list_remote}
-		proto=$(echo ${this_remote} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-		echo "protocol ${proto}"
+		remote_url=$(git remote -v | grep ${remote_name} |  awk '{print $2}')
+		echo "  remote ${remote_url}"
+		echo "${remote_url}" >> ${list_remote}
+		remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+		echo "protocol ${remote_pro}"
 
 		n_remotes=$(git remote | wc -l)
 
@@ -179,13 +179,13 @@ do
 	    # check against argument
 	    if [ $# -gt 0 ]; then
 		echo -n "matching argument ""$1""... "
-		if [[ $this_remote =~ $1 ]]; then
+		if [[ $remote_url =~ $1 ]]; then
 		    echo -e "${GOOD}OK${NORMAL}"
 		    # add to list
 		    if [ ! -z ${OK_list:+dummy} ]; then
 			OK_list+=$'\n'
 		    fi
-		    OK_list+=${this_remote}
+		    OK_list+=${remote_url}
 		else
 		    echo "skipping..."
 		    continue
@@ -195,7 +195,7 @@ do
 		if [ ! -z ${OK_list:+dummy} ]; then
 		    OK_list+=$'\n'
 		fi
-		OK_list+=${this_remote}
+		OK_list+=${remote_url}
 	    fi
 
             # push/pull setting
