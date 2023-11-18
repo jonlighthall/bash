@@ -124,7 +124,12 @@ git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
 git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
 git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 
-# track failures and modifications
+# count successes
+n_found=''
+n_pull=''
+n_push=''
+
+# count failures and modifications
 loc_fail=''
 pull_fail=''
 push_fail=''
@@ -134,7 +139,7 @@ unset OK_list
 # track push/pull times
 t_pull_max=0
 t_push_max=0
-n=0
+
 loop_counter=0
 
 for repo in $list
@@ -143,6 +148,7 @@ do
     echo -e "locating ${PSDIR}$repo${NORMAL}... \c"
     if [ -e ${HOME}/$repo ]; then
 	echo -e "${GOOD}OK${NORMAL}"
+	((n_found++))
 	cd ${HOME}/$repo
 	echo -n "checking repository status... "
 	git rev-parse --is-inside-work-tree &>/dev/null
@@ -190,6 +196,9 @@ do
 	    echo "  remote ${remote_url}"
 
 	    remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+	    if [[ "${remote_pro}" == "git" ]]; then
+		remote_pro="SSH"
+	    fi
 	    echo "protocol ${remote_pro}"
 
 	    # get number of remotes
@@ -247,7 +256,6 @@ do
 			fi
 		    else
 			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-			((n++))
 		    fi
 		done
 		if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
@@ -341,7 +349,7 @@ do
     fi
 done
 
-echo "done updating repositories"
+cbar "done updating repositories"
 echo "returning to starting directory ${start_dir}..."
 cd ${start_dir}
 
@@ -349,46 +357,64 @@ cd ${start_dir}
 sort -u ${list_remote} -o ${list_remote}
 
 # print list of remotes
-echo -n "      remotes: "
+echo -n "  all remotes: "
 head -n 1 ${list_remote}
 list_indent='               '
 tail -n +2 ${list_remote} | sed "s/^/${list_indent}/"
 echo
-echo -n "      remotes: "
-OK_list=$(echo ${OK_list} | sort -n | sed 's/ /\n/g')
+echo -n "these remotes: "
+OK_list=$(echo ${OK_list} | sed 's/ /\n/g' | sort -n)
 echo "${OK_list}" | head -n 1
 echo "${OK_list}" | tail -n +2 | sed "s/^/${list_indent}/"
 echo
 
 # print push/pull summary
+# all
+echo "        found: ${n_found}"
 echo -n "    not found: "
 if [ -z "$loc_fail" ]; then
     echo "none"
 else
     echo "$loc_fail"
 fi
-echo -n "push failures: "
-if [ -z "$push_fail" ]; then
+
+# pull
+echo -n " repos pulled: "
+if [ -z "${n_pull}" ]; then
     echo "none"
 else
-    echo "$push_fail"
+    echo "${n_pull}"
 fi
 echo -n "pull failures: "
 if [ -z "$pull_fail" ]; then
     echo "none"
 else
-    echo "$pull_fail"
+    echo -e "${GRH}$pull_fail${NORMAL}"
 fi
+echo "pull max time: ${t_pull_max} ns or $(bc <<< "scale=3;$t_pull_max/1000000000") sec"
+
+# push
+echo -n " repos pushed: "
+if [ -z "${n_push}" ]; then
+    echo "none"
+else
+    echo "${n_push}"
+fi
+echo -n "push failures: "
+if [ -z "$push_fail" ]; then
+    echo "none"
+else
+    echo -e "${GRH}$push_fail${NORMAL}"
+fi
+echo "push max time: ${t_push_max} ns or $(bc <<< "scale=3;$t_push_max/1000000000") sec"
+
+# modified
 echo -n "     modified: "
 if [ -z "$mods" ]; then
     echo "none"
 else
     echo "$mods"
 fi
-
-echo "        found: ${n}"
-echo "pull max time: ${t_pull_max} ns or $(bc <<< "scale=3;$t_pull_max/1000000000") sec"
-echo "push max time: ${t_push_max} ns or $(bc <<< "scale=3;$t_push_max/1000000000") sec"
 
 # print time at exit
 echo -en "\n${BASH_SOURCE##*/} "
