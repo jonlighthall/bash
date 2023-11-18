@@ -151,29 +151,15 @@ do
 	    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 
 	    # parse remote
-	    echo "parse remote..."
 	    if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
 		echo "${TAB}no remote tracking branch set for current branch"
 		continue
 	    else
-		remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-		echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
-		
+		remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')		
 		remote_name=${remote_tracking_branch%%/*}
-		echo "${TAB}remote is name $remote_name"  
-		
+		remote_url=$(git remote -v | grep ${remote_name} |  awk '{print $2}' | uniq)
 		# add remote to list
-		remote_url=$(git remote -v | grep ${remote_name} |  awk '{print $2}')
-		echo "  remote ${remote_url}"
 		echo "${remote_url}" >> ${list_remote}
-		remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-		echo "protocol ${remote_pro}"
-
-		n_remotes=$(git remote | wc -l)
-
-		if [ "${n_remotes}" -gt 1 ]; then
-		    echo "${n_remotes} remotes found"
-		fi
 	    fi
 
 	    # check against argument
@@ -187,7 +173,7 @@ do
 		    fi
 		    OK_list+=${remote_url}
 		else
-		    echo "skipping..."
+		    echo -e "${gray}SKIP${NORMAL}"
 		    continue
 		fi
 	    else
@@ -198,7 +184,21 @@ do
 		OK_list+=${remote_url}
 	    fi
 
-            # push/pull setting
+	    # print remote parsing
+	    echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
+	    echo "${TAB}remote name is $remote_name"  		
+	    echo "  remote ${remote_url}"
+
+	    remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+	    echo "protocol ${remote_pro}"
+
+	    # get number of remotes
+	    n_remotes=$(git remote | wc -l)
+	    if [ "${n_remotes}" -gt 1 ]; then
+		echo "remotes found: ${n_remotes}"
+	    fi
+
+	    # push/pull setting
 	    GIT_HIGHLIGHT='\x1b[100;37m'
 	    
 	    #------------------------------------------------------
@@ -206,8 +206,8 @@ do
 	    #------------------------------------------------------
 	    echo "updating..."
 	    git remote update
-	    echo -n "leading remote commits:"
-	    N_local=$(git rev-list ${remote_name}..HEAD | wc -l)
+	    echo -n "leading remote commits: "
+	    N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
 	    if [ ${N_local} -eq 0 ]; then
 		echo "none"
 	    else
@@ -268,8 +268,8 @@ do
             #------------------------------------------------------
 	    # push
 	    #------------------------------------------------------
-	    echo -n "trailing local commits:"
-	    N_remote=$(git rev-list HEAD..${remote_name} | wc -l)
+	    echo -n "trailing local commits: "
+	    N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
 	    if [ ${N_remote} -eq 0 ]; then
 		echo "none"
 	    else
@@ -335,8 +335,6 @@ do
 	loc_fail+="$repo "
 	bash test_file ${HOME}/$repo
     fi
-    #    hline 70
-    #   echo
 done
 
 echo "done updating repositories"
