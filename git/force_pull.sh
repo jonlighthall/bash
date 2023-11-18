@@ -29,16 +29,23 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 fi
 
 # parse remote
-cbar "${BOLD}parse arguments...${NORMAL}"
+cbar "${BOLD}parse remote...${NORMAL}"
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "${TAB}no remote tracking branch set for current branch"
 else
     remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
     echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
-    name_remote=${remote_tracking_branch%%/*}
-    echo "${TAB}remote is name $name_remote"
-    url_remote=$(git remote -v | grep ${name_remote} |  awk '{print $2}' | sort -u)
-    echo "${TAB}remote url is ${url_remote}"
+    remote_name=${remote_tracking_branch%%/*}
+    echo "${TAB}remote name is $remote_name"
+    remote_url=$(git remote -v | grep ${remote_name} |  awk '{print $2}' | uniq)
+    echo "${TAB}remote url is ${remote_url}"
+    remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+    echo "protocol ${remote_pro}"
+    n_remotes=$(git remote | wc -l)
+    if [ "${n_remotes}" -gt 1 ]; then
+	echo "${n_remotes} remotes found"
+    fi
+
     # parse branches
     branch_remote=${remote_tracking_branch#*/}
     echo "${TAB}remote branch is $branch_remote"
@@ -47,11 +54,12 @@ branch_local=$(git branch | grep \* | sed 's/^\* //')
 echo -e "${TAB} local branch is ${green}${branch_local}${NORMAL}"
 
 # parse arguments
+cbar "${BOLD}parse arguments...${NORMAL}"
 if [ $# -ge 1 ]; then
-    name_remote=$1
+    remote_name=$1
 else
     echo "${TAB}no remote specified"
-    echo "${TAB}${fTAB}using $name_remote"
+    echo "${TAB}${fTAB}using $remote_name"
 fi
 if [ $# -ge 2 ]; then
     branch_remote=$2
@@ -59,8 +67,8 @@ else
     echo "${TAB}no remote branch specified"
     echo "${TAB}${fTAB}using $branch_remote"
 fi
-branch_pull=${name_remote}/${branch_remote}
-if [ -z ${name_remote} ] || [ -z ${branch_remote} ]; then
+branch_pull=${remote_name}/${branch_remote}
+if [ -z ${remote_name} ] || [ -z ${branch_remote} ]; then
     echo -e "${TAB}${BROKEN}ERROR: no remote tracking branch specified${NORMAL}"
     echo "${TAB} HELP: specify remote tracking branch with"
     echo "${TAB}       ${TAB}${BASH_SOURCE##*/} <repository> <refspec>"
@@ -77,8 +85,8 @@ else
 fi
 
 # before starting, fetch remote
-echo "${TAB}fetching ${name_remote}..."
-git fetch ${name_remote}
+echo "${TAB}fetching ${remote_name}..."
+git fetch ${remote_name}
 
 # determine latest common local commit, based on commit time
 iHEAD=${branch_pull}
@@ -174,6 +182,7 @@ fi
 TAB=${TAB%$fTAB}
 TAB=${TAB%$fTAB}
 
+# get Git version
 git_ver=$(git --version | awk '{print $3}')
 git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
 git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
