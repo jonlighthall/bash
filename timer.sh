@@ -23,11 +23,10 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 fi
 echo "press Ctrl-C to exit"
 while [ .true ]; do
-    elap_time=$(($(date +%s%N)-${start_time}))
-    dT=$(bc <<< "scale=3;$elap_time/1000000000")
+    elap_time=$(($(date +%s%N) - ${start_time}))
+    dT=$(bc <<<"scale=3;$elap_time/1000000000")
     #    echo -en "\x1b[2K\relapsed time is ${white}${dT_sec} sec${NORMAL}"
     echo -en "\x1b[2K\r$(sec2elap $dT | tr -d '\n')"
     trap 'echo -e "\nbreaking..."; break;' INT
 done
 trap "echo -e 'exiting...\n $(sec2elap $dT)'" EXIT
-

@@ -1,2 +1,2 @@
 #!/bin/bash
-echo $(( $(date +%s) - $1 ))
+echo $(($(date +%s) - $1))

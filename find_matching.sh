@@ -48,11 +48,11 @@ else
     base1="${fname1%.*}"
     echo "base name = $base1"
     if [[ $fname1 == *"."* ]]; then
-	echo "fname contains dots"
-	ext="${fname1##*.}"
+        echo "fname contains dots"
+        ext="${fname1##*.}"
     else
-	echo "fname does not contains dots, using default"
-	ext="txt"
+        echo "fname does not contains dots, using default"
+        ext="txt"
     fi
     base="${base1}_found"
 
@@ -67,8 +67,8 @@ else
     while [ ${file_in} -ef ${file_out} ]; do
         echo "the same file as ${file_out}"
         echo -n "${TAB}renaming output... "
-	file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
-	echo ${file_out}
+        file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
+        echo ${file_out}
     done
     echo "uniquely named"
 
@@ -77,8 +77,8 @@ else
     while [ -f ${file_out} ]; do
         echo "exists"
         echo -n "${TAB}renaming output... "
-	file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
-	echo ${file_out}
+        file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
+        echo ${file_out}
     done
     echo "${TAB}unique file name found"
 
@@ -88,53 +88,53 @@ else
 
     # parse arguments
     if [ $# -lt 2 ]; then
-	echo "no search location given"
-	echo "defaulting to PWD"
-	search_dir=$(readlink -f $PWD)
+        echo "no search location given"
+        echo "defaulting to PWD"
+        search_dir=$(readlink -f $PWD)
     else
-	search_dir=$(readlink -f $2)
+        search_dir=$(readlink -f $2)
     fi
     # check for search directory
     echo -n "search directory ${search_dir}... "
-    if [ -d $search_dir ];then
-	echo "OK"
+    if [ -d $search_dir ]; then
+        echo "OK"
     else
-	echo "not found"
-	exit 1
+        echo "not found"
+        exit 1
     fi
 
     # set print frequency
     if [ $j -lt 10 ]; then
-	nprint=1
+        nprint=1
     else
-	nprint=$((j/10))
+        nprint=$((j / 10))
     fi
     echo "${TAB}printing one results for every $nprint lines"
 
     while read line; do
         fname=$line
         ((k++))
-	if [ $(( k % $nprint)) -eq 0 ]; then
-	    echo -ne "\n$k/$j looking for ${fname}... "
-	else
-	    echo -n ","
-	fi
-	find $search_dir -type f -name *${fname}* >> ${file_out}
-	if [ $(( k % $nprint)) -eq 0 ]; then
-	    echo "done"
-	else
-	    echo -n "."
-	fi
-    done < $file_in
+        if [ $((k % $nprint)) -eq 0 ]; then
+            echo -ne "\n$k/$j looking for ${fname}... "
+        else
+            echo -n ","
+        fi
+        find $search_dir -type f -name *${fname}* >>${file_out}
+        if [ $((k % $nprint)) -eq 0 ]; then
+            echo "done"
+        else
+            echo -n "."
+        fi
+    done <$file_in
     echo
     echo $k "file names checked"
-    echo "$((j-k)) files not searched for"
+    echo "$((j - k)) files not searched for"
     l=$(cat ${file_out} | wc -l)
     echo "$l files found"
     if [ $j -lt $l ]; then
-	printf "%0.2f files found for each pattern" $(bc <<< "scale=2; $l / $j")
+        printf "%0.2f files found for each pattern" $(bc <<<"scale=2; $l / $j")
     else
-	echo "$((j-l)) files not found"
+        echo "$((j - l)) files not found"
     fi
 fi
 # print time at exit

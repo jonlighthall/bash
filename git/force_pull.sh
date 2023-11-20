@@ -42,13 +42,13 @@ else
     echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
     remote_name=${remote_tracking_branch%%/*}
     echo "${TAB}remote name is $remote_name"
-    remote_url=$(git remote -v | grep ${remote_name} |  awk '{print $2}' | uniq)
+    remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
     echo "${TAB}remote url is ${remote_url}"
     remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
     echo "protocol ${remote_pro}"
     n_remotes=$(git remote | wc -l)
     if [ "${n_remotes}" -gt 1 ]; then
-	echo "${n_remotes} remotes found"
+        echo "${n_remotes} remotes found"
     fi
 
     # parse branches
@@ -108,37 +108,37 @@ while [ -z ${hash_local} ]; do
 
     echo -n "${TAB}subject and time hashes..."
     if [ "$hash_local" == "$hash_local_s" ]; then
-	echo "match"
+        echo "match"
     else
-	echo "do not match"
-	echo "${TAB}subj = $hash_local_s"
-	echo "${TAB}time = $hash_local"
+        echo "do not match"
+        echo "${TAB}subj = $hash_local_s"
+        echo "${TAB}time = $hash_local"
     fi
     echo -n "${TAB}corresponding local commit hash: "
     if [ ! -z ${hash_local} ]; then
-	TAB+=${fTAB:='   '}
-	echo "$hash_local"
+        TAB+=${fTAB:='   '}
+        echo "$hash_local"
         # determine local commits not found on remote
-	echo -n "${TAB}trailing local commits: "
-	hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
-	if [ ! -z ${hash_start} ]; then
-	    echo
-	    git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
-	    N_local=$(git rev-list $hash_local..HEAD | wc -l)
-	    if [ $N_local -gt 1 ]; then
-		echo -n "${TAB}or ${hash_start}^.."
-		hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
-		echo ${hash_end}
-	    else
-		hash_end=$hash_start
-	    fi
-	    echo -e "${TAB}${yellow} local branch is $N_local commits ahead of remote${NORMAL}"
-	else
-	    echo -e "${green}none${NORMAL}"
-	    N_local=0
-	fi
+        echo -n "${TAB}trailing local commits: "
+        hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
+        if [ ! -z ${hash_start} ]; then
+            echo
+            git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
+            N_local=$(git rev-list $hash_local..HEAD | wc -l)
+            if [ $N_local -gt 1 ]; then
+                echo -n "${TAB}or ${hash_start}^.."
+                hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
+                echo ${hash_end}
+            else
+                hash_end=$hash_start
+            fi
+            echo -e "${TAB}${yellow} local branch is $N_local commits ahead of remote${NORMAL}"
+        else
+            echo -e "${green}none${NORMAL}"
+            N_local=0
+        fi
     else
-	echo "not found"
+        echo "not found"
     fi
     TAB=${TAB%$fTAB}
     iHEAD="${iHEAD}~"
@@ -157,9 +157,9 @@ if [ $hash_local == $hash_remote ]; then
     hash_merge=$(git merge-base ${branch_local} ${branch_pull})
     echo -n "${TAB}common hash is... "
     if [ $hash_local == $hash_merge ]; then
-	echo "the same as merge base"
+        echo "the same as merge base"
     else
-	echo "not the same as merge base"
+        echo "not the same as merge base"
     fi
 else
     echo "a different hash (diverged)"
@@ -173,11 +173,11 @@ if [ ! -z ${hash_start_remote} ]; then
     git rev-list $hash_remote..${branch_pull} | sed "s/^/${TAB}/"
     N_remote=$(git rev-list $hash_remote..${branch_pull} | wc -l)
     if [ $N_remote -gt 1 ]; then
-	echo -n "${TAB}or ${hash_start_remote}^.."
-	hash_end_remote=$(git rev-list $hash_remote..${branch_pull} | head -n 1)
-	echo ${hash_end_remote}
+        echo -n "${TAB}or ${hash_start_remote}^.."
+        hash_end_remote=$(git rev-list $hash_remote..${branch_pull} | head -n 1)
+        echo ${hash_end_remote}
     else
-	hash_end_remote=$hash_start_remote
+        hash_end_remote=$hash_start_remote
     fi
     echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
 else
@@ -204,32 +204,32 @@ else
     git status
     echo "stashing..."
     if [ $git_ver_maj -lt 2 ]; then
-	# old command
-	git stash
+        # old command
+        git stash
     else
-	# modern command
-	git stash -u
+        # modern command
+        git stash -u
     fi
     b_stash=true
 fi
 
 # copy leading commits to new branch
 cbar "${BOLD}copying local commits to new branch...${NORMAL}"
-if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
+if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     branch_temp=${branch_local}.temp
     echo "generating temporary branch..."
     i=0
     set +e
     while [[ ! -z $(git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep ${branch_temp}) ]]; do
-	echo "${TAB}${fTAB}${branch_temp}"
-	((i++))
-	branch_temp=${branch_local}.temp${i}
-	echo "${TAB}${fTAB}checking ${branch_temp}"
+        echo "${TAB}${fTAB}${branch_temp}"
+        ((i++))
+        branch_temp=${branch_local}.temp${i}
+        echo "${TAB}${fTAB}checking ${branch_temp}"
     done
     echo "${TAB}${fTAB}found unused branch name ${branch_temp}"
     if (! return 0 2>/dev/null); then
-	echo "${TAB}${fTAB}resetting error"
-	set -e
+        echo "${TAB}${fTAB}resetting error"
+        set -e
     fi
     git checkout -b ${branch_temp}
     git checkout ${branch_local}
@@ -238,7 +238,7 @@ else
 fi
 
 # initiate HEAD
-if [ $N_remote -gt 0 ];then
+if [ $N_remote -gt 0 ]; then
     echo "resetting HEAD to $hash_remote..."
     git reset --hard $hash_remote | sed "s/^/${TAB}/"
 fi
@@ -246,7 +246,7 @@ fi
 # pull remote commits
 cbar "${BOLD}pulling remote changes...${NORMAL}"
 echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of remote${NORMAL}"
-if [ $N_remote -gt 0 ];then
+if [ $N_remote -gt 0 ]; then
     git pull
     echo "done pulling"
 else
@@ -255,7 +255,7 @@ fi
 
 # push local commits
 cbar "${BOLD}merging local changes...${NORMAL}"
-if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ];then
+if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     N_temp=$(git rev-list ${branch_temp}..${branch_local} | wc -l)
     echo -e "${TAB}${yellow}  temp branch is $N_temp commits ahead of ${branch_local}${NORMAL}"
     echo "${TAB}rebase and merge..."
@@ -270,7 +270,7 @@ else
 fi
 cbar "${BOLD}pushing local changes...${NORMAL}"
 echo -e "${TAB}${yellow} local branch is $N_local commits ahead of remote${NORMAL}"
-if [ $N_local -gt 0 ];then 
+if [ $N_local -gt 0 ]; then
     git push
     echo "done pushing"
 else
@@ -283,16 +283,16 @@ N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo "there are $N_stash entries in stash"
     if $b_stash; then
-	git stash pop
-	echo -ne "stash made... "
-	if [ -z "$(git diff)" ]; then
-	    echo "${green}no changes${NORMAL}"
-	else
-	    echo -e "${yellow}changes!${NORMAL}"
-	    git reset HEAD
-	fi
+        git stash pop
+        echo -ne "stash made... "
+        if [ -z "$(git diff)" ]; then
+            echo "${green}no changes${NORMAL}"
+        else
+            echo -e "${yellow}changes!${NORMAL}"
+            git reset HEAD
+        fi
     else
-	echo "${TAB}... but none are from this operation"
+        echo "${TAB}... but none are from this operation"
     fi
     echo "done un-stashing"
 else
@@ -304,10 +304,9 @@ cbar "${BOLD}you're done!${NORMAL}"
 # print time at exit
 echo -en "\n${BASH_SOURCE##*/} "
 end_time=$(date +%s%N)
-elap_time=$((${end_time}-${start_time}))
-dT_sec=$(bc <<< "scale=3;$elap_time/1000000000")
-if command -v sec2elap &>/dev/null
-then
+elap_time=$((${end_time} - ${start_time}))
+dT_sec=$(bc <<<"scale=3;$elap_time/1000000000")
+if command -v sec2elap &>/dev/null; then
     bash sec2elap $dT_sec | tr -d '\n'
 else
     echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"

@@ -15,8 +15,8 @@ fi
 
 fname=ls2md.md
 
-for ext in $arg
-do
+for ext in $arg; do
     echo "filtering $arg"
-    find -L ./ -not -path "*/.git*/*" -type f -name "*${ext}" | sed "s,^./,,;s/${ext}$//" | sort | sed "s,^.*$,[\`&\`] (&${ext})," >> ${fname};cat ${fname}
+    find -L ./ -not -path "*/.git*/*" -type f -name "*${ext}" | sed "s,^./,,;s/${ext}$//" | sort | sed "s,^.*$,[\`&\`] (&${ext})," >>${fname}
+    cat ${fname}
 done

@@ -39,43 +39,39 @@ list_in=${cred_ref}
 if [ $# -gt 0 ]; then
     list_in+=" $@"
     echo "list of arguments:"
-    for arg in "$@"
-    do
-	echo "${TAB}$arg"
+    for arg in "$@"; do
+        echo "${TAB}$arg"
     done
 
     echo "list of files:"
-    for file in $list_in
-    do
-	echo "${TAB}$file"
+    for file in $list_in; do
+        echo "${TAB}$file"
     done
 fi
 
 # check list of files
 list_out=''
 list_del=''
-for cred_in in $list_in
-do
+for cred_in in $list_in; do
     echo -n "${cred_in}... "
     if [ -f ${cred_in} ]; then
-	echo -e "is a regular ${UL}file${NORMAL}"
-	list_out+="${cred_in} "
-	if [ ! ${cred_in} -ef ${cred_ref} ]; then
-	    echo "${cred_in} is not the same as ${cred_ref}"
-	    list_del+="${cred_in} "
-	else
-	    echo "${cred_ref} and ${cred_in} are the same file"
-	fi
+        echo -e "is a regular ${UL}file${NORMAL}"
+        list_out+="${cred_in} "
+        if [ ! ${cred_in} -ef ${cred_ref} ]; then
+            echo "${cred_in} is not the same as ${cred_ref}"
+            list_del+="${cred_in} "
+        else
+            echo "${cred_ref} and ${cred_in} are the same file"
+        fi
     else
-	echo -e "${BAD}${UL}does not exist${NORMAL}"
+        echo -e "${BAD}${UL}does not exist${NORMAL}"
     fi
 done
 echo "list out = ${list_out}"
 echo "list del = ${list_del}"
 
 echo "list of files:"
-for file in $list_out
-do
+for file in $list_out; do
     echo "${TAB}$file"
 done
 
@@ -86,7 +82,7 @@ echo "output file name is ${cred_out}"
 
 # create known creds file
 echo -n "${TAB}concatenate files... "
-cat ${list_out} > ${cred_out}
+cat ${list_out} >${cred_out}
 echo "done"
 L=$(cat ${cred_out} | wc -l)
 echo "${TAB}${TAB} ${cred_out} has $L lines"
@@ -112,9 +108,8 @@ echo "list del = ${list_del}"
 
 if [[ ! -z ${list_del} ]]; then
     echo "${TAB}removing merged files..."
-    for file in ${list_del}
-    do
-	rm -vf $file{,~} 2>/dev/null | sed "s/^/${TAB}/"
+    for file in ${list_del}; do
+        rm -vf $file{,~} 2>/dev/null | sed "s/^/${TAB}/"
     done
 fi
 
