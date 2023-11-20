@@ -25,11 +25,10 @@ fi
 list=$(git ls-files -d)
 
 # checkout deleted files
-for fname in $list
-do
+for fname in $list; do
     echo $fname
     git checkout $fname
 done
-wait 
+wait
 # print time at exit
 echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

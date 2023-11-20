@@ -26,7 +26,7 @@ else
     echo -e "remote tracking branch is ${blue}${branch_tracking}${NORMAL}"
     name_remote=${branch_tracking%%/*}
     echo "remote is name $name_remote"
-    url_remote=$(git remote -v | grep ${name_remote} |  awk '{print $2}' | sort -u)
+    url_remote=$(git remote -v | grep ${name_remote} | awk '{print $2}' | sort -u)
     echo "remote url is ${url_remote}"
     # parse branches
     branch_remote=${branch_tracking#*/}
@@ -35,7 +35,7 @@ fi
 branch_local=$(git branch | grep \* | sed 's/^\* //')
 echo -e " local branch is ${green}${branch_local}${NORMAL}"
 
-branch_list=$(git branch -va | sed 's/^*/ /' |  awk '{print $1}' | sed 's|remotes/.*/||' | sort -u | sed '/HEAD/d')
+branch_list=$(git branch -va | sed 's/^*/ /' | awk '{print $1}' | sed 's|remotes/.*/||' | sort -u | sed '/HEAD/d')
 echo "list of branches: "
 echo "${branch_list}" | sed 's/^/   /'
 

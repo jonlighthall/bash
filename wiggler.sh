@@ -1,7 +1,7 @@
 echo "press Ctrl-C to exit"
 step=1
-range=$((2*step+1))
-start=$((-1*step))
+range=$((2 * step + 1))
+start=$((-1 * step))
 while [ .true ]; do
     dx=$(($RANDOM % range + start))
     dy=$(($RANDOM % range + start))

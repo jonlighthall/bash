@@ -34,8 +34,7 @@ bar "upgrade and fix missing..."
 sudo apt upgrade -y --fix-missing
 
 # install packages
-for PACK in dbus-x11 x11-apps xterm
-do
+for PACK in dbus-x11 x11-apps xterm; do
     bar "installing ${PACK}..."
     sudo apt install -y --fix-missing ${PACK}
 done

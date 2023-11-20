@@ -55,139 +55,139 @@ k=0 # files in list
 
 # check for input
 if [ $# -eq 0 ]; then
-    echo "Please provide an input file"
-    exit 1
-else
-    echo "number of arguments = $#"
-
-    # set file names
-    file_in=$(readlink -f $1)
-    echo "argument 1: $1"
-    TAB+=${fTAB:='   '}
-    echo -n "${TAB}input file ${file_in}... "
-    if [ -f ${file_in} ]; then
-	echo "exits"
-	# read input file
-	j=$(cat ${file_in} | wc -l)
-	TAB+=${fTAB:='   '}
-	echo "${TAB}and has $j entries"
-
-	# set print frequency
-	if [ $j -lt 10 ]; then
-	    nprint=1
-	else
-	    nprint=$((j/10+1))
-	fi
-	echo "${TAB}printing one results for every $nprint lines"
-
-	# parse input
-	dir1=$(dirname $file_in)
-	echo "${TAB}input dir = $dir1"
-	fname1=$(basename $file_in)
-	echo "${TAB}input file = $fname1"
-	base1="${fname1%.*}"
-	echo "${TAB}base name = $base1"
-	TAB+=${fTAB}
-	if [[ $fname1 == *"."* ]]; then
-	    echo "${TAB}fname contains dots"
-	    ext="${fname1##*.}"
-	else
-	    echo "${TAB}fname does not contains dots, using default"
-	    ext="txt"
-	fi
-	TAB=${TAB%$fTAB}
-
-	# set default output file name to match input
-	base="${base1}_found"
-	file_spec="${dir1}/${base}.${ext}"
-
-	TAB=${TAB%$fTAB}
-	echo "file specification = $file_spec"
-
-	file_out=${file_spec}
-	echo $file_out
-
-	# check if input and output are the same file
-	echo -n " input file ${file_in} is... "
-	while [ ${file_in} -ef ${file_out} ]; do
-            echo "the same file as ${file_out}"
-            echo -n "${TAB}renaming output... "
-	    file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
-	    echo ${file_out}
-	done
-	echo "uniquely named"
-
-	# check if output exists
-	echo -n "output file ${file_out}... "
-	if [ -f ${file_out} ]; then
-            echo "exists"
-	    while [ -f ${file_out} ]; do
-		echo "${file_out##*/} exists"
-		echo -n "${TAB}renaming output... "
-		file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
-		echo ${file_out##*/}
-	    done
-	    echo "${TAB}unique file name found"
-	else
-	    echo "uniquely named"
-	fi
-
-	# parse arguments
-	if [ $# -lt 2 ]; then
-	    echo "no file to search specified"
-	    exit 1
-	else
-	    echo -n "search file $2... "
-	    # check for search file
-	    if [ -f $2 ]; then
-		echo "OK"
-	    else
-		echo "not found"
-		exit 1
-	    fi
-	fi
-
-	# process input file
-    	while read line; do
-            fname=$line
-            ((k++))
-	    # print status
-	    printf "\x1b[2K\r%4d/$j %3d%%" $k $((((k*100))/j))
-	    if [ $(( k % $nprint)) -eq 0 ]; then
-		echo -ne " looking for ${fname}... "
-	    fi
-	    # save matches to file
-	    grep "${fname}" $2 >> ${file_out}
-	    RETVAL=$?
-	    # print result
-	    if [ $(( k % $nprint)) -eq 0 ]; then
-		if [[ $RETVAL != 0 ]]; then
-		    echo "done"
-		else
-		    echo "not found"
-		fi
-	    fi
-	done < $file_in
-	echo
-	# print summary
-	echo $k "file names checked"
-	echo "$((j-k)) files not searched for"
-	l=$(cat ${file_out} | wc -l)
-	echo "$l files found"
-	if [ $j -lt $l ]; then
-	    printf "%0.2f files found for each pattern" $(bc <<< "scale=2; $l / $j")
-	else
-	    echo "$((j-l)) files not found"
-	fi
-    else
-	echo "does not exit"
+	echo "Please provide an input file"
 	exit 1
-    fi
+else
+	echo "number of arguments = $#"
+
+	# set file names
+	file_in=$(readlink -f $1)
+	echo "argument 1: $1"
+	TAB+=${fTAB:='   '}
+	echo -n "${TAB}input file ${file_in}... "
+	if [ -f ${file_in} ]; then
+		echo "exits"
+		# read input file
+		j=$(cat ${file_in} | wc -l)
+		TAB+=${fTAB:='   '}
+		echo "${TAB}and has $j entries"
+
+		# set print frequency
+		if [ $j -lt 10 ]; then
+			nprint=1
+		else
+			nprint=$((j / 10 + 1))
+		fi
+		echo "${TAB}printing one results for every $nprint lines"
+
+		# parse input
+		dir1=$(dirname $file_in)
+		echo "${TAB}input dir = $dir1"
+		fname1=$(basename $file_in)
+		echo "${TAB}input file = $fname1"
+		base1="${fname1%.*}"
+		echo "${TAB}base name = $base1"
+		TAB+=${fTAB}
+		if [[ $fname1 == *"."* ]]; then
+			echo "${TAB}fname contains dots"
+			ext="${fname1##*.}"
+		else
+			echo "${TAB}fname does not contains dots, using default"
+			ext="txt"
+		fi
+		TAB=${TAB%$fTAB}
+
+		# set default output file name to match input
+		base="${base1}_found"
+		file_spec="${dir1}/${base}.${ext}"
+
+		TAB=${TAB%$fTAB}
+		echo "file specification = $file_spec"
+
+		file_out=${file_spec}
+		echo $file_out
+
+		# check if input and output are the same file
+		echo -n " input file ${file_in} is... "
+		while [ ${file_in} -ef ${file_out} ]; do
+			echo "the same file as ${file_out}"
+			echo -n "${TAB}renaming output... "
+			file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
+			echo ${file_out}
+		done
+		echo "uniquely named"
+
+		# check if output exists
+		echo -n "output file ${file_out}... "
+		if [ -f ${file_out} ]; then
+			echo "exists"
+			while [ -f ${file_out} ]; do
+				echo "${file_out##*/} exists"
+				echo -n "${TAB}renaming output... "
+				file_out=${dir1}/${base}_$(date +'%Y-%m-%d-t%H%M%S').${ext}
+				echo ${file_out##*/}
+			done
+			echo "${TAB}unique file name found"
+		else
+			echo "uniquely named"
+		fi
+
+		# parse arguments
+		if [ $# -lt 2 ]; then
+			echo "no file to search specified"
+			exit 1
+		else
+			echo -n "search file $2... "
+			# check for search file
+			if [ -f $2 ]; then
+				echo "OK"
+			else
+				echo "not found"
+				exit 1
+			fi
+		fi
+
+		# process input file
+		while read line; do
+			fname=$line
+			((k++))
+			# print status
+			printf "\x1b[2K\r%4d/$j %3d%%" $k $((((k * 100)) / j))
+			if [ $((k % $nprint)) -eq 0 ]; then
+				echo -ne " looking for ${fname}... "
+			fi
+			# save matches to file
+			grep "${fname}" $2 >>${file_out}
+			RETVAL=$?
+			# print result
+			if [ $((k % $nprint)) -eq 0 ]; then
+				if [[ $RETVAL != 0 ]]; then
+					echo "done"
+				else
+					echo "not found"
+				fi
+			fi
+		done <$file_in
+		echo
+		# print summary
+		echo $k "file names checked"
+		echo "$((j - k)) files not searched for"
+		l=$(cat ${file_out} | wc -l)
+		echo "$l files found"
+		if [ $j -lt $l ]; then
+			printf "%0.2f files found for each pattern" $(bc <<<"scale=2; $l / $j")
+		else
+			echo "$((j - l)) files not found"
+		fi
+	else
+		echo "does not exit"
+		exit 1
+	fi
 fi
 # print time at exit
 echo -en "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
 if command -v sec2elap &>/dev/null; then
-    bash sec2elap $SECONDS
+	bash sec2elap $SECONDS
 else
-    echo "elapsed time is $SECONDS sec"
+	echo "elapsed time is $SECONDS sec"
 fi

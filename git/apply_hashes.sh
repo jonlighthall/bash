@@ -1,7 +1,6 @@
 #!/bin/bash
 unset n
-while read -r line
-do
+while read -r line; do
     echo "$line"
     git cherry-pick $line
     retval=$?
@@ -9,9 +8,9 @@ do
     : $((n++))
     echo -n "   $n: "
     if [ $retval -ne 0 ]; then
-	echo "FAIL"
-	exit
+        echo "FAIL"
+        exit
     else
-	echo "OK"
+        echo "OK"
     fi
-done < good_hashes.txt
+done <good_hashes.txt

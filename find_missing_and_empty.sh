@@ -15,8 +15,7 @@ j=0 # empty files
 k=0 # files in list
 
 # check for input
-if [ $# -eq 0 ]
-then
+if [ $# -eq 0 ]; then
     echo "Please provide an input file"
     exit 1
 else
@@ -50,25 +49,25 @@ else
         if [ ! -f $fname ]; then
             ((i++))
             echo $i $fname "is missing"
-            echo $line >> ${file_out}
+            echo $line >>${file_out}
         else
             if [ ! -s $fname ]; then #adding empty increases runtime < 4%
                 ((j++))
                 echo $j $fname "is empty"
-                echo $line >> ${file_out}
+                echo $line >>${file_out}
             fi
         fi
-    done < $file_in
+    done <$file_in
     echo $k "filenames checked"
     echo $i "of" $k "files missing"
-    ((m=k-i))
+    ((m = k - i))
     if [ $m == 0 ]; then
         echo "no empty files found"
     else
         echo $m "files found"
         echo $j "of" $m "files empty"
     fi
-    ((l=i+j))
+    ((l = i + j))
     echo $l "of" $k "problem files"
     #if [ -f ${file_out} ]; then
     #cat ${file_out}

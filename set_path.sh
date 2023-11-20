@@ -5,19 +5,18 @@
 #
 # Path additions
 for ADDPATH in \
-    ${PWD%/*}/ \
-    ${PWD%/*/*}/
-do
-    echo -n ${ADDPATH}
-    if [[ "$PATH" != *"${ADDPATH}:"*  ]]; then
-	if [ -d "${ADDPATH}" ] ; then
-	    export PATH=$ADDPATH:$PATH
-	    echo " added to PATH"
+	${PWD%/*}/ \
+	${PWD%/*/*}/; do
+	echo -n ${ADDPATH}
+	if [[ "$PATH" != *"${ADDPATH}:"* ]]; then
+		if [ -d "${ADDPATH}" ]; then
+			export PATH=$ADDPATH:$PATH
+			echo " added to PATH"
+		else
+			echo " not found"
+		fi
 	else
-	    echo " not found"
+		echo " already in PATH"
 	fi
-    else
-	echo " already in PATH"
-    fi
 done
 echo "done"
