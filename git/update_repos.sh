@@ -344,9 +344,9 @@ do
 		# add repo to list
 		mod_repos+="$repo "
 		# add to files to list
-#		if [ ! -z ${mod_files:+dummy} ]; then
-#		    mod_files+=$'\n'
-#		fi
+		if [ ! -z ${mod_files:+dummy} ]; then
+		    mod_files+=$'\n'
+		fi
 		mod_files+=${list_mod}
 		echo "${mod_files}"
 	    fi
