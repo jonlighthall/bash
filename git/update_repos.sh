@@ -347,8 +347,7 @@ do
 		if [ ! -z ${mod_files:+dummy} ]; then
 		    mod_files+=$'\n'
 		fi
-		mod_files+=${list_mod}
-		echo "${mod_files}"
+		mod_files+=$(echo "${list_mod}" | sed "s;^;${repo}/;")
 	    fi
 	else
 	    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
