@@ -1,8 +1,12 @@
-#/bin/bash
+#!/bin/bash
+#
 # git/force_pull.sh - the remote name and branch can be optionally specified by the first and
 # second arguments, respectively. The default remote tracking branch is origin/master.
-
+#
 # Apr 2023 JCL
+
+# start timer
+start_time=$(date +%s%N)
 
 # set tab
 TAB=''
@@ -21,7 +25,7 @@ else
     RUN_TYPE="executing"
     # exit on errors
     set -eE
-    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting..."' ERR
+    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -294,4 +298,18 @@ if [ $N_stash -gt 0 ]; then
 else
     echo -e "${green}no stash entries${NORMAL}"
 fi
-cbar "\n${BOLD}you're done!${NORMAL}"
+echo
+cbar "${BOLD}you're done!${NORMAL}"
+
+# print time at exit
+echo -en "\n${BASH_SOURCE##*/} "
+end_time=$(date +%s%N)
+elap_time=$((${end_time}-${start_time}))
+dT_sec=$(bc <<< "scale=3;$elap_time/1000000000")
+if command -v sec2elap &>/dev/null
+then
+    bash sec2elap $dT_sec | tr -d '\n'
+else
+    echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
+fi
+echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"
