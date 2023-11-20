@@ -38,8 +38,6 @@ bar "autoremove and purge..."
 sudo apt autoremove --purge -y
 bar "autoclean..."
 sudo apt autoclean
-bar "clean..."
-sudo apt clean
 
 # check for distro update
 bar "release upgrade..."
