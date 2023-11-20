@@ -137,6 +137,8 @@ pull_fail=''
 push_fail=''
 mod_repos=''
 mod_files=''
+
+n_match=''
 unset OK_list
 
 # track push/pull times
@@ -176,22 +178,18 @@ do
 		echo -n "matching argument ""$1""... "
 		if [[ $remote_url =~ $1 ]]; then
 		    echo -e "${GOOD}OK${NORMAL}"
-		    # add to list
-		    if [ ! -z ${OK_list:+dummy} ]; then
-			OK_list+=$'\n'
-		    fi
-		    OK_list+=${remote_url}
+		    ((n_match++))
 		else
 		    echo -e "${gray}SKIP${NORMAL}"
 		    continue
 		fi
-	    else
-		# add to list
-		if [ ! -z ${OK_list:+dummy} ]; then
-		    OK_list+=$'\n'
-		fi
-		OK_list+=${remote_url}
 	    fi
+
+	    # add to list
+	    if [ ! -z ${OK_list:+dummy} ]; then
+		OK_list+=$'\n'
+	    fi
+	    OK_list+=${remote_url}
 
 	    # print remote parsing
 	    echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
@@ -390,6 +388,11 @@ else
     echo "$loc_fail"
 fi
 
+# matched
+if [ ! -z "$n_match" ]; then
+    echo "      matched: ${n_match} ($1)"
+fi
+
 # pull
 echo -n " repos pulled: "
 if [ -z "${n_pull}" ]; then
@@ -397,12 +400,12 @@ if [ -z "${n_pull}" ]; then
 else
     echo "${n_pull}"
     echo -n "pull failures: "
-if [ -z "$pull_fail" ]; then
-    echo "none"
-else
-    echo -e "${GRH}$pull_fail${NORMAL}"
-fi
-echo "pull max time: ${t_pull_max} ns or $(bc <<< "scale=3;$t_pull_max/1000000000") sec"
+    if [ -z "$pull_fail" ]; then
+	echo "none"
+    else
+	echo -e "${GRH}$pull_fail${NORMAL}"
+    fi
+    echo "pull max time: ${t_pull_max} ns or $(bc <<< "scale=3;$t_pull_max/1000000000") sec"
 fi
 
 # push
