@@ -4,7 +4,9 @@
 #
 # Apr 2022 JCL
 
+# start timer
 start_time=$(date +%s%N)
+
 # set tab
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
