@@ -20,7 +20,8 @@ if (return 0 2>/dev/null); then
 else
     RUN_TYPE="executing"
     # exit on errors
-    set -e
+    set -eE
+    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting..."' ERR
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -293,4 +294,4 @@ if [ $N_stash -gt 0 ]; then
 else
     echo -e "${green}no stash entries${NORMAL}"
 fi
-echo -e "\n${BOLD}you're done!${NORMAL}"
+cbar "\n${BOLD}you're done!${NORMAL}"
