@@ -26,26 +26,24 @@ fi
 # define replacement seperator
 sep=_._
 
-if [ $# -eq 0 ]
-then
+if [ $# -eq 0 ]; then
     echo "${TAB}Please provide a target directory"
     exit 1
 else
     echo -n "${TAB}target directory $1 "
     if [[ -d $1 ]]; then
-	echo "found"
-	TAB+=$fTAB
-	for bad in bat bin cmd csh exe gz osx out prf ps
-	do
-	    echo "${TAB}replacing \".$bad\" with \"${sep}${bad}\"..."
-	    for fname in $(find $1 -name "*.${bad}"); do
-		mv -nv "$fname" "`echo $fname | sed "s/\.$bad/$sep$bad/"`" | sed "s/^/${TAB}${fTAB}/"
-	    done
-	done
-	TAB=${TAB#$fTAB}
+        echo "found"
+        TAB+=$fTAB
+        for bad in bat bin cmd csh exe gz osx out prf ps; do
+            echo "${TAB}replacing \".$bad\" with \"${sep}${bad}\"..."
+            for fname in $(find $1 -name "*.${bad}"); do
+                mv -nv "$fname" "$(echo $fname | sed "s/\.$bad/$sep$bad/")" | sed "s/^/${TAB}${fTAB}/"
+            done
+        done
+        TAB=${TAB#$fTAB}
     else
-	echo "not found"
-	exit 1
+        echo "not found"
+        exit 1
     fi
 fi
 

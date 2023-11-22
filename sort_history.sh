@@ -30,31 +30,31 @@ set_loc=C
 export LC_COLLATE=$set_loc
 
 # define random marker functions
-function find_marker () {
+function find_marker() {
     \grep -m 1 -n "${marker}" "$1"
 }
 
-function add_marker () {
+function add_marker() {
     valid=.false.
     while [ $valid == .false. ]; do
-	N_dec=$(($RANDOM % m_span + m_start))
-	if [[ ! $bad_list =~ ${N_dec} ]]; then
-	    valid=.true.
-	fi
+        N_dec=$(($RANDOM % m_span + m_start))
+        if [[ ! $bad_list =~ ${N_dec} ]]; then
+            valid=.true.
+        fi
     done
     marker+=$(printf '%b' $(printf '\\%03o' ${N_dec}))
 }
 
-function gen_marker () {
+function gen_marker() {
     echo "${TAB}generating unique marker for $1..."
     marker=''
     add_marker
-    line_width=$(( $(tput cols) - 1 ))
+    line_width=$(($(tput cols) - 1))
     while [[ ! -z $(find_marker "$1") ]]; do
-	echo -ne "${TAB}${TAB}marker = ${marker}\t"
-	echo -ne "found\t\t"
-	find_marker "$1" | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/" ) | cut -c -$line_width
-	add_marker
+        echo -ne "${TAB}${TAB}marker = ${marker}\t"
+        echo -ne "found\t\t"
+        find_marker "$1" | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ([[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/") | cut -c -$line_width
+        add_marker
     done
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
 }
@@ -66,7 +66,7 @@ function gen_marker () {
 # define marker range
 m_start=48
 m_end=122
-m_span=$(( $m_end - $m_start + 1 ))
+m_span=$(($m_end - $m_start + 1))
 
 # specify forbidden characters
 bad_list=$(echo {58..64} {91..96})
@@ -74,8 +74,7 @@ bad_list=$(echo {58..64} {91..96})
 # print bad list
 echo "${TAB}bad list:"
 echo -n "${TAB}${TAB}"
-for i in ${bad_list}
-do
+for i in ${bad_list}; do
     printf "\\$(printf %03o "$i")"
 done
 echo
@@ -83,10 +82,9 @@ echo
 # print good list
 echo "${TAB}good list:"
 echo -n "${TAB}${TAB}"
-for ((j=$m_start;j<=$m_end;j++))
-do
+for ((j = $m_start; j <= $m_end; j++)); do
     if [[ ! $bad_list =~ ${j} ]]; then
-	printf "\\$(printf %03o "$j")"
+        printf "\\$(printf %03o "$j")"
     fi
 done
 echo
@@ -106,15 +104,13 @@ list_in=${hist_ref}
 if [ $# -gt 0 ]; then
     list_in+=" $@"
     echo "list of arguments:"
-    for arg in "$@"
-    do
-	echo "${TAB}$arg"
+    for arg in "$@"; do
+        echo "${TAB}$arg"
     done
 
     echo "list of files:"
-    for file in $list_in
-    do
-	echo "${TAB}$file"
+    for file in $list_in; do
+        echo "${TAB}$file"
     done
 fi
 
@@ -122,39 +118,38 @@ fi
 list_out=''
 list_del=''
 set +e
-for hist_in in $list_in
-do
+for hist_in in $list_in; do
     echo -n "${hist_in}... "
     if [ -f ${hist_in} ]; then
-	echo -e "is a regular ${UL}file${NORMAL}"
-	list_out+="${hist_in} "
-	if [ ! ${hist_in} -ef ${hist_ref} ]; then
-	    echo "${TAB}${hist_in} is not the same as ${hist_ref}"
-	    list_del+="${hist_in} "
-	else
-	    echo "${TAB}${hist_ref} and ${hist_in} are the same file"
-	fi
+        echo -e "is a regular ${UL}file${NORMAL}"
+        list_out+="${hist_in} "
+        if [ ! ${hist_in} -ef ${hist_ref} ]; then
+            echo "${TAB}${hist_in} is not the same as ${hist_ref}"
+            list_del+="${hist_in} "
+        else
+            echo "${TAB}${hist_ref} and ${hist_in} are the same file"
+        fi
 
-	# add check for initial orphaned lines
-	(head -n 1 ${hist_in} | grep "#[0-9]\{10\}") >/dev/null
-	if [ $? -eq 0 ]; then 
-	    echo "${TAB}${hist_in} starts with timestamp"
-	else
-	    echo "${TAB}${hist_in} DOES NOT start with timestamp"
-	    # get next timestamp
-	    TS=$(grep "#[0-9]\{10\}" .bash_history -m 1 | sed 's/^#\([0-9]\{10\}\)[ \n].*/\1/')
-	    echo "${TAB}   TS = $TS"
-	    # generate preceeding timestamp
-	    preTS=$((TS-1))
-	    echo "${TAB}preTS = $preTS"
-	    # create temporary file
-	    hist_temp=${hist_in}_$(date +'%s')
-	    echo "${TAB}$hist_temp"	    
-	    echo "#$preTS INSERT MISSING TIMESTAMP" | cat - ${hist_in} > ${hist_temp}
-	    mv -v ${hist_temp} ${hist_in}
-	fi
+        # add check for initial orphaned lines
+        (head -n 1 ${hist_in} | grep "#[0-9]\{10\}") >/dev/null
+        if [ $? -eq 0 ]; then
+            echo "${TAB}${hist_in} starts with timestamp"
+        else
+            echo "${TAB}${hist_in} DOES NOT start with timestamp"
+            # get next timestamp
+            TS=$(grep "#[0-9]\{10\}" .bash_history -m 1 | sed 's/^#\([0-9]\{10\}\)[ \n].*/\1/')
+            echo "${TAB}   TS = $TS"
+            # generate preceeding timestamp
+            preTS=$((TS - 1))
+            echo "${TAB}preTS = $preTS"
+            # create temporary file
+            hist_temp=${hist_in}_$(date +'%s')
+            echo "${TAB}$hist_temp"
+            echo "#$preTS INSERT MISSING TIMESTAMP" | cat - ${hist_in} >${hist_temp}
+            mv -v ${hist_temp} ${hist_in}
+        fi
     else
-	echo -e "${BAD}${UL}does not exist${NORMAL}"
+        echo -e "${BAD}${UL}does not exist${NORMAL}"
     fi
 done
 set -e
@@ -162,8 +157,7 @@ echo "list out = ${list_out}"
 echo "list del = ${list_del}"
 
 echo "list of files:"
-for file in $list_out
-do
+for file in $list_out; do
     echo "${TAB}$file"
 done
 
@@ -174,12 +168,11 @@ echo "output file name is ${hist_out}"
 
 # create history file
 echo -n "${TAB}concatenate files... "
-cat ${list_out} > ${hist_out}
+cat ${list_out} >${hist_out}
 echo "done"
 
-for hist_edit in ${hist_bak} ${hist_out}
-do
-    # get file length 
+for hist_edit in ${hist_bak} ${hist_out}; do
+    # get file length
     L=$(cat ${hist_edit} | wc -l)
     echo "${TAB}${TAB} ${hist_edit} has $L lines"
 
@@ -233,10 +226,9 @@ do
     end_mark="~"
     LI_MARKER=$beg_mark
     LO_MARKER=$end_mark
-    for ((i=1;i<$N;i++))
-    do
-	LI_MARKER+="$beg_mark"
-	LO_MARKER+="$end_mark"
+    for ((i = 1; i < $N; i++)); do
+        LI_MARKER+="$beg_mark"
+        LO_MARKER+="$end_mark"
     done
     echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
     marker_list+=" $LI_MARKER $LO_MARKER"
@@ -255,14 +247,12 @@ do
     head_list="CONTIN INSERT LOGIN"
     tail_list="INDIFF LOGOUT SHUTDN SORT"
 
-    for head in ${head_list}
-    do
-	sed -i "s/ ${head}/${LI_MARKER}${head}/" ${hist_edit}
+    for head in ${head_list}; do
+        sed -i "s/ ${head}/${LI_MARKER}${head}/" ${hist_edit}
     done
 
-    for tail in ${tail_list}
-    do
-	sed -i "s/ ${tail}/${LO_MARKER}${tail}/" ${hist_edit}
+    for tail in ${tail_list}; do
+        sed -i "s/ ${tail}/${LO_MARKER}${tail}/" ${hist_edit}
     done
     echo "done"
 
@@ -274,47 +264,45 @@ do
 
     # unmark log in/out lines
     echo -n "${TAB}unmark login lines... "
-    for head in ${head_list}
-    do
-	sed -i "s/${LI_MARKER}${head}/ ${head}/" ${hist_edit}
+    for head in ${head_list}; do
+        sed -i "s/${LI_MARKER}${head}/ ${head}/" ${hist_edit}
     done
-    for tail in ${tail_list}
-    do
-	sed -i "s/${LO_MARKER}${tail}/ ${tail}/" ${hist_edit}
+    for tail in ${tail_list}; do
+        sed -i "s/${LO_MARKER}${tail}/ ${tail}/" ${hist_edit}
     done
     echo "done"
 
     ignore_list=(
-	    "bg" \
-	    "cd \.\.\/" \
-	    "exit" \
-	    "git diff" \
-	    "git log" \
-	    "git pull" \
-	    "git push" \
-	    "git status" \
-	    "gitb" \
-	    "gitd" \
-	    "gitl" \
-	    "gitr" \
-	    "gits" \
-	    "history" \
-	    "la" \
-	    "ls" \
-	    "lt" \
-	    "make" \
-	    "make clean" \
-	    "make run" \
-	    "pwd" \
-	    "up" \
-	    "update_repos" \
+        "bg"
+        "cd \.\.\/"
+        "exit"
+        "git diff"
+        "git log"
+        "git pull"
+        "git push"
+        "git status"
+        "gitb"
+        "gitd"
+        "gitl"
+        "gitr"
+        "gits"
+        "history"
+        "la"
+        "ls"
+        "lt"
+        "make"
+        "make clean"
+        "make run"
+        "pwd"
+        "up"
+        "update_repos"
     )
 
     for igno in "${ignore_list[@]}"; do
-	echo -n "${TAB}deleting ${igno}... "
-	sed -i "/${TS_MARKER}${igno}$/d" ${hist_edit}
-	sed -i "s/${OR_MARKER}${igno}$//" ${hist_edit}
-	echo "done"
+        echo -n "${TAB}deleting ${igno}... "
+        sed -i "/${TS_MARKER}${igno}$/d" ${hist_edit}
+        sed -i "s/${OR_MARKER}${igno}$//" ${hist_edit}
+        echo "done"
     done
 
     # unmerge commands
@@ -348,7 +336,7 @@ echo "done"
 # save markers
 N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_out} | wc -l)
 echo -e "${TAB}\x1b[1;31mnumber of differences = $N${NORMAL}"
-echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >> ${hist_out}
+echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}
 
@@ -356,9 +344,8 @@ echo "list del = ${list_del}"
 
 if [[ ! -z ${list_del} ]]; then
     echo "${TAB}removing merged files..."
-    for file in ${list_del}
-    do
-	rm -vf $file{,~} 2>/dev/null | sed "s/^/${TAB}/"
+    for file in ${list_del}; do
+        rm -vf $file{,~} 2>/dev/null | sed "s/^/${TAB}/"
     done
 fi
 
@@ -375,5 +362,5 @@ echo "${TAB}diffy ${hist_bak} ${hist_ref}"
 echo "${TAB}en ${hist_bak} ${hist_ref}"
 
 if command -v diffy &>/dev/null; then
-    diffy  ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
+    diffy ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
 fi
