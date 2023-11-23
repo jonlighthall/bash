@@ -6,7 +6,9 @@ if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing (not sourced)"
-    set -e # exit on non-zero status
+    # exit on errors
+    set -eE
+    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
 
 echo -e "\$BASH_SOURCE = $BASH_SOURCE"
@@ -74,7 +76,7 @@ PSH_LEV=$((SH_LEV - PS_LEV))
 echo "-----------------------------------"
 echo "           shell level = $SHLVL"
 echo "         process level = $PS_LEV"
-echo "  parent process level = $PPS_LEV" 
+echo "  parent process level = $PPS_LEV"
 echo "    prompt shell level = $PSH_LEV"
 echo "-----------------------------------"
 
@@ -82,12 +84,12 @@ echo -n "parent process level = 0? "
 if [ "$PPS_LEV" -eq 0 ]; then
     echo "yes"
     # only works if sourced
-    if [ "${0}" = "$BASH_SOURCE"  ];then
-	echo -e "      \$0 same as \$BASH_SOURCE"
-	echo "      This script is called by another process."
+    if [ "${0}" = "$BASH_SOURCE" ]; then
+        echo -e "      \$0 same as \$BASH_SOURCE"
+        echo "      This script is called by another process."
     else
-	echo -e "      \$0 NOT same as \$BASH_SOURCE"
-	echo "      This script is not called by another process."
+        echo -e "      \$0 NOT same as \$BASH_SOURCE"
+        echo "      This script is not called by another process."
     fi
 else
     echo "no"
@@ -99,27 +101,26 @@ if (return 0 2>/dev/null); then
     echo -e "\x1b[33m   sourced\x1b[0m"
     echo "   compare shell/script to source..."
     # only works if sourced
-    if [ "${0}" = "$BASH_SOURCE"  ];then
-	echo -e "      \$0 same as \$BASH_SOURCE"
-	echo "      This script is called by another process."
+    if [ "${0}" = "$BASH_SOURCE" ]; then
+        echo -e "      \$0 same as \$BASH_SOURCE"
+        echo "      This script is called by another process."
     else
-	echo -e "      \$0 NOT same as \$BASH_SOURCE"
-	echo "      This script is NOT called by another process."
+        echo -e "      \$0 NOT same as \$BASH_SOURCE"
+        echo "      This script is NOT called by another process."
     fi
 else
     echo -e "\x1b[34m   not sourced\x1b[0m"
 fi
 
-
 [[ $SHLVL -gt ${nstack} ]] &&
     echo "   called from parent" ||
-	echo "   called directly"
+    echo "   called directly"
 
 echo "process level $PS_LEV"
 
 echo -n "(shell level $SHLVL) -gt (process level $PS_LEV) ? "
 
-if [ "$PS_LEV" -gt 1 ] || ( [ "$PS_LEV" -gt "$PPS_LEV" ] ) || ( [ "$SH_LEV" -gt "$PSH_LEV" ] && [ "$PS_LEV" -gt 1 ] ); then
+if [ "$PS_LEV" -gt 1 ] || ([ "$PS_LEV" -gt "$PPS_LEV" ]) || ([ "$SH_LEV" -gt "$PSH_LEV" ] && [ "$PS_LEV" -gt 1 ]); then
     echo true
     echo -e "\x1b[0;35m$(basename $BASH_SOURCE) was envoked by another process\x1b[0m"
 else
@@ -130,11 +131,10 @@ fi
 # print time at exit
 echo -en "${TAB}${PSDIR}$(basename $BASH_SOURCE)${NORMAL} "
 end_time=$(date +%s%N)
-elap_time=$((${end_time}-${start_time}))
-dT_sec=$(bc <<< "scale=3;$elap_time/1000000000")
-if command -v sec2elap &>/dev/null
-then
-    echo -n "$(sec2elap $dT_sec | tr -d '\n')" 
+elap_time=$((${end_time} - ${start_time}))
+dT_sec=$(bc <<<"scale=3;$elap_time/1000000000")
+if command -v sec2elap &>/dev/null; then
+    echo -n "$(sec2elap $dT_sec | tr -d '\n')"
 else
     echo -en "elapsed time is ${white}${dT_sec} sec${NORMAL}"
 fi

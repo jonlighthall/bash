@@ -6,7 +6,9 @@ if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing (not sourced)"
-    set -e # exit on non-zero status
+    # exit on errors
+    set -eE
+    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
 
 echo -e "\$BASH_SOURCE = $BASH_SOURCE"

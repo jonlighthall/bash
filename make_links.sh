@@ -15,6 +15,7 @@ else
     RUN_TYPE="executing"
     # exit on errors
     set -e
+    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -75,82 +76,83 @@ for my_link in \
     update_packages \
     whatsup \
     add_path \
-    xtest
-
-do
+    xtest; do
     # define target (source)
     target=${target_dir}/${my_link}${ext}
     # define link (destination)
     sub_dir=$(dirname "$my_link")
     if [ ! $sub_dir = "." ]; then
         # strip target subdirectory from link name
-	my_link=$(basename "$my_link")
+        my_link=$(basename "$my_link")
     fi
     link=${link_dir}/${my_link}
 
     # check if target exists
     echo -n "target file ${target}... "
     if [ -e "${target}" ]; then
-	echo "exists "
+        echo "exists "
 
-	# next, check file permissions
-	if true; then
-	    echo -n "${TAB}${target##*/} requires specific permissions: "
-	    permOK=500
-	    echo "${permOK}"
-	    TAB+=${fTAB:='   '}
-	    echo -n "${TAB}checking permissions... "
-	    perm=$(stat -c "%a" "${target}")
-	    echo ${perm}
-	    # the target files will have the required permissions added to the existing permissions
-	    if [[ ${perm} -le ${permOK}  ]] || [[ ! ( -f "${target}" && -x "${target}" ) ]]; then
-		echo -en "${TAB}${GRH}changing permissions${NORMAL} to ${permOK}... "
-		chmod +${permOK} "${target}" || chmod u+rx "${target}"
-		RETVAL=$?
-		if [ $RETVAL -eq 0 ]; then
-		    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		else
-		    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		fi
-	    else
-		echo -e "${TAB}permissions ${GOOD}OK${NORMAL}"
-	    fi
-	    TAB=${TAB%$fTAB}
-	fi
+        # next, check file permissions
+        if true; then
+            echo -n "${TAB}${target##*/} requires specific permissions: "
+            permOK=500
+            echo "${permOK}"
+            TAB+=${fTAB:='   '}
+            echo -n "${TAB}checking permissions... "
+            perm=$(stat -c "%a" "${target}")
+            echo ${perm}
+            # the target files will have the required permissions added to the existing permissions
+            if [[ ${perm} -le ${permOK} ]] || [[ ! (-f "${target}" && -x "${target}") ]]; then
+                echo -en "${TAB}${GRH}changing permissions${NORMAL} to ${permOK}... "
+                chmod +${permOK} "${target}" || chmod u+rx "${target}"
+                RETVAL=$?
+                if [ $RETVAL -eq 0 ]; then
+                    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                else
+                    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                fi
+            else
+                echo -e "${TAB}permissions ${GOOD}OK${NORMAL}"
+            fi
+            TAB=${TAB%$fTAB}
+        fi
 
-	# begin linking...
-	echo -n "${TAB}link $link... "
-	TAB+=${fTAB:='   '}
-	# first, check for existing copy
-	if [ -L ${link} ] || [ -f ${link} ] || [ -d ${link} ]; then
-	    echo -n "exists and "
-	    if [[ "${target}" -ef ${link} ]]; then
+        # begin linking...
+        echo -n "${TAB}link $link... "
+        TAB+=${fTAB:='   '}
+        # first, check for existing copy
+        if [ -L ${link} ] || [ -f ${link} ] || [ -d ${link} ]; then
+            echo -n "exists and "
+            if [[ "${target}" -ef ${link} ]]; then
                 echo "already points to ${my_link}"
-		echo -n "${TAB}"
-		ls -lhG --color=auto ${link}
-		echo "${TAB}skipping..."
-		TAB=${TAB%$fTAB}
-		continue
-	    else
-		# next, delete or backup existing copy
-		if [ $(diff -ebwB "${target}" ${link} | wc -c) -eq 0 ]; then
-		    echo "has the same contents"
-		    echo -n "${TAB}deleting... "
-		    rm -v ${link}
-		else
-		    echo "will be backed up..."
-		    mv -v ${link} ${link}_$(date -r ${link} +'%Y-%m-%d-t%H%M') | sed "s/^/${TAB}/"
-		fi
-	    fi
-	else
-	    echo "does not exist"
-	fi
+                echo -n "${TAB}"
+                ls -lhG --color=auto ${link}
+                echo "${TAB}skipping..."
+                TAB=${TAB%$fTAB}
+                continue
+            else
+                # next, delete or backup existing copy
+                if [ $(diff -ebwB "${target}" ${link} | wc -c) -eq 0 ]; then
+                    echo "has the same contents"
+                    echo -n "${TAB}deleting... "
+                    rm -v ${link}
+                else
+                    echo "will be backed up..."
+                    mv -v ${link} ${link}_$(date -r ${link} +'%Y-%m-%d-t%H%M') | sed "s/^/${TAB}/"
+                fi
+            fi
+        else
+            echo "does not exist"
+        fi
         # then link
-	echo -en "${TAB}${GRH}";hline 72;
-	echo "${TAB}making link... "
-	ln -sv "${target}" ${link} | sed "s/^/${TAB}/"
-	echo -ne "${TAB}";hline 72;echo -en "${NORMAL}"
-	TAB=${TAB%$fTAB}
+        echo -en "${TAB}${GRH}"
+        hline 72
+        echo "${TAB}making link... "
+        ln -sv "${target}" ${link} | sed "s/^/${TAB}/"
+        echo -ne "${TAB}"
+        hline 72
+        echo -en "${NORMAL}"
+        TAB=${TAB%$fTAB}
     else
         echo -e "${BAD}does not exist${NORMAL}"
     fi
