@@ -56,6 +56,7 @@ echo " groups:" $(id -nG 2>/dev/null)
 #
 # Print shell information
 #
+echo "  shell: $SHELL"
 echo "    PID: $PPID"
 echo -n "   date: "
 date
