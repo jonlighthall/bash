@@ -1,10 +1,14 @@
 #!/bin/bash
 echo "   host:" $HOSTNAME
-echo -n "display: "
-if [ -z $DISPLAY ]; then
+
+echo -n " domain: " 
+$(hostname -y &> /dev/null)
+if [ $? -ne 0 ]; then
     echo -e "\x1b[31mnot set\x1b[0m"
+else
+    hostname -d
 fi
-echo "$DISPLAY"
+
 echo -n "     IP: "
 hostname -i | sed 's/^[^\.]* //'
 echo -n "     OS: "
@@ -17,6 +21,12 @@ else
         cat /etc/*release | sort -u
     fi
 fi
+
+echo -n "display: "
+if [ -z $DISPLAY ]; then
+    echo -e "\x1b[31mnot set\x1b[0m"
+fi
+echo "$DISPLAY"
 echo -n "   user: "
 if [ -z $USER ]; then
     if [ -z $USERNAME ]; then
@@ -46,10 +56,19 @@ else
     echo $(ps -p $PPID -o etime)
 fi
 
+TAB='     '
 for arg in a d f i I y ; do
     echo " -$arg :"
-    hostname "-${arg}"
-    echo "RETVAL = $?"
+    unset hn
+    unset rv
+    hn=$(hostname "-${arg}")
+    rv=$?
+    if [ -z "$hn" ]; then
+	echo -e "${TAB}\x1b[31mnot set\x1b[0m"
+    else
+	echo $hn | sed "s/\s$//;s/ /\n${TAB}/g;s/^/${TAB}/"
+    fi
+    echo "${TAB}RETVAL = $rv"
 done
 
 echo -n "   path: $UNAME@"
