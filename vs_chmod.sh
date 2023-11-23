@@ -28,4 +28,4 @@ while [ .true ]; do
     chmod -Rc 777 /home/jlighthall/.vscode-server/
     trap 'echo -e "\nbreaking..."; break;' INT
 done
-trap "echo -e 'exiting...\n $(sec2elap $dT)'" EXIT
+trap "echo -e 'exiting...\n$(sec2elap $dT)'" EXIT

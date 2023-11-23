@@ -1,4 +1,3 @@
-set -e
 # set tab
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
@@ -19,6 +18,8 @@ if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"
 else
 	RUN_TYPE="executing"
+	set -eE
+	trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
