@@ -1,6 +1,8 @@
 #!/bin/bash -u
+#
+# Print host information
+#
 echo "   host:" $HOSTNAME
-
 echo -n " domain: " 
 $(hostname -y &> /dev/null)
 DOM_RET_VAL=$?
@@ -10,10 +12,20 @@ if [ $DOM_RET_VAL -ne 0 ] && [ -z ${DOMAIN} ] ; then
 else
     echo "${DOMAIN}"
 fi
-
 echo -n "     IP: "
 IP=$(hostname -i | sed 's/^[^\.]* //')
 echo "${IP}"
+# select hostname or IP address for SSH path
+if [ $DOM_RET_VAL -ne 0 ]; then
+    SSH_HOST=${IP}
+else
+    SSH_HOST=${DOMAIN}
+fi
+echo -n "display: "
+if [ -z $DISPLAY ]; then
+    echo -e "\x1b[31mnot set\x1b[0m"
+fi
+echo "$DISPLAY"
 echo -n "     OS: "
 if [ -f /etc/os-release ]; then
     \grep -i pretty /etc/os-release | sed 's/.*="\([^"].*\)"/\1/'
@@ -24,19 +36,9 @@ else
         cat /etc/*release | sort -u
     fi
 fi
-
-# select hostname or IP address for SSH path
-if [ $DOM_RET_VAL -ne 0 ]; then
-    SSH_HOST=${IP}
-else
-    SSH_HOST=${DOMAIN}
-fi
-
-echo -n "display: "
-if [ -z $DISPLAY ]; then
-    echo -e "\x1b[31mnot set\x1b[0m"
-fi
-echo "$DISPLAY"
+#
+# Print user information
+#
 echo -n "   user: "
 if [ -z $USER ]; then
     if [ -z $USERNAME ]; then
@@ -51,10 +53,12 @@ fi
 echo $UNAME
 echo "user ID:" $UID
 echo " groups:" $(id -nG 2>/dev/null)
-echo "    pwd:" $PWD
+#
+# Print shell information
+#
+echo "    PID: $PPID"
 echo -n "   date: "
 date
-echo "    PID: $PPID"
 echo -n "   time: shell "
 if (ps -o etimes) &>/dev/null; then
     if command -v sec2elap &>/dev/null; then
@@ -65,27 +69,15 @@ if (ps -o etimes) &>/dev/null; then
 else
     echo $(ps -p $PPID -o etime)
 fi
-
-TAB='     '
-for arg in a d f i I y ; do
-    echo " -$arg :"
-    unset hn
-    unset rv
-    hn=$(hostname "-${arg}")
-    rv=$?
-    if [ -z "$hn" ] || [[ $rv -ne 0 ]]; then
-	echo -e "${TAB}\x1b[31mnot set\x1b[0m"
-    else
-	echo $hn | sed "s/\s$//;s/ /\n${TAB}/g;s/^/${TAB}/"
-    fi
-    echo "${TAB}RETVAL = $rv"
-done
-
+#
+# Print path information
+#
+echo "    pwd:" $PWD
+# print full path for SSH, etc.
 echo -n "   path: $UNAME@"
-
 if [[ "$HOSTNAME" == *"."* ]]; then
     echo -n "$HOSTNAME"
 else
-	echo -n  "${SSH_HOST}"
+    echo -n  "${SSH_HOST}"
 fi
 echo ":$PWD"
