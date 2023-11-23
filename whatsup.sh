@@ -35,7 +35,7 @@ echo "    pwd:" $PWD
 echo -n "   date: "
 date
 echo "    PID: $PPID"
-echo -n "   time: "
+echo -n "   time: shell "
 if (ps -o etimes) &>/dev/null; then
     if command -v sec2elap &>/dev/null; then
         bash sec2elap $(ps -p "$PPID" -o etimes | tail -n 1)
@@ -46,10 +46,10 @@ else
     echo $(ps -p $PPID -o etime)
 fi
 
-TAB='     '
 for arg in a d f i I y ; do
     echo " -$arg :"
-    hostname "-${arg}" | sed "s/\s$//;s/ /\n${TAB}/g;s/^/${TAB}/"
+    hostname "-${arg}"
+    echo "RETVAL = $?"
 done
 
 echo -n "   path: $UNAME@"
@@ -59,11 +59,11 @@ if [[ "$HOSTNAME" == *"."* ]]; then
 else
     if [ -z $(hostname -d) ]; then
         echo -n  "$(hostname -I | sed 's/ .*$//')"
-	echo "domain not set"
-	echo "using IP address"
+	echo -e "\n     domain not set"
+	echo "     using IP address"
     else
 	echo -n  "$(hostname -f)"
-	echo "domain = $(hostname -d)"
+	echo "     domain = $(hostname -d)"
     fi
 fi
 echo ":$PWD"
