@@ -63,7 +63,7 @@ for arg in a d f i I y ; do
     unset rv
     hn=$(hostname "-${arg}")
     rv=$?
-    if [ -z "$hn" ]; then
+    if [ -z "$hn" ] || [[ $rv -ne 0 ]]; then
 	echo -e "${TAB}\x1b[31mnot set\x1b[0m"
     else
 	echo $hn | sed "s/\s$//;s/ /\n${TAB}/g;s/^/${TAB}/"
