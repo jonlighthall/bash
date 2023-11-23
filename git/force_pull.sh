@@ -228,7 +228,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     done
     echo "${TAB}${fTAB}found unused branch name ${branch_temp}"
     if (! return 0 2>/dev/null); then
-        echo "${TAB}${fTAB}resetting error"
+        echo "${TAB}${fTAB}resetting exit on error"
         set -e
     fi
     git checkout -b ${branch_temp}
@@ -245,7 +245,7 @@ fi
 
 # pull remote commits
 cbar "${BOLD}pulling remote changes...${NORMAL}"
-echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of remote${NORMAL}"
+echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
 if [ $N_remote -gt 0 ]; then
     git pull
     echo "done pulling"
