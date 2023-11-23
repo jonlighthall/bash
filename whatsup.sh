@@ -3,14 +3,17 @@ echo "   host:" $HOSTNAME
 
 echo -n " domain: " 
 $(hostname -y &> /dev/null)
-if [ $? -ne 0 ]; then
+DOM_RET_VAL=$?
+if [ $DOM_RET_VAL -ne 0 ]; then
     echo -e "\x1b[31mnot set\x1b[0m"
 else
-    hostname -d
+    DOMAIN=$(hostname -d)
+    echo "${DOMAIN}"
 fi
 
 echo -n "     IP: "
-hostname -i | sed 's/^[^\.]* //'
+IP=$(hostname -i | sed 's/^[^\.]* //')
+echo "${IP}"
 echo -n "     OS: "
 if [ -f /etc/os-release ]; then
     \grep -i pretty /etc/os-release | sed 's/.*="\([^"].*\)"/\1/'
@@ -20,6 +23,13 @@ else
     else
         cat /etc/*release | sort -u
     fi
+fi
+
+# select hostname or IP address for SSH path
+if [ $DOM_RET_VAL -ne 0 ]; then
+    SSH_HOST=${IP}
+else
+    SSH_HOST=${DOMAIN}
 fi
 
 echo -n "display: "
@@ -76,13 +86,6 @@ echo -n "   path: $UNAME@"
 if [[ "$HOSTNAME" == *"."* ]]; then
     echo -n "$HOSTNAME"
 else
-    if [ -z $(hostname -d) ]; then
-        echo -n  "$(hostname -I | sed 's/ .*$//')"
-	echo -e "\n     domain not set"
-	echo "     using IP address"
-    else
-	echo -n  "$(hostname -f)"
-	echo "     domain = $(hostname -d)"
-    fi
+	echo -n  "${SSH_HOST}"
 fi
 echo ":$PWD"
