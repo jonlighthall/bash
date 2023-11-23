@@ -4,10 +4,10 @@ echo "   host:" $HOSTNAME
 echo -n " domain: " 
 $(hostname -y &> /dev/null)
 DOM_RET_VAL=$?
-if [ $DOM_RET_VAL -ne 0 ]; then
+DOMAIN=$(hostname -d)
+if [ $DOM_RET_VAL -ne 0 ] && [ -z ${DOMAIN} ] ; then
     echo -e "\x1b[31mnot set\x1b[0m"
 else
-    DOMAIN=$(hostname -d)
     echo "${DOMAIN}"
 fi
 
