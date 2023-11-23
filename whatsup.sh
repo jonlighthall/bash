@@ -45,20 +45,25 @@ if (ps -o etimes) &>/dev/null; then
 else
     echo $(ps -p $PPID -o etime)
 fi
-echo -n "   path: $UNAME@"
 
+TAB='     '
 for arg in a d f i I y ; do
-    echo "$arg"
-    timeout -s 9 1s hostname "-${arg}"
+    echo " -$arg :"
+    hostname "-${arg}" | sed "s/\s$//;s/ /\n${TAB}/g;s/^/${TAB}/"
 done
+
+echo -n "   path: $UNAME@"
 
 if [[ "$HOSTNAME" == *"."* ]]; then
     echo -n "$HOSTNAME"
 else
     if [ -z $(hostname -d) ]; then
         echo -n  "$(hostname -I | sed 's/ .*$//')"
+	echo "domain not set"
+	echo "using IP address"
     else
-        echo "fail"
+	echo -n  "$(hostname -f)"
+	echo "domain = $(hostname -d)"
     fi
 fi
 echo ":$PWD"
