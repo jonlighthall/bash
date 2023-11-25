@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # add the following directories to the start of PATH
 #
 # NB: remember to 'source' this script, don't just execute it

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # Used to delete binary files from directory. Tracked binary files
 # found in a Git repository will be removed from the repository. The

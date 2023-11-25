@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # add the directories passed to the command as arguments to the start
 # of the PATH environmental variable
 #

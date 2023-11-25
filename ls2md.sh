@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # ls2md.sh - convert directory contents to markdown links. Used for creating a table of contents
 # for git readme files. Optional argument specifies the file extenstion. Default is '.sh'

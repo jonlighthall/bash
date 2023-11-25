@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # test_variable.sh - test the value of a variable. expected values are null, true, false
 #

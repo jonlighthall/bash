@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 echo "${0##*/}"
 
 # test X11

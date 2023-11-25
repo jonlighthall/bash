@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 echo "   host:" $HOSTNAME
 
 echo -n " domain: " 

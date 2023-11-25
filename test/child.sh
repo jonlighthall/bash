@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 start_time=$(date +%s%N)
 # print source name at start
 echo

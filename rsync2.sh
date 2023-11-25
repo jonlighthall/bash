@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 
 # set directories
 export dir_common="${HOME}/utils/scripts/"

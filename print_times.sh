@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 echo -n "UTC:   "
 TZ='UTC' date
 echo -n "GPS:   "

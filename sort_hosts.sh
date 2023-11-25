@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # sort_hosts.sh - this script will merge all hosts in known_hosts and sort the result
 #

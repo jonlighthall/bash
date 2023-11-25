@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 N=5000
 echo "start"
 echo -e "counting to $N... \x1B[s+++"

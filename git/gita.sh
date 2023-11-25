@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 TAB="     "
 echo "current author name:"
 git config --get user.name | uniq | sed "s/^/${TAB}/"

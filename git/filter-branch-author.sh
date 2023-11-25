@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty

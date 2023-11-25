@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # sort_creds.sh - this script will merge all credentials in .git_credentials and sort the result
 #

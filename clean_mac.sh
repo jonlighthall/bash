@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # this script remvoes all proprietary Mac OS files from a specified directory
 #
 # enter the command to be applied to each file within the parenthesis

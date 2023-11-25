@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # Purpose:
 # this script iteratively compares bash history files and determines

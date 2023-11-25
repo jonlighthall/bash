@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 echo "printing..."
 for ((i=32;i<=126;i++))
 do

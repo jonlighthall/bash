@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 echo $BASH_SOURCE
 
 fpretty=${HOME}/utils/bash/.bashrc_pretty

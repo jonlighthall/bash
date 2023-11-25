@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # install_packages.sh - install packages for xtest
 #

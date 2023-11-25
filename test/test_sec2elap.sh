@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # program to test formatting of sec2elap over different time epochs
 for n in {1..8}
 do
