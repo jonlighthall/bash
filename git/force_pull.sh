@@ -191,7 +191,7 @@ while [ -z ${hash_local} ]; do
             else
                 hash_end=$hash_start
             fi
-            echo -e "${TAB}${fTAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
+            echo -e "${TAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
         else
             echo -e "${green}none${NORMAL}"
             N_local=0
