@@ -356,7 +356,7 @@ if [ $N_stash -gt 0 ]; then
         echo "${fTAB}...but none are from this operation"
     fi
 else
-    echo -e "${green}no stash entries${NORMAL}"
+    echo "${fTAB}no stash entries"
 fi
 cbar "${BOLD}you're done!${NORMAL}"
 
