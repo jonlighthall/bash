@@ -205,7 +205,7 @@ git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 # stash local changes
 cbar "${BOLD}stashing local changes...${NORMAL}"
 if [ -z "$(git diff)" ]; then
-    echo -e "${green}no differences to stash${NORMAL}"
+    echo -e "${TAB}no differences to stash"
     b_stash=false
 else
     echo "prepare to stash..."
