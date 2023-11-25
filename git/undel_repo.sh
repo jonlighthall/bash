@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # Checks a Git repository for deleted files and restores those files
 # by checking them out
 

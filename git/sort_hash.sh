@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 while read -r line; do
     echo "$line"
     ts1=$(echo $line | awk '{print $1}')

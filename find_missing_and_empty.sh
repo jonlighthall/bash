@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # reads an input list of files names. any files that are not found or empty are written to an
 # output list. handling is included to backup any duplicated input/output file names.
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # sort_history.sh - this script will merge all commands in .bash_history with their corresponding
 # timestamps, sort the result, and unmerge the sorted list.

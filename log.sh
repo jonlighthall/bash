@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 if [ $# -eq 0 ]; then
     echo "Please provide an executable"
 else

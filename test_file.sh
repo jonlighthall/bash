@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # set tab
 TAB+=${fTAB:='   '}
 # no echo source since this is a utility

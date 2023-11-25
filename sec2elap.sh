@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 echo -n "elapsed time is "
 # check if input is empty
 echo -ne "\x1B[1;37m"

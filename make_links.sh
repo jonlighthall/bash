@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # set tab
 :${TAB:=''}
 

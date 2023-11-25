@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 sleep 1 &
 echo $!
 sleep 2 &

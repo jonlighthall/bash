@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 
 dnow=$(date +%s)
 fname=$1

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # grep_matching.sh - Reads an input list of files name regex patterns. Any files matching the
 # individual patterns are saved to a new list of file names. Handling is included to backup any

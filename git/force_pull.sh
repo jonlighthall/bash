@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # git/force_pull.sh - the remote name and branch can be optionally specified by the first and
 # second arguments, respectively. The default remote tracking branch is origin/master.

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 
 # used to un-fix bad file extensions for OneDrive
 

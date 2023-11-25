@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # mv_date.sh - Rename input file to include modification date.
 #

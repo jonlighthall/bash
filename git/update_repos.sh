@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # update_repos.sh - push and pull a specified list of git repositories and print summaries
 #

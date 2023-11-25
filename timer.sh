@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 
 start_time=$(date +%s%N)
 # set tab

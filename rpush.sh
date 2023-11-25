@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # set paths
 source rpath.sh
 SOURCE=${LOCAL%/}

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # untar.sh - untar archvies - why isn't this an intrinsic?
 #

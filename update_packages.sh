@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 #
 # update_packages.sh - update, upgrade, and clean installed packages
 #

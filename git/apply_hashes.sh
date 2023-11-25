@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 unset n
 while read -r line; do
     echo "$line"
