@@ -112,40 +112,43 @@ N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
 echo "${N_local}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    echo -e "${yellow}repsoitories have diverged{NORMAL}"
+    echo -e "${fTAB}${yellow}local '${branch_local}' and remote '${remote_tracking_branch}' have diverged${NORMAL}"
 fi
 
 echo "comparing repositories based on commit time..."
 # determine latest common local commit, based on commit time
 iHEAD=${branch_pull}
-
 if [ ${N_remote} -gt 0 ]; then
     # print local and remote times
-    echo " local time is $(git log ${branch_local} --format="%ad" -1)"
-    echo "remote time is $(git log ${remote_tracking_branch} --format="%ad" -1)"
+    echo "${fTAB} local time is $(git log ${branch_local} --format="%ad" -1)"
+    echo "${fTAB}remote time is $(git log ${remote_tracking_branch} --format="%ad" -1)"
 
     # get local commit time
     T_local=$(git log ${branch_local} --format="%at" -1)
 
-    echo "remote commits not found locally:"
-    git rev-list ${remote_tracking_branch} --after=${T_local} | sed "s/^/${fTAB}/"
+    echo -n "remote commits commited after local HEAD:"
+    N_after=$(git rev-list ${remote_tracking_branch} --after=${T_local} | wc -l)
+    if [ $N_after -eq 0 ]; then
+	echo " none"
+    else
+	echo
+	git rev-list ${remote_tracking_branch} --after=${T_local} | sed "s/^/${fTAB}/"
+	echo -e "number of commits:\n${fTAB}${N_after}"
 
-    echo -ne "number of commits:\n${fTAB}"
-    git rev-list ${remote_tracking_branch} --after=${T_local} | wc -l
-
-    echo "list of commits: "
-    git log ${remote_tracking_branch} --after=${T_local}
-
-    echo -ne "start by checking commit:\n${fTAB}"
-    git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1
-
-    iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1)
+	echo "list of commits: "
+	git log ${remote_tracking_branch} --after=${T_local}
+	
+	echo -ne "start by checking commit:\n${fTAB}"
+	git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1
+	
+	iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1)	
+    fi
 fi
 
 hash_local=''
 while [ -z ${hash_local} ]; do
     echo "${TAB}checking ${iHEAD}..."
-    hash_remote=$(git log ${iHEAD} --format=%H  -n 1)
+    hash_remote=$(git rev-parse ${iHEAD})
     subj_remote=$(git log ${iHEAD} --format=%s  -n 1)
     time_remote=$(git log ${iHEAD} --format=%at -n 1)
     TAB+=${fTAB:='   '}
@@ -200,7 +203,7 @@ echo -n "${TAB}corresponding remote commit hash: "
 echo $hash_remote
 TAB+=${fTAB:='   '}
 echo -n "${TAB}common commit has... "
-if [ $hash_local == $hash_remote ]; then
+if [ "$hash_local" == "$hash_remote" ]; then
     echo "the same hash"
     echo -n "${TAB}merge base: .................. "
     git merge-base ${branch_local} ${branch_pull}
@@ -215,6 +218,8 @@ else
     echo "a different hash (diverged)"
     echo " local: $hash_local"
     echo "remote: $hash_remote"
+    git log $hash_local -1
+    git log $hash_remote -1	
 fi
 
 # determine remote commits not found locally
@@ -268,7 +273,7 @@ fi
 # copy leading commits to new branch
 cbar "${BOLD}copying local commits to new branch...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    echo -e "${yellow}repsoitories have diverged{NORMAL}"
+    echo -e "${fTAB}${yellow}local '${branch_local}' and remote '${remote_tracking_branch}' have diverged${NORMAL}"
     branch_temp=${branch_local}.temp
     echo "generating temporary branch..."
     i=0
@@ -284,8 +289,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
         echo "${TAB}${fTAB}resetting exit on error"
         set -eE
     fi
-    git checkout -b ${branch_temp}
-    git checkout ${branch_local}
+    git branch ${branch_temp}
 else
     echo -e "${TAB}${fTAB}no local commits to copy"
 fi
@@ -300,7 +304,7 @@ fi
 cbar "${BOLD}pulling remote changes...${NORMAL}"
 if [ $N_remote -gt 0 ]; then
     echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
-    git pull
+    git pull --ff-only
 else
     echo -e "${TAB}${fTAB}no need to pull"
 fi
@@ -308,7 +312,7 @@ fi
 # push local commits
 cbar "${BOLD}merging local changes...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    echo -e "${yellow}repsoitories have diverged{NORMAL}"
+    echo -e "${fTAB}${yellow}local '${branch_local}' and remote '${remote_tracking_branch}' have diverged${NORMAL}"
     N_temp=$(git rev-list ${branch_temp}..${branch_local} | wc -l)
     echo -e "${TAB}${yellow}  temp branch is ${N_temp} commits ahead of ${branch_local}${NORMAL}"
     echo "${TAB}rebase..."
