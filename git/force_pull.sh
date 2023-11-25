@@ -246,8 +246,8 @@ fi
 
 # pull remote commits
 cbar "${BOLD}pulling remote changes...${NORMAL}"
-echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
 if [ $N_remote -gt 0 ]; then
+    echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
     git pull
     echo "done pulling"
 else
