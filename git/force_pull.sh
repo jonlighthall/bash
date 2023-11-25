@@ -332,7 +332,7 @@ else
 fi
 cbar "${BOLD}pushing local changes...${NORMAL}"
 if [ $N_local -gt 0 ]; then
-    echo -e "${TAB}${yellow} local branch is $N_local commits ahead of remote${NORMAL}"
+    echo -e "${TAB}${fTAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
     git push
 else
     echo -e "${TAB}${fTAB}no need to push"
