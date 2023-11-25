@@ -95,6 +95,7 @@ git fetch ${remote_name}
 
 # determine latest common local commit, based on commit time
 iHEAD=${branch_pull}
+hash_local=''
 while [ -z ${hash_local} ]; do
     echo "${TAB}checking ${iHEAD}..."
     subj_remote=$(git log ${iHEAD} --format=%s -n 1)
@@ -269,8 +270,8 @@ else
     echo -e "${TAB}${fTAB}no need to merge"
 fi
 cbar "${BOLD}pushing local changes...${NORMAL}"
-echo -e "${TAB}${yellow} local branch is $N_local commits ahead of remote${NORMAL}"
 if [ $N_local -gt 0 ]; then
+    echo -e "${TAB}${yellow} local branch is $N_local commits ahead of remote${NORMAL}"
     git push
     echo "done pushing"
 else
