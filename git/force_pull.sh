@@ -48,13 +48,13 @@ if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "${TAB}no remote tracking branch set for current branch"
 else
     remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
+    echo -e "${TAB}remote tracking branch: ${blue}${remote_tracking_branch}${NORMAL}"
     remote_name=${remote_tracking_branch%%/*}
-    echo "${TAB}remote name is $remote_name"
+    echo "${TAB}remote name: .......... $remote_name"
     remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
-    echo "${TAB}remote url is ${remote_url}"
+    echo "${TAB}remote url: ${remote_url}"
     remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-    echo "protocol ${remote_pro}"
+    echo "protocol:   ${remote_pro}"
     n_remotes=$(git remote | wc -l)
     if [ "${n_remotes}" -gt 1 ]; then
         echo "${n_remotes} remotes found"
@@ -62,10 +62,10 @@ else
 
     # parse branches
     branch_remote=${remote_tracking_branch#*/}
-    echo "${TAB}remote branch is $branch_remote"
+    echo "${TAB}remote branch: $branch_remote"
 fi
 branch_local=$(git branch | grep \* | sed 's/^\* //')
-echo -e "${TAB} local branch is ${green}${branch_local}${NORMAL}"
+echo -e "${TAB} local branch: ${green}${branch_local}${NORMAL}"
 
 # parse arguments
 cbar "${BOLD}parse arguments...${NORMAL}"
@@ -127,24 +127,30 @@ if [ ${N_remote} -gt 0 ]; then
     # get local commit time
     T_local=$(git log ${branch_local} --format="%at" -1)
 
-    #git rev-list ${remote_tracking_branch} --after=${T_local} | wc -l
+    echo "remote commits not found locally:"
+    git rev-list ${remote_tracking_branch} --after=${T_local}
 
-    #git rev-list ${remote_tracking_branch} --after=${T_local}
+    echo "number of commits:"
+    git rev-list ${remote_tracking_branch} --after=${T_local} | wc -l
 
-    #git log ${remote_tracking_branch} --after=${T_local}
+    echo "start by checking commit: "
+    git log ${remote_tracking_branch} --after=${T_local}
 
     # get time just after local commit
     T_ref=$((T_local + 1))
 
-    #git rev-list ${remote_tracking_branch} --after=${T_ref} | wc -l
+    echo "remote commits not found locally:"
+    git rev-list ${remote_tracking_branch} --after=${T_ref}
 
-    #git rev-list ${remote_tracking_branch} --after=${T_ref}
+    echo "number of commits:"
+    git rev-list ${remote_tracking_branch} --after=${T_ref} | wc -l
 
-    #git log ${remote_tracking_branch} --after=${T_ref}
+    echo "start by checking commit: "
+    git log ${remote_tracking_branch} --after=${T_ref}
 
     iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_ref} | tail -1)   
 
-    #echo $iHEAD
+    echo $iHEAD
 fi
 
 hash_local=''
@@ -154,7 +160,7 @@ while [ -z ${hash_local} ]; do
     time_remote=$(git log ${iHEAD} --format=%at -n 1)
     TAB+=${fTAB:='   '}
     echo "${TAB}remote commit subject: $subj_remote"
-    echo "${TAB}remote commit time: $time_remote or $(date -d @${time_remote} +"%a %b %-d %Y at %-l:%M %p %Z")"
+    echo "${TAB}remote commit time: .. $time_remote or $(date -d @${time_remote} +"%a %b %-d %Y at %-l:%M %p %Z")"
 
     hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
     hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
@@ -205,7 +211,7 @@ TAB+=${fTAB:='   '}
 echo -n "${TAB}common commit has... "
 if [ $hash_local == $hash_remote ]; then
     echo "the same hash"
-    echo -n "${TAB}merge base: "
+    echo -n "${TAB}merge base: .................. "
     git merge-base ${branch_local} ${branch_pull}
     hash_merge=$(git merge-base ${branch_local} ${branch_pull})
     echo -n "${TAB}common hash is... "
