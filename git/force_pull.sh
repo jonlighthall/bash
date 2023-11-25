@@ -100,8 +100,22 @@ fi
 
 # before starting, fetch remote
 echo "${TAB}fetching ${remote_name}..."
-git fetch ${remote_name}
+git fetch --verbose ${remote_name} ${branch_remote}
 
+echo "comparing repositories based on commit hash..."
+echo -n "${fTAB}leading remote commits: "
+N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
+echo "${N_remote}"
+
+echo -n "${fTAB}trailing local commits: "
+N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
+echo "${N_local}"
+
+if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
+    echo -e "${yellow}repsoitories have diverged{NORMAL}"
+fi
+
+echo "comparing repositories based on commit time..."
 # determine latest common local commit, based on commit time
 iHEAD=${branch_pull}
 hash_local=''
@@ -124,7 +138,7 @@ while [ -z ${hash_local} ]; do
         echo "${TAB}subj = $hash_local_s"
         echo "${TAB}time = $hash_local"
     fi
-    echo -n "${TAB}corresponding local commit hash: "
+    echo -n "${TAB}corresponding local commit hash:  "
     if [ ! -z ${hash_local} ]; then
         TAB+=${fTAB:='   '}
         echo "$hash_local"
@@ -173,6 +187,8 @@ if [ $hash_local == $hash_remote ]; then
     fi
 else
     echo "a different hash (diverged)"
+    echo " local: $hash_local"
+    echo "remote: $hash_remote"
 fi
 
 # determine remote commits not found locally
@@ -226,6 +242,7 @@ fi
 # copy leading commits to new branch
 cbar "${BOLD}copying local commits to new branch...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
+    echo -e "${yellow}repsoitories have diverged{NORMAL}"
     branch_temp=${branch_local}.temp
     echo "generating temporary branch..."
     i=0
@@ -266,8 +283,9 @@ fi
 # push local commits
 cbar "${BOLD}merging local changes...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
+    echo -e "${yellow}repsoitories have diverged{NORMAL}"
     N_temp=$(git rev-list ${branch_temp}..${branch_local} | wc -l)
-    echo -e "${TAB}${yellow}  temp branch is $N_temp commits ahead of ${branch_local}${NORMAL}"
+    echo -e "${TAB}${yellow}  temp branch is ${N_temp} commits ahead of ${branch_local}${NORMAL}"
     echo "${TAB}rebase..."
     git checkout ${branch_temp}
     git rebase ${branch_local}
