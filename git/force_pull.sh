@@ -185,13 +185,13 @@ while [ -z ${hash_local} ]; do
             git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
             N_local=$(git rev-list $hash_local..HEAD | wc -l)
             if [ $N_local -gt 1 ]; then
-                echo -n "${TAB}or ${hash_start}^.."
+                echo -ne "${TAB}\033[3Dor ${hash_start}^.."
                 hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
                 echo ${hash_end}
             else
                 hash_end=$hash_start
             fi
-            echo -e "${TAB}${yellow} local branch is $N_local commits ahead of remote${NORMAL}"
+            echo -e "${TAB}${fTAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
         else
             echo -e "${green}none${NORMAL}"
             N_local=0
