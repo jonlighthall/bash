@@ -339,8 +339,11 @@ else
     echo -e "${TAB}${fTAB}no need to merge"
 fi
 cbar "${BOLD}pushing local changes...${NORMAL}"
+N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
+    echo "list of commits: "
+    git log ${remote_tracking_branch}..HEAD
     git push
 else
     echo -e "${TAB}${fTAB}no need to push"
