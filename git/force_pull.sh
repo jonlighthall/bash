@@ -110,7 +110,7 @@ while [ -z ${hash_local} ]; do
     time_remote=$(git log ${iHEAD} --format=%at -n 1)
     TAB+=${fTAB:='   '}
     echo "${TAB}remote commit subject: $subj_remote"
-    echo "${TAB}remote commit time: $time_remote"
+    echo "${TAB}remote commit time: $time_remote or $(date -d @${time_remote} +"%a %b %-d %Y at %-l:%M %p %Z")"
 
     hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
     hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
