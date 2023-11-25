@@ -51,7 +51,7 @@ TAB=${TAB#$fTAB}
 # print time at exit
 echo -en "${TAB}$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
 if command -v sec2elap &>/dev/null; then
-    sec2elap ${SECONDS}
+    bash sec2elap ${SECONDS}
 else
     echo "elapsed time is ${white}${SECONDS} sec${NORMAL}"
 fi
