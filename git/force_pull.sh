@@ -156,7 +156,8 @@ if [ ${N_remote} -gt 0 ]; then
 	echo -ne "start by checking commit:\n${fTAB}"
 	git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1
 	
-	iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1)	
+	iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1)
+	cbar "${BOLD}looping through remote commits...${NORMAL}"
     fi
 fi
 hash_local=''
@@ -287,7 +288,6 @@ fi
 # copy leading commits to new branch
 cbar "${BOLD}copying local commits to new branch...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    echo -e "${fTAB}${yellow}local '${branch_local}' and remote '${remote_tracking_branch}' have diverged${NORMAL}"
     branch_temp=${branch_local}.temp
     echo "generating temporary branch..."
     i=0
@@ -317,7 +317,7 @@ fi
 # pull remote commits
 cbar "${BOLD}pulling remote changes...${NORMAL}"
 if [ $N_remote -gt 0 ]; then
-    echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
+    echo -e "${TAB}${fTAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
     git pull --ff-only
 else
     echo -e "${TAB}${fTAB}no need to pull"
@@ -326,9 +326,8 @@ fi
 # push local commits
 cbar "${BOLD}merging local changes...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    echo -e "${fTAB}${yellow}local '${branch_local}' and remote '${remote_tracking_branch}' have diverged${NORMAL}"
     N_temp=$(git rev-list ${branch_temp}..${branch_local} | wc -l)
-    echo -e "${TAB}${yellow}  temp branch is ${N_temp} commits ahead of ${branch_local}${NORMAL}"
+    echo -e "${TAB}${fTAB}${yellow}branch '${branch_temp}' is ${N_temp} commits ahead of '${branch_local}'${NORMAL}"
     echo "${TAB}rebase..."
     git checkout ${branch_temp}
     git rebase ${branch_local}
