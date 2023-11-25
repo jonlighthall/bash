@@ -115,6 +115,10 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     echo -e "${fTAB}${yellow}local '${branch_local}' and remote '${remote_tracking_branch}' have diverged${NORMAL}"
 fi
 
+if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then
+    hash_local=$(git rev-parse HEAD)
+    hash_remote=$(git rev-parse ${branch_pull})
+else
 echo "comparing repositories based on commit time..."
 # determine latest common local commit, based on commit time
 iHEAD=${branch_pull}
@@ -144,8 +148,8 @@ if [ ${N_remote} -gt 0 ]; then
 	iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1)	
     fi
 fi
-
 hash_local=''
+fi
 while [ -z ${hash_local} ]; do
     echo "${TAB}checking ${iHEAD}..."
     hash_remote=$(git rev-parse ${iHEAD})
@@ -198,7 +202,6 @@ while [ -z ${hash_local} ]; do
 done
 
 # compare local commit to remote commit
-hash_remote=$(git log ${branch_pull} | grep -B4 "${subj_remote}" | head -n 1 | awk '{print $2}')
 echo -n "${TAB}corresponding remote commit hash: "
 echo $hash_remote
 TAB+=${fTAB:='   '}
@@ -238,7 +241,7 @@ if [ ! -z ${hash_start_remote} ]; then
     fi
     echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
 else
-    echo -e "${green}none${NORMAL}"
+    echo -e "none"
     N_remote=0
 fi
 TAB=${TAB%$fTAB}
