@@ -76,6 +76,7 @@ date
 # Print path information
 #
 echo
+echo "   home:" $HOME
 echo "    pwd:" $PWD
 # print full path for SSH, etc.
 echo -n "   path: $UNAME@"
