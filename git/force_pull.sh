@@ -229,7 +229,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     echo "${TAB}${fTAB}found unused branch name ${branch_temp}"
     if (! return 0 2>/dev/null); then
         echo "${TAB}${fTAB}resetting exit on error"
-        set -e
+        set -eE
     fi
     git checkout -b ${branch_temp}
     git checkout ${branch_local}

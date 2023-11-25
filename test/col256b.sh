@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 case $TERM in
     xterm*)
         TERM=xterm-256color
