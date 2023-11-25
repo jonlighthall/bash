@@ -1,7 +1,15 @@
 #!/bin/bash -u
 #
-# git/force_pull.sh - the remote name and branch can be optionally specified by the first and
-# second arguments, respectively. The default remote tracking branch is origin/master.
+# git/force_pull.sh - this script was developed to synchronize the local repository with the
+# remote repository after a force push; hence the name. It assumes that---in the case of a force
+# push---that the two repsoitories have common commit times, if not common hashes; this would be
+# the case the history has been rewritten to update author names, for example. It is also useful
+# for synchonizing diverged repsoitories without explicitly merging.
+#
+# METHOD - 
+#
+# USAGE - the remote name and branch can be optionally specified by the first and second
+# arguments, respectively. The default remote branch is the current tracking branch.
 #
 # Apr 2023 JCL
 
