@@ -4,7 +4,7 @@ for n in {1..8}
 do
     echo $n
     echo $((10**n))
-    sec2elap $((10**$n))
+    bash sec2elap $((10**$n))
 done
 # print time at exit
 echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
