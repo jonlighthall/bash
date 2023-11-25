@@ -258,7 +258,7 @@ cbar "${BOLD}merging local changes...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     N_temp=$(git rev-list ${branch_temp}..${branch_local} | wc -l)
     echo -e "${TAB}${yellow}  temp branch is $N_temp commits ahead of ${branch_local}${NORMAL}"
-    echo "${TAB}rebase and merge..."
+    echo "${TAB}rebase..."
     git checkout ${branch_temp}
     git rebase ${branch_local}
     git checkout ${branch_local}
