@@ -128,35 +128,25 @@ if [ ${N_remote} -gt 0 ]; then
     T_local=$(git log ${branch_local} --format="%at" -1)
 
     echo "remote commits not found locally:"
-    git rev-list ${remote_tracking_branch} --after=${T_local}
+    git rev-list ${remote_tracking_branch} --after=${T_local} | sed "s/^/${fTAB}/"
 
-    echo "number of commits:"
+    echo -ne "number of commits:\n${fTAB}"
     git rev-list ${remote_tracking_branch} --after=${T_local} | wc -l
 
-    echo "start by checking commit: "
+    echo "list of commits: "
     git log ${remote_tracking_branch} --after=${T_local}
 
-    # get time just after local commit
-    T_ref=$((T_local + 1))
+    echo -ne "start by checking commit:\n${fTAB}"
+    git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1
 
-    echo "remote commits not found locally:"
-    git rev-list ${remote_tracking_branch} --after=${T_ref}
-
-    echo "number of commits:"
-    git rev-list ${remote_tracking_branch} --after=${T_ref} | wc -l
-
-    echo "start by checking commit: "
-    git log ${remote_tracking_branch} --after=${T_ref}
-
-    iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_ref} | tail -1)   
-
-    echo $iHEAD
+    iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1)
 fi
 
 hash_local=''
 while [ -z ${hash_local} ]; do
     echo "${TAB}checking ${iHEAD}..."
-    subj_remote=$(git log ${iHEAD} --format=%s -n 1)
+    hash_remote=$(git log ${iHEAD} --format=%H  -n 1)
+    subj_remote=$(git log ${iHEAD} --format=%s  -n 1)
     time_remote=$(git log ${iHEAD} --format=%at -n 1)
     TAB+=${fTAB:='   '}
     echo "${TAB}remote commit subject: $subj_remote"
@@ -165,7 +155,7 @@ while [ -z ${hash_local} ]; do
     hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
     hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
 
-    echo -n "${TAB}subject and time hashes..."
+    echo -n "${TAB}subject and time hashes... "
     if [ "$hash_local" == "$hash_local_s" ]; then
         echo "match"
     else
@@ -173,6 +163,7 @@ while [ -z ${hash_local} ]; do
         echo "${TAB}subj = $hash_local_s"
         echo "${TAB}time = $hash_local"
     fi
+    echo "${TAB}remote commit hash: ............. ${hash_remote}"
     echo -n "${TAB}corresponding local commit hash:  "
     if [ ! -z ${hash_local} ]; then
         TAB+=${fTAB:='   '}
@@ -234,7 +225,7 @@ if [ ! -z ${hash_start_remote} ]; then
     git rev-list $hash_remote..${branch_pull} | sed "s/^/${TAB}/"
     N_remote=$(git rev-list $hash_remote..${branch_pull} | wc -l)
     if [ $N_remote -gt 1 ]; then
-        echo -n "${TAB}or ${hash_start_remote}^.."
+        echo -ne "${TAB}\033[3Dor ${hash_start_remote}^.."
         hash_end_remote=$(git rev-list $hash_remote..${branch_pull} | head -n 1)
         echo ${hash_end_remote}
     else
@@ -344,7 +335,10 @@ N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo "there are $N_stash entries in stash"
     if $b_stash; then
+	set +e
         git stash pop
+	echo "${TAB}${fTAB}resetting exit on error"
+        set -eE
         echo -ne "stash made... "
         if [ -z "$(git diff)" ]; then
             echo "${green}no changes${NORMAL}"
