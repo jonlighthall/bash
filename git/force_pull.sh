@@ -310,7 +310,6 @@ cbar "${BOLD}pulling remote changes...${NORMAL}"
 if [ $N_remote -gt 0 ]; then
     echo -e "${TAB}${yellow}remote branch is $N_remote commits ahead of local${NORMAL}"
     git pull
-    echo "done pulling"
 else
     echo -e "${TAB}${fTAB}no need to pull"
 fi
@@ -335,7 +334,6 @@ cbar "${BOLD}pushing local changes...${NORMAL}"
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${yellow} local branch is $N_local commits ahead of remote${NORMAL}"
     git push
-    echo "done pushing"
 else
     echo -e "${TAB}${fTAB}no need to push"
 fi
@@ -357,7 +355,6 @@ if [ $N_stash -gt 0 ]; then
     else
         echo "${fTAB}...but none are from this operation"
     fi
-    echo "done un-stashing"
 else
     echo -e "${green}no stash entries${NORMAL}"
 fi
