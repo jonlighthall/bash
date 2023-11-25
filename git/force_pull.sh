@@ -355,17 +355,16 @@ if [ $N_stash -gt 0 ]; then
             git reset HEAD
         fi
     else
-        echo "${TAB}... but none are from this operation"
+        echo "${fTAB}...but none are from this operation"
     fi
     echo "done un-stashing"
 else
     echo -e "${green}no stash entries${NORMAL}"
 fi
-echo
 cbar "${BOLD}you're done!${NORMAL}"
 
 # print time at exit
-echo -en "\n${BASH_SOURCE##*/} "
+echo -en "${BASH_SOURCE##*/} "
 end_time=$(date +%s%N)
 elap_time=$((${end_time} - ${start_time}))
 dT_sec=$(bc <<<"scale=3;$elap_time/1000000000")
