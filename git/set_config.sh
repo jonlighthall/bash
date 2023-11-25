@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "setting Git user..."
 git config --global user.name "Jon Lighthall"
