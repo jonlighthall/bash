@@ -34,7 +34,18 @@ else
     # exit on errors
     set -eE
     trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
-    trap 'echo -e "${yellow}EXIT${NORMAL}: exiting ${BASH_SOURCE##*/}..."' EXIT
+    # print time at exit
+    trap 'echo -en "${yellow}EXIT${NORMAL}: ${BASH_SOURCE##*/} "
+          end_time=$(date +%s%N);
+          elap_time=$((${end_time} - ${start_time}));
+          dT_sec=$(bc <<<"scale=3;$elap_time/1000000000");
+          if command -v sec2elap &>/dev/null; then
+              bash sec2elap $dT_sec | tr -d "\n"
+          else
+              echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
+          fi
+          echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"          
+	  ' EXIT
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -360,15 +371,3 @@ else
     echo "${fTAB}no stash entries"
 fi
 cbar "${BOLD}you're done!${NORMAL}"
-
-# print time at exit
-echo -en "${BASH_SOURCE##*/} "
-end_time=$(date +%s%N)
-elap_time=$((${end_time} - ${start_time}))
-dT_sec=$(bc <<<"scale=3;$elap_time/1000000000")
-if command -v sec2elap &>/dev/null; then
-    bash sec2elap $dT_sec | tr -d '\n'
-else
-    echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
-fi
-echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"
