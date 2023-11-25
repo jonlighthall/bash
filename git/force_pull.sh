@@ -118,6 +118,35 @@ fi
 echo "comparing repositories based on commit time..."
 # determine latest common local commit, based on commit time
 iHEAD=${branch_pull}
+
+if [ ${N_remote} -gt 0 ]; then
+    # print local and remote times
+    echo " local time is $(git log ${branch_local} --format="%ad" -1)"
+    echo "remote time is $(git log ${remote_tracking_branch} --format="%ad" -1)"
+
+    # get local commit time
+    T_local=$(git log ${branch_local} --format="%at" -1)
+
+    #git rev-list ${remote_tracking_branch} --after=${T_local} | wc -l
+
+    #git rev-list ${remote_tracking_branch} --after=${T_local}
+
+    #git log ${remote_tracking_branch} --after=${T_local}
+
+    # get time just after local commit
+    T_ref=$((T_local + 1))
+
+    #git rev-list ${remote_tracking_branch} --after=${T_ref} | wc -l
+
+    #git rev-list ${remote_tracking_branch} --after=${T_ref}
+
+    #git log ${remote_tracking_branch} --after=${T_ref}
+
+    iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_ref} | tail -1)   
+
+    #echo $iHEAD
+fi
+
 hash_local=''
 while [ -z ${hash_local} ]; do
     echo "${TAB}checking ${iHEAD}..."
