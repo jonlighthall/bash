@@ -39,6 +39,7 @@ fi
 #
 # Print user information
 #
+echo
 echo -n "   user: "
 if [ -z $USER ]; then
     if [ -z $USERNAME ]; then
@@ -56,10 +57,9 @@ echo " groups:" $(id -nG 2>/dev/null)
 #
 # Print shell information
 #
+echo
 echo "  shell: $SHELL"
 echo "    PID: $PPID"
-echo -n "   date: "
-date
 echo -n "   time: shell "
 if (ps -o etimes) &>/dev/null; then
     if command -v sec2elap &>/dev/null; then
@@ -70,9 +70,12 @@ if (ps -o etimes) &>/dev/null; then
 else
     echo $(ps -p $PPID -o etime)
 fi
+echo -n "   date: "
+date
 #
 # Print path information
 #
+echo
 echo "    pwd:" $PWD
 # print full path for SSH, etc.
 echo -n "   path: $UNAME@"
