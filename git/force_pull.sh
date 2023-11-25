@@ -34,6 +34,7 @@ else
     # exit on errors
     set -eE
     trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
+    trap 'echo -e "${yellow}EXIT${NORMAL}: exiting ${BASH_SOURCE##*/}..."' EXIT
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
