@@ -355,7 +355,7 @@ N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo "there are $N_stash entries in stash"
     if $b_stash; then
-	set +e
+	set +eE
         git stash pop
 	echo "${TAB}${fTAB}resetting exit on error"
         set -eE
