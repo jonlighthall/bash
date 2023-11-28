@@ -33,6 +33,11 @@ src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 	echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
+src_dir=${src_name%/*}
+echo -e "${TAB}${gray}path =  $src_dir${NORMAL}"
+
+src_dir=${BASH_SOURCE%/*}
+echo -e "${TAB}${gray}path = $src_dir${NORMAL}"
 
 if ! (return 0 2>/dev/null); then
 	echo "NB: ${BASH_SOURCE##*/} has not been sourced"
@@ -246,11 +251,29 @@ for repo in $list; do
 					echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
 					if [[ $RETVAL != 0 ]]; then
 						echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+						# increase time
 						if [[ $RETVAL == 137 ]]; then
 							nsec=$((nsec * 2))
 							echo "${TAB}increasing timeout to ${nsec}"
 							to="timeout -s 9 ${nsec}s "
 							cmd="${to}${cmd_base}"
+						fi
+						# force pull
+						if [[ $RETVAL == 128 ]]; then
+							cbar "${TAB}${GRH}should I force pull!? ${NORMAL}"
+							echo -e "${TAB}source directory = $src_dir"
+							prog=${src_dir}/force_pull
+							if [ -f ${prog} ]; then
+								bash ${prog}
+								RETVAL2=$?
+								echo -en "${TAB}${GRH}force_pull${NORMAL}: "
+								if [[ $RETVAL != 0 ]]; then
+									echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL3${NORMAL}"
+									exit || return
+								else
+									echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL2${NORMAL}"
+								fi
+							fi
 						fi
 					else
 						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
