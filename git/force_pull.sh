@@ -7,6 +7,15 @@
 # for synchonizing diverged repsoitories without explicitly merging.
 #
 # METHOD -
+#   stash local changes
+#   copy local commits to temporary branch
+#   reset local branch to common commit with remote
+#   fast-forward local branch to match remote (pull)
+#   rebase temporary branch
+#   fast-forward local branch to rebased temporary branch (merge)
+#   sync local changes with remote (push)
+#   apply stash
+#   reset HEAD
 #
 # USAGE - the remote name and branch can be optionally specified by the first and second
 # arguments, respectively. The default remote branch is the current tracking branch.
@@ -323,7 +332,7 @@ else
     echo -e "${TAB}${fTAB}no need to pull"
 fi
 
-# push local commits
+# rebase and merge oustanding local commits
 cbar "${BOLD}merging local changes...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     N_temp=$(git rev-list ${branch_temp}..${branch_local} | wc -l)
@@ -338,6 +347,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
 else
     echo -e "${TAB}${fTAB}no need to merge"
 fi
+# push local commits
 cbar "${BOLD}pushing local changes...${NORMAL}"
 N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
