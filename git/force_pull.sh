@@ -6,7 +6,7 @@
 # the case the history has been rewritten to update author names, for example. It is also useful
 # for synchonizing diverged repsoitories without explicitly merging.
 #
-# METHOD - 
+# METHOD -
 #
 # USAGE - the remote name and branch can be optionally specified by the first and second
 # arguments, respectively. The default remote branch is the current tracking branch.
@@ -130,42 +130,42 @@ if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then
     hash_local=$(git rev-parse HEAD)
     hash_remote=$(git rev-parse ${branch_pull})
 else
-echo "comparing repositories based on commit time..."
-# determine latest common local commit, based on commit time
-iHEAD=${branch_pull}
-if [ ${N_remote} -gt 0 ]; then
-    # print local and remote times
-    echo "${fTAB} local time is $(git log ${branch_local} --format="%ad" -1)"
-    echo "${fTAB}remote time is $(git log ${remote_tracking_branch} --format="%ad" -1)"
+    echo "comparing repositories based on commit time..."
+    # determine latest common local commit, based on commit time
+    iHEAD=${branch_pull}
+    if [ ${N_remote} -gt 0 ]; then
+        # print local and remote times
+        echo "${fTAB} local time is $(git log ${branch_local} --format="%ad" -1)"
+        echo "${fTAB}remote time is $(git log ${remote_tracking_branch} --format="%ad" -1)"
 
-    # get local commit time
-    T_local=$(git log ${branch_local} --format="%at" -1)
+        # get local commit time
+        T_local=$(git log ${branch_local} --format="%at" -1)
 
-    echo -n "remote commits commited after local HEAD:"
-    N_after=$(git rev-list ${remote_tracking_branch} --after=${T_local} | wc -l)
-    if [ $N_after -eq 0 ]; then
-	echo " none"
-    else
-	echo
-	git rev-list ${remote_tracking_branch} --after=${T_local} | sed "s/^/${fTAB}/"
-	echo -e "number of commits:\n${fTAB}${N_after}"
+        echo -n "remote commits commited after local HEAD:"
+        N_after=$(git rev-list ${remote_tracking_branch} --after=${T_local} | wc -l)
+        if [ $N_after -eq 0 ]; then
+            echo " none"
+        else
+            echo
+            git rev-list ${remote_tracking_branch} --after=${T_local} | sed "s/^/${fTAB}/"
+            echo -e "number of commits:\n${fTAB}${N_after}"
 
-	echo "list of commits: "
-	git log ${remote_tracking_branch} --after=${T_local}
-	
-	echo -ne "start by checking commit:\n${fTAB}"
-	git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1
-	
-	iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1)
-	cbar "${BOLD}looping through remote commits...${NORMAL}"
+            echo "list of commits: "
+            git log ${remote_tracking_branch} --after=${T_local} --no-pager
+
+            echo -ne "start by checking commit:\n${fTAB}"
+            git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1
+
+            iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1)
+            cbar "${BOLD}looping through remote commits...${NORMAL}"
+        fi
     fi
-fi
-hash_local=''
+    hash_local=''
 fi
 while [ -z ${hash_local} ]; do
     echo "${TAB}checking ${iHEAD}..."
     hash_remote=$(git rev-parse ${iHEAD})
-    subj_remote=$(git log ${iHEAD} --format=%s  -n 1)
+    subj_remote=$(git log ${iHEAD} --format=%s -n 1)
     time_remote=$(git log ${iHEAD} --format=%at -n 1)
     TAB+=${fTAB:='   '}
     echo "${TAB}remote commit subject: $subj_remote"
@@ -234,7 +234,7 @@ else
     echo " local: $hash_local"
     echo "remote: $hash_remote"
     git log $hash_local -1
-    git log $hash_remote -1	
+    git log $hash_remote -1
 fi
 
 # determine remote commits not found locally
@@ -343,7 +343,7 @@ N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
     echo "list of commits: "
-    git log ${remote_tracking_branch}..HEAD
+    git log ${remote_tracking_branch}..HEAD --no-pager
     git push
 else
     echo -e "${TAB}${fTAB}no need to push"
@@ -357,7 +357,7 @@ if [ $N_stash -gt 0 ]; then
     if $b_stash; then
 	set +eE
         git stash pop
-	echo "${TAB}${fTAB}resetting exit on error"
+        echo "${TAB}${fTAB}resetting exit on error"
         set -eE
         echo -ne "stash made... "
         if [ -z "$(git diff)" ]; then
