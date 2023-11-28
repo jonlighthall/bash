@@ -160,7 +160,7 @@ else
             echo -e "number of commits:\n${fTAB}${N_after}"
 
             echo "list of commits: "
-            git log ${remote_tracking_branch} --after=${T_local} --no-pager
+            git --no-pager log ${remote_tracking_branch} --after=${T_local}
 
             echo -ne "start by checking commit:\n${fTAB}"
             git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1
@@ -353,7 +353,7 @@ N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
     echo "list of commits: "
-    git log ${remote_tracking_branch}..HEAD --no-pager
+    git --no-pager log ${remote_tracking_branch}..HEAD
     git push
 else
     echo -e "${TAB}${fTAB}no need to push"
