@@ -7,15 +7,15 @@
 # for synchonizing diverged repsoitories without explicitly merging.
 #
 # METHOD -
-#   stash local changes
-#   copy local commits to temporary branch
-#   reset local branch to common commit with remote
-#   fast-forward local branch to match remote (pull)
-#   rebase temporary branch
-#   fast-forward local branch to rebased temporary branch (merge)
-#   sync local changes with remote (push)
-#   apply stash
-#   reset HEAD
+#   STASH  save uncommited local changes
+#   BRANCH copy local commits to temporary branch
+#   RESET  reset local branch to common remote commit
+#   PULL   fast-forward local branch to remote HEAD
+#   REBASE rebase temporary branch
+#   MERGE  fast-forward local branch to rebased temporary branch
+#   PUSH   sync local changes with remote
+#   STASH  restore uncommited changes
+#   RESET  unstage uncommited changes
 #
 # USAGE - the remote name and branch can be optionally specified by the first and second
 # arguments, respectively. The default remote branch is the current tracking branch.
