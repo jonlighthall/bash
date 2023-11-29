@@ -319,8 +319,13 @@ fi
 
 # initiate HEAD
 if [ $N_remote -gt 0 ]; then
-    echo "resetting HEAD to $hash_remote..."
-    git reset --hard $hash_remote | sed "s/^/${TAB}/"
+    cbar "${BOLD}reseting HEAD to match remote...${NORMAL}"
+    if [ $N_local -eq 0 ]; then
+	echo "${TAB}${fTAB}no need to reset"
+    else
+	echo "${TAB}${fTAB}resetting HEAD to $hash_remote..."
+	git reset --hard $hash_remote | sed "s/^/${TAB}/"
+    fi    
 fi
 
 # pull remote commits
