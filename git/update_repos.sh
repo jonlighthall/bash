@@ -10,28 +10,28 @@ start_time=$(date +%s%N)
 # set tab
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-    TAB=''
-    : ${fTAB:='   '}
+	TAB=''
+	: ${fTAB:='   '}
 else
-    TAB+=${TAB+${fTAB:='   '}}
+	TAB+=${TAB+${fTAB:='   '}}
 fi
 
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+	source $fpretty
 fi
 
 # print source name at start
 if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
+	RUN_TYPE="sourcing"
 else
-    RUN_TYPE="executing"
+	RUN_TYPE="executing"
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+	echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 src_dir=${src_name%/*}
 echo -e "${TAB}${gray}path =  $src_dir${NORMAL}"
@@ -40,8 +40,8 @@ src_dir=${BASH_SOURCE%/*}
 echo -e "${TAB}${gray}path = $src_dir${NORMAL}"
 
 if ! (return 0 2>/dev/null); then
-    echo "NB: ${BASH_SOURCE##*/} has not been sourced"
-    echo "    user SSH config settings MAY not be loaded??"
+	echo "NB: ${BASH_SOURCE##*/} has not been sourced"
+	echo "    user SSH config settings MAY not be loaded??"
 fi
 
 start_dir=$PWD
@@ -80,29 +80,29 @@ list+="${dir_matlab} \
 # private
 fname_private=${HOME}/${dir_script}bash/git/list_private_dir.txt
 if [ -f ${fname_private} ]; then
-    while IFS= read -r line; do
-	# evaluate each line to expand defined variable names
-	eval line2=$line
-	if [[ $line == $line2 ]]; then
-	    list+=" ${line}"
-	else
-	    list+=" ${line2}"
-	fi
-    done <${fname_private}
+	while IFS= read -r line; do
+		# evaluate each line to expand defined variable names
+		eval line2=$line
+		if [[ $line == $line2 ]]; then
+			list+=" ${line}"
+		else
+			list+=" ${line2}"
+		fi
+	done <${fname_private}
 fi
 
 # project
 fname_project=${HOME}/${dir_script}bash/git/list_project_dir.txt
 if [ -f ${fname_project} ]; then
-    while IFS= read -r line; do
-	# evaluate each line to expand defined variable names
-	eval line2=$line
-	if [[ $line == $line2 ]]; then
-	    list+=" ${line}"
-	else
-	    list+=" ${line2}"
-	fi
-    done <${fname_project}
+	while IFS= read -r line; do
+		# evaluate each line to expand defined variable names
+		eval line2=$line
+		if [[ $line == $line2 ]]; then
+			list+=" ${line}"
+		else
+			list+=" ${line2}"
+		fi
+	done <${fname_project}
 fi
 
 script_ver=$(script --version | sed 's/[^0-9\.]//g')
@@ -113,14 +113,14 @@ script_ver_pat=$(echo $script_ver | awk -F. '{print $3}')
 # check if Git is defined
 echo -n "${TAB}Checking Git... "
 if command -v git &>/dev/null; then
-    echo -e "${GOOD}OK${NORMAL} Git is defined"
+	echo -e "${GOOD}OK${NORMAL} Git is defined"
 else
-    echo -e "${BAD}FAIL${NORMAL} Git not defined"
-    if (return 0 2>/dev/null); then
-	return
-    else
-	exit 1
-    fi
+	echo -e "${BAD}FAIL${NORMAL} Git not defined"
+	if (return 0 2>/dev/null); then
+		return
+	else
+		exit 1
+	fi
 fi
 
 # get Git version
@@ -154,244 +154,244 @@ t_push_max=0
 loop_counter=0
 
 for repo in $list; do
-    hline 70
+	hline 70
 
-    #------------------------------------------------------
-    # find
-    #------------------------------------------------------
-    echo -e "locating ${PSDIR}$repo${NORMAL}... \c"
-    if [ -e ${HOME}/$repo ]; then
-	echo -e "${GOOD}OK${NORMAL}"
-	((n_found++))
-	cd ${HOME}/$repo
-	echo -n "checking repository status... "
-	git rev-parse --is-inside-work-tree &>/dev/null
-	RETVAL=$?
-	if [[ $RETVAL -eq 0 ]]; then
-	    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-	    ((n_git++))
-	    # parse remote
-	    if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
-		echo "${TAB}no remote tracking branch set for current branch"
-		continue
-	    else
-		remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-		remote_name=${remote_tracking_branch%%/*}
-		remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
-		# add remote to list
-		echo "${remote_url}" >>${list_remote}
-	    fi
-
-	    # check against argument
-	    if [ $# -gt 0 ]; then
-		echo -n "matching argument ""$1""... "
-		if [[ $remote_url =~ $1 ]]; then
-		    echo -e "${GOOD}OK${NORMAL}"
-		    ((n_match++))
-		else
-		    echo -e "${gray}SKIP${NORMAL}"
-		    continue
-		fi
-	    fi
-
-	    # add to list
-	    if [ ! -z ${OK_list:+dummy} ]; then
-		OK_list+=$'\n'
-	    fi
-	    OK_list+=${remote_url}
-
-	    # print remote parsing
-	    echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
-	    echo "${TAB}remote name is $remote_name"
-	    echo "  remote ${remote_url}"
-
-	    remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-	    if [[ "${remote_pro}" == "git" ]]; then
-		remote_pro="SSH"
-	    fi
-	    echo "protocol ${remote_pro}"
-
-	    # get number of remotes
-	    n_remotes=$(git remote | wc -l)
-	    if [ "${n_remotes}" -gt 1 ]; then
-		echo "remotes found: ${n_remotes}"
-	    fi
-
-	    # push/pull setting
-	    GIT_HIGHLIGHT='\x1b[100;37m'
-
-	    #------------------------------------------------------
-	    # fetch
-	    #------------------------------------------------------
-	    echo "updating..."
-	    git remote --verbose update
-	    ((n_fetch++))
-
-	    #------------------------------------------------------
-	    # pull
-	    #------------------------------------------------------
-	    echo -n "leading remote commits: "
-	    N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
-	    if [ ${N_remote} -eq 0 ]; then
-		echo "none"
-	    else
-		echo "${N_remote}"
-
-		echo "pulling... "
-		cmd_base="git pull --all --progress --tags --verbose" #--prune"
-		if [ $git_ver_maj -ge 2 ]; then
-		    cmd_base+=" --ff-only --ipv4"
-		fi
-		# secify number of seconds before kill
-		nsec=4
-		to="timeout -s 9 ${nsec}s "
-		# concat commands
-		cmd="${to}${cmd_base}"
-		RETVAL=137
-		loop_counter=0
-		while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
-		    ((loop_counter++))
-		    if [ $loop_counter -gt 1 ]; then
-			echo "${TAB}PULL attempt $loop_counter..."
-		    fi
-		    t_start=$(date +%s%N)
-		    ${cmd}
-		    RETVAL=$?
-		    t_end=$(date +%s%N)
-		    dt_pull=$((${t_end} - ${t_start}))
-
-		    echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
-		    if [[ $RETVAL != 0 ]]; then
-			echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-			# increase time
-			if [[ $RETVAL == 137 ]]; then
-			    nsec=$((nsec * 2))
-			    echo "${TAB}increasing timeout to ${nsec}"
-			    to="timeout -s 9 ${nsec}s "
-			    cmd="${to}${cmd_base}"
+	#------------------------------------------------------
+	# find
+	#------------------------------------------------------
+	echo -e "locating ${PSDIR}$repo${NORMAL}... \c"
+	if [ -e ${HOME}/$repo ]; then
+		echo -e "${GOOD}OK${NORMAL}"
+		((n_found++))
+		cd ${HOME}/$repo
+		echo -n "checking repository status... "
+		git rev-parse --is-inside-work-tree &>/dev/null
+		RETVAL=$?
+		if [[ $RETVAL -eq 0 ]]; then
+			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+			((n_git++))
+			# parse remote
+			if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
+				echo "${TAB}no remote tracking branch set for current branch"
+				continue
+			else
+				remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
+				remote_name=${remote_tracking_branch%%/*}
+				remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
+				# add remote to list
+				echo "${remote_url}" >>${list_remote}
 			fi
-			# force pull
-			if [[ $RETVAL == 128 ]]; then
-			    cbar "${TAB}${GRH}should I force pull!? ${NORMAL}"
-			    echo -e "${TAB}source directory = $src_dir"
-			    prog=${src_dir}/force_pull
-			    if [ -f ${prog} ]; then
-				bash ${prog}
-				RETVAL2=$?
-				echo -en "${TAB}${GRH}force_pull${NORMAL}: "
-				if [[ $RETVAL != 0 ]]; then
-				    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL3${NORMAL}"
-				    exit || return
+
+			# check against argument
+			if [ $# -gt 0 ]; then
+				echo -n "matching argument ""$1""... "
+				if [[ $remote_url =~ $1 ]]; then
+					echo -e "${GOOD}OK${NORMAL}"
+					((n_match++))
 				else
-				    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL2${NORMAL}"
-				    ((n_fpull++))
+					echo -e "${gray}SKIP${NORMAL}"
+					continue
 				fi
-			    fi
 			fi
-		    else
-			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-			((n_pull++))
-		    fi
-		done
-		if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
-		    t_pull_max=${dt_pull}
-		fi
-		if [[ $RETVAL != 0 ]]; then
-		    # add to failure list
-		    pull_fail+="$repo "
+
+			# add to list
+			if [ ! -z ${OK_list:+dummy} ]; then
+				OK_list+=$'\n'
+			fi
+			OK_list+=${remote_url}
+
+			# print remote parsing
+			echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
+			echo "${TAB}remote name is $remote_name"
+			echo "  remote ${remote_url}"
+
+			remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+			if [[ "${remote_pro}" == "git" ]]; then
+				remote_pro="SSH"
+			fi
+			echo "protocol ${remote_pro}"
+
+			# get number of remotes
+			n_remotes=$(git remote | wc -l)
+			if [ "${n_remotes}" -gt 1 ]; then
+				echo "remotes found: ${n_remotes}"
+			fi
+
+			# push/pull setting
+			GIT_HIGHLIGHT='\x1b[100;37m'
+
+			#------------------------------------------------------
+			# fetch
+			#------------------------------------------------------
+			echo "updating..."
+			git remote --verbose update
+			((n_fetch++))
+
+			#------------------------------------------------------
+			# pull
+			#------------------------------------------------------
+			echo -n "leading remote commits: "
+			N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
+			if [ ${N_remote} -eq 0 ]; then
+				echo "none"
+			else
+				echo "${N_remote}"
+
+				echo "pulling... "
+				cmd_base="git pull --all --progress --tags --verbose" #--prune"
+				if [ $git_ver_maj -ge 2 ]; then
+					cmd_base+=" --ff-only --ipv4"
+				fi
+				# secify number of seconds before kill
+				nsec=4
+				to="timeout -s 9 ${nsec}s "
+				# concat commands
+				cmd="${to}${cmd_base}"
+				RETVAL=137
+				loop_counter=0
+				while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
+					((loop_counter++))
+					if [ $loop_counter -gt 1 ]; then
+						echo "${TAB}PULL attempt $loop_counter..."
+					fi
+					t_start=$(date +%s%N)
+					${cmd}
+					RETVAL=$?
+					t_end=$(date +%s%N)
+					dt_pull=$((${t_end} - ${t_start}))
+
+					echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
+					if [[ $RETVAL != 0 ]]; then
+						echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+						# increase time
+						if [[ $RETVAL == 137 ]]; then
+							nsec=$((nsec * 2))
+							echo "${TAB}increasing timeout to ${nsec}"
+							to="timeout -s 9 ${nsec}s "
+							cmd="${to}${cmd_base}"
+						fi
+						# force pull
+						if [[ $RETVAL == 128 ]]; then
+							cbar "${TAB}${GRH}should I force pull!? ${NORMAL}"
+							echo -e "${TAB}source directory = $src_dir"
+							prog=${src_dir}/force_pull
+							if [ -f ${prog} ]; then
+								bash ${prog}
+								RETVAL2=$?
+								echo -en "${TAB}${GRH}force_pull${NORMAL}: "
+								if [[ $RETVAL != 0 ]]; then
+									echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL3${NORMAL}"
+									exit || return
+								else
+									echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL2${NORMAL}"
+									((n_fpull++))
+								fi
+							fi
+						fi
+					else
+						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+						((n_pull++))
+					fi
+				done
+				if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
+					t_pull_max=${dt_pull}
+				fi
+				if [[ $RETVAL != 0 ]]; then
+					# add to failure list
+					pull_fail+="$repo "
+				else
+					# update links after pull
+					prog=make_links.sh
+					if [ -f ${prog} ]; then
+						if [[ ! (("$(hostname -f)" == *"navy.mil") && ($repo =~ "private")) ]]; then
+							bash ${prog}
+						fi
+					fi
+				fi
+			fi
+
+			#------------------------------------------------------
+			# push
+			#------------------------------------------------------
+			echo -n "trailing local commits: "
+			N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
+			if [ ${N_local} -eq 0 ]; then
+				echo "none"
+			else
+				echo "${N_local}"
+
+				echo "pushing... "
+				cmd_base="git push --progress --verbose"
+				if [ $git_ver_maj -ge 2 ]; then
+					cmd_base+=" --ipv4"
+				fi
+				# secify number of seconds before kill
+				nsec=2
+				to="timeout -s 9 ${nsec}s "
+				# concat commands
+				cmd="${to}${cmd_base}"
+				RETVAL=137
+				loop_counter=0
+				while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
+					((loop_counter++))
+					if [ $loop_counter -gt 1 ]; then
+						echo "${TAB}PUSH attempt $loop_counter..."
+					fi
+					t_start=$(date +%s%N)
+					${cmd}
+					RETVAL=$?
+					t_end=$(date +%s%N)
+					dt_push=$((${t_end} - ${t_start}))
+
+					echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
+					if [[ $RETVAL != 0 ]]; then
+						echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+						if [[ $RETVAL == 137 ]]; then
+							nsec=$((nsec * 2))
+							echo "${TAB}increasing timeout to ${nsec}"
+							to="timeout -s 9 ${nsec}s "
+							cmd="${to}${cmd_base}"
+						fi
+					else
+						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+						((n_push++))
+					fi
+				done
+				if [[ ${dt_push} -gt ${t_push_max} ]]; then
+					t_push_max=${dt_push}
+				fi
+				if [[ $RETVAL != 0 ]]; then
+					# add to failure list
+					push_fail+="$repo "
+				fi
+			fi
+
+			# check for modified files
+			unset list_mod
+			list_mod=$(git diff --name-only --diff-filter=M)
+			if [[ ! -z "${list_mod}" ]]; then
+				# print file list
+				echo -e "modified: ${GRH}"
+				echo "${list_mod}" | sed "s/^/${fTAB}/"
+				echo -en "${NORMAL}"
+				# add repo to list
+				mod_repos+="$repo "
+				# add to files to list
+				if [ ! -z ${mod_files:+dummy} ]; then
+					mod_files+=$'\n'
+				fi
+				mod_files+=$(echo "${list_mod}" | sed "s;^;${repo}/;")
+			fi
 		else
-		    # update links after pull
-		    prog=make_links.sh
-		    if [ -f ${prog} ]; then
-			if [[ ! (("$(hostname -f)" == *"navy.mil") && ($repo =~ "private")) ]]; then
-			    bash ${prog}
-			fi
-		    fi
-		fi
-	    fi
-
-	    #------------------------------------------------------
-	    # push
-	    #------------------------------------------------------
-	    echo -n "trailing local commits: "
-	    N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
-	    if [ ${N_local} -eq 0 ]; then
-		echo "none"
-	    else
-		echo "${N_local}"
-
-		echo "pushing... "
-		cmd_base="git push --progress --verbose"
-		if [ $git_ver_maj -ge 2 ]; then
-		    cmd_base+=" --ipv4"
-		fi
-		# secify number of seconds before kill
-		nsec=2
-		to="timeout -s 9 ${nsec}s "
-		# concat commands
-		cmd="${to}${cmd_base}"
-		RETVAL=137
-		loop_counter=0
-		while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
-		    ((loop_counter++))
-		    if [ $loop_counter -gt 1 ]; then
-			echo "${TAB}PUSH attempt $loop_counter..."
-		    fi
-		    t_start=$(date +%s%N)
-		    ${cmd}
-		    RETVAL=$?
-		    t_end=$(date +%s%N)
-		    dt_push=$((${t_end} - ${t_start}))
-
-		    echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
-		    if [[ $RETVAL != 0 ]]; then
 			echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-			if [[ $RETVAL == 137 ]]; then
-			    nsec=$((nsec * 2))
-			    echo "${TAB}increasing timeout to ${nsec}"
-			    to="timeout -s 9 ${nsec}s "
-			    cmd="${to}${cmd_base}"
-			fi
-		    else
-			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-			((n_push++))
-		    fi
-		done
-		if [[ ${dt_push} -gt ${t_push_max} ]]; then
-		    t_push_max=${dt_push}
+			echo "${TAB}$repo not a Git repository"
+			loc_fail+="$repo "
 		fi
-		if [[ $RETVAL != 0 ]]; then
-		    # add to failure list
-		    push_fail+="$repo "
-		fi
-	    fi
-
-	    # check for modified files
-	    unset list_mod
-	    list_mod=$(git diff --name-only --diff-filter=M)
-	    if [[ ! -z "${list_mod}" ]]; then
-		# print file list
-		echo -e "modified: ${GRH}"
-		echo "${list_mod}" | sed "s/^/${fTAB}/"
-		echo -en "${NORMAL}"
-		# add repo to list
-		mod_repos+="$repo "
-		# add to files to list
-		if [ ! -z ${mod_files:+dummy} ]; then
-		    mod_files+=$'\n'
-		fi
-		mod_files+=$(echo "${list_mod}" | sed "s;^;${repo}/;")
-	    fi
 	else
-	    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-	    echo "${TAB}$repo not a Git repository"
-	    loc_fail+="$repo "
+		echo "not found"
+		loc_fail+="$repo "
+		bash test_file ${HOME}/$repo
 	fi
-    else
-	echo "not found"
-	loc_fail+="$repo "
-	bash test_file ${HOME}/$repo
-    fi
 done
 
 cbar "done updating repositories"
@@ -418,67 +418,67 @@ echo
 echo "        found: ${n_found}"
 echo -n "    not found: "
 if [ -z "$loc_fail" ]; then
-    echo "none"
+	echo "none"
 else
-    echo "$loc_fail"
+	echo "$loc_fail"
 fi
 
 # matched
 if [ ! -z "$n_match" ]; then
-    echo "      matched: ${n_match} ($1)"
+	echo "      matched: ${n_match} ($1)"
 fi
 
 # fetched
 echo -n "      fetched: "
 if [ -z "${n_fetch}" ]; then
-    echo "none"
+	echo "none"
 else
-    echo "$n_fetch"
+	echo "$n_fetch"
 fi
 
 # pull
 echo -n " repos pulled: "
 if [ -z "${n_pull}" ]; then
-    echo "none"
+	echo "none"
 else
-    echo "${n_pull}"
-    echo "pull max time: ${t_pull_max} ns or $(bc <<<"scale=3;$t_pull_max/1000000000") sec"
+	echo "${n_pull}"
+	echo "pull max time: ${t_pull_max} ns or $(bc <<<"scale=3;$t_pull_max/1000000000") sec"
 fi
 echo -n "pull failures: "
 if [ -z "$pull_fail" ]; then
-    echo "none"
+	echo "none"
 else
-    echo -e "${GRH}$pull_fail${NORMAL}"
+	echo -e "${GRH}$pull_fail${NORMAL}"
 fi
 echo -n "  force pulls: "
 if [ -z "$n_fpull" ]; then
-    echo "none"
+	echo "none"
 else
-    echo -e "${yellow}$n_fpull${NORMAL}"
+	echo -e "${yellow}$n_fpull${NORMAL}"
 fi
 
 # push
 echo -n " repos pushed: "
 if [ -z "${n_push}" ]; then
-    echo "none"
+	echo "none"
 else
-    echo "${n_push}"
-    echo "push max time: ${t_push_max} ns or $(bc <<<"scale=3;$t_push_max/1000000000") sec"
+	echo "${n_push}"
+	echo "push max time: ${t_push_max} ns or $(bc <<<"scale=3;$t_push_max/1000000000") sec"
 fi
 echo -n "push failures: "
 if [ -z "$push_fail" ]; then
-    echo "none"
+	echo "none"
 else
-    echo -e "${GRH}$push_fail${NORMAL}"
+	echo -e "${GRH}$push_fail${NORMAL}"
 fi
 
 # modified
 echo -n "     modified: "
 if [ -z "$mod_repos" ]; then
-    echo "none"
+	echo "none"
 else
-    echo "$mod_repos"
-    echo -e "${GRH}$mod_files${NORMAL}" | sed "s/^/${list_indent}/"
+	echo "$mod_repos"
+	echo -e "${GRH}$mod_files${NORMAL}" | sed "s/^/${list_indent}/"
 fi
 
 # print time at exit
@@ -487,8 +487,8 @@ end_time=$(date +%s%N)
 elap_time=$((${end_time} - ${start_time}))
 dT_sec=$(bc <<<"scale=3;$elap_time/1000000000")
 if command -v sec2elap &>/dev/null; then
-    bash sec2elap $dT_sec | tr -d '\n'
+	bash sec2elap $dT_sec | tr -d '\n'
 else
-    echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
+	echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
 fi
 echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"
