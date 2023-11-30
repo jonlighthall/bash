@@ -26,8 +26,13 @@
 start_time=$(date +%s%N)
 
 # set tab
-TAB=''
-fTAB='   '
+called_by=$(ps -o comm= $PPID)
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
+    TAB=''
+    : ${fTAB:='   '}
+else
+    TAB+=${TAB+${fTAB:='   '}}
+fi
 
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
@@ -38,13 +43,15 @@ fi
 # print source name at start
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
+    set -T +eE
+    trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
 else
     RUN_TYPE="executing"
     # exit on errors
     set -eE
-    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
+    trap 'echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/}"' ERR
     # print time at exit
-    trap 'echo -en "${yellow}EXIT${NORMAL}: ${BASH_SOURCE##*/} "
+    trap 'echo -en "${yellow}EXIT${NORMAL}: ${BASH_SOURCE##*/}\n"
           end_time=$(date +%s%N);
           elap_time=$((${end_time} - ${start_time}));
           dT_sec=$(bc <<<"scale=3;$elap_time/1000000000");
