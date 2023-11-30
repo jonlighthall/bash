@@ -25,8 +25,25 @@ fi
 # print source name at start
 if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"
+	set -T +eE
+	trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
 else
 	RUN_TYPE="executing"
+	# exit on errors
+	set -eE
+	trap 'echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/}"' ERR
+	# print time at exit
+	trap 'echo -en "${yellow}EXIT${NORMAL}: ${BASH_SOURCE##*/}\n"
+          end_time=$(date +%s%N);
+          elap_time=$((${end_time} - ${start_time}));
+          dT_sec=$(bc <<<"scale=3;$elap_time/1000000000");
+          if command -v sec2elap &>/dev/null; then
+              bash sec2elap $dT_sec | tr -d "\n"
+          else
+              echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
+          fi
+          echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"          
+	  ' EXIT
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -225,7 +242,18 @@ for repo in $list; do
 			#------------------------------------------------------
 			echo "updating..."
 			git remote --verbose update
-			((n_fetch++))
+
+			RETVAL=$?
+			if [[ $RETVAL == 0 ]]; then
+				echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+				((n_fetch++))
+			else
+				echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+				echo "failed to fetch remote"
+				echo "WSL may need to be restarted"
+				echo "Press Ctrl-C to cancle"
+				read -e -i "shutdown_wsl" && eval "$REPLY"
+			fi
 
 			#------------------------------------------------------
 			# pull
@@ -480,15 +508,3 @@ else
 	echo "$mod_repos"
 	echo -e "${GRH}$mod_files${NORMAL}" | sed "s/^/${list_indent}/"
 fi
-
-# print time at exit
-echo -en "\n${BASH_SOURCE##*/} "
-end_time=$(date +%s%N)
-elap_time=$((${end_time} - ${start_time}))
-dT_sec=$(bc <<<"scale=3;$elap_time/1000000000")
-if command -v sec2elap &>/dev/null; then
-	bash sec2elap $dT_sec | tr -d '\n'
-else
-	echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
-fi
-echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"
