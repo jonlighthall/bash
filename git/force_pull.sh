@@ -223,20 +223,20 @@ while [ -z ${hash_local} ]; do
 done
 
 # compare local commit to remote commit
-echo -n "${TAB}corresponding remote commit hash: "
+echo -n "${TAB}corresponding remote commit: "
 echo $hash_remote
 TAB+=${fTAB:='   '}
-echo -n "${TAB}common commit has... "
+echo -n "${TAB}local commit has... "
 if [ "$hash_local" == "$hash_remote" ]; then
     echo "the same hash"
-    echo -n "${TAB}merge base: .................. "
+    echo -n "${TAB}merge base: ............. "
     git merge-base ${branch_local} ${branch_pull}
     hash_merge=$(git merge-base ${branch_local} ${branch_pull})
-    echo -n "${TAB}common hash is... "
+    echo -n "${TAB}local commit has... "
     if [ $hash_local == $hash_merge ]; then
-        echo "the same as merge base"
+        echo "the same hash"
     else
-        echo "not the same as merge base"
+        echo "a different hash"
     fi
 else
     echo "a different hash (diverged)"
@@ -321,11 +321,11 @@ fi
 if [ $N_remote -gt 0 ]; then
     cbar "${BOLD}reseting HEAD to match remote...${NORMAL}"
     if [ $N_local -eq 0 ]; then
-	echo "${TAB}${fTAB}no need to reset"
+        echo "${TAB}${fTAB}no need to reset"
     else
-	echo "${TAB}${fTAB}resetting HEAD to $hash_remote..."
-	git reset --hard $hash_remote | sed "s/^/${TAB}/"
-    fi    
+        echo "${TAB}${fTAB}resetting HEAD to $hash_remote..."
+        git reset --hard $hash_remote | sed "s/^/${TAB}/"
+    fi
 fi
 
 # pull remote commits
@@ -370,7 +370,7 @@ N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo "there are $N_stash entries in stash"
     if $b_stash; then
-	set +eE
+        set +eE
         git stash pop
         echo "${TAB}${fTAB}resetting exit on error"
         set -eE
