@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "jonlighthall",
+        "projectKey": "jonlighthall_bash"
+    }
+}
