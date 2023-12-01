@@ -82,15 +82,15 @@ function print_error() {
 	
 	# print summary
 	start_new_line
-	echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/}"
-	echo -en "${spc}\E[35m${BASH_SOURCE##*/}\E[m\E[36m:\E[m"
-
 	# print grep-like line match
-	echo -en "\x1B[32m${ERR_LINENO}\x1B[m\x1B[36m:\x1B[m "
+	ERR_PRINT=$(echo -e "${BAD}ERROR${NORMAL}: \E[35m${BASH_SOURCE##*/}\E[m\E[36m:\E[m\x1B[32m${ERR_LINENO}\x1B[m\x1B[36m:\x1B[m ")
+	lep=$(echo -n "${ERR_PRINT}" | sed 's/\x1b\[[0-9;]*m//g' | wc -c)
+	echo -n ${ERR_PRINT}
 	sed -n "${ERR_LINENO}p" $src_name | sed "s/^\s*//"
 
 	# if command contains vairables, evaluate expression
-	if [[ "$ERR_CMD" =~ '$' ]]; then 
+	if [[ "$ERR_CMD" =~ '$' ]]; then
+		etab=$((lep - evl -1 ))
 		echo -ne "\x1B[${etab}C${eva}"
 		eval echo $ERR_CMD
 	fi
