@@ -48,6 +48,38 @@ function print_exit() {
 	timestamp
 }
 
+function print_error() {
+	# expected arguments are $LINENO $? $BASH_COMMAND
+	line=$1
+	echo "line: $1 $line"
+	shift
+	retval=$1
+	echo "retval: $1 $retval : ${!retval} ${!1}"
+	shift
+	cmd="$@"
+	set +e
+	echo "cmd: ${cmd}"
+	echo -n "eval: "
+    eval ${cmd}
+
+	echo
+	eval echo eval $cmd
+	echo
+	eval echo $cmd
+
+	return
+	var1=$(echo "cmd: $cmd")
+	echo "$var1"
+	echo "cmd: ${cmd}" | sed 's/\${/${!/'
+	var=$(echo "cmd: ${cmd}" | sed 's/\${/${!/')
+	echo "$var"
+	spc='       '
+	echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/}"
+	echo -e "${spc}Error on line $line"
+	sed -n "${line}p" $src_name | sed "s/^\s*/${spc}${GRL}/"
+	echo -e "${spc}${gray}RETVAL=${RETVAL}${NORMAL}"
+}
+
 # print source name at start
 if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"
@@ -57,7 +89,7 @@ else
 	RUN_TYPE="executing"
 	# exit on errors
 	set -eE
-	trap 'echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/} ${gray}RETVAL=$?${NORMAL}"' ERR
+	trap 'print_error $LINENO $? $BASH_COMMAND' ERR
 	# print time at exit
 	trap print_exit EXIT
 fi
