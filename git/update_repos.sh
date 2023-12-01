@@ -309,8 +309,8 @@ for repo in $list; do
 			#------------------------------------------------------
 			echo "updating..."
 			git remote --verbose update
-
 			RETVAL=$?
+			echo -en "${GIT_HIGHLIGHT}fetch${NORMAL}: "
 			if [[ $RETVAL == 0 ]]; then
 				echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 				: $((n_fetch++))
@@ -478,7 +478,6 @@ for repo in $list; do
 				mod_files+=$(echo "${list_mod}" | sed "s;^;${repo}/;")
 			fi
 		else
-			echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 			echo "${TAB}$repo not a Git repository"
 			loc_fail+="$repo "
 		fi
