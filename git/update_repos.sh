@@ -50,34 +50,29 @@ function print_exit() {
 
 function print_error() {
 	# expected arguments are $LINENO $? $BASH_COMMAND
-	line=$1
-	echo "line: $1 $line"
-	shift
-	retval=$1
-	echo "retval: $1 $retval : ${!retval} ${!1}"
-	shift
-	cmd="$@"
-	set +e
-	echo "cmd: ${cmd}"
-	echo -n "eval: "
-    eval ${cmd}
 
-	echo
-	eval echo eval $cmd
-	echo
-	eval echo $cmd
+	# parse arguments
+	ERR_LINENO=$1
+	shift
+	ERR_RETVAL=$1
+	shift
+	ERR_CMD="$@"
 
-	return
-	var1=$(echo "cmd: $cmd")
-	echo "$var1"
-	echo "cmd: ${cmd}" | sed 's/\${/${!/'
-	var=$(echo "cmd: ${cmd}" | sed 's/\${/${!/')
-	echo "$var"
+	# print arguments
+	echo "line:   $ERR_LINENO"
+	echo "retval: $ERR_RETVAL"
+	echo "cmd:    ${ERR_CMD}"
+
+	# print summary
 	spc='       '
 	echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/}"
-	echo -e "${spc}Error on line $line"
-	sed -n "${line}p" $src_name | sed "s/^\s*/${spc}${GRL}/"
-	echo -e "${spc}${gray}RETVAL=${RETVAL}${NORMAL}"
+	echo -e "${spc}on line $ERR_LINENO"
+	echo -ne "line contents: "
+	sed -n "${ERR_LINENO}p" $src_name | sed "s/^\s*/${spc}${GRL}/"
+	echo -ne "evaluates to : "
+	eval echo $ERR_CMD
+	echo -ne "with return value: "
+	echo -e "${spc}${gray}RETVAL=${ERR_RETVAL}${NORMAL}"
 }
 
 # print source name at start
