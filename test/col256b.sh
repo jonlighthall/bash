@@ -14,8 +14,11 @@ for q in $(seq 0 ${qmax}); do
     tput setaf $q
 	for p in $(seq 0 ${pmax}); do
 		tput setab $p
-		printf ' b=%d f=%d ' $p $q
+		printf ' b=%3d f=%3d ' $p $q
+		if [ $((p % 16)) -eq 0  ]; then
+			echo -e "\E[m"
+		fi
 	done
 	tput sgr0
-	printf '\n'
+	printf '\n\n'
 done
