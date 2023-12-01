@@ -8,14 +8,14 @@ case $TERM in
         ;;
 esac
 export TERM
-declare -i qmax=0
-declare -i pmax=256
-for q in $(seq 0 ${qmax}); do
-    tput setaf $q
-	for p in $(seq 0 ${pmax}); do
-		tput setab $p
-		printf ' b=%3d f=%3d ' $p $q
-		if [ $((p % 16)) -eq 0  ]; then
+declare -i fore_max=0
+declare -i back_max=256
+for fore in $(seq 0 ${fore_max}); do
+    tput setaf $fore
+	for back in $(seq 0 ${back_max}); do
+		tput setab $back
+		printf ' b=%3d f=%3d ' $back $fore
+		if [ $((back % 16)) -eq 0  ]; then
 			echo -e "\E[m"
 		fi
 	done
