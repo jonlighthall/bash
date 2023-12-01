@@ -48,6 +48,19 @@ function print_exit() {
 	timestamp
 }
 
+function start_new_line() {
+	# get the cursor position
+	echo -en "\E[6n"
+	read -sdR CURPOS
+	CURPOS=${CURPOS#*[}
+	# get the x-position of the cursor		 
+	x_pos=${CURPOS#*;}
+	# if the cursor is not at the start of a line, then create a new line
+	if [ ${x_pos} -gt 1 ]; then
+		echo
+	fi
+}
+
 function print_error() {
 	# expected arguments are $LINENO $? $BASH_COMMAND
 
@@ -58,19 +71,39 @@ function print_error() {
 	shift
 	ERR_CMD="$@"
 
+	start_new_line
+	
 	# print arguments
 	echo "line:   $ERR_LINENO"
 	echo "retval: $ERR_RETVAL"
 	echo "cmd:    ${ERR_CMD}"
 
-	# print summary
+	# define indent
 	spc='       '
+	declare -i lnl=${#ERR_LINENO}
+	declare -i spl=${#spc}
+	ltab=$((spl - lnl - 2))
+	
+	# print summary
 	echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/}"
-	echo -e "${spc}on line $ERR_LINENO"
-	echo -ne "line contents: "
-	sed -n "${ERR_LINENO}p" $src_name | sed "s/^\s*/${spc}${GRL}/"
-	echo -ne "evaluates to : "
-	eval echo $ERR_CMD
+
+	# print grep-like line match
+	echo -en "\x1B[${ltab}C\x1B[32m${ERR_LINENO}\x1B[m\x1B[36m:\x1B[m "
+	sed -n "${ERR_LINENO}p" $src_name | sed "s/^\s*//"
+
+	echo -e "file: \x1B[35m xtest.sh\x1B[m"
+	echo -e "colon: \x1B[36m:\x1B[m"
+	echo -e "lineno: \x1B[32m22\x1B[m"
+	echo -e "match: \x1B[01;31mexit\x1B[m"
+
+	if [[ "$ERR_CMD" =~ '$' ]]; then 
+		echo "yes"
+		echo -ne "evaluates to : "
+		eval echo $ERR_CMD
+	else
+		echo "no"
+	fi
+	echo "retval: $ERR_RETVAL"
 	echo -ne "with return value: "
 	echo -e "${spc}${gray}RETVAL=${ERR_RETVAL}${NORMAL}"
 }
@@ -212,6 +245,7 @@ t_pull_max=0
 t_push_max=0
 
 for repo in $list; do
+	start_new_line
 	hline 70
 
 	#------------------------------------------------------
