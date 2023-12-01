@@ -11,9 +11,9 @@ start_time=$(date +%s%N)
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
 	TAB=''
-	: ${fTAB:='   '}
+	: ${fTAB:='	'}
 else
-	TAB+=${TAB+${fTAB:='   '}}
+	TAB+=${TAB+${fTAB:='	'}}
 fi
 
 # load formatting
@@ -57,7 +57,7 @@ else
 	RUN_TYPE="executing"
 	# exit on errors
 	set -eE
-	trap 'echo $(!:0);echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/} ${gray} !:0 RETVAL=$?${NORMAL}"' ERR
+	trap 'echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/} ${gray}RETVAL=$?${NORMAL}"' ERR
 	# print time at exit
 	trap print_exit EXIT
 fi
