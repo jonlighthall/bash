@@ -25,13 +25,13 @@ fi
 # print source name at start
 if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"
-	set -T +eE
+	set -TE
 	trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
 else
 	RUN_TYPE="executing"
 	# exit on errors
-	set -eE
-	trap 'echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/}"' ERR
+	set -E
+	trap 'echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/} ${gray}RETVAL=$?${NORMAL}"' ERR
 	# print time at exit
 	trap 'echo -en "${yellow}EXIT${NORMAL}: ${BASH_SOURCE##*/}\n"
           end_time=$(date +%s%N);
@@ -443,7 +443,8 @@ echo
 
 # print push/pull summary
 # all
-echo "        found: ${n_found}"
+echo "   dirs found: ${n_found}"
+echo "  repos found: ${n_git}"
 echo -n "    not found: "
 if [ -z "$loc_fail" ]; then
 	echo "none"
