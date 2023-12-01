@@ -73,9 +73,9 @@ function print_error() {
 	
 	# define indent
 	spc='       '
-	declare -i lnl=${#ERR_LINENO}
 	declare -i spl=${#spc}
-	ltab=$((spl - lnl - 2))
+	declare -i lnl=${#ERR_LINENO}
+	declare -i ltab=$((spl - lnl - 2))
 	eva='-> '
 	declare -i evl=${#eva}
 	declare -i etab=$((spl - evl))
@@ -83,9 +83,10 @@ function print_error() {
 	# print summary
 	start_new_line
 	echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/}"
+	echo -en "${spc}\E[35m${BASH_SOURCE##*/}\E[m\E[36m:\E[m"
 
 	# print grep-like line match
-	echo -en "\x1B[${ltab}C\x1B[32m${ERR_LINENO}\x1B[m\x1B[36m:\x1B[m "
+	echo -en "\x1B[32m${ERR_LINENO}\x1B[m\x1B[36m:\x1B[m "
 	sed -n "${ERR_LINENO}p" $src_name | sed "s/^\s*//"
 
 	# if command contains vairables, evaluate expression
