@@ -70,41 +70,29 @@ function print_error() {
 	ERR_RETVAL=$1
 	shift
 	ERR_CMD="$@"
-
-	start_new_line
 	
-	# print arguments
-	echo "line:   $ERR_LINENO"
-	echo "retval: $ERR_RETVAL"
-	echo "cmd:    ${ERR_CMD}"
-
 	# define indent
 	spc='       '
 	declare -i lnl=${#ERR_LINENO}
 	declare -i spl=${#spc}
 	ltab=$((spl - lnl - 2))
+	eva='-> '
+	declare -i evl=${#eva}
+	declare -i etab=$((spl - evl))
 	
 	# print summary
+	start_new_line
 	echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/}"
 
 	# print grep-like line match
 	echo -en "\x1B[${ltab}C\x1B[32m${ERR_LINENO}\x1B[m\x1B[36m:\x1B[m "
 	sed -n "${ERR_LINENO}p" $src_name | sed "s/^\s*//"
 
-	echo -e "file: \x1B[35m xtest.sh\x1B[m"
-	echo -e "colon: \x1B[36m:\x1B[m"
-	echo -e "lineno: \x1B[32m22\x1B[m"
-	echo -e "match: \x1B[01;31mexit\x1B[m"
-
+	# if command contains vairables, evaluate expression
 	if [[ "$ERR_CMD" =~ '$' ]]; then 
-		echo "yes"
-		echo -ne "evaluates to : "
+		echo -ne "\x1B[${etab}C${eva}"
 		eval echo $ERR_CMD
-	else
-		echo "no"
 	fi
-	echo "retval: $ERR_RETVAL"
-	echo -ne "with return value: "
 	echo -e "${spc}${gray}RETVAL=${ERR_RETVAL}${NORMAL}"
 }
 
