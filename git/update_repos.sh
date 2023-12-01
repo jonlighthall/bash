@@ -42,6 +42,7 @@ function print_elap() {
 }
 
 function print_exit() {
+	start_new_line
 	echo -e "${yellow}EXIT${NORMAL}: ${BASH_SOURCE##*/}"
 	print_elap
 	echo -n " on "
@@ -53,7 +54,7 @@ function start_new_line() {
 	echo -en "\E[6n"
 	read -sdR CURPOS
 	CURPOS=${CURPOS#*[}
-	# get the x-position of the cursor		 
+	# get the x-position of the cursor
 	x_pos=${CURPOS#*;}
 	# if the cursor is not at the start of a line, then create a new line
 	if [ ${x_pos} -gt 1 ]; then
@@ -70,28 +71,26 @@ function print_error() {
 	ERR_RETVAL=$1
 	shift
 	ERR_CMD="$@"
-	
-	# define indent
-	spc='       '
-	declare -i spl=${#spc}
-	declare -i lnl=${#ERR_LINENO}
-	declare -i ltab=$((spl - lnl - 2))
-	eva='-> '
-	declare -i evl=${#eva}
-	declare -i etab=$((spl - evl))
-	
+
 	# print summary
 	start_new_line
-	# print grep-like line match
-	ERR_PRINT=$(echo -e "${BAD}ERROR${NORMAL}: \E[35m${BASH_SOURCE##*/}\E[m\E[36m:\E[m\x1B[32m${ERR_LINENO}\x1B[m\x1B[36m:\x1B[m ")
-	lep=$(echo -n "${ERR_PRINT}" | sed 's/\x1b\[[0-9;]*m//g' | wc -c)
+	ERR_PRINT=$(echo -e "${BAD}ERROR${NORMAL}: ")
 	echo -n ${ERR_PRINT}
-	sed -n "${ERR_LINENO}p" $src_name | sed "s/^\s*//"
+	# print grep-like line match
+	echo -e " \E[35m${BASH_SOURCE##*/}\E[m\E[36m:\E[m\x1B[32m${ERR_LINENO}\x1B[m"
+
+	# define indent
+	declare -i spl=$(echo -ne "${ERR_PRINT}" | sed 's/\x1b\[[0-9;]*m//g' | wc -c)
+	spc=$(echo -ne "\x1B[${spl}C")
+
+	sed -n "${ERR_LINENO}p" $src_name | sed "s/^\s*/${spc}/"
 
 	# if command contains vairables, evaluate expression
 	if [[ "$ERR_CMD" =~ '$' ]]; then
-		etab=$((lep - evl -1 ))
-		echo -ne "\x1B[${etab}C${eva}"
+		eva='eval '
+		declare -i evl=${#eva}
+		declare -i etab=$((spl - evl))
+		echo -ne "\x1B[${etab}C${VALID}${eva}\E[m"
 		eval echo $ERR_CMD
 	fi
 	echo -e "${spc}${gray}RETVAL=${ERR_RETVAL}${NORMAL}"
@@ -248,10 +247,10 @@ for repo in $list; do
 		echo -n "checking repository status... "
 		set +e
 		git rev-parse --is-inside-work-tree &>/dev/null
+		RETVAL=$?
 		if ! (return 0 2>/dev/null); then
 			set -e
 		fi
-		RETVAL=$?
 		if [[ $RETVAL -eq 0 ]]; then
 			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 			: $((n_git++))
@@ -548,7 +547,7 @@ else
 		echo "none"
 	else
 		echo -e "${GRH}$pull_fail${NORMAL}"
-	fi	
+	fi
 	echo "pull max time: ${t_pull_max} ns or $(bc <<<"scale=3;$t_pull_max/1000000000") sec"
 fi
 echo -n "  force pulls: "
