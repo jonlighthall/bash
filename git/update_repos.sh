@@ -22,28 +22,44 @@ if [ -e $fpretty ]; then
 	source $fpretty
 fi
 
+function timestamp() {
+	echo "$(date +"%a %b %-d at %-l:%M %p %Z")"
+}
+
+function print_elap() {
+	end_time=$(date +%s%N)
+	elap_time=$((${end_time} - ${start_time}))
+	if command -v bc &>/dev/null; then
+		dT_sec=$(bc <<<"scale=3;$elap_time/1000000000")
+	else
+		dT_sec=${elap_time::-9}
+	fi
+	if command -v sec2elap &>/dev/null; then
+		bash sec2elap $dT_sec | tr -d "\n"
+	else
+		echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
+	fi
+}
+
+function print_exit() {
+	echo -e "${yellow}EXIT${NORMAL}: ${BASH_SOURCE##*/}"
+	print_elap
+	echo -n " on "
+	timestamp
+}
+
 # print source name at start
 if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"
-	set -TE
+	set -TE +e
 	trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
 else
 	RUN_TYPE="executing"
 	# exit on errors
-	set -E
-	trap 'echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/} ${gray}RETVAL=$?${NORMAL}"' ERR
+	set -eE
+	trap 'echo $(!:0);echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/} ${gray} !:0 RETVAL=$?${NORMAL}"' ERR
 	# print time at exit
-	trap 'echo -en "${yellow}EXIT${NORMAL}: ${BASH_SOURCE##*/}\n"
-          end_time=$(date +%s%N);
-          elap_time=$((${end_time} - ${start_time}));
-          dT_sec=$(bc <<<"scale=3;$elap_time/1000000000");
-          if command -v sec2elap &>/dev/null; then
-              bash sec2elap $dT_sec | tr -d "\n"
-          else
-              echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
-          fi
-          echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"          
-	  ' EXIT
+	trap print_exit EXIT
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -146,29 +162,27 @@ git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
 git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
 git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 
-# count successes
-n_found=''
-n_git=''
-n_fetch=''
-n_pull=''
-n_fpull=''
-n_push=''
+# decleare counting variables
+declare -i n_fetch=0
+declare -i n_found=0
+declare -i n_fpull=0
+declare -i n_git=0
+declare -i n_loops=0
+declare -i n_match=0
+declare -i n_pull=0
+declare -i n_push=0
 
-# count failures and modifications
+# list failures and modifications
 loc_fail=''
 pull_fail=''
 push_fail=''
 mod_repos=''
 mod_files=''
-
-n_match=''
 unset OK_list
 
 # track push/pull times
 t_pull_max=0
 t_push_max=0
-
-loop_counter=0
 
 for repo in $list; do
 	hline 70
@@ -179,14 +193,18 @@ for repo in $list; do
 	echo -e "locating ${PSDIR}$repo${NORMAL}... \c"
 	if [ -e ${HOME}/$repo ]; then
 		echo -e "${GOOD}OK${NORMAL}"
-		((n_found++))
+		: $((n_found++))
 		cd ${HOME}/$repo
 		echo -n "checking repository status... "
+		set +e
 		git rev-parse --is-inside-work-tree &>/dev/null
+		if ! (return 0 2>/dev/null); then
+			set -e
+		fi
 		RETVAL=$?
 		if [[ $RETVAL -eq 0 ]]; then
 			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-			((n_git++))
+			: $((n_git++))
 			# parse remote
 			if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
 				echo "${TAB}no remote tracking branch set for current branch"
@@ -204,7 +222,7 @@ for repo in $list; do
 				echo -n "matching argument ""$1""... "
 				if [[ $remote_url =~ $1 ]]; then
 					echo -e "${GOOD}OK${NORMAL}"
-					((n_match++))
+					: $((n_match++))
 				else
 					echo -e "${gray}SKIP${NORMAL}"
 					continue
@@ -246,7 +264,7 @@ for repo in $list; do
 			RETVAL=$?
 			if [[ $RETVAL == 0 ]]; then
 				echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-				((n_fetch++))
+				: $((n_fetch++))
 			else
 				echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 				echo "failed to fetch remote"
@@ -276,11 +294,11 @@ for repo in $list; do
 				# concat commands
 				cmd="${to}${cmd_base}"
 				RETVAL=137
-				loop_counter=0
-				while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
-					((loop_counter++))
-					if [ $loop_counter -gt 1 ]; then
-						echo "${TAB}PULL attempt $loop_counter..."
+				n_loops=0
+				while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
+					: $((n_loops++))
+					if [ $n_loops -gt 1 ]; then
+						echo "${TAB}PULL attempt $n_loops..."
 					fi
 					t_start=$(date +%s%N)
 					${cmd}
@@ -312,13 +330,13 @@ for repo in $list; do
 									exit || return
 								else
 									echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL2${NORMAL}"
-									((n_fpull++))
+									: $((n_fpull++))
 								fi
 							fi
 						fi
 					else
 						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-						((n_pull++))
+						: $((n_pull++))
 					fi
 				done
 				if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
@@ -359,11 +377,11 @@ for repo in $list; do
 				# concat commands
 				cmd="${to}${cmd_base}"
 				RETVAL=137
-				loop_counter=0
-				while [ $RETVAL -eq 137 ] && [ $loop_counter -lt 5 ]; do
-					((loop_counter++))
-					if [ $loop_counter -gt 1 ]; then
-						echo "${TAB}PUSH attempt $loop_counter..."
+				n_loops=0
+				while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
+					: $((n_loops++))
+					if [ $n_loops -gt 1 ]; then
+						echo "${TAB}PUSH attempt $n_loops..."
 					fi
 					t_start=$(date +%s%N)
 					${cmd}
@@ -382,7 +400,7 @@ for repo in $list; do
 						fi
 					else
 						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-						((n_push++))
+						: $((n_push++))
 					fi
 				done
 				if [[ ${dt_push} -gt ${t_push_max} ]]; then
@@ -418,7 +436,11 @@ for repo in $list; do
 	else
 		echo "not found"
 		loc_fail+="$repo "
+		set +e
 		bash test_file ${HOME}/$repo
+		if ! (return 0 2>/dev/null); then
+			set -e
+		fi
 	fi
 done
 
