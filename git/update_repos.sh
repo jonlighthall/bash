@@ -475,13 +475,13 @@ else
 fi
 
 # matched
-if [ ! -z "$n_match" ]; then
+if [ $n_match -gt 0 ]; then
 	echo "      matched: ${n_match} ($1)"
 fi
 
 # fetched
 echo -n "      fetched: "
-if [ -z "${n_fetch}" ]; then
+if [ ${n_fetch} -eq 0 ]; then
 	echo "none"
 else
 	echo "$n_fetch"
@@ -489,20 +489,20 @@ fi
 
 # pull
 echo -n " repos pulled: "
-if [ -z "${n_pull}" ]; then
+if [ ${n_pull} -eq 0 ]; then
 	echo "none"
 else
 	echo "${n_pull}"
+	echo -n "pull failures: "
+	if [ -z "$pull_fail" ]; then
+		echo "none"
+	else
+		echo -e "${GRH}$pull_fail${NORMAL}"
+	fi	
 	echo "pull max time: ${t_pull_max} ns or $(bc <<<"scale=3;$t_pull_max/1000000000") sec"
 fi
-echo -n "pull failures: "
-if [ -z "$pull_fail" ]; then
-	echo "none"
-else
-	echo -e "${GRH}$pull_fail${NORMAL}"
-fi
 echo -n "  force pulls: "
-if [ -z "$n_fpull" ]; then
+if [ $n_fpull -eq 0 ]; then
 	echo "none"
 else
 	echo -e "${yellow}$n_fpull${NORMAL}"
@@ -510,17 +510,17 @@ fi
 
 # push
 echo -n " repos pushed: "
-if [ -z "${n_push}" ]; then
+if [ $n_push -eq 0 ]; then
 	echo "none"
 else
 	echo "${n_push}"
+	echo -n "push failures: "
+	if [ -z "$push_fail" ]; then
+		echo "none"
+	else
+		echo -e "${GRH}$push_fail${NORMAL}"
+	fi
 	echo "push max time: ${t_push_max} ns or $(bc <<<"scale=3;$t_push_max/1000000000") sec"
-fi
-echo -n "push failures: "
-if [ -z "$push_fail" ]; then
-	echo "none"
-else
-	echo -e "${GRH}$push_fail${NORMAL}"
 fi
 
 # modified
