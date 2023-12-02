@@ -28,10 +28,10 @@ start_time=$(date +%s%N)
 # set tab
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-    TAB=''
-    : ${fTAB:='   '}
+	TAB=''
+	: ${fTAB:='	'}
 else
-    TAB+=${TAB+${fTAB:='   '}}
+	TAB+=${TAB+${fTAB:='	'}}
 fi
 
 # load formatting
@@ -43,25 +43,15 @@ fi
 # print source name at start
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
-    set -T +eE
+    set -TE +e
     trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
 else
     RUN_TYPE="executing"
     # exit on errors
     set -eE
-    trap 'echo -e "${BAD}ERROR${NORMAL}: ${BASH_SOURCE##*/}"' ERR
+    trap 'print_error $LINENO $? $BASH_COMMAND' ERR
     # print time at exit
-    trap 'echo -en "${yellow}EXIT${NORMAL}: ${BASH_SOURCE##*/}\n"
-          end_time=$(date +%s%N);
-          elap_time=$((${end_time} - ${start_time}));
-          dT_sec=$(bc <<<"scale=3;$elap_time/1000000000");
-          if command -v sec2elap &>/dev/null; then
-              bash sec2elap $dT_sec | tr -d "\n"
-          else
-              echo -n "elapsed time is ${white}${dT_sec} sec${NORMAL}"
-          fi
-          echo " on $(date +"%a %b %-d at %-l:%M %p %Z")"          
-	  ' EXIT
+    trap print_exit EXIT
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
