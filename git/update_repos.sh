@@ -43,7 +43,7 @@ function print_elap() {
 
 function print_exit() {
 	start_new_line
-	echo -e "${yellow}EXIT${NORMAL}: ${BASH_SOURCE##*/}"
+	echo -e "${yellow}\E[7m EXIT ${NORMAL} ${BASH_SOURCE##*/}"
 	print_elap
 	echo -n " on "
 	timestamp
@@ -74,7 +74,7 @@ function print_error() {
 
 	# print summary
 	start_new_line
-	ERR_PRINT=$(echo -e "${BAD}ERROR${NORMAL}: ")
+	ERR_PRINT=$(echo -e "\E[37;41m ERROR ${NORMAL} ")
 	echo -n ${ERR_PRINT}
 	# print grep-like line match
 	echo -e " \E[35m${BASH_SOURCE##*/}\E[m\E[36m:\E[m\x1B[32m${ERR_LINENO}\x1B[m"
@@ -302,7 +302,7 @@ for repo in $list; do
 			fi
 
 			# push/pull setting
-			GIT_HIGHLIGHT='\x1b[100;37m'
+			GIT_HIGHLIGHT='\x1b[7m'
 
 			#------------------------------------------------------
 			# fetch
@@ -310,7 +310,7 @@ for repo in $list; do
 			echo "updating..."
 			git remote --verbose update
 			RETVAL=$?
-			echo -en "${GIT_HIGHLIGHT}fetch${NORMAL}: "
+			echo -en "${GIT_HIGHLIGHT} fetch ${NORMAL} "
 			if [[ $RETVAL == 0 ]]; then
 				echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 				: $((n_fetch++))
@@ -355,7 +355,7 @@ for repo in $list; do
 					t_end=$(date +%s%N)
 					dt_pull=$((${t_end} - ${t_start}))
 
-					echo -en "${GIT_HIGHLIGHT}pull${NORMAL}: "
+					echo -en "${GIT_HIGHLIGHT} pull ${NORMAL} "
 					if [[ $RETVAL != 0 ]]; then
 						echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 						# increase time
@@ -438,7 +438,7 @@ for repo in $list; do
 					t_end=$(date +%s%N)
 					dt_push=$((${t_end} - ${t_start}))
 
-					echo -en "${GIT_HIGHLIGHT}push${NORMAL}: "
+					echo -en "${GIT_HIGHLIGHT} push ${NORMAL} "
 					if [[ $RETVAL != 0 ]]; then
 						echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 						if [[ $RETVAL == 137 ]]; then
