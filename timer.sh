@@ -27,16 +27,13 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
+# define traps
+trap print_exit EXIT
+trap 'start_new_line; echo -e "breaking..."; break;' INT
+
 # print instructions
 echo "press Ctrl-C to exit"
-
 while [ .true ]; do
-    elap_time=$(($(date +%s%N) - ${start_time}))
-    dT=$(bc <<<"scale=3;$elap_time/1000000000")
-    #    echo -en "\x1b[2K\relapsed time is ${white}${dT_sec} sec${NORMAL}"
-    echo -en "\x1b[2K\r$(sec2elap $dT | tr -d '\n')"
-    trap 'start_new_line; echo -e "breaking..."; break;' INT
+	echo -en "\x1b[2K\r$(print_elap)"
 done
 
-# define traps
-trap "echo -e 'exiting...\n$(sec2elap $dT | tr -d '\n')'" EXIT

@@ -1,4 +1,8 @@
 #!/bin/bash -u
+
+# get starting time in nanoseconds
+start_time=$(date +%s%N)
+
 # set tab
 :${TAB:=''}
 
@@ -8,20 +12,25 @@ if [ -e "$fpretty" ]; then
     source "$fpretty"
 fi
 
-# print source name at start
+# determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
     # exit on errors
-    set -eE
-    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
+    set -eE    
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f "$BASH_SOURCE")
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
+
+# define traps
+trap 'print_error $LINENO $? $BASH_COMMAND' ERR
+trap print_int INT
+trap print_exit EXIT
+trap print_return RETURN
 
 # set target and link directories
 target_dir=$(dirname "$src_name")
@@ -160,11 +169,3 @@ done
 bar 38 "--------- Done Making Links ----------"
 
 git update-index --skip-worktree git/url.txt
-
-# print time at exit
-echo -en "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
-if command -v sec2elap &>/dev/null; then
-    bash sec2elap ${SECONDS}
-else
-    echo "elapsed time is ${white}${SECONDS} sec${NORMAL}"
-fi

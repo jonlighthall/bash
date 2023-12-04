@@ -1,7 +1,15 @@
 #!/bin/bash -u
 start_time=$(date +%s%N)
-# print source name at start
+
+# load formatting
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+	source $fpretty
+fi
+
 echo
+
+# deterimine run type
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
@@ -11,6 +19,7 @@ else
     trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
 
+# print source name at start
 echo -e "\$BASH_SOURCE = $BASH_SOURCE"
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
