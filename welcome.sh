@@ -7,4 +7,10 @@ msg=$(echo " Welcome to $(hostname -s) ")
 ln=$(for ((i = 1; i <= ${#msg}; i++)); do echo -n "-"; done)
 # display welcome message
 echo -e "\033[0;33m$ln\n$msg\n$ln\033[0m"
+
+# update repositories
+fup=${HOME}/utils/bash/git/update_repos.sh
+if [ -e $fup ]; then
+	bash $fup
+fi
 exit
