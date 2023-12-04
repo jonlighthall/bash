@@ -4,7 +4,7 @@
 #
 # Apr 2022 JCL
 
-# start timer
+# get starting time in nanoseconds
 start_time=$(date +%s%N)
 
 # set tab
@@ -22,19 +22,21 @@ if [ -e $fpretty ]; then
 	source $fpretty
 fi
 
-# print source name at start
+# determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"
 	set -TE +e
-	trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
 else
 	RUN_TYPE="executing"
 	# exit on errors
 	set -eE
-	trap 'print_error $LINENO $? $BASH_COMMAND' ERR
-	# print time at exit
-	trap print_exit EXIT
 fi
+
+# define traps
+trap 'print_error $LINENO $? $BASH_COMMAND' ERR
+trap print_exit EXIT
+trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
+
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
