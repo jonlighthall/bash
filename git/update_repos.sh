@@ -57,6 +57,19 @@ echo -e "${TAB}${gray}path = $src_dir${NORMAL}"
 start_dir=$PWD
 echo "starting directory = ${start_dir}"
 
+# check if Git is defined
+echo -n "${TAB}Checking Git... "
+if command -v git &>/dev/null; then
+	echo -e "${GOOD}OK${NORMAL} Git is defined"
+else
+	echo -e "${BAD}FAIL${NORMAL} Git not defined"
+	if (return 0 2>/dev/null); then
+		return 1
+	else
+		exit 1
+	fi
+fi
+
 # list repository paths, relative to home
 # settings
 list="config \
@@ -115,23 +128,11 @@ if [ -f ${fname_project} ]; then
 	done <${fname_project}
 fi
 
+#get script version
 script_ver=$(script --version | sed 's/[^0-9\.]//g')
 script_ver_maj=$(echo $script_ver | awk -F. '{print $1}')
 script_ver_min=$(echo $script_ver | awk -F. '{print $2}')
 script_ver_pat=$(echo $script_ver | awk -F. '{print $3}')
-
-# check if Git is defined
-echo -n "${TAB}Checking Git... "
-if command -v git &>/dev/null; then
-	echo -e "${GOOD}OK${NORMAL} ${gray}Git is defined${NORMAL}"
-else
-	echo -e "${BAD}FAIL${NORMAL} Git not defined"
-	if (return 0 2>/dev/null); then
-		return
-	else
-		exit 1
-	fi
-fi
 
 # get Git version
 git_ver=$(git --version | awk '{print $3}')
