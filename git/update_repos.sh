@@ -128,12 +128,6 @@ if [ -f ${fname_project} ]; then
 	done <${fname_project}
 fi
 
-#get script version
-script_ver=$(script --version | sed 's/[^0-9\.]//g')
-script_ver_maj=$(echo $script_ver | awk -F. '{print $1}')
-script_ver_min=$(echo $script_ver | awk -F. '{print $2}')
-script_ver_pat=$(echo $script_ver | awk -F. '{print $3}')
-
 # get Git version
 git_ver=$(git --version | awk '{print $3}')
 git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
