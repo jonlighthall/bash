@@ -138,7 +138,7 @@ git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
 git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
 git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 
-# decleare counting variables
+# declare counting variables
 declare -i n_fetch=0
 declare -i n_found=0
 declare -i n_fpull=0
@@ -246,7 +246,7 @@ for repo in $list; do
 				echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 				echo "failed to fetch remote"
 				echo "WSL may need to be restarted"
-				echo "Press Ctrl-C to cancle"
+				echo "Press Ctrl-C to cancel"
 				read -e -i "shutdown_wsl" && eval "$REPLY"
 			fi
 
@@ -265,7 +265,7 @@ for repo in $list; do
 				if [ $git_ver_maj -ge 2 ]; then
 					cmd_base+=" --ff-only --ipv4"
 				fi
-				# secify number of seconds before kill
+				# specify number of seconds before kill
 				nsec=4
 				to="timeout -s 9 ${nsec}s "
 				# concat commands
@@ -348,7 +348,7 @@ for repo in $list; do
 				if [ $git_ver_maj -ge 2 ]; then
 					cmd_base+=" --ipv4"
 				fi
-				# secify number of seconds before kill
+				# specify number of seconds before kill
 				nsec=2
 				to="timeout -s 9 ${nsec}s "
 				# concat commands
