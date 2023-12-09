@@ -5,25 +5,45 @@
 #
 # Apr 2023 JCL
 
-# load formatting
-fpretty=${HOME}/utils/bash/.bashrc_pretty
-if [ -e $fpretty ]; then
-    source $fpretty
+# get starting time in nanoseconds
+start_time=$(date +%s%N)
+
+# set tab
+called_by=$(ps -o comm= $PPID)
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
+	TAB=''
+	: ${fTAB:='   '}
+else
+	TAB+=${TAB+${fTAB:='   '}}
 fi
 
-# print source name at start
-if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
-else
-    RUN_TYPE="executing"
-    # exit on errors
-    set -eE
-    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
+# load formatting and functions
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+	source $fpretty
 fi
+
+# define traps
+trap 'print_error $LINENO $? $BASH_COMMAND' ERR
+trap print_exit EXIT
+trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
+trap print_int INT
+
+# determine if script is being sourced or executed and add conditional behavior
+if (return 0 2>/dev/null); then
+	RUN_TYPE="sourcing"
+	set -TE +e
+else
+	RUN_TYPE="executing"
+	# exit on errors
+	set -eE
+fi
+
+# print run type and source name
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+	echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
 # set sort order (C sorting is the most consistient)
@@ -47,18 +67,20 @@ function add_marker() {
     marker+=$(printf '%b' $(printf '\\%03o' ${N_dec}))
 }
 
+TS_MARKER=''
+
 function gen_marker() {
     echo "${TAB}generating unique marker for $1..."
     marker=''
     add_marker
     line_width=$(($(tput cols) - 1))
     while [[ ! -z $(find_marker "$1") ]]; do
-        echo -ne "${TAB}${TAB}marker = ${marker}\t"
+        echo -ne "${TAB}${fTAB}marker = ${marker}\t"
         echo -ne "found\t\t"
         find_marker "$1" | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ([[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/") | cut -c -$line_width
         add_marker
     done
-    echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
+    echo -e "${TAB}${fTAB}marker = ${marker}\tnot found"
 }
 
 #-----------------#
@@ -75,7 +97,7 @@ bad_list=$(echo {58..64} {91..96})
 
 # print bad list
 echo "${TAB}bad list:"
-echo -n "${TAB}${TAB}"
+echo -n "${TAB}${fTAB}"
 for i in ${bad_list}; do
     printf "\\$(printf %03o "$i")"
 done
@@ -83,7 +105,7 @@ echo
 
 # print good list
 echo "${TAB}good list:"
-echo -n "${TAB}${TAB}"
+echo -n "${TAB}${fTAB}"
 for ((j = $m_start; j <= $m_end; j++)); do
     if [[ ! $bad_list =~ ${j} ]]; then
         printf "\\$(printf %03o "$j")"
@@ -99,45 +121,46 @@ else
     hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
 fi
 echo "backup history file"
-cp -pv $hist_ref ${hist_bak}
+cp -pv $hist_ref ${hist_bak} | sed "s/^/${TAB}${fTAB}/"
 
 # set list of files to check
 list_in=${hist_ref}
 if [ $# -gt 0 ]; then
     list_in+=" $@"
-    echo "list of arguments:"
+    echo "${TAB}list of arguments:"
     for arg in "$@"; do
-        echo "${TAB}$arg"
+        echo "${TAB}${fTAB}$arg"
     done
 
-    echo "list of files:"
+    echo "${TAB}list of files (input):"
     for file in $list_in; do
-        echo "${TAB}$file"
+        echo "${TAB}${fTAB}$file"
     done
 fi
 
 # check list of files
+echo "${TAB}checking file list..."
 list_out=''
 list_del=''
-set +e
+set +eE
 for hist_in in $list_in; do
-    echo -n "${hist_in}... "
+    echo -n "${TAB}${fTAB}${hist_in}... "
     if [ -f ${hist_in} ]; then
         echo -e "is a regular ${UL}file${NORMAL}"
         list_out+="${hist_in} "
         if [ ! ${hist_in} -ef ${hist_ref} ]; then
-            echo "${TAB}${hist_in} is not the same as ${hist_ref}"
+            echo "${TAB}${fTAB}${hist_in} is not the same as ${hist_ref}"
             list_del+="${hist_in} "
         else
-            echo "${TAB}${hist_ref} and ${hist_in} are the same file"
+            echo "${TAB}${fTAB}${hist_ref} and ${hist_in} are the same file"
         fi
 
         # add check for initial orphaned lines
         (head -n 1 ${hist_in} | grep "#[0-9]\{10\}") >/dev/null
         if [ $? -eq 0 ]; then
-            echo "${TAB}${hist_in} starts with timestamp"
+            echo "${TAB}${fTAB}${hist_in} starts with timestamp"
         else
-            echo "${TAB}${hist_in} DOES NOT start with timestamp"
+            echo "${TAB}${fTAB}${hist_in} DOES NOT start with timestamp"
             # get next timestamp
             TS=$(grep "#[0-9]\{10\}" .bash_history -m 1 | sed 's/^#\([0-9]\{10\}\)[ \n].*/\1/')
             echo "${TAB}   TS = $TS"
@@ -158,15 +181,15 @@ set -eE
 echo "list out = ${list_out}"
 echo "list del = ${list_del}"
 
-echo "list of files:"
+echo "list of files (checked):"
 for file in $list_out; do
-    echo "${TAB}$file"
+    echo "${TAB}${fTAB}$file"
 done
 
 # set output file name
 hist_out=${hist_ref}_merge
 list_del+="${hist_out} "
-echo "output file name is ${hist_out}"
+echo "${TAB}output file name is ${hist_out}"
 
 # create history file
 echo -n "${TAB}concatenate files... "
@@ -176,7 +199,7 @@ echo "done"
 for hist_edit in ${hist_bak} ${hist_out}; do
     # get file length
     L=$(cat ${hist_edit} | wc -l)
-    echo "${TAB}${TAB} ${hist_edit} has $L lines"
+    echo "${TAB}${fTAB}${hist_edit} has $L lines"
 
     # clean up whitespace
     echo -n "${TAB}delete trailing whitespaces... "
@@ -223,7 +246,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     # generate login marker
     echo "${TAB}generate superior/inferior markers... "
     N=${#TS_MARKER}
-    echo "${TAB}${TAB}time stamp marker is $N long"
+    echo "${TAB}${fTAB}time stamp marker is $N long"
     beg_mark="!"
     end_mark="~"
     LI_MARKER=$beg_mark
@@ -232,17 +255,17 @@ for hist_edit in ${hist_bak} ${hist_out}; do
         LI_MARKER+="$beg_mark"
         LO_MARKER+="$end_mark"
     done
-    echo "${TAB}${TAB}markers = '$LI_MARKER' '$LO_MARKER'"
+    echo "${TAB}${fTAB}markers = '$LI_MARKER' '$LO_MARKER'"
     marker_list+=" $LI_MARKER $LO_MARKER"
 
     # check sort
     echo "${TAB}check sort... "
     LCcol=$(locale -k LC_COLLATE | tail -1 | sed 's/^.*=//' | tr -d '"')
-    echo "${TAB}${TAB}LC_COLLATE = ${set_loc} (${LCcol})"
-    echo "${TAB}${TAB}unsorted:"
-    echo $marker_list | xargs -n1 | sed "s/^/${TAB}${TAB}${TAB}/"
-    echo "${TAB}${TAB}sorted:"
-    echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${TAB}${TAB}/"
+    echo "${TAB}${fTAB}LC_COLLATE = ${set_loc} (${LCcol})"
+    echo "${TAB}${fTAB}unsorted:"
+    echo $marker_list | xargs -n1 | sed "s/^/${TAB}${fTAB}${fTAB}/"
+    echo "${TAB}${fTAB}sorted:"
+    echo $marker_list | xargs -n1 | sort -u | sed "s/^/${TAB}${fTAB}${fTAB}/"
 
     # mark log in/out lines
     echo -n "${TAB}mark superior/inferior lines... "
@@ -301,7 +324,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     )
 
     for igno in "${ignore_list[@]}"; do
-        echo -n "${TAB}deleting ${igno}... "
+        echo -n "${TAB}${fTAB}deleting ${igno}... "
         sed -i "/${TS_MARKER}${igno}$/d" ${hist_edit}
         sed -i "s/${OR_MARKER}${igno}$//" ${hist_edit}
         echo "done"
@@ -347,22 +370,22 @@ echo "list del = ${list_del}"
 if [[ ! -z ${list_del} ]]; then
     echo "${TAB}removing merged files..."
     for file in ${list_del}; do
-        rm -vf $file{,~} 2>/dev/null | sed "s/^/${TAB}/"
+        rm -vf $file{,~} 2>/dev/null | sed "s/^/${TAB}${fTAB}/"
     done
 fi
 
 # print time at exit
-echo -en "$(date +"%a %b %d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
-if command -v sec2elap &>/dev/null; then
-    bash sec2elap ${SECONDS}
-else
-    echo "elapsed time is ${white}${SECONDS} sec${NORMAL}"
-fi
+print_elap
 
 echo -e "\nto compare changes"
-echo "${TAB}diffy ${hist_bak} ${hist_ref}"
-echo "${TAB}en ${hist_bak} ${hist_ref}"
+echo "${TAB}${fTAB}diffy ${hist_bak} ${hist_ref}"
+default=$(echo "emacs -nw --eval '(ediff-files ""${hist_bak}"" ""${hist_ref}"")'")
+echo "${TAB}${fTAB}"${default}
 
 if command -v diffy &>/dev/null; then
     diffy ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
 fi
+
+echo "Press Ctrl-C to cancel"
+read -e -i "emacs -nw --eval '(ediff-files \"${hist_bak}\" \"${hist_ref}\")'" && eval "$REPLY"
+
