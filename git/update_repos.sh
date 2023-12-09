@@ -122,7 +122,7 @@ script_ver_pat=$(echo $script_ver | awk -F. '{print $3}')
 # check if Git is defined
 echo -n "${TAB}Checking Git... "
 if command -v git &>/dev/null; then
-	echo -e "${GOOD}OK${NORMAL} Git is defined"
+	echo -e "${GOOD}OK${NORMAL} ${gray}Git is defined${NORMAL}"
 else
 	echo -e "${BAD}FAIL${NORMAL} Git not defined"
 	if (return 0 2>/dev/null); then
