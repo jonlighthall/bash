@@ -16,11 +16,16 @@ else
 	TAB+=${TAB+${fTAB:='	'}}
 fi
 
-# load formatting
+# load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
 	source $fpretty
 fi
+
+# define traps
+trap 'print_error $LINENO $? $BASH_COMMAND' ERR
+trap print_exit EXIT
+trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
@@ -30,29 +35,25 @@ else
 	RUN_TYPE="executing"
 	# exit on errors
 	set -eE
+	# print note
+	echo "NB: ${BASH_SOURCE##*/} has not been sourced"
+	echo "    user SSH config settings MAY not be loaded??"
 fi
 
-# define traps
-trap 'print_error $LINENO $? $BASH_COMMAND' ERR
-trap print_exit EXIT
-trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
-
+# print run type and source name
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 	echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
+
+# print source path
 src_dir=${src_name%/*}
 echo -e "${TAB}${gray}path =  $src_dir${NORMAL}"
-
 src_dir=${BASH_SOURCE%/*}
 echo -e "${TAB}${gray}path = $src_dir${NORMAL}"
 
-if ! (return 0 2>/dev/null); then
-	echo "NB: ${BASH_SOURCE##*/} has not been sourced"
-	echo "    user SSH config settings MAY not be loaded??"
-fi
-
+# save and print starting directory
 start_dir=$PWD
 echo "starting directory = ${start_dir}"
 
