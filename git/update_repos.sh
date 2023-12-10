@@ -23,9 +23,84 @@ if [ -e $fpretty ]; then
 fi
 
 # define traps
-trap 'print_error $LINENO $? $BASH_COMMAND' ERR
-trap print_exit EXIT
-trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
+function set_traps() {
+	echo -e "${magenta}\E[7mset traps${NORMAL}"
+	echo "setting shell options..."
+	if (return 0 2>/dev/null); then
+		echo -e "${magenta}\E[7mreturn flags${NORMAL}"
+		#		set -TE +e
+	else
+		echo -e "${magenta}\E[7mexit flags${NORMAL}"
+		set -e
+	fi
+	set -E
+	echo "the following traps are saved"	
+	if [ -z "${save_traps}" ]; then
+		echo "${fTAB}none"	
+
+		echo "setting traps..."		
+		trap 'print_error $LINENO $? $BASH_COMMAND' ERR
+		trap print_exit EXIT
+		trap 'echo -e "${yellow}RETURN${NORMAL}: ${0##*/} $LINENO $? $BASH_COMMAND"' RETURN
+
+	else
+
+		echo "${save_traps}" | sed "s/^/${fTAB}/"
+		echo "setting saved traps..."
+		eval $(echo "${save_traps}" | sed "s/$/;/g")
+
+		#eval $(echo '${save_traps}')
+	fi
+	echo "on set trap retrun, the following traps are set"
+	trap -p | sed "s/^/${fTAB}/"
+	if [ -z "$(trap -p)" ]; then
+		echo "${fTAB}none"
+		exit
+	fi
+}
+
+function unset_traps() {
+	start_new_line
+	echo -e "${cyan}\E[7mun-set traps${NORMAL}"
+
+	echo "setting shell options..."
+	#	set +eET
+	set +eE
+	
+	echo "the current traps are set"
+	trap -p | sed "s/^/${fTAB}/"
+
+	if [ -z "$(trap -p)" ]; then
+		echo "${fTAB}none"
+	else
+
+		# save traps
+		save_traps=$(trap -p | sed 's/-- //g')
+
+		if [ ! -z "${save_traps}" ]; then
+			echo "the current traps are saved"
+			echo "${save_traps}" | sed "s/^/${fTAB}/"
+		fi
+		
+		trap - ERR
+		trap - EXIT
+		trap - RETURN
+
+	fi
+
+	
+	echo "on unset trap retrun, the following traps are set"
+	trap -p
+
+	if [ -z $(trap -p) ]; then
+		echo "${fTAB}none"
+	else
+		exit
+	fi
+
+}
+
+set_traps
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
@@ -171,12 +246,10 @@ for repo in $list; do
 		: $((n_found++))
 		cd ${HOME}/$repo
 		echo -n "checking repository status... "
-		set +e
+		unset_traps
 		git rev-parse --is-inside-work-tree &>/dev/null
 		RETVAL=$?
-		if ! (return 0 2>/dev/null); then
-			set -e
-		fi
+		set_traps
 		if [[ $RETVAL -eq 0 ]]; then
 			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 			: $((n_git++))
@@ -250,11 +323,10 @@ for repo in $list; do
 				if [ ${do_check} = 'true' ]; then					
 					# check connection before proceeding
 					echo "checking SSH connection..."
-					set +e
-					trap - ERR
+					unset_traps
 					ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${rhost}
-					RETVAL=$?					
-					set -e +x
+					RETVAL=$?
+					set_traps
 					if [[ $RETVAL == 0 ]]; then
 						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 						# add to list
@@ -472,11 +544,9 @@ for repo in $list; do
 	else
 		echo "not found"
 		loc_fail+="$repo "
-		set +e
+		unset_traps
 		bash test_file ${HOME}/$repo
-		if ! (return 0 2>/dev/null); then
-			set -e
-		fi
+		set_traps
 	fi
 done
 
