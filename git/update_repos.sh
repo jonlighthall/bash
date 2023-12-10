@@ -208,25 +208,44 @@ for repo in $list; do
 			fi
 			OK_list+=${remote_url}
 
+			# push/pull setting
+			GIT_HIGHLIGHT='\x1b[7m'
+			
 			# print remote parsing
 			echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
 			echo "${TAB}remote name is $remote_name"
 			echo "  remote ${remote_url}"
 
+			# parse protocol
 			remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
 			if [[ "${remote_pro}" == "git" ]]; then
 				remote_pro="SSH"
+				rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
+				echo "    host $rhost"
+				# check connection before proceeding
+				echo "checking SSH connection..."
+				set +e 
+				ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${rhost}
+				RETVAL=$?
+				set -e +x
+				if [[ $RETVAL == 0 ]]; then
+					echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+				else
+					if [[ $RETVAL == 1 ]]; then
+						echo -e "${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+						# Github will return 1 if everything is working
+					else
+						echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+					fi
+				fi
 			fi
-			echo "protocol ${remote_pro}"
+			echo "protocol ${remote_pro}"			
 
 			# get number of remotes
 			n_remotes=$(git remote | wc -l)
 			if [ "${n_remotes}" -gt 1 ]; then
 				echo "remotes found: ${n_remotes}"
 			fi
-
-			# push/pull setting
-			GIT_HIGHLIGHT='\x1b[7m'
 
 			#------------------------------------------------------
 			# fetch
