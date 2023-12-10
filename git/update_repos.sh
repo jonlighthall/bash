@@ -11,9 +11,9 @@ start_time=$(date +%s%N)
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
 	TAB=''
-	: ${fTAB:='	'}
+	: ${fTAB:='   '}
 else
-	TAB+=${TAB+${fTAB:='	'}}
+	TAB+=${TAB+${fTAB:='   '}}
 fi
 
 # load formatting and functions
