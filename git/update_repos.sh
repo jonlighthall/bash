@@ -151,6 +151,8 @@ push_fail=''
 mod_repos=''
 mod_files=''
 unset OK_list
+host_OK=''
+host_bad=''
 
 # track push/pull times
 t_pull_max=0
@@ -222,20 +224,63 @@ for repo in $list; do
 				remote_pro="SSH"
 				rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
 				echo "    host $rhost"
-				# check connection before proceeding
-				echo "checking SSH connection..."
-				set +e 
-				ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${rhost}
-				RETVAL=$?
-				set -e +x
-				if [[ $RETVAL == 0 ]]; then
-					echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+
+				# default to checking host
+				do_check=true
+				echo "do_check = $do_check"
+				
+				# check remote host name against list of checked hosts
+				if [ ! -z ${host_OK:+dummy} ]; then
+					echo "checking $rhost against list of checked hosts"
+					for good_host in ${host_OK}; do 
+						if [[ $rhost =~ $good_host ]]; then
+							echo "$rhost matches $good_host"
+							do_check=false
+							break
+						else
+							continue
+						fi
+					done
 				else
-					if [[ $RETVAL == 1 ]]; then
-						echo -e "${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-						# Github will return 1 if everything is working
+					echo "list of checked hosts empty"
+				fi
+
+				echo "do_check = $do_check"
+				
+				if [ ${do_check} = 'true' ]; then					
+					# check connection before proceeding
+					echo "checking SSH connection..."
+					set +e
+					trap - ERR
+					ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${rhost}
+					RETVAL=$?					
+					set -e +x
+					if [[ $RETVAL == 0 ]]; then
+						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+						# add to list
+						if [ ! -z ${host_OK:+dummy} ]; then
+							host_OK+=$'\n'
+						fi
+						host_OK+=${rhost}						
 					else
-						echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+						if [[ $RETVAL == 1 ]]; then
+							echo -e "${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+
+							if [[ $rhost =~ "github.com" ]]; then
+								echo "host is github"
+								# Github will return 1 if everything is working
+								
+								# add to list
+								if [ ! -z ${host_OK:+dummy} ]; then
+									host_OK+=$'\n'
+								fi
+								host_OK+=${rhost}
+							else
+								echo "host is not github"
+							fi							
+						else
+							echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+						fi
 					fi
 				fi
 			fi
