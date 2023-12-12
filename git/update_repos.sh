@@ -365,7 +365,7 @@ for repo in $list; do
 			# get number of remotes
 			n_remotes=$(git remote | wc -l)
 			if [ "${n_remotes}" -gt 1 ]; then
-				echo "remotes found: ${n_remotes}"
+				decho "remotes found: ${n_remotes}"
 			fi
 
 			#------------------------------------------------------
@@ -395,12 +395,12 @@ for repo in $list; do
 			#------------------------------------------------------
 			# pull
 			#------------------------------------------------------
-			echo -n "leading remote commits: "
+			decho -n "leading remote commits: "
 			N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
 			if [ ${N_remote} -eq 0 ]; then
-				echo "none"
+				decho "none"
 			else
-				echo "${N_remote}"
+				decho "${N_remote}"
 
 				echo "pulling... "
 				cmd_base="git pull --all --progress --tags --verbose" #--prune"
@@ -478,12 +478,12 @@ for repo in $list; do
 			#------------------------------------------------------
 			# push
 			#------------------------------------------------------
-			echo -n "trailing local commits: "
+			decho -n "trailing local commits: "
 			N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
 			if [ ${N_local} -eq 0 ]; then
-				echo "none"
+				decho "none"
 			else
-				echo "${N_local}"
+				decho "${N_local}"
 
 				echo "pushing... "
 				cmd_base="git push --progress --verbose"
