@@ -212,15 +212,29 @@ do
 			
 			if [ "${!VAR}" = true ] || [ "${!VAR}" = false ]; then # boolean
 				echo "boolean tests"
-				echo -e -n " ${VAR}  : " # true when unset or null; fails when non-boolean: command not found
+				echo -e -n "  ${VAR}  : " # true when unset or null; fails when non-boolean: command not found
 				if ${!VAR}; then
 					echo -e " ${TRUE}"
 				else
 					echo -e "${FALSE}"
 				fi
+				
+				echo -e -n " !${VAR}  : "
+				if ! ${!VAR}; then
+					echo -e " ${TRUE}"
+				else
+					echo -e "${FALSE}"
+				fi
 
-				echo -e -n "\"${VAR}\" : " # fails when unset or null or non-boolean: command not found
+				echo -e -n " \"${VAR}\" : " # fails when unset or null or non-boolean: command not found
 				if "${!VAR}"; then
+					echo -e " ${TRUE}"
+				else
+					echo -e "${FALSE}"
+				fi
+				
+				echo -e -n "!\"${VAR}\" : "
+				if ! "${!VAR}"; then
 					echo -e " ${TRUE}"
 				else
 					echo -e "${FALSE}"
@@ -232,29 +246,36 @@ do
     # practical tests
 	if ! [[ "${!VAR}" =~ " "  ]]; then
 		echo -e "----------------------------------------------------"
-		echo -e -n "   not unset (set): "
+		echo -e -n "    not unset (set): "
 		if [ ! -z ${!VAR+dummy} ]; then
 			echo -e " ${TRUE}"
 		else
 			echo -e "${FALSE}"
 		fi
 
-		echo -e -n "not unset\E[0m and true\E[0m: "
+		echo -e -n "not unset and  true: "
 		if [ ! -z ${!VAR:+dummy} ] && [ ${!VAR} = true ]; then
+			echo -e " ${TRUE}" # fails when what
+		else
+			echo -e "${FALSE}"
+		fi
+		
+		echo -e -n "not unset and false: "
+		if [ ! -z ${!VAR:+dummy} ] && [ ${!VAR} = false ]; then
 			echo -e " ${TRUE}" # fails when what
 		else
 			echo -e "${FALSE}"
 		fi
 
 		# NB -n arguments must be in quotes
-		echo -e -n "      set and true: "
+		echo -e -n "      set and  true: "
 		if [ -n "${!VAR:+dummy}" ] && [ ${!VAR} = true ]; then
 			echo -e " ${TRUE}"
 		else
 			echo -e "${FALSE}"
 		fi
 
-		echo -e -n "     set and false: "
+		echo -e -n "      set and false: "
 		if [ -n "${!VAR:+dummy}" ] && [ ${!VAR} = false ]; then
 			echo -e " ${TRUE}"
 		else
