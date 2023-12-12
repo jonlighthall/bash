@@ -20,10 +20,10 @@ declare -i DEBUG=0
 
 # conditional debug echo
 decho() {
-    if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
+	if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
 		# if DEBUG is (unset or null) or greater than 0
 		echo "$@"
-    fi
+	fi
 }
 
 # load formatting and functions
@@ -44,11 +44,11 @@ function set_traps() {
 		set -e
 	fi
 	set -E
-	decho "the following traps are saved"	
+	decho "the following traps are saved"
 	if [ -z "${save_traps}" ]; then
-		decho "${fTAB}none"	
+		decho "${fTAB}none"
 
-		decho "setting traps..."		
+		decho "setting traps..."
 		trap 'print_error $LINENO $? $BASH_COMMAND' ERR
 		trap print_exit EXIT
 		trap 'echo -e "${yellow}RETURN${NORMAL}: ${0##*/} $LINENO $? $BASH_COMMAND"' RETURN
@@ -74,7 +74,7 @@ function unset_traps() {
 	decho "setting shell options..."
 	#	set +eET
 	set +eE
-	
+
 	decho "the current traps are set"
 
 	if [ -z "$(trap -p)" ]; then
@@ -88,7 +88,7 @@ function unset_traps() {
 			decho "the current traps are saved"
 			decho "${save_traps}" | sed "s/^/${fTAB}/"
 		fi
-		
+
 		trap - ERR
 		trap - EXIT
 		trap - RETURN
@@ -289,7 +289,7 @@ for repo in $list; do
 
 			# push/pull setting
 			GIT_HIGHLIGHT='\E[7m'
-			
+
 			# print remote parsing
 			decho -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
 			decho "${TAB}remote name is $remote_name"
@@ -305,11 +305,11 @@ for repo in $list; do
 				# default to checking host
 				do_check=true
 				decho "do_check = $do_check"
-				
+
 				# check remote host name against list of checked hosts
 				if [ ! -z ${host_OK:+dummy} ]; then
 					decho "checking $rhost against list of checked hosts"
-					for good_host in ${host_OK}; do 
+					for good_host in ${host_OK}; do
 						if [[ $rhost =~ $good_host ]]; then
 							decho "$rhost matches $good_host"
 							do_check=false
@@ -323,8 +323,8 @@ for repo in $list; do
 				fi
 
 				decho "do_check = $do_check"
-				
-				if [ ${do_check} = 'true' ]; then					
+
+				if [ ${do_check} = 'true' ]; then
 					# check connection before proceeding
 					echo "checking SSH connection..."
 					unset_traps
@@ -337,7 +337,7 @@ for repo in $list; do
 						if [ ! -z ${host_OK:+dummy} ]; then
 							host_OK+=$'\n'
 						fi
-						host_OK+=${rhost}						
+						host_OK+=${rhost}
 					else
 						if [[ $RETVAL == 1 ]]; then
 							echo -e "${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
@@ -345,7 +345,7 @@ for repo in $list; do
 							if [[ $rhost =~ "github.com" ]]; then
 								decho "host is github"
 								# Github will return 1 if everything is working
-								
+
 								# add to list
 								if [ ! -z ${host_OK:+dummy} ]; then
 									host_OK+=$'\n'
@@ -353,14 +353,14 @@ for repo in $list; do
 								host_OK+=${rhost}
 							else
 								decho "host is not github"
-							fi							
+							fi
 						else
 							echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 						fi
 					fi
 				fi
 			fi
-			decho "protocol ${remote_pro}"			
+			decho "protocol ${remote_pro}"
 
 			# get number of remotes
 			n_remotes=$(git remote | wc -l)
@@ -376,8 +376,8 @@ for repo in $list; do
 			if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
 				cmd_base+=" --verbose"
 			fi
-			cmd="${cmd_base} update"			
-			${cmd}							
+			cmd="${cmd_base} update"
+			${cmd}
 
 			RETVAL=$?
 			echo -en "${GIT_HIGHLIGHT} fetch ${NORMAL} "
