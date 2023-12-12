@@ -8,7 +8,7 @@ $(hostname -y &> /dev/null)
 DOM_RET_VAL=$?
 DOMAIN=$(hostname -d)
 if [ $DOM_RET_VAL -ne 0 ] && [ -z ${DOMAIN} ] ; then
-    echo -e "\x1b[31mnot set\x1b[0m"
+    echo -e "\E[31mnot set\E[0m"
 else
     echo "${DOMAIN}"
 fi
@@ -23,7 +23,7 @@ else
 fi
 echo -n "display: "
 if [ -z $DISPLAY ]; then
-    echo -e "\x1b[31mnot set\x1b[0m"
+    echo -e "\E[31mnot set\E[0m"
 fi
 echo "$DISPLAY"
 echo -n "     OS: "
@@ -43,7 +43,7 @@ echo
 echo -n "   user: "
 if [ -z $USER ]; then
     if [ -z $USERNAME ]; then
-        echo -e "\x1b[31mnot set\x1b[0m"
+        echo -e "\E[31mnot set\E[0m"
         UNAME=''
     else
         UNAME=$USERNAME

@@ -34,6 +34,6 @@ trap 'start_new_line; echo -e "breaking..."; break;' INT
 # print instructions
 echo "press Ctrl-C to exit"
 while [ .true ]; do
-	echo -en "\x1b[2K\r$(print_elap)"
+	echo -en "\E[2K\r$(print_elap)"
 done
 

@@ -49,7 +49,7 @@ function gen_marker () {
     while [[ ! -z $(find_marker) ]]; do
 	echo -ne "${TAB}${TAB}marker = ${marker}\t"
 	echo -ne "found\t\t"
-	find_marker | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/" )
+	find_marker | sed "s/${marker}/\E[1;31m${marker}\E[0m/" | ( [[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\E[1;31m\E[4m${TS_MARKER}\E[0m/" )
 	add_marker
     done
     echo -e "${TAB}${TAB}marker = ${marker}\tnot found"
@@ -132,8 +132,8 @@ do
 	    echo "not found"
 	else
 	    echo -ne "grep:\t\t"
-	    find_marker | sed "s/${marker}/\x1b[1;47;31m${marker}\x1b[0m/"
-	    sed -n -e "s/${marker}/\x1b[1;47;31m${marker}\x1b[0m/p" ${hist_out} | sed "s/^/${TAB}${TAB}\t\t\tsed:\t\t/" | head -1
+	    find_marker | sed "s/${marker}/\E[1;47;31m${marker}\E[0m/"
+	    sed -n -e "s/${marker}/\E[1;47;31m${marker}\E[0m/p" ${hist_out} | sed "s/^/${TAB}${TAB}\t\t\tsed:\t\t/" | head -1
 	fi
 	if [[ $good_list =~ ${j} ]]; then
 	    marker_list+=" $marker"

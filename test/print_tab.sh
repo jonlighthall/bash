@@ -1,8 +1,8 @@
 #!/bin/bash -u
-yellow='\033[0;33m'
-  GOOD='\033[0;32m' # green
-NORMAL='\033[0m'    # reset
- space='\x1B[30;106m'
+yellow='\E[0;33m'
+  GOOD='\E[0;32m' # green
+NORMAL='\E[0m'    # reset
+ space='\E[30;106m'
 
 # set tab
 thisTAB='   '

@@ -201,7 +201,7 @@ while [ -z ${hash_local} ]; do
             git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
             N_local=$(git rev-list $hash_local..HEAD | wc -l)
             if [ $N_local -gt 1 ]; then
-                echo -ne "${TAB}\033[3Dor ${hash_start}^.."
+                echo -ne "${TAB}\E[3Dor ${hash_start}^.."
                 hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
                 echo ${hash_end}
             else
@@ -251,7 +251,7 @@ if [ ! -z ${hash_start_remote} ]; then
     git rev-list $hash_remote..${branch_pull} | sed "s/^/${TAB}/"
     N_remote=$(git rev-list $hash_remote..${branch_pull} | wc -l)
     if [ $N_remote -gt 1 ]; then
-        echo -ne "${TAB}\033[3Dor ${hash_start_remote}^.."
+        echo -ne "${TAB}\E[3Dor ${hash_start_remote}^.."
         hash_end_remote=$(git rev-list $hash_remote..${branch_pull} | head -n 1)
         echo ${hash_end_remote}
     else
