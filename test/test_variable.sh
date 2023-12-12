@@ -142,6 +142,13 @@ do
 					echo -e "${FALSE}"
 				fi
 
+				echo -e -n "[  ${VAR}  =  false  ] : "
+				if [ ${!VAR} = false ]; then
+					echo -e " ${TRUE}"
+				else
+					echo -e "${FALSE}"
+				fi
+
 				# literal
 				echo -e -n "[  ${VAR}  =  'true' ] : " # fails when unset or null: unary operator expected
 				if [ ${!VAR} = 'true' ]; then
@@ -150,9 +157,39 @@ do
 					echo -e "${FALSE}"
 				fi
 
-			fi
+				echo -e -n "[  ${VAR}  = 'false' ] : " 
+				if [ ${!VAR} = 'false' ]; then
+					echo -e " ${TRUE}"
+				else
+					echo -e "${FALSE}"
+				fi
+				
+				#string
+				echo -e -n "[  ${VAR}  =  \"true\" ] : "
+				if [ ${!VAR} = "true" ]; then
+					echo -e " ${TRUE}"
+				else
+					echo -e "${FALSE}"
+				fi
+
+				echo -e -n "[  ${VAR}  = \"false\" ] : "
+				if [ ${!VAR} = "false" ]; then
+					echo -e " ${TRUE}"
+				else
+					echo -e "${FALSE}"
+				fi
+
+			fi			
+			
 			echo -e -n "[ \"${VAR}\" =   true  ] : "
 			if [ "${!VAR}" = true ]; then
+				echo -e " ${TRUE}"
+			else
+				echo -e "${FALSE}"
+			fi
+
+			echo -e -n "[ \"${VAR}\" =  false  ] : "
+			if [ "${!VAR}" = false ]; then
 				echo -e " ${TRUE}"
 			else
 				echo -e "${FALSE}"
@@ -166,6 +203,12 @@ do
 				echo -e "${FALSE}"
 			fi
 
+			echo -e -n "[ \"${VAR}\" = \"false\" ] : "
+			if [ "${!VAR}" = "false" ]; then
+				echo -e " ${TRUE}"
+			else
+				echo -e "${FALSE}"
+			fi
 			
 			if [ "${!VAR}" = true ] || [ "${!VAR}" = false ]; then # boolean
 				echo "boolean tests"
