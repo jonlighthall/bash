@@ -281,7 +281,7 @@ for repo in $list; do
 			OK_list+=${remote_url}
 
 			# push/pull setting
-			GIT_HIGHLIGHT='\x1b[7m'
+			GIT_HIGHLIGHT='\E[7m'
 			
 			# print remote parsing
 			echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"

@@ -1,7 +1,7 @@
 #!/bin/bash -u
 N=5000
 echo "start"
-echo -e "counting to $N... \x1B[s+++"
+echo -e "counting to $N... \E[s+++"
 for ((i=1;i<=$N;i++))
 do
     echo -en "   $i: x"
@@ -9,14 +9,14 @@ do
     echo -en "z"
     if [ "$i" -lt "$N" ];then
 	echo -en " $i < $N"
-	echo -en "\x1B[K"
+	echo -en "\E[K"
     else
 	echo " $i >= $N"
 	echo "done"
-	echo -en "\x1B[u"
+	echo -en "\E[u"
 	sleep 1
 	echo "here"
-	echo -e "\x1B[E"
+	echo -e "\E[E"
     fi
 done
 echo "one more line"

@@ -31,10 +31,10 @@ echo "compare process name..."
 called_by=$(ps -o comm= $PPID)
 echo -n "   called by ${called_by}: "
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-    echo -e "\x1b[0;36menvoked by shell\x1b[0m"
+    echo -e "\E[0;36menvoked by shell\E[0m"
     #(return not_child)
 else
-    echo -e "\x1b[0;35menvoked by another process\x1b[0m"
+    echo -e "\E[0;35menvoked by another process\E[0m"
     #(return child)
 fi
 
@@ -56,7 +56,7 @@ if [ "$SHLVL" = "$SH_LEV" ]; then
     echo "yes"
 else
     echo "no"
-    echo -e "\x1b[0;31mSHELL LEVEL MISMATCH\x1b[0m"
+    echo -e "\E[0;31mSHELL LEVEL MISMATCH\E[0m"
     echo "           shell level = $SHLVL"
     echo "           shell level = $SH_LEV"
     #  exit 1
@@ -107,7 +107,7 @@ fi
 echo
 echo "compare shell level..."
 if (return 0 2>/dev/null); then
-    echo -e "\x1b[33m   sourced\x1b[0m"
+    echo -e "\E[33m   sourced\E[0m"
     echo "   compare shell/script to source..."
     # only works if sourced
     if [ "${0}" = "$BASH_SOURCE" ]; then
@@ -118,7 +118,7 @@ if (return 0 2>/dev/null); then
         echo "      This script is NOT called by another process."
     fi
 else
-    echo -e "\x1b[34m   not sourced\x1b[0m"
+    echo -e "\E[34m   not sourced\E[0m"
 fi
 
 [[ $SHLVL -gt ${nstack} ]] &&
@@ -131,10 +131,10 @@ echo -n "(shell level $SHLVL) -gt (process level $PS_LEV) ? "
 
 if [ "$PS_LEV" -gt 1 ] || ([ "$PS_LEV" -gt "$PPS_LEV" ]) || ([ "$SH_LEV" -gt "$PSH_LEV" ] && [ "$PS_LEV" -gt 1 ]); then
     echo true
-    echo -e "\x1b[0;35m$(basename $BASH_SOURCE) was envoked by another process\x1b[0m"
+    echo -e "\E[0;35m$(basename $BASH_SOURCE) was envoked by another process\E[0m"
 else
     echo false
-    echo -e "\x1b[0;32m$(basename $BASH_SOURCE) was envoked by $SHELL_NAME shell\x1b[0m"
+    echo -e "\E[0;32m$(basename $BASH_SOURCE) was envoked by $SHELL_NAME shell\E[0m"
 fi
 
 # print time at exit

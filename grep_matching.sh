@@ -152,7 +152,7 @@ else
 			fname=$line
 			((k++))
 			# print status
-			printf "\x1b[2K\r%4d/$j %3d%%" $k $((((k * 100)) / j))
+			printf "\E[2K\r%4d/$j %3d%%" $k $((((k * 100)) / j))
 			if [ $((k % $nprint)) -eq 0 ]; then
 				echo -ne " looking for ${fname}... "
 			fi

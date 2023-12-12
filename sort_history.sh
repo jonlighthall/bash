@@ -77,7 +77,7 @@ function gen_marker() {
     while [[ ! -z $(find_marker "$1") ]]; do
         echo -ne "${TAB}${fTAB}marker = ${marker}\t"
         echo -ne "found\t\t"
-        find_marker "$1" | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ([[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/") | cut -c -$line_width
+        find_marker "$1" | sed "s/${marker}/\E[1;31m${marker}\E[0m/" | ([[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\E[1;31m\E[4m${TS_MARKER}\E[0m/") | cut -c -$line_width
         add_marker
     done
     echo -e "${TAB}${fTAB}marker = ${marker}\tnot found"
@@ -285,7 +285,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     echo -n "${TAB}sorting lines... "
     sort -u ${hist_edit} -o ${hist_edit}
     echo "done"
-    echo -e "${TAB}\x1b[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
+    echo -e "${TAB}\E[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
 
     # unmark log in/out lines
     echo -n "${TAB}unmark login lines... "
@@ -360,7 +360,7 @@ echo "done"
 
 # save markers
 N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_out} | wc -l)
-echo -e "${TAB}\x1b[1;31mnumber of differences = $N${NORMAL}"
+echo -e "${TAB}\E[1;31mnumber of differences = $N${NORMAL}"
 echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}

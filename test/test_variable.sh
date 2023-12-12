@@ -17,9 +17,9 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 fi
 
 # define colors
-TRUE='\x1B[1;32mtrue\x1B[0m'
-FALSE='\x1B[1;31mfalse\x1B[0m'
-UNSET='\x1B[1;33munset\x1B[0m'
+TRUE='\E[1;32mtrue\E[0m'
+FALSE='\E[1;31mfalse\E[0m'
+UNSET='\E[1;33munset\E[0m'
 
 clear -x
 
@@ -71,7 +71,7 @@ do
 	echo -n "is ${VAR} null   : "
 	if [ -z ${!VAR-dummy} ]; then
 	    echo -e " ${TRUE}: null (empty)"
-	    echo -e "\n\x1B[1m${VAR} is set and null\x1B[0m"
+	    echo -e "\n\E[1m${VAR} is set and null\E[0m"
 	else
 	    echo -e "${FALSE}: not null"
 	    echo -n "is ${VAR} boolean: "
@@ -80,19 +80,19 @@ do
 		echo -n "is ${VAR} true   : "
 		if ${!VAR}; then # fails when what
 		    echo -e " ${TRUE}"
-		    echo -e "\n\x1B[1m${VAR} is set and ${TRUE}"
+		    echo -e "\n\E[1m${VAR} is set and ${TRUE}"
 		else
 		    echo -e "${FALSE}"
-		    echo -e "\n\x1B[1m${VAR} is set and ${FALSE}"
+		    echo -e "\n\E[1m${VAR} is set and ${FALSE}"
 		fi
 	    else
 		echo -e "${FALSE}: not boolean"
-		echo -e "\n\x1B[1m${VAR} is set and not boolean"
+		echo -e "\n\E[1m${VAR} is set and not boolean"
 	    fi
 	fi
     else
 	echo -e "${FALSE}: ${UNSET}"
-	echo -e "\n\x1B[1m${VAR} is ${UNSET}"
+	echo -e "\n\E[1m${VAR} is ${UNSET}"
     fi
     echo -e "----------------------------------------------------"
 
@@ -159,7 +159,7 @@ do
 	echo -e "${FALSE}"
     fi
 
-    echo -e -n "not unset\x1B[0m and true\x1B[0m: "
+    echo -e -n "not unset\E[0m and true\E[0m: "
     if [ ! -z ${!VAR:+dummy} ] && [ ${!VAR} = true ]; then
 	echo -e " ${TRUE}" # fails when what
     else

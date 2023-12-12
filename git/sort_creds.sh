@@ -98,11 +98,11 @@ echo "done"
 echo -n "${TAB}sorting lines... "
 sort -u ${cred_out} -o ${cred_out}
 echo "done"
-echo -e "${TAB}\x1b[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
+echo -e "${TAB}\E[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
 
 # print number of differences
 N=$(diff --suppress-common-lines -yiEbwB ${cred_bak} ${cred_out} | wc -l)
-echo -e "${TAB}\x1b[1;31mnumber of differences = $N${NORMAL}"
+echo -e "${TAB}\E[1;31mnumber of differences = $N${NORMAL}"
 
 cp -Lpv ${cred_out} ${cred_ref}
 
