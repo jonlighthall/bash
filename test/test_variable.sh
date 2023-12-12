@@ -50,7 +50,7 @@ if [ $# -eq 0 ]; then
     echo "no input received"
     echo "possibilities:"
     echo "   - no argument given"
-    echo "   - value passed (e.g. \$VB) instead of name (e.g. VB)"
+    echo "   - value passed (e.g. \$VB) instead of name (e.g. VB) and:"
     echo -e "      - input is $UNSET"
     echo "      - input is null"
 
@@ -70,7 +70,14 @@ echo "testing variables $input..."
 for VAR in $input
 do
     echo
-    echo "testing VAR: ${VAR} = '${!VAR}'"
+	echo -n "testing VAR: ${VAR} = "
+	
+    if [ -z ${!VAR+dummy} ]; then
+		echo -e "${UNSET}"
+		set +u
+	else
+		echo "'${!VAR}'"
+	fi
 
     if [[ "${VAR}" == "${!VAR}" ]]; then
 	echo "value of variable name matches FOR loop variable name"
@@ -151,14 +158,15 @@ do
     fi
 
     # NB [] tests must include a comparison, otherwise any non-null (including false) will test as true
-    echo -e -n "      quotes [] t : "
+
+	echo -e -n "(quotes) = \"true\" : "
     if [ "${!VAR}" = "true" ]; then
 	echo -e " ${TRUE}"
     else
 	echo -e "${FALSE}"
     fi
 
-    echo -e -n " quotes [] t bare : "
+	echo -e -n "(bare)   =  true  : "
     if [ "${!VAR}" = true ]; then
 	echo -e " ${TRUE}"
     else
