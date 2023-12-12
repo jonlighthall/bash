@@ -4,6 +4,21 @@
 #
 # Jul 2023 JCL
 
+# set tab
+called_by=$(ps -o comm= $PPID)
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
+	TAB=''
+	: ${fTAB:='   '}
+else
+	TAB+=${TAB+${fTAB:='   '}}
+fi
+
+# load formatting and functions
+fpretty=${HOME}/utils/bash/.bashrc_pretty
+if [ -e $fpretty ]; then
+	source $fpretty
+fi
+
 # print source name at start
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
