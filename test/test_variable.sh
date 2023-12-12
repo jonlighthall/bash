@@ -71,7 +71,8 @@ for VAR in $input
 do
     echo
 	echo -n "testing VAR: ${VAR} = "
-	
+
+	# NB when using indirect reference, the parameter must be in brackets
     if [ -z ${!VAR+dummy} ]; then
 		echo -e "${UNSET}"
 		set +u
@@ -116,38 +117,42 @@ do
 		echo -e "${FALSE}: ${UNSET}"
 		echo -e "\n\E[1m${VAR} is ${UNSET}"
     fi
-    echo -e "----------------------------------------------------"
 
+    echo -e "----------------------------------------------------"
     # true/false
+	echo "pseudo-boolean tests"
     echo -e "----------------------------------------------------"
 
     if [ ! -z ${!VAR+dummy} ]; then # set
 		if [ ! -z ${!VAR-dummy} ]; then # not null
-			# NB when using indirect reference, the parameter must be in brackets
-			echo -e -n "    brackets [] t : " # fails when unset or null: unary operator expected
-			if [ ${!VAR} = 'true' ]; then
-				echo -e " ${TRUE}"
-			else
-				echo -e "${FALSE}"
-			fi
+			# NB [] tests must include a comparison, otherwise any non-null (including false) will test as true
+			echo "comparison tests"
 
-			echo -e -n "   no quotes [] t : " # fails when unset or null: unary operator expected
+			echo -e -n "[  ${VAR}  =   true  ] : " # fails when unset or null: unary operator expected
 			if [ ${!VAR} = true ]; then
 				echo -e " ${TRUE}"
 			else
 				echo -e "${FALSE}"
 			fi
 
+			# literal
+			echo -e -n "[  ${VAR}  =  'true' ] : " # fails when unset or null: unary operator expected
+			if [ ${!VAR} = 'true' ]; then
+				echo -e " ${TRUE}"
+			else
+				echo -e "${FALSE}"
+			fi
+
 			if [ ${!VAR} = true ] || [ ${!VAR} = false ]; then # boolean
-				# NB when using indirect reference, the parameter must be in brackets
-				echo -e -n "         brackets : " # true when unset or null; fails when non-boolean: command not found
+				echo "boolean tests"
+				echo -e -n " ${VAR}  : " # true when unset or null; fails when non-boolean: command not found
 				if ${!VAR}; then
 					echo -e " ${TRUE}"
 				else
 					echo -e "${FALSE}"
 				fi
 
-				echo -e -n "           quotes : " # fails when unset or null or non-boolean: command not found
+				echo -e -n "\"${VAR}\" : " # fails when unset or null or non-boolean: command not found
 				if "${!VAR}"; then
 					echo -e " ${TRUE}"
 				else
@@ -157,17 +162,16 @@ do
 		fi
     fi
 
-    # NB [] tests must include a comparison, otherwise any non-null (including false) will test as true
-
-	echo -e -n "(quotes) = \"true\" : "
-    if [ "${!VAR}" = "true" ]; then
+	echo -e -n "[ \"${VAR}\" =   true  ] : "
+	if [ "${!VAR}" = true ]; then
 		echo -e " ${TRUE}"
     else
 		echo -e "${FALSE}"
     fi
 
-	echo -e -n "(bare)   =  true  : "
-    if [ "${!VAR}" = true ]; then
+	# string
+	echo -e -n "[ \"${VAR}\" =  \"true\" ] : "
+	if [ "${!VAR}" = "true" ]; then
 		echo -e " ${TRUE}"
     else
 		echo -e "${FALSE}"
@@ -204,11 +208,12 @@ do
 		echo -e "${FALSE}"
     fi
 
-    echo -e "----------------------------------------------------"
-    # null, no quotes
-    echo -e "----------------------------------------------------"
-    echo -e -n "    NULL (-z)         : "
-    if [ -z ${!VAR} ]; then
+	echo -e "----------------------------------------------------"
+	# null, no quotes
+	echo "no quotes"
+	echo -e "----------------------------------------------------"
+	echo -e -n "    NULL (-z)         : "
+	if [ -z ${!VAR} ]; then
 		echo -e " ${TRUE}: ${UNSET} or null (empty)"
     else
 		echo -e "${FALSE}: set and not null"
@@ -282,9 +287,11 @@ do
     else
 		echo -e "${FALSE}: ${UNSET} or null"
     fi
-
+    
+    echo -e "----------------------------------------------------"
     # not null, quotes
     # NB -n arguments must be in quotes
+    echo "quotes"
     echo -e "----------------------------------------------------"
     echo -e -n "NOT NULL (-n \"\")      : "
     if [ -n "${!VAR}" ]; then
@@ -360,6 +367,7 @@ do
     echo -e "----------------------------------------------------"
     # not null ands, quotes
     # NB -n arguments must be in quotes
+    echo "ands"
     echo -e "----------------------------------------------------"
     echo -e -n "NOT NULL (! -z && -n \"\")    : "
     if [ ! -z ${!VAR} ] && [ -n "${!VAR}"  ]; then
@@ -408,6 +416,7 @@ do
     echo -e "----------------------------------------------------"
     # impossible and
     # NB -n arguments must be in quotes
+    echo "impossible"
     echo -e "----------------------------------------------------"
     echo -e -n "    NULL and NOT NULL (-z && -n \"\")     : "
     if [ -z ${!VAR} ] && [ -n "${!VAR}"  ]; then
@@ -417,7 +426,7 @@ do
     fi
 
     echo -e -n "NOT NULL and     NULL (! -z && ! -n \"\") : "
-    if [ ! -z ${!VAR} ] && [ ! -n "${!VAR}"  ]; then
+    if [ ! -z ${!VAR} ] && [ ! -n "${!VAR}"      ]; then
 		echo -e " ${TRUE}: impossible!"
     else
 		echo -e "${FALSE}: OK"
