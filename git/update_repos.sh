@@ -52,10 +52,11 @@ function set_traps() {
 		#eval $(echo '${save_traps}')
 	fi
 	echo "on set trap retrun, the following traps are set"
-	echo $(trap -p | sed "s/^/${fTAB}/")
 	if [ -z "$(trap -p)" ]; then
 		echo "${fTAB}none"
 		exit
+	else
+		echo $(trap -p | sed "s/^/${fTAB}/")
 	fi
 }
 
@@ -67,11 +68,10 @@ function unset_traps() {
 	set +eE
 	
 	echo "the current traps are set"
-	echo $(trap -p | sed "s/^/${fTAB}/")
 	if [ -z "$(trap -p)" ]; then
 		echo "${fTAB}none"
 	else
-
+		echo $(trap -p | sed "s/^/${fTAB}/")
 		# save traps
 		save_traps=$(trap -p | sed 's/-- //g')
 
@@ -85,16 +85,14 @@ function unset_traps() {
 		trap - RETURN
 
 	fi
-
 	
 	echo "on unset trap retrun, the following traps are set"
-	echo $(trap -p)
 	if [ -z $(trap -p) ]; then
 		echo "${fTAB}none"
 	else
+		echo $(trap -p)
 		exit
 	fi
-
 }
 
 set_traps
