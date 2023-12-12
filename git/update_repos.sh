@@ -52,7 +52,7 @@ function set_traps() {
 		#eval $(echo '${save_traps}')
 	fi
 	echo "on set trap retrun, the following traps are set"
-	trap -p | sed "s/^/${fTAB}/"
+	echo $(trap -p | sed "s/^/${fTAB}/")
 	if [ -z "$(trap -p)" ]; then
 		echo "${fTAB}none"
 		exit
@@ -60,7 +60,6 @@ function set_traps() {
 }
 
 function unset_traps() {
-	start_new_line
 	echo -e "${cyan}\E[7mun-set traps${NORMAL}"
 
 	echo "setting shell options..."
@@ -68,8 +67,7 @@ function unset_traps() {
 	set +eE
 	
 	echo "the current traps are set"
-	trap -p | sed "s/^/${fTAB}/"
-
+	echo $(trap -p | sed "s/^/${fTAB}/")
 	if [ -z "$(trap -p)" ]; then
 		echo "${fTAB}none"
 	else
@@ -90,8 +88,7 @@ function unset_traps() {
 
 	
 	echo "on unset trap retrun, the following traps are set"
-	trap -p
-
+	echo $(trap -p)
 	if [ -z $(trap -p) ]; then
 		echo "${fTAB}none"
 	else
