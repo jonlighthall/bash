@@ -291,27 +291,27 @@ for repo in $list; do
 			GIT_HIGHLIGHT='\E[7m'
 			
 			# print remote parsing
-			echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
-			echo "${TAB}remote name is $remote_name"
-			echo "  remote ${remote_url}"
+			decho -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
+			decho "${TAB}remote name is $remote_name"
+			decho "  remote ${remote_url}"
 
 			# parse protocol
 			remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
 			if [[ "${remote_pro}" == "git" ]]; then
 				remote_pro="SSH"
 				rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
-				echo "    host $rhost"
+				decho "    host $rhost"
 
 				# default to checking host
 				do_check=true
-				echo "do_check = $do_check"
+				decho "do_check = $do_check"
 				
 				# check remote host name against list of checked hosts
 				if [ ! -z ${host_OK:+dummy} ]; then
-					echo "checking $rhost against list of checked hosts"
+					decho "checking $rhost against list of checked hosts"
 					for good_host in ${host_OK}; do 
 						if [[ $rhost =~ $good_host ]]; then
-							echo "$rhost matches $good_host"
+							decho "$rhost matches $good_host"
 							do_check=false
 							break
 						else
@@ -319,10 +319,10 @@ for repo in $list; do
 						fi
 					done
 				else
-					echo "list of checked hosts empty"
+					decho "list of checked hosts empty"
 				fi
 
-				echo "do_check = $do_check"
+				decho "do_check = $do_check"
 				
 				if [ ${do_check} = 'true' ]; then					
 					# check connection before proceeding
@@ -343,7 +343,7 @@ for repo in $list; do
 							echo -e "${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 
 							if [[ $rhost =~ "github.com" ]]; then
-								echo "host is github"
+								decho "host is github"
 								# Github will return 1 if everything is working
 								
 								# add to list
@@ -352,7 +352,7 @@ for repo in $list; do
 								fi
 								host_OK+=${rhost}
 							else
-								echo "host is not github"
+								decho "host is not github"
 							fi							
 						else
 							echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
@@ -360,7 +360,7 @@ for repo in $list; do
 					fi
 				fi
 			fi
-			echo "protocol ${remote_pro}"			
+			decho "protocol ${remote_pro}"			
 
 			# get number of remotes
 			n_remotes=$(git remote | wc -l)
@@ -371,7 +371,7 @@ for repo in $list; do
 			#------------------------------------------------------
 			# fetch
 			#------------------------------------------------------
-			echo "updating..."
+			decho "updating..."
 			git remote --verbose update
 			RETVAL=$?
 			echo -en "${GIT_HIGHLIGHT} fetch ${NORMAL} "
