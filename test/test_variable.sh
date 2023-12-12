@@ -21,14 +21,14 @@ fi
 
 # print source name at start
 if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
+	RUN_TYPE="sourcing"
 else
-    RUN_TYPE="executing"
-fi    
+	RUN_TYPE="executing"
+fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+	echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
 # define colors
@@ -40,59 +40,58 @@ clear -x
 
 # check if sourced
 if (return 0 2>/dev/null); then
-    echo "script is sourced"
+	echo "script is sourced"
 else
-    echo "CAUTION: script has not been sourced. Results may not reflect current shell."
+	echo "CAUTION: script has not been sourced. Results may not reflect current shell."
 fi
 
 # parse inputs
 if [ $# -eq 0 ]; then
-    echo "no input received"
-    echo "possibilities:"
-    echo "   - no argument given"
-    echo "   - value passed (e.g. \$VB) instead of name (e.g. VB) and:"
-    echo -e "      - input is $UNSET"
-    echo "      - input is null"
+	echo "no input received"
+	echo "possibilities:"
+	echo "   - no argument given"
+	echo "   - value passed (e.g. \$VB) instead of name (e.g. VB) and:"
+	echo -e "      - input is $UNSET"
+	echo "      - input is null"
 
-    if ! (return 0 2>/dev/null); then
+	if ! (return 0 2>/dev/null); then
 		echo "   - input is not exported"
-    fi
-    echo "using default argument"
-    input=VB
+	fi
+	echo "using default argument"
+	input=VB
 else
-    echo "arguments: $@"
-    input=$@
+	echo "arguments: $@"
+	input=$@
 fi
 
 echo "testing variables $input..."
 
 # test inputs
-for VAR in $input
-do
-    echo
+for VAR in $input; do
+	echo
 	echo -n "testing VAR: ${VAR} = "
 
 	# NB when using indirect reference, the parameter must be in brackets
-    if [ -z ${!VAR+dummy} ]; then
+	if [ -z ${!VAR+dummy} ]; then
 		echo -e "${UNSET}"
 		set +u
 	else
 		echo "'${!VAR}'"
 	fi
 
-    if [[ "${VAR}" == "${!VAR}" ]]; then
+	if [[ "${VAR}" == "${!VAR}" ]]; then
 		echo "value of variable name matches FOR loop variable name"
 		break
-    fi
+	fi
 
-    echo -e "----------------------------------------------------"
-    # what is it?
-    echo -e "----------------------------------------------------"
-    echo -n "is ${VAR} set    : "
-    if [ ! -z ${!VAR+dummy} ]; then
+	echo -e "----------------------------------------------------"
+	# what is it?
+	echo -e "----------------------------------------------------"
+	echo -n "is ${VAR} set    : "
+	if [ ! -z ${!VAR+dummy} ]; then
 		echo -e " ${TRUE}: set"
 		echo -n "does ${VAR} contain whitespace :"
-		if [[ "${!VAR}" =~ " "  ]]; then
+		if [[ "${!VAR}" =~ " " ]]; then
 			echo -e " ${TRUE}: contains whitespace"
 		else
 			echo -e "${FALSE}: does not contain whitespace"
@@ -120,21 +119,21 @@ do
 				fi
 			fi
 		fi
-    else
+	else
 		echo -e "${FALSE}: ${UNSET}"
 		echo -e "\n\E[1m${VAR} is ${UNSET}"
 	fi
-	
-    echo -e "----------------------------------------------------"
-    # true/false
-	echo "pseudo-boolean tests"
-    echo -e "----------------------------------------------------"
 
-    if [ ! -z ${!VAR+dummy} ]; then # set
+	echo -e "----------------------------------------------------"
+	# true/false
+	echo "pseudo-boolean tests"
+	echo -e "----------------------------------------------------"
+
+	if [ ! -z ${!VAR+dummy} ]; then    # set
 		if [ ! -z "${!VAR-dummy}" ]; then # not null
 			# NB [] tests must include a comparison, otherwise any non-null (including false) will test as true
 			echo "comparison tests"
-			if ! [[ "${!VAR}" =~ " "  ]]; then
+			if ! [[ "${!VAR}" =~ " " ]]; then
 				echo -e -n "[  ${VAR}  =   true  ] : " # fails when unset or null: unary operator expected
 				if [ ${!VAR} = true ]; then
 					echo -e " ${TRUE}"
@@ -157,13 +156,13 @@ do
 					echo -e "${FALSE}"
 				fi
 
-				echo -e -n "[  ${VAR}  = 'false' ] : " 
+				echo -e -n "[  ${VAR}  = 'false' ] : "
 				if [ ${!VAR} = 'false' ]; then
 					echo -e " ${TRUE}"
 				else
 					echo -e "${FALSE}"
 				fi
-				
+
 				#string
 				echo -e -n "[  ${VAR}  =  \"true\" ] : "
 				if [ ${!VAR} = "true" ]; then
@@ -178,9 +177,8 @@ do
 				else
 					echo -e "${FALSE}"
 				fi
+			fi
 
-			fi			
-			
 			echo -e -n "[ \"${VAR}\" =   true  ] : "
 			if [ "${!VAR}" = true ]; then
 				echo -e " ${TRUE}"
@@ -209,16 +207,17 @@ do
 			else
 				echo -e "${FALSE}"
 			fi
-			
+
 			if [ "${!VAR}" = true ] || [ "${!VAR}" = false ]; then # boolean
 				echo "boolean tests"
-				echo -e -n "  ${VAR}  : " # true when unset or null; fails when non-boolean: command not found
+				# the following conditionals will fail when non-boolean: command not found
+				echo -e -n "  ${VAR}  : "
 				if ${!VAR}; then
 					echo -e " ${TRUE}"
 				else
 					echo -e "${FALSE}"
 				fi
-				
+
 				echo -e -n " !${VAR}  : "
 				if ! ${!VAR}; then
 					echo -e " ${TRUE}"
@@ -226,13 +225,13 @@ do
 					echo -e "${FALSE}"
 				fi
 
-				echo -e -n " \"${VAR}\" : " # fails when unset or null or non-boolean: command not found
+				echo -e -n " \"${VAR}\" : "
 				if "${!VAR}"; then
 					echo -e " ${TRUE}"
 				else
 					echo -e "${FALSE}"
 				fi
-				
+
 				echo -e -n "!\"${VAR}\" : "
 				if ! "${!VAR}"; then
 					echo -e " ${TRUE}"
@@ -241,10 +240,10 @@ do
 				fi
 			fi
 		fi
-    fi
+	fi
 
-    # practical tests
-	if ! [[ "${!VAR}" =~ " "  ]]; then
+	# practical tests
+	if ! [[ "${!VAR}" =~ " " ]]; then
 		echo -e "----------------------------------------------------"
 		echo -e -n "    not unset (set): "
 		if [ ! -z ${!VAR+dummy} ]; then
@@ -259,7 +258,7 @@ do
 		else
 			echo -e "${FALSE}"
 		fi
-		
+
 		echo -e -n "not unset and false: "
 		if [ ! -z ${!VAR:+dummy} ] && [ ${!VAR} = false ]; then
 			echo -e " ${TRUE}" # fails when what
@@ -445,14 +444,14 @@ do
 	echo "ands"
 	echo -e "----------------------------------------------------"
 	echo -e -n "NOT NULL (! -z && -n \"\")    : "
-	if [ ! -z "${!VAR}" ] && [ -n "${!VAR}"     ]; then
+	if [ ! -z "${!VAR}" ] && [ -n "${!VAR}" ]; then
 		echo -e " ${TRUE}: set and not null"
 	else
 		echo -e "${FALSE}: ${UNSET} or null"
 	fi
 
 	echo -e -n "NOT NULL (! -z && -n + \"\")  : "
-	if [ ! -z "${!VAR+dummy}" ] && [ -n "${!VAR+dummy}" ];    then
+	if [ ! -z "${!VAR+dummy}" ] && [ -n "${!VAR+dummy}" ]; then
 		echo -e " ${TRUE}: set (maybe null)"
 	else
 		echo -e "${FALSE}: ${UNSET}"
@@ -468,7 +467,7 @@ do
 	# null ands, quotes
 	echo -e "----------------------------------------------------"
 	echo -e -n "    NULL (-z && ! -n \"\")    : "
-	if [ -z "${!VAR}" ] && [ ! -n "${!VAR}" ];    then
+	if [ -z "${!VAR}" ] && [ ! -n "${!VAR}" ]; then
 		echo -e " ${TRUE}: ${UNSET} or null"
 	else
 		echo -e "${FALSE}: set and not null"
@@ -494,14 +493,14 @@ do
 	echo "impossible"
 	echo -e "----------------------------------------------------"
 	echo -e -n "    NULL and NOT NULL (-z && -n \"\")     : "
-	if [ -z "${!VAR}" ] && [ -n "${!VAR}"  ]; then
+	if [ -z "${!VAR}" ] && [ -n "${!VAR}" ]; then
 		echo -e " ${TRUE}: impossible!"
 	else
 		echo -e "${FALSE}: OK"
 	fi
 
 	echo -e -n "NOT NULL and	 NULL (! -z && ! -n \"\") : "
-	if [ ! -z "${!VAR}" ] && [ ! -n "${!VAR}"  ]; then
+	if [ ! -z "${!VAR}" ] && [ ! -n "${!VAR}" ]; then
 		echo -e " ${TRUE}: impossible!"
 	else
 		echo -e "${FALSE}: OK"
