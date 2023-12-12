@@ -16,6 +16,16 @@ else
 	TAB+=${TAB+${fTAB:='   '}}
 fi
 
+declare -i DEBUG=0
+
+# conditional debug echo
+decho() {
+    if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
+		# if DEBUG is (unset or null) or greater than 0
+		echo "$@"
+    fi
+}
+
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
@@ -24,60 +34,59 @@ fi
 
 # define traps
 function set_traps() {
-	echo -e "${magenta}\E[7mset traps${NORMAL}"
-	echo "setting shell options..."
+	decho -e "${magenta}\E[7mset traps${NORMAL}"
+	decho "setting shell options..."
 	if (return 0 2>/dev/null); then
-		echo -e "${magenta}\E[7mreturn flags${NORMAL}"
+		decho -e "${magenta}\E[7mreturn flags${NORMAL}"
 		#		set -TE +e
 	else
-		echo -e "${magenta}\E[7mexit flags${NORMAL}"
+		decho -e "${magenta}\E[7mexit flags${NORMAL}"
 		set -e
 	fi
 	set -E
-	echo "the following traps are saved"	
+	decho "the following traps are saved"	
 	if [ -z "${save_traps}" ]; then
-		echo "${fTAB}none"	
+		decho "${fTAB}none"	
 
-		echo "setting traps..."		
+		decho "setting traps..."		
 		trap 'print_error $LINENO $? $BASH_COMMAND' ERR
 		trap print_exit EXIT
 		trap 'echo -e "${yellow}RETURN${NORMAL}: ${0##*/} $LINENO $? $BASH_COMMAND"' RETURN
 
 	else
-
-		echo "${save_traps}" | sed "s/^/${fTAB}/"
-		echo "setting saved traps..."
+		decho "${save_traps}" | sed "s/^/${fTAB}/"
+		decho "setting saved traps..."
 		eval $(echo "${save_traps}" | sed "s/$/;/g")
 
 		#eval $(echo '${save_traps}')
 	fi
-	echo "on set trap retrun, the following traps are set"
+	decho "on set trap retrun, the following traps are set"
 	if [ -z "$(trap -p)" ]; then
-		echo "${fTAB}none"
+		decho "${fTAB}none"
 		exit
 	else
-		echo $(trap -p | sed "s/^/${fTAB}/")
+		decho $(trap -p | sed "s/^/${fTAB}/")
 	fi
 }
 
 function unset_traps() {
-	echo -e "${cyan}\E[7mun-set traps${NORMAL}"
-
-	echo "setting shell options..."
+	decho -e "${cyan}\E[7mun-set traps${NORMAL}"
+	decho "setting shell options..."
 	#	set +eET
 	set +eE
 	
-	echo "the current traps are set"
+	decho "the current traps are set"
+
 	if [ -z "$(trap -p)" ]; then
-		echo "${fTAB}none"
+		decho "${fTAB}none"
 	else
-		echo $(trap -p | sed "s/^/${fTAB}/")
+		decho $(trap -p | sed "s/^/${fTAB}/")
 		# save traps
 		save_traps=$(trap -p | sed 's/-- //g')
 
 		if [ ! -z "${save_traps}" ]; then
-			echo "the current traps are saved"
-			echo "${save_traps}" | sed "s/^/${fTAB}/"
+			decho "the current traps are saved"
+			decho "${save_traps}" | sed "s/^/${fTAB}/"
 		fi
 		
 		trap - ERR
@@ -85,12 +94,12 @@ function unset_traps() {
 		trap - RETURN
 
 	fi
-	
-	echo "on unset trap retrun, the following traps are set"
+
+	decho "on unset trap retrun, the following traps are set"
 	if [ -z $(trap -p) ]; then
-		echo "${fTAB}none"
+		decho "${fTAB}none"
 	else
-		echo $(trap -p)
+		decho $(trap -p)
 		exit
 	fi
 }
