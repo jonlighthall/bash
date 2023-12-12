@@ -372,7 +372,13 @@ for repo in $list; do
 			# fetch
 			#------------------------------------------------------
 			decho "updating..."
-			git remote --verbose update
+			cmd_base="git remote"
+			if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
+				cmd_base+=" --verbose"
+			fi
+			cmd="${cmd_base} update"			
+			${cmd}							
+
 			RETVAL=$?
 			echo -en "${GIT_HIGHLIGHT} fetch ${NORMAL} "
 			if [[ $RETVAL == 0 ]]; then
