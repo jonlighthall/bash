@@ -307,10 +307,11 @@ for VAR in $input; do
 		
 		echo -ne "    NULL [ -z \${VAR+a } ]\t: "
 		# only true when VAR is unset
+		a3="set (maybe null)"
 		if [ -z ${!VAR+alternate} ]; then
 			echo -ne " ${TRUE}: ${UNSET}\t"
 		else
-			echo -ne "${FALSE}: set (maybe null)"
+			echo -ne "${FALSE}: ${a3}"
 		fi
 		# substitution occurs when VAR is set or null
 		echo -e "\t: '${!VAR+alternate}'"
@@ -350,7 +351,7 @@ for VAR in $input; do
 
 		echo -ne "NOT NULL (! -z +)     : "
 		if [ ! -z ${!VAR+alternate} ]; then
-			echo -e " ${TRUE}: set (maybe null)"
+			echo -e " ${TRUE}: ${a3}"
 		else
 			echo -e "${FALSE}: ${UNSET}"
 		fi
@@ -391,7 +392,7 @@ for VAR in $input; do
 
 	echo -ne "NOT NULL (-n + \"\")	: "
 	if [ -n "${!VAR+alternate}" ]; then
-		echo -e " ${TRUE}: set (maybe null)"
+		echo -e " ${TRUE}: ${a3}"
 	else
 		echo -e "${FALSE}: ${UNSET}"
 	fi
@@ -430,7 +431,7 @@ for VAR in $input; do
 	if [ ! -n "${!VAR+alternate}" ]; then
 		echo -e " ${TRUE}: ${UNSET}"
 	else
-		echo -e "${FALSE}: set (maybe null)"
+		echo -e "${FALSE}: ${a3}"
 	fi
 
 	echo -ne "    NULL (! -n :+ \"\")   : "
@@ -453,7 +454,7 @@ for VAR in $input; do
 
 	echo -ne "NOT NULL (! -z && -n + \"\")  : "
 	if [ ! -z "${!VAR+alternate}" ] && [ -n "${!VAR+alternate}" ]; then
-		echo -e " ${TRUE}: set (maybe null)"
+		echo -e " ${TRUE}: ${a3}"
 	else
 		echo -e "${FALSE}: ${UNSET}"
 	fi
@@ -478,7 +479,7 @@ for VAR in $input; do
 	if [ -z "${!VAR+alternate}" ] && [ ! -n "${!VAR+alternate}" ]; then
 		echo -e " ${TRUE}: ${UNSET}"
 	else
-		echo -e "${FALSE}: set (maybe null)"
+		echo -e "${FALSE}: ${a3}"
 	fi
 
 	echo -ne "    NULL (-z && ! -n :+ \"\") : "
