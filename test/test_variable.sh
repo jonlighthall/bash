@@ -274,7 +274,7 @@ for VAR in $input; do
 		echo -ne "    NULL [ -z \${VAR-d } ]\t: "
 		# only true when VAR is null		
 		if [ -z ${!VAR-default} ]; then
-			echo -ne " ${TRUE}: ${NULL}"
+			echo -ne " ${TRUE}: ${NULL}\t"
 		else
 			echo -ne "${FALSE}: ${UNSET} or not null"
 		fi
