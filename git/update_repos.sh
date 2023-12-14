@@ -390,8 +390,8 @@ for repo in $list; do
 				echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 				echo "failed to fetch remote"
 				echo "WSL may need to be restarted"
-				echo "Press Ctrl-C to cancel"
-				read -e -i "shutdown_wsl" && eval "$REPLY"
+				echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
+				read -e -i "shutdown_wsl" -p $'\e[0;32m$\e[0m ' && eval $REPLY
 			fi
 
 			#------------------------------------------------------
