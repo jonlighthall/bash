@@ -80,6 +80,7 @@ for VAR in $input; do
 	echo -n "testing VAR: ${VAR} = "
 
 	# NB when using indirect reference, the parameter must be in brackets
+	# check if VAR is set
 	if [ -z ${!VAR+dummy} ]; then
 		echo -e "${UNSET}"
 		set +u
@@ -94,11 +95,11 @@ for VAR in $input; do
 
 	echo -e "----------------------------------------------------"
 	# what is it?
-	echo -e "----------------------------------------------------"
+	#echo -e "----------------------------------------------------"
 	echo -n "is ${VAR} set    : "
 	if [ ! -z ${!VAR+dummy} ]; then
 		echo -e " ${TRUE}: set"
-		echo -n "does ${VAR} contain whitespace :"
+		echo -n "${VAR} has space : "
 		if [[ "${!VAR}" =~ " " ]]; then
 			echo -e " ${TRUE}: contains whitespace"
 		else
@@ -122,7 +123,14 @@ for VAR in $input; do
 					fi
 				else
 					echo -e "${FALSE}: not boolean"
-					echo -e "\n\E[1m${VAR} is set and not boolean"
+					echo -n "is ${VAR} integer: "
+					if [[ "${!VAR}" =~ ^[0-9]+$ ]]; then
+						echo -e " ${TRUE}: integer"
+						echo -e "\n\E[1m${VAR} is set and an integer\E[0m"
+					else
+						echo -e "${FALSE}: not integer"
+						echo -e "\n\E[1m${VAR} is set and not boolean or integer\E[0m"
+					fi
 				fi
 			fi
 		fi
@@ -131,13 +139,12 @@ for VAR in $input; do
 		echo -e "\n\E[1m${VAR} is ${UNSET}"
 	fi
 
-	echo -e "----------------------------------------------------"
-	# true/false
-	echo "pseudo-boolean tests"
-	echo -e "----------------------------------------------------"
-
 	if [ ! -z ${!VAR+dummy} ]; then    # set
 		if [ ! -z "${!VAR-dummy}" ]; then # not null
+			echo -e "----------------------------------------------------"
+			# true/false
+			echo "pseudo-boolean tests"
+			echo -e "----------------------------------------------------"
 			# NB [] tests must include a comparison, otherwise any non-null (including false) will test as true
 			echo "comparison tests"
 			if ! [[ "${!VAR}" =~ " " ]]; then
