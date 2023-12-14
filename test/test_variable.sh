@@ -274,9 +274,14 @@ for VAR in $input; do
 		echo -ne "    NULL [ -z \${VAR-d } ]\t: "
 		# only true when VAR is null		
 		if [ -z ${!VAR-default} ]; then
-			echo -ne " ${TRUE}: ${NULL}\t"
+			echo -ne " ${TRUE}: set and ${NULL}"
 		else
-			echo -ne "${FALSE}: ${UNSET} or not null"
+			echo -ne "${FALSE}: "
+			if [[ ${!VAR-default} == default ]]; then
+				echo -ne "${UNSET}\t"
+			else
+				echo -n "set and not null"
+			fi
 		fi
 		# substitution occurs when VAR is unset (has not been declared)
 		echo -e "\t: '${!VAR:-default}'"
@@ -284,13 +289,14 @@ for VAR in $input; do
 		echo -ne "    NULL [ -z \${VAR:-d} ]\t: "
 		# only true when VAR is (unset or null) and default is null (impossible with text)
 		if [ -z ${!VAR:-default} ]; then
-			echo -ne " ${TRUE}: ?? ${UNSET}"
-			# set and null, different than -
+			echo -ne " ${TRUE}: ${UNSET} or ${NULL}"			
 		else
-			echo -ne "${FALSE}: ?? set and not null"
-			# unset - false, same as -
-
-			# set not null - false
+			echo -ne "${FALSE}: "
+			if [[ ${!VAR:-default} == default ]]; then
+				echo -ne "${UNSET} or ${NULL}"
+			else
+				echo -n "set and not null"
+			fi
 		fi
 		# substitution occurs when VAR is unset (has not been declared) or null (empty)
 		echo -e "\t: '${!VAR:-default}'"
