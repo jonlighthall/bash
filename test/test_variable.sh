@@ -35,6 +35,7 @@ fi
 TRUE='\E[1;32mtrue\E[0m'
 FALSE='\E[1;31mfalse\E[0m'
 UNSET='\E[1;33munset\E[0m'
+NULL='\E[1;36mnull\E[0m'
 
 clear -x
 
@@ -51,20 +52,27 @@ if [ $# -eq 0 ]; then
 	echo "possibilities:"
 	echo "   - no argument given"
 	echo "   - value passed (e.g. \$VB) instead of name (e.g. VB) and:"
-	echo -e "      - input is $UNSET"
-	echo "      - input is null"
-
+	echo -e "      - input is ${UNSET}"
+	echo -e "      - input is ${NULL}"
 	if ! (return 0 2>/dev/null); then
 		echo "   - input is not exported"
 	fi
 	echo "using default argument"
 	input=VB
 else
-	echo "arguments: $@"
+	echo -n "argument"
+	if [ $# -gt 1 ]; then
+		echo -n "s"
+	fi
+	echo ": $@ "
 	input=$@
 fi
 
-echo "testing variables $input..."
+echo -n "testing variable"
+if [ $# -gt 1 ]; then
+	echo -n "s"
+fi
+echo " $input..."
 
 # test inputs
 for VAR in $input; do
@@ -72,7 +80,8 @@ for VAR in $input; do
 	echo -n "testing VAR: ${VAR} = "
 
 	# NB when using indirect reference, the parameter must be in brackets
-	if [ -z ${!VAR+dummy} ]; then
+	# check if VAR is set
+	if [ -z ${!VAR+alternate} ]; then
 		echo -e "${UNSET}"
 		set +u
 	else
@@ -86,20 +95,19 @@ for VAR in $input; do
 
 	echo -e "----------------------------------------------------"
 	# what is it?
-	echo -e "----------------------------------------------------"
+	#echo -e "----------------------------------------------------"
 	echo -n "is ${VAR} set    : "
-	if [ ! -z ${!VAR+dummy} ]; then
+	if [ ! -z ${!VAR+alternate} ]; then
 		echo -e " ${TRUE}: set"
-		echo -n "does ${VAR} contain whitespace :"
+		echo -n "${VAR} has space : "
 		if [[ "${!VAR}" =~ " " ]]; then
 			echo -e " ${TRUE}: contains whitespace"
 		else
 			echo -e "${FALSE}: does not contain whitespace"
-
 			echo -n "is ${VAR} null   : "
-			if [ -z ${!VAR-dummy} ]; then
-				echo -e " ${TRUE}: null (empty)"
-				echo -e "\n\E[1m${VAR} is set and null\E[0m"
+			if [ -z ${!VAR-default} ]; then
+				echo -e " ${TRUE}: ${NULL}"
+				echo -e "\n\E[1m${VAR} is set and ${NULL}\E[0m"
 			else
 				echo -e "${FALSE}: not null"
 				echo -n "is ${VAR} boolean: "
@@ -115,7 +123,14 @@ for VAR in $input; do
 					fi
 				else
 					echo -e "${FALSE}: not boolean"
-					echo -e "\n\E[1m${VAR} is set and not boolean"
+					echo -n "is ${VAR} integer: "
+					if [[ "${!VAR}" =~ ^[0-9]+$ ]]; then
+						echo -e " ${TRUE}: integer"
+						echo -e "\n\E[1m${VAR} is set and an integer\E[0m"
+					else
+						echo -e "${FALSE}: not integer"
+						echo -e "\n\E[1m${VAR} is set and not boolean or integer\E[0m"
+					fi
 				fi
 			fi
 		fi
@@ -124,13 +139,12 @@ for VAR in $input; do
 		echo -e "\n\E[1m${VAR} is ${UNSET}"
 	fi
 
-	echo -e "----------------------------------------------------"
-	# true/false
-	echo "pseudo-boolean tests"
-	echo -e "----------------------------------------------------"
-
-	if [ ! -z ${!VAR+dummy} ]; then    # set
-		if [ ! -z "${!VAR-dummy}" ]; then # not null
+	if [ ! -z ${!VAR+alternate} ]; then # set
+		if [ ! -z "${!VAR-default}" ]; then # not null
+			echo -e "----------------------------------------------------"
+			# true/false
+			echo "pseudo-boolean tests"
+			echo -e "----------------------------------------------------"
 			# NB [] tests must include a comparison, otherwise any non-null (including false) will test as true
 			echo "comparison tests"
 			if ! [[ "${!VAR}" =~ " " ]]; then
@@ -242,123 +256,114 @@ for VAR in $input; do
 		fi
 	fi
 
-	# practical tests
+	# define conditions and anti-conditions
+	c1="${UNSET} or ${NULL}"
+	a1="set and not null"
+	c2="set and ${NULL}"
+	a2="${UNSET} or not null"
+	c3="${UNSET}"
+	a3="set (maybe null)"
+
 	if ! [[ "${!VAR}" =~ " " ]]; then
 		echo -e "----------------------------------------------------"
-		echo -e -n "    not unset (set): "
-		if [ ! -z ${!VAR+dummy} ]; then
-			echo -e " ${TRUE}"
-		else
-			echo -e "${FALSE}"
-		fi
-
-		echo -e -n "not unset and  true: "
-		if [ ! -z ${!VAR:+dummy} ] && [ ${!VAR} = true ]; then
-			echo -e " ${TRUE}" # fails when what
-		else
-			echo -e "${FALSE}"
-		fi
-
-		echo -e -n "not unset and false: "
-		if [ ! -z ${!VAR:+dummy} ] && [ ${!VAR} = false ]; then
-			echo -e " ${TRUE}" # fails when what
-		else
-			echo -e "${FALSE}"
-		fi
-
-		# NB -n arguments must be in quotes
-		echo -e -n "      set and  true: "
-		if [ -n "${!VAR:+dummy}" ] && [ ${!VAR} = true ]; then
-			echo -e " ${TRUE}"
-		else
-			echo -e "${FALSE}"
-		fi
-
-		echo -e -n "      set and false: "
-		if [ -n "${!VAR:+dummy}" ] && [ ${!VAR} = false ]; then
-			echo -e " ${TRUE}"
-		else
-			echo -e "${FALSE}"
-		fi
-
-		echo -e "----------------------------------------------------"
-		# null, no quotes
+		# null tests, no quotes
+		# all [ -z ] tests are false when VAR is set
 		echo "no quotes"
 		echo -e "----------------------------------------------------"
-		echo -e -n "    NULL (-z)         : "
+		echo -ne "    NULL [ -z \${VAR   } ]\t: "
+		# true when VAR is unset or null
 		if [ -z ${!VAR} ]; then
-			echo -e " ${TRUE}: ${UNSET} or null (empty)"
+			echo -ne " ${TRUE}: ${c1}"
 		else
-			echo -e "${FALSE}: set and not null"
+			echo -ne "${FALSE}: ${a1}"
 		fi
+		echo -e "\t: '${!VAR}'"
 
-		echo -e -n "    NULL (-z -)       : "
-		if [ -z ${!VAR-dummy} ]; then
-			echo -e " ${TRUE}: set and null (empty)"
+		echo -ne "    NULL [ -z \${VAR-d } ]\t: "
+		# only true when VAR is null
+		if [ -z ${!VAR-default} ]; then
+			echo -ne " ${TRUE}: ${c2}"
 		else
-			echo -e "${FALSE}: ${UNSET} or not null"
+			echo -ne "${FALSE}: "
+			if [[ ${!VAR-default} == default ]]; then
+				echo -ne "${UNSET}\t"
+			else
+				echo -n "${a1}"
+			fi
 		fi
+		# substitution occurs when VAR is unset (has not been declared)
+		echo -e "\t: '${!VAR:-default}'"
 
-		echo -e -n "    NULL (-z :-)      : "
-		if [ -z ${!VAR:-dummy} ]; then
-			echo -e " ${TRUE}: ?? ${UNSET}"
-			# set and null, different than -
+		echo -ne "    NULL [ -z \${VAR:-d} ]\t: "
+		# only true when VAR is (unset or null) and default is null (impossible with text)
+		if [ -z ${!VAR:-default} ]; then
+			echo -ne " ${TRUE}: ${c1}"
 		else
-			echo -e "${FALSE}: ?? set and not null"
-			# unset - false, same as -
-
-			# set not null - false
+			echo -ne "${FALSE}: "
+			if [[ ${!VAR:-default} == default ]]; then
+				echo -ne "${c1}"
+			else
+				echo -n "${a1}"
+			fi
 		fi
+		# substitution occurs when VAR is unset (has not been declared) or null (empty)
+		echo -e "\t: '${!VAR:-default}'"
 
-		echo -e -n "    NULL (-z +)       : "
-		if [ -z ${!VAR+dummy} ]; then
-			echo -e " ${TRUE}: ${UNSET}"
+		echo -ne "    NULL [ -z \${VAR+a } ]\t: "
+		# only true when VAR is unset
+		if [ -z ${!VAR+alternate} ]; then
+			echo -ne " ${TRUE}: ${UNSET}\t"
 		else
-			echo -e "${FALSE}: set (maybe null)"
+			echo -ne "${FALSE}: ${a3}"
 		fi
+		# substitution occurs when VAR is set or null
+		echo -e "\t: '${!VAR+alternate}'"
 
-		echo -e -n "    NULL (-z :+)      : "
-		if [ -z ${!VAR:+dummy} ]; then
-			echo -e " ${TRUE}: ${UNSET} or null"
+		echo -ne "    NULL [ -z \${VAR:+a} ]\t: "
+		# true if VAR is unset or null
+		if [ -z ${!VAR:+alternate} ]; then
+			echo -ne " ${TRUE}: ${c1}"
 		else
-			echo -e "${FALSE}: set and not null"
+			echo -ne "${FALSE}: ${a1}"
 		fi
+		# substitution occurs when VAR is set and not null
+		echo -e "\t: '${!VAR:+alternate}'"
 
 		# not null, no quotes
 		echo -e "----------------------------------------------------"
-		echo -e -n "NOT NULL (! -z)       : "
+		echo -ne "NOT NULL (! -z)       : "
 		if [ ! -z ${!VAR} ]; then
-			echo -e " ${TRUE}: not null"
+			echo -e " ${TRUE}: ${a1}"
 		else
-			echo -e "${FALSE}: ${UNSET} or null"
+			echo -e "${FALSE}: ${c1}"
 		fi
 
-		echo -e -n "NOT NULL (! -z -)     : "
-		if [ ! -z ${!VAR-dummy} ]; then
-			echo -e " ${TRUE}: ${UNSET} or not null"
+		echo -ne "NOT NULL (! -z -)     : "
+		if [ ! -z ${!VAR-default} ]; then
+			echo -e " ${TRUE}: ${a2}"
 		else
-			echo -e "${FALSE}: set and null"
+			echo -e "${FALSE}: ${c2}"
 		fi
 
-		echo -e -n "NOT NULL (! -z :-)    : "
-		if [ ! -z ${!VAR:-dummy} ]; then
-			echo -e " ${TRUE}: ?? ${UNSET} or not null"
+		echo -ne "NOT NULL (! -z :-)    : "
+		if [ ! -z ${!VAR:-default} ]; then
+			echo -e " ${TRUE}: ${a2}"
 		else
-			echo -e "${FALSE}: ?? set and null"
+			echo -e "${FALSE}: ${c2}"
 		fi
 
-		echo -e -n "NOT NULL (! -z +)     : "
-		if [ ! -z ${!VAR+dummy} ]; then
-			echo -e " ${TRUE}: set (maybe null)"
+		echo -ne "NOT NULL (! -z +)     : "
+		if [ ! -z ${!VAR+alternate} ]; then
+			echo -e " ${TRUE}: ${a3}"
 		else
 			echo -e "${FALSE}: ${UNSET}"
 		fi
 
-		echo -e -n "NOT NULL (! -z :+)    : "
-		if [ ! -z ${!VAR:+dummy} ]; then
-			echo -e " ${TRUE}: set and not null"
+		echo -ne "NOT NULL (! -z :+)    : "
+		if [ ! -z ${!VAR:+alternate} ]; then
+			echo -e " ${TRUE}: ${a1}"
 		else
-			echo -e "${FALSE}: ${UNSET} or null"
+			echo -e "${FALSE}: ${c1}"
 		fi
 	fi
 
@@ -367,124 +372,124 @@ for VAR in $input; do
 	# NB -n arguments must be in quotes
 	echo "quotes"
 	echo -e "----------------------------------------------------"
-	echo -e -n "NOT NULL (-n \"\")        : "
+	echo -ne "NOT NULL (-n \"\")        : "
 	if [ -n "${!VAR}" ]; then
-		echo -e " ${TRUE}: set and not null (empty)"
+		echo -e " ${TRUE}: ${a1}"
 	else
-		echo -e "${FALSE}: ${UNSET} or null"
+		echo -e "${FALSE}: ${c1}"
 	fi
 
-	echo -e -n "NOT NULL (-n - \"\")	: "
-	if [ -n "${!VAR-dummy}" ]; then
-		echo -e " ${TRUE}: ${UNSET} or not null (empty)"
+	echo -ne "NOT NULL (-n - \"\")	: "
+	if [ -n "${!VAR-default}" ]; then
+		echo -e " ${TRUE}: ${a2}"
 	else
-		echo -e "${FALSE}: set and null"
+		echo -e "${FALSE}: ${c2}"
 	fi
 
-	echo -e -n "NOT NULL (-n :- \"\")	: "
-	if [ -n "${!VAR:-dummy}" ]; then
-		echo -e " ${TRUE}: ?? ${UNSET} or not null (empty)"
+	echo -ne "NOT NULL (-n :- \"\")	: "
+	if [ -n "${!VAR:-default}" ]; then
+		echo -e " ${TRUE}: ${a2}"
 	else
-		echo -e "${FALSE}: ?? set and null"
+		echo -e "${FALSE}: ${c2}"
 	fi
 
-	echo -e -n "NOT NULL (-n + \"\")	: "
-	if [ -n "${!VAR+dummy}" ]; then
-		echo -e " ${TRUE}: set (maybe null)"
+	echo -ne "NOT NULL (-n + \"\")	: "
+	if [ -n "${!VAR+alternate}" ]; then
+		echo -e " ${TRUE}: ${a3}"
 	else
 		echo -e "${FALSE}: ${UNSET}"
 	fi
 
-	echo -e -n "NOT NULL (-n :+ \"\")	: "
-	if [ -n "${!VAR:+dummy}" ]; then
-		echo -e " ${TRUE}: set and not null"
+	echo -ne "NOT NULL (-n :+ \"\")	: "
+	if [ -n "${!VAR:+alternate}" ]; then
+		echo -e " ${TRUE}: ${a1}"
 	else
-		echo -e "${FALSE}: ${UNSET} or null"
+		echo -e "${FALSE}: ${c1}"
 	fi
 
 	# not not null, quotes
 	echo -e "----------------------------------------------------"
-	echo -e -n "    NULL (! -n \"\")	: "
+	echo -ne "    NULL (! -n \"\")	: "
 	if [ ! -n "${!VAR}" ]; then
-		echo -e " ${TRUE}: ${UNSET} or null"
+		echo -e " ${TRUE}: ${c1}"
 	else
-		echo -e "${FALSE}: set and not null"
+		echo -e "${FALSE}: ${a1}"
 	fi
 
-	echo -e -n "    NULL (! -n - \"\")	: "
-	if [ ! -n "${!VAR-dummy}" ]; then
-		echo -e " ${TRUE}: set and null"
+	echo -ne "    NULL (! -n - \"\")	: "
+	if [ ! -n "${!VAR-default}" ]; then
+		echo -e " ${TRUE}: ${c2}"
 	else
-		echo -e "${FALSE}: ${UNSET} or not null"
+		echo -e "${FALSE}: ${a2}"
 	fi
 
-	echo -e -n "    NULL (! -n :- \"\")   : "
-	if [ ! -n "${!VAR:-dummy}" ]; then
-		echo -e " ${TRUE}: ??set and null"
+	echo -ne "    NULL (! -n :- \"\")   : "
+	if [ ! -n "${!VAR:-default}" ]; then
+		echo -e " ${TRUE}: ${c2}"
 	else
-		echo -e "${FALSE}: ??${UNSET} or not null"
+		echo -e "${FALSE}: ${a2}"
 	fi
 
-	echo -e -n "    NULL (! -n + \"\")	: "
-	if [ ! -n "${!VAR+dummy}" ]; then
+	echo -ne "    NULL (! -n + \"\")	: "
+	if [ ! -n "${!VAR+alternate}" ]; then
 		echo -e " ${TRUE}: ${UNSET}"
 	else
-		echo -e "${FALSE}: set (maybe null)"
+		echo -e "${FALSE}: ${a3}"
 	fi
 
-	echo -e -n "    NULL (! -n :+ \"\")   : "
-	if [ ! -n "${!VAR:+dummy}" ]; then
-		echo -e " ${TRUE}: ${UNSET} or null"
+	echo -ne "    NULL (! -n :+ \"\")   : "
+	if [ ! -n "${!VAR:+alternate}" ]; then
+		echo -e " ${TRUE}: ${c1}"
 	else
-		echo -e "${FALSE}: set and not null"
+		echo -e "${FALSE}: ${a1}"
 	fi
 	echo -e "----------------------------------------------------"
 	# not null ands, quotes
 	# NB -n arguments must be in quotes
 	echo "ands"
 	echo -e "----------------------------------------------------"
-	echo -e -n "NOT NULL (! -z && -n \"\")    : "
+	echo -ne "NOT NULL (! -z && -n \"\")    : "
 	if [ ! -z "${!VAR}" ] && [ -n "${!VAR}" ]; then
-		echo -e " ${TRUE}: set and not null"
+		echo -e " ${TRUE}: ${a1}"
 	else
-		echo -e "${FALSE}: ${UNSET} or null"
+		echo -e "${FALSE}: ${c1}"
 	fi
 
-	echo -e -n "NOT NULL (! -z && -n + \"\")  : "
-	if [ ! -z "${!VAR+dummy}" ] && [ -n "${!VAR+dummy}" ]; then
-		echo -e " ${TRUE}: set (maybe null)"
+	echo -ne "NOT NULL (! -z && -n + \"\")  : "
+	if [ ! -z "${!VAR+alternate}" ] && [ -n "${!VAR+alternate}" ]; then
+		echo -e " ${TRUE}: ${a3}"
 	else
 		echo -e "${FALSE}: ${UNSET}"
 	fi
 
-	echo -e -n "NOT NULL (! -z && -n :+ \"\") : "
-	if [ ! -z "${!VAR:+dummy}" ] && [ -n "${!VAR:+dummy}" ]; then
-		echo -e " ${TRUE}: set and not null"
+	echo -ne "NOT NULL (! -z && -n :+ \"\") : "
+	if [ ! -z "${!VAR:+alternate}" ] && [ -n "${!VAR:+alternate}" ]; then
+		echo -e " ${TRUE}: ${a1}"
 	else
-		echo -e "${FALSE}: ${UNSET} or null"
+		echo -e "${FALSE}: ${c1}"
 	fi
 
 	# null ands, quotes
 	echo -e "----------------------------------------------------"
-	echo -e -n "    NULL (-z && ! -n \"\")    : "
+	echo -ne "    NULL (-z && ! -n \"\")    : "
 	if [ -z "${!VAR}" ] && [ ! -n "${!VAR}" ]; then
-		echo -e " ${TRUE}: ${UNSET} or null"
+		echo -e " ${TRUE}: ${c1}"
 	else
-		echo -e "${FALSE}: set and not null"
+		echo -e "${FALSE}: ${a1}"
 	fi
 
-	echo -e -n "    NULL (-z && ! -n + \"\")  : "
-	if [ -z "${!VAR+dummy}" ] && [ ! -n "${!VAR+dummy}" ]; then
+	echo -ne "    NULL (-z && ! -n + \"\")  : "
+	if [ -z "${!VAR+alternate}" ] && [ ! -n "${!VAR+alternate}" ]; then
 		echo -e " ${TRUE}: ${UNSET}"
 	else
-		echo -e "${FALSE}: set (maybe null)"
+		echo -e "${FALSE}: ${a3}"
 	fi
 
-	echo -e -n "    NULL (-z && ! -n :+ \"\") : "
-	if [ -z "${!VAR:+dummy}" ] && [ ! -n "${!VAR:+dummy}" ]; then
-		echo -e " ${TRUE}: ${UNSET} or null"
+	echo -ne "    NULL (-z && ! -n :+ \"\") : "
+	if [ -z "${!VAR:+alternate}" ] && [ ! -n "${!VAR:+alternate}" ]; then
+		echo -e " ${TRUE}: ${c1}"
 	else
-		echo -e "${FALSE}: set and not null"
+		echo -e "${FALSE}: ${a1}"
 	fi
 
 	echo -e "----------------------------------------------------"
@@ -492,14 +497,14 @@ for VAR in $input; do
 	# NB -n arguments must be in quotes
 	echo "impossible"
 	echo -e "----------------------------------------------------"
-	echo -e -n "    NULL and NOT NULL (-z && -n \"\")     : "
+	echo -ne "    NULL and NOT NULL (-z && -n \"\")     : "
 	if [ -z "${!VAR}" ] && [ -n "${!VAR}" ]; then
 		echo -e " ${TRUE}: impossible!"
 	else
 		echo -e "${FALSE}: OK"
 	fi
 
-	echo -e -n "NOT NULL and	 NULL (! -z && ! -n \"\") : "
+	echo -ne "NOT NULL and	 NULL (! -z && ! -n \"\") : "
 	if [ ! -z "${!VAR}" ] && [ ! -n "${!VAR}" ]; then
 		echo -e " ${TRUE}: impossible!"
 	else
@@ -507,4 +512,43 @@ for VAR in $input; do
 	fi
 	echo -e "----------------------------------------------------"
 
+	# practical tests
+	if ! [[ "${!VAR}" =~ " " ]]; then
+		echo -e "----------------------------------------------------"
+		echo -ne "    not unset (set): "
+		if [ ! -z ${!VAR+alternate} ]; then
+			echo -e " ${TRUE}"
+		else
+			echo -e "${FALSE}"
+		fi
+
+		echo -ne "not unset and  true: "
+		if [ ! -z ${!VAR:+alternate} ] && [ ${!VAR} = true ]; then
+			echo -e " ${TRUE}" # fails when what
+		else
+			echo -e "${FALSE}"
+		fi
+
+		echo -ne "not unset and false: "
+		if [ ! -z ${!VAR:+alternate} ] && [ ${!VAR} = false ]; then
+			echo -e " ${TRUE}" # fails when what
+		else
+			echo -e "${FALSE}"
+		fi
+
+		# NB -n arguments must be in quotes
+		echo -ne "      set and  true: "
+		if [ -n "${!VAR:+alternate}" ] && [ ${!VAR} = true ]; then
+			echo -e " ${TRUE}"
+		else
+			echo -e "${FALSE}"
+		fi
+
+		echo -ne "      set and false: "
+		if [ -n "${!VAR:+alternate}" ] && [ ${!VAR} = false ]; then
+			echo -e " ${TRUE}"
+		else
+			echo -e "${FALSE}"
+		fi
+	fi
 done
