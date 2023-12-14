@@ -256,47 +256,10 @@ for VAR in $input; do
 		fi
 	fi
 
-	# practical tests
 	if ! [[ "${!VAR}" =~ " " ]]; then
 		echo -e "----------------------------------------------------"
-		echo -e -n "    not unset (set): "
-		if [ ! -z ${!VAR+dummy} ]; then
-			echo -e " ${TRUE}"
-		else
-			echo -e "${FALSE}"
-		fi
-
-		echo -e -n "not unset and  true: "
-		if [ ! -z ${!VAR:+dummy} ] && [ ${!VAR} = true ]; then
-			echo -e " ${TRUE}" # fails when what
-		else
-			echo -e "${FALSE}"
-		fi
-
-		echo -e -n "not unset and false: "
-		if [ ! -z ${!VAR:+dummy} ] && [ ${!VAR} = false ]; then
-			echo -e " ${TRUE}" # fails when what
-		else
-			echo -e "${FALSE}"
-		fi
-
-		# NB -n arguments must be in quotes
-		echo -e -n "      set and  true: "
-		if [ -n "${!VAR:+dummy}" ] && [ ${!VAR} = true ]; then
-			echo -e " ${TRUE}"
-		else
-			echo -e "${FALSE}"
-		fi
-
-		echo -e -n "      set and false: "
-		if [ -n "${!VAR:+dummy}" ] && [ ${!VAR} = false ]; then
-			echo -e " ${TRUE}"
-		else
-			echo -e "${FALSE}"
-		fi
-
-		echo -e "----------------------------------------------------"
-		# null, no quotes
+		# null tests, no quotes
+		# all [ -z ] tests are false when VAR is set
 		echo "no quotes"
 		echo -e "----------------------------------------------------"
 		echo -e -n "    NULL (-z)         : "
@@ -521,4 +484,43 @@ for VAR in $input; do
 	fi
 	echo -e "----------------------------------------------------"
 
+	# practical tests
+	if ! [[ "${!VAR}" =~ " " ]]; then
+		echo -e "----------------------------------------------------"
+		echo -e -n "    not unset (set): "
+		if [ ! -z ${!VAR+dummy} ]; then
+			echo -e " ${TRUE}"
+		else
+			echo -e "${FALSE}"
+		fi
+
+		echo -e -n "not unset and  true: "
+		if [ ! -z ${!VAR:+dummy} ] && [ ${!VAR} = true ]; then
+			echo -e " ${TRUE}" # fails when what
+		else
+			echo -e "${FALSE}"
+		fi
+
+		echo -e -n "not unset and false: "
+		if [ ! -z ${!VAR:+dummy} ] && [ ${!VAR} = false ]; then
+			echo -e " ${TRUE}" # fails when what
+		else
+			echo -e "${FALSE}"
+		fi
+
+		# NB -n arguments must be in quotes
+		echo -e -n "      set and  true: "
+		if [ -n "${!VAR:+dummy}" ] && [ ${!VAR} = true ]; then
+			echo -e " ${TRUE}"
+		else
+			echo -e "${FALSE}"
+		fi
+
+		echo -e -n "      set and false: "
+		if [ -n "${!VAR:+dummy}" ] && [ ${!VAR} = false ]; then
+			echo -e " ${TRUE}"
+		else
+			echo -e "${FALSE}"
+		fi
+	fi
 done
