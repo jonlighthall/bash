@@ -347,9 +347,9 @@ for VAR in $input; do
 
 		echo -ne "NOT NULL (! -z :-)    : "
 		if [ ! -z ${!VAR:-default} ]; then
-			echo -e " ${TRUE}: ?? ${UNSET} or not null"
+			echo -e " ${TRUE}: ${a2}"
 		else
-			echo -e "${FALSE}: ?? ${NULL}"
+			echo -e "${FALSE}: ${c2}"
 		fi
 
 		echo -ne "NOT NULL (! -z +)     : "
@@ -388,9 +388,9 @@ for VAR in $input; do
 
 	echo -ne "NOT NULL (-n :- \"\")	: "
 	if [ -n "${!VAR:-default}" ]; then
-		echo -e " ${TRUE}: ?? ${UNSET} or not null"
+		echo -e " ${TRUE}: ${a2}"
 	else
-		echo -e "${FALSE}: ?? ${NULL}"
+		echo -e "${FALSE}: ${c2}"
 	fi
 
 	echo -ne "NOT NULL (-n + \"\")	: "
@@ -425,9 +425,9 @@ for VAR in $input; do
 
 	echo -ne "    NULL (! -n :- \"\")   : "
 	if [ ! -n "${!VAR:-default}" ]; then
-		echo -e " ${TRUE}: ??${NULL}"
+		echo -e " ${TRUE}: ${c2}"
 	else
-		echo -e "${FALSE}: ??${UNSET} or not null"
+		echo -e "${FALSE}: ${a2}"
 	fi
 
 	echo -ne "    NULL (! -n + \"\")	: "
