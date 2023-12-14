@@ -129,10 +129,10 @@ fi
 # print source path
 ## physical
 src_dir_phys=${src_name%/*}
-echo -e "${TAB}${gray}path =  $src_dir_phys${NORMAL}"
+echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
 ## logical
 src_dir_logi=${BASH_SOURCE%/*}
-echo -e "${TAB}${gray}path = $src_dir_logi${NORMAL}"
+echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
 
 # save and print starting directory
 start_dir=$PWD
