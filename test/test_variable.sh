@@ -265,46 +265,55 @@ for VAR in $input; do
 		echo -ne "    NULL [ -z \${VAR   } ]\t: "
 		# true when VAR is unset or null
 		if [ -z ${!VAR} ]; then
-			echo -e " ${TRUE}: ${UNSET} or ${NULL}"
+			echo -ne " ${TRUE}: ${UNSET} or ${NULL}"
 		else
-			echo -e "${FALSE}: set and not null"
+			echo -ne "${FALSE}: set and not null"
 		fi
+		echo -e "\t: '${!VAR}'"
 
 		echo -ne "    NULL [ -z \${VAR-d } ]\t: "
 		# only true when VAR is null		
 		if [ -z ${!VAR-default} ]; then
-			echo -e " ${TRUE}: ${NULL}"
+			echo -ne " ${TRUE}: ${NULL}"
 		else
-			echo -e "${FALSE}: ${UNSET} or not null"
+			echo -ne "${FALSE}: ${UNSET} or not null"
 		fi
+		# substitution occurs when VAR is unset (has not been declared)
+		echo -e "\t: '${!VAR:-default}'"
 
 		echo -ne "    NULL [ -z \${VAR:-d} ]\t: "
 		# only true when VAR is (unset or null) and default is null (impossible with text)
 		if [ -z ${!VAR:-default} ]; then
-			echo -e " ${TRUE}: ?? ${UNSET}"
+			echo -ne " ${TRUE}: ?? ${UNSET}"
 			# set and null, different than -
 		else
-			echo -e "${FALSE}: ?? set and not null"
+			echo -ne "${FALSE}: ?? set and not null"
 			# unset - false, same as -
 
 			# set not null - false
 		fi
+		# substitution occurs when VAR is unset (has not been declared) or null (empty)
+		echo -e "\t: '${!VAR:-default}'"
 		
 		echo -ne "    NULL [ -z \${VAR+a } ]\t: "
 		# only true when VAR is unset
 		if [ -z ${!VAR+alternate} ]; then
-			echo -e " ${TRUE}: ${UNSET}"
+			echo -ne " ${TRUE}: ${UNSET}\t"
 		else
-			echo -e "${FALSE}: set (maybe null)"
+			echo -ne "${FALSE}: set (maybe null)"
 		fi
+		# substitution occurs when VAR is set or null
+		echo -e "\t: '${!VAR+alternate}'"
 
 		echo -ne "    NULL [ -z \${VAR:+a} ]\t: "
 		# true if VAR is unset or null
 		if [ -z ${!VAR:+alternate} ]; then
-			echo -e " ${TRUE}: ${UNSET} or ${NULL}"
+			echo -ne " ${TRUE}: ${UNSET} or ${NULL}"
 		else
-			echo -e "${FALSE}: set and not null"
+			echo -ne "${FALSE}: set and not null"
 		fi
+		# substitution occurs when VAR is set and not null
+		echo -e "\t: '${!VAR:+alternate}'"
 
 		# not null, no quotes
 		echo -e "----------------------------------------------------"
