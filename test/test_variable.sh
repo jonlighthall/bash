@@ -60,11 +60,19 @@ if [ $# -eq 0 ]; then
 	echo "using default argument"
 	input=VB
 else
-	echo "arguments: $@"
+	echo -n "argument"
+	if [ $# -gt 1 ]; then
+		echo -n "s"
+	fi
+	echo ": $@ "
 	input=$@
 fi
 
-echo "testing variables $input..."
+echo -n "testing variable"
+if [ $# -gt 1 ]; then
+	echo -n "s"
+fi
+echo " $input..."
 
 # test inputs
 for VAR in $input; do
