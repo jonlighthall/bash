@@ -139,7 +139,7 @@ for VAR in $input; do
 		echo -e "\n\E[1m${VAR} is ${UNSET}"
 	fi
 
-	if [ ! -z ${!VAR+alternate} ]; then    # set
+	if [ ! -z ${!VAR+alternate} ]; then # set
 		if [ ! -z "${!VAR-default}" ]; then # not null
 			echo -e "----------------------------------------------------"
 			# true/false
@@ -256,6 +256,14 @@ for VAR in $input; do
 		fi
 	fi
 
+	# define conditions and anti-conditions
+	c1="${UNSET} or ${NULL}"
+	a1="set and not null"
+	c2="set and ${NULL}"
+	a2="${UNSET} or not null"
+	c3="${UNSET}"
+	a3="set (maybe null)"
+
 	if ! [[ "${!VAR}" =~ " " ]]; then
 		echo -e "----------------------------------------------------"
 		# null tests, no quotes
@@ -264,8 +272,6 @@ for VAR in $input; do
 		echo -e "----------------------------------------------------"
 		echo -ne "    NULL [ -z \${VAR   } ]\t: "
 		# true when VAR is unset or null
-		c1="${UNSET} or ${NULL}"
-		a1="set and not null"
 		if [ -z ${!VAR} ]; then
 			echo -ne " ${TRUE}: ${c1}"
 		else
@@ -275,8 +281,6 @@ for VAR in $input; do
 
 		echo -ne "    NULL [ -z \${VAR-d } ]\t: "
 		# only true when VAR is null
-		c2="set and ${NULL}"
-		a2="${UNSET} or not null"
 		if [ -z ${!VAR-default} ]; then
 			echo -ne " ${TRUE}: ${c2}"
 		else
@@ -293,7 +297,7 @@ for VAR in $input; do
 		echo -ne "    NULL [ -z \${VAR:-d} ]\t: "
 		# only true when VAR is (unset or null) and default is null (impossible with text)
 		if [ -z ${!VAR:-default} ]; then
-			echo -ne " ${TRUE}: ${c1}"			
+			echo -ne " ${TRUE}: ${c1}"
 		else
 			echo -ne "${FALSE}: "
 			if [[ ${!VAR:-default} == default ]]; then
@@ -304,10 +308,9 @@ for VAR in $input; do
 		fi
 		# substitution occurs when VAR is unset (has not been declared) or null (empty)
 		echo -e "\t: '${!VAR:-default}'"
-		
+
 		echo -ne "    NULL [ -z \${VAR+a } ]\t: "
 		# only true when VAR is unset
-		a3="set (maybe null)"
 		if [ -z ${!VAR+alternate} ]; then
 			echo -ne " ${TRUE}: ${UNSET}\t"
 		else
