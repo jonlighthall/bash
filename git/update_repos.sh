@@ -127,10 +127,12 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 fi
 
 # print source path
-src_dir=${src_name%/*}
-echo -e "${TAB}${gray}path =  $src_dir${NORMAL}"
-src_dir=${BASH_SOURCE%/*}
-echo -e "${TAB}${gray}path = $src_dir${NORMAL}"
+## physical
+src_dir_phys=${src_name%/*}
+echo -e "${TAB}${gray}path =  $src_dir_phys${NORMAL}"
+## logical
+src_dir_logi=${BASH_SOURCE%/*}
+echo -e "${TAB}${gray}path = $src_dir_logi${NORMAL}"
 
 # save and print starting directory
 start_dir=$PWD
@@ -438,8 +440,8 @@ for repo in $list; do
 						# force pull
 						if [[ $RETVAL == 128 ]]; then
 							cbar "${TAB}${GRH}should I force pull!? ${NORMAL}"
-							echo -e "${TAB}source directory = $src_dir"
-							prog=${src_dir}/force_pull
+							echo -e "${TAB}source directory = $src_dir_logi"
+							prog=${src_dir_logi}/force_pull
 							if [ -f ${prog} ]; then
 								bash ${prog}
 								RETVAL2=$?
