@@ -617,7 +617,12 @@ else
 	else
 		echo -e "${GRH}$pull_fail${NORMAL}"
 	fi
-	echo "pull max time: ${t_pull_max} ns or $(bc <<<"scale=3;$t_pull_max/1000000000") sec"
+	echo -n "pull max time: ${t_pull_max} ns"
+	if command -v bc &>/dev/null; then
+		echo " or $(bc <<<"scale=3;$t_pull_max/1000000000") sec"
+	else
+		echo
+	fi
 fi
 echo -n "  force pulls: "
 if [ $n_fpull -eq 0 ]; then
@@ -638,7 +643,12 @@ else
 	else
 		echo -e "${GRH}$push_fail${NORMAL}"
 	fi
-	echo "push max time: ${t_push_max} ns or $(bc <<<"scale=3;$t_push_max/1000000000") sec"
+	echo -n "push max time: ${t_push_max} ns"
+	if command -v bc &>/dev/null; then
+		echo " or $(bc <<<"scale=3;$t_push_max/1000000000") sec"
+	else
+		echo
+	fi	
 fi
 
 # modified
