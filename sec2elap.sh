@@ -75,14 +75,12 @@ else
 			fi
 			# if less than 10 seconds
 			if (( $ELAP < 10 )); then
-				echo -e "\nless than 10"
 				echo -n "$ELAP"
  				if [ ${nd} -gt 0 ]; then
 					echo -n ".$deci"
 				fi
 				echo " sec"
 			else
-				echo -e "\ngreater than 10"
 				# reduce precision
 				if [ ${nd} -gt 1 ]; then
 					((nd--))
@@ -90,14 +88,12 @@ else
 				fi
 				# if less than a minute
 				if (( $ELAP < 60 )); then
-					echo -e "less than than 60"
 					echo -n "${ELAP}"
  					if [ ${nd} -gt 0 ]; then
 						echo -n ".$deci"
 					fi
 					echo " sec"
 				else
-					echo -e "greater than than 60"
 					# round to the nearest integer
  					if [ ${rnd} -ge 5 ]; then
 					 	((ELAP++))						
@@ -110,7 +106,6 @@ else
 	# less than 1 minute
 	if [ ! $ELAP -lt 60 ]; then
 		if [ $ELAP -gt 100 ]; then
-			echo -e "greater than 100"
 			# reduce precision
 			if [ ${nd} -gt 1 ]; then
 				((nd--))
