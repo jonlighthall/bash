@@ -58,21 +58,18 @@ else
 						prnt_deci=${prnt_deci::-1}					
 					fi
 				fi
-
-				if [ $ELAP -ge 1000 ]; then
+				if [ $ELAP -ge $((10**3)) ]; then
 					# reduce precision
 					if [ ${nd} -gt 0 ]; then
 						((nd--))
 						prnt_deci=${prnt_deci::-1}					
 					fi
 				fi				
-
 				# round to the nearest integer
 				if [ ${nd} -eq 0 ] && [ ${tenths} -ge 5 ]; then
 					((ELAP++))
 				fi
-
-				# check if the decimals to zero
+				# check if the decimals round to zero
 				fmt="%.${nd}f"
 				declare -i tenths_fmt=$(printf "$fmt" $1 | sed 's/^.*\.//')
 				# ...and round up accordingly
@@ -90,7 +87,7 @@ else
 					echo " sec"
 				else
 					HR=$(($ELAP / (60 * 60)))
-					if [ $ELAP -ge 10000 ]; then
+					if [ $ELAP -ge $((10**4)) ]; then
 						# reduce precision
 						if [ ${nd} -gt 0 ]; then
 							((nd--))
@@ -108,6 +105,21 @@ else
 					else
 						DY=$(($HR / 24))
 						HR=$(($HR - $DY * 24))
+						if [ $ELAP -ge $((10**5)) ]; then
+							# reduce precision
+							if [ ${nd} -gt 0 ]; then
+								((nd--))
+								prnt_deci=${prnt_deci::-1}					
+							fi
+						fi
+						if [ $ELAP -ge $((10**6)) ]; then
+							# reduce precision
+							if [ ${nd} -gt 0 ]; then
+								((nd--))
+								prnt_deci=${prnt_deci::-1}					
+							fi
+						fi				
+
 						# if less than a year
 						if (($DY < $((365)))); then
 							echo -n $(date -d @${ELAP} +"$DY days $HR hours %M min %S")
@@ -119,7 +131,14 @@ else
 						else
 							YR=$(($DY / 365))
 							DY=$(($DY - $YR * 365))
-							echo -n $(date -d @${ELAP} +"$YR years $DY days $HR hours %M min %S sec")
+							if [ $ELAP -ge $((10**7)) ]; then
+								# reduce precision
+								if [ ${nd} -gt 0 ]; then
+									((nd--))
+									prnt_deci=${prnt_deci::-1}					
+								fi
+							fi
+							echo -n $(date -d @${ELAP} +"$YR years $DY days $HR hours %M min %S")
 							if [ ${nd} -gt 0 ]; then
 								fmt="%.${nd}f"
 								printf "$fmt" $1 | sed 's/^.*\././'
