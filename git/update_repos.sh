@@ -374,21 +374,43 @@ for repo in $list; do
 			# fetch
 			#------------------------------------------------------
 			decho "updating..."
-			cmd_base="git remote"
+			# specify number of seconds before kill
+			nsec=2
+			to="timeout -s 9 ${nsec}s "
+			# concat commands
+			cmd_base="${to} git remote"
 			if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
 				cmd_base+=" --verbose"
 			fi
 			cmd="${cmd_base} update"
-			${cmd}
-
-			RETVAL=$?
-			echo -en "${GIT_HIGHLIGHT} fetch ${NORMAL} "
-			if [[ $RETVAL == 0 ]]; then
-				echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-				: $((n_fetch++))
-			else
-				echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-				echo "failed to fetch remote"
+			RETVAL=137
+			n_loops=0
+			while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
+				: $((n_loops++))
+				if [ $n_loops -gt 1 ]; then
+					echo "${TAB}FETCH attempt $n_loops..."
+				fi
+				t_start=$(date +%s%N)
+				${cmd}
+				RETVAL=$?
+				t_end=$(date +%s%N)
+				dt_fetch=$((${t_end} - ${t_start}))
+				echo -en "${GIT_HIGHLIGHT} fetch ${NORMAL} "
+				if [[ $RETVAL == 0 ]]; then
+					echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+					: $((n_fetch++))
+				else
+					echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+					echo "failed to fetch remote"
+					if [[ $RETVAL == 137 ]]; then
+						nsec=$((nsec * 2))
+						echo "${TAB}increasing timeout to ${nsec}"
+						to="timeout -s 9 ${nsec}s "
+						cmd="${to}${cmd_base}"
+					fi
+				fi
+			done
+			if [ $RETVAL -ne 0 ]; then
 				echo "WSL may need to be restarted"
 				echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
 				read -e -i "shutdown_wsl" -p $'\e[0;32m$\e[0m ' -t 10 && eval $REPLY
