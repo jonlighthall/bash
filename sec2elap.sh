@@ -12,6 +12,15 @@ else
 		# calculate number of decimal places
 		deci=${1#*.}
 		declare -i nd=${#deci}
+
+		declare -ir nd_max=9
+		if [ $nd -gt $nd_max ]; then
+			ddeci=${deci:0:$nd_max}.${deci:$nd_max}
+			fmt="%.0f"
+			deci=$(printf "$fmt" ${ddeci})
+			nd=nd_max
+		fi
+		
 		# get most significant decimal
 		if [ $nd -gt 1 ]; then
 			declare -ir tenths=${deci::-$(($nd - 1))}
@@ -26,9 +35,10 @@ else
 	fi
 
 	# if less than 1 second
-	if (( $ELAP < 1 )); then
+	if [[ $ELAP -lt 1 ]]; then
 		# print argument with full precision
-		echo "$1 sec"
+		fmt="%.${nd}f sec\n"
+		printf "$fmt" $1
 	else
 		# reduce precision
 		if [ ${nd} -gt 0 ]; then
@@ -37,7 +47,7 @@ else
 		fi
 		# less than 10 seconds
 		if (( $ELAP < 10 )); then
-			fmt="%.${nd}f sec\n"
+ 			fmt="%.${nd}f sec\n"
 			printf "$fmt" $1
 		else
 			# reduce precision
