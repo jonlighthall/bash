@@ -5,7 +5,7 @@
 # Apr 2022 JCL
 
 # get starting time in nanoseconds
-start_time=$(date +%s%N)
+declare -i start_time=$(date +%s%N)
 
 # set tab
 called_by=$(ps -o comm= $PPID)
