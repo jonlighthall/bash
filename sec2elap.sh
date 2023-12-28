@@ -110,11 +110,21 @@ else
 						HR=$(($HR - $DY * 24))
 						# if less than a year
 						if (($DY < $((365)))); then
-							echo $(date -d @${ELAP} +"$DY days $HR hours %M min %S sec")
+							echo -n $(date -d @${ELAP} +"$DY days $HR hours %M min %S")
+							if [ ${nd} -gt 0 ]; then
+								fmt="%.${nd}f"
+								printf "$fmt" $1 | sed 's/^.*\././'
+							fi
+							echo " sec"
 						else
 							YR=$(($DY / 365))
 							DY=$(($DY - $YR * 365))
-							echo $(date -d @${ELAP} +"$YR years $DY days $HR hours %M min %S sec")
+							echo -n $(date -d @${ELAP} +"$YR years $DY days $HR hours %M min %S sec")
+							if [ ${nd} -gt 0 ]; then
+								fmt="%.${nd}f"
+								printf "$fmt" $1 | sed 's/^.*\././'
+							fi
+							echo " sec"
 						fi # year
 					fi # day
 				fi # hour
@@ -123,4 +133,4 @@ else
 	fi # 1 second
 fi # null
 
-echo -ne "\E[0m"
+echo -ne "\E[0;m"

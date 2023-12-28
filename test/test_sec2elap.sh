@@ -11,7 +11,9 @@ for n in {0..8}; do
 		dec+="$m"
 		declare j=$(echo "$i$dec")
 		echo "$j"
-		bash sec2elap $j
+		if [ $m -ge $n ]; then 
+			bash sec2elap $j
+		fi
 	done
 done
 # print time at exit
