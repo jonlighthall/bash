@@ -14,17 +14,17 @@ else
 	echo "number of arguments = $#"
 
 	# set file names
-	file_in=$(readlink -f $1)
+	in_file=$(readlink -f $1)
 	echo "argument 1: $1"
 	TAB+=${fTAB:='   '}
-	echo -n "${TAB} input path: ${file_in}... "
-	if [ -f "${file_in}" ]; then
+	echo -n "${TAB} input path: ${in_file}... "
+	if [ -f "${in_file}" ]; then
 		echo "exits"
 
 		# parse input
-		in_dir=$(dirname "${file_in}")
+		in_dir=$(dirname "${in_file}")
 		echo "${TAB}  input dir: $in_dir"
-		in_fname=$(basename "${file_in}")
+		in_fname=$(basename "${in_file}")
 		echo "${TAB} input file: $in_fname"
 		in_base="${in_fname%.*}"
 		echo "${TAB}  base name: $in_base"
@@ -42,33 +42,33 @@ else
 
 		# set default output file name to match input
 		out_base="${in_base}"
-		file_out="${in_dir}/${out_base}${ext}"
+		out_file="${in_dir}/${out_base}${ext}"
 
 		# check if input and output are the same file
-		echo -e "output file ${file_out} is ..."
-		while [ "${file_in}" -ef "${file_out}" ]; do
-			echo "${TAB}the same file as input file ${file_in}"
+		echo -e "output file ${out_file} is ..."
+		while [ "${in_file}" -ef "${out_file}" ]; do
+			echo "${TAB}the same file as input file ${in_file}"
 			echo -n "${TAB}renaming output... "
 			# NB: don't rename any existing files; change the ouput file name to something unique
-			file_out=${in_dir}/${out_base}_$(date -r "${file_out}" +'%Y-%m-%d-t%H%M%S')${ext}
-			echo ${file_out}
+			out_file=${in_dir}/${out_base}_$(date -r "${out_file}" +'%Y-%m-%d-t%H%M%S')${ext}
+			echo ${out_file}
 		done
 		echo "${TAB}uniquely named"
 
 		# check if output exists
-		echo "output file ${file_out}... "
-		if [ -f "${file_out}" ]; then
+		echo "output file ${out_file}... "
+		if [ -f "${out_file}" ]; then
 			echo "${TAB}exists"
 			echo -n "${TAB}waiting for new time stamp... "
-			while [ -f "${file_out}" ]; do
+			while [ -f "${out_file}" ]; do
 				# NB: don't rename any existing files; change the ouput file name to something
 				# unique
-				file_out=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
+				out_file=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
 			done
 			echo "done"
 			echo "${TAB}unique file name found"
-			file_out=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
-			echo "output file ${file_out}"
+			out_file=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
+			echo "output file ${out_file}"
 		else
 			echo "${TAB}does not exist (uniquely named)"
 		fi
@@ -80,4 +80,4 @@ else
 fi
 
 # now move file
-mv -nv "${file_in}" "${file_out}"
+mv -nv "${in_file}" "${out_file}"
