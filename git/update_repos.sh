@@ -249,7 +249,7 @@ for repo in $list; do
 	echo -e "locating ${PSDIR}$repo${NORMAL}... \c"
 	if [ -e ${HOME}/$repo ]; then
 		echo -e "${GOOD}OK${NORMAL}"
-		: $((n_found++))
+		((++n_found))
 		cd ${HOME}/$repo
 		echo -n "checking repository status... "
 		unset_traps
@@ -258,7 +258,7 @@ for repo in $list; do
 		set_traps
 		if [[ $RETVAL -eq 0 ]]; then
 			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-			: $((n_git++))
+			((++n_git))
 			# parse remote
 			if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
 				echo "${TAB}no remote tracking branch set for current branch"
@@ -276,7 +276,7 @@ for repo in $list; do
 				echo -n "matching argument ""$1""... "
 				if [[ $remote_url =~ $1 ]]; then
 					echo -e "${GOOD}OK${NORMAL}"
-					: $((n_match++))
+					((++n_match))
 				else
 					echo -e "${gray}SKIP${NORMAL}"
 					continue
@@ -386,7 +386,7 @@ for repo in $list; do
 			RETVAL=137
 			n_loops=0
 			while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
-				: $((n_loops++))
+				((++n_loops))
 				if [ $n_loops -gt 1 ]; then
 					echo "${TAB}FETCH attempt $n_loops..."
 				fi
@@ -398,7 +398,7 @@ for repo in $list; do
 				echo -en "${GIT_HIGHLIGHT} fetch ${NORMAL} "
 				if [[ $RETVAL == 0 ]]; then
 					echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-					: $((n_fetch++))
+					((++n_fetch))
 				else
 					echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 					echo "failed to fetch remote"
@@ -439,7 +439,7 @@ for repo in $list; do
 				RETVAL=137
 				n_loops=0
 				while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
-					: $((n_loops++))
+					((++n_loops))
 					if [ $n_loops -gt 1 ]; then
 						echo "${TAB}PULL attempt $n_loops..."
 					fi
@@ -473,13 +473,13 @@ for repo in $list; do
 									exit || return
 								else
 									echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL2${NORMAL}"
-									: $((n_fpull++))
+									((++n_fpull))
 								fi
 							fi
 						fi
 					else
 						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-						: $((n_pull++))
+						((++n_pull))
 					fi
 				done
 				if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
@@ -522,7 +522,7 @@ for repo in $list; do
 				RETVAL=137
 				n_loops=0
 				while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
-					: $((n_loops++))
+					((++n_loops))
 					if [ $n_loops -gt 1 ]; then
 						echo "${TAB}PUSH attempt $n_loops..."
 					fi
@@ -543,7 +543,7 @@ for repo in $list; do
 						fi
 					else
 						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-						: $((n_push++))
+						((++n_push))
 					fi
 				done
 				if [[ ${dt_push} -gt ${t_push_max} ]]; then
