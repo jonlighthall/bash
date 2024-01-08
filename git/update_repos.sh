@@ -404,7 +404,7 @@ for repo in $list; do
 					echo "failed to fetch remote"
 					if [[ $RETVAL == 137 ]]; then
 						nsec=$((nsec * 2))
-						echo "${TAB}increasing timeout to ${nsec}"
+						echo "${TAB}increasing fetch timeout to ${nsec}"
 						to="timeout -s 9 ${nsec}s "
 						cmd="${to}${cmd_base}"
 					fi
@@ -455,7 +455,7 @@ for repo in $list; do
 						# increase time
 						if [[ $RETVAL == 137 ]]; then
 							nsec=$((nsec * 2))
-							echo "${TAB}increasing timeout to ${nsec}"
+							echo "${TAB}increasing pull timeout to ${nsec}"
 							to="timeout -s 9 ${nsec}s "
 							cmd="${to}${cmd_base}"
 						fi
@@ -537,7 +537,7 @@ for repo in $list; do
 						echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 						if [[ $RETVAL == 137 ]]; then
 							nsec=$((nsec * 2))
-							echo "${TAB}increasing timeout to ${nsec}"
+							echo "${TAB}increasing push timeout to ${nsec}"
 							to="timeout -s 9 ${nsec}s "
 							cmd="${to}${cmd_base}"
 						fi
