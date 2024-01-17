@@ -386,6 +386,6 @@ if command -v diffy &>/dev/null; then
     diffy ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
 fi
 
-echo "Press Ctrl-C to cancel"
-read -e -i "emacs -nw --eval '(ediff-files \"${hist_bak}\" \"${hist_ref}\")'" && eval "$REPLY"
+echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
+read -e -i "emacs -nw --eval '(ediff-files \"${hist_bak}\" \"${hist_ref}\")'" -p $'\e[0;32m$\e[0m ' && eval "$REPLY"
 
