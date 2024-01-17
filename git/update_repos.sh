@@ -633,12 +633,6 @@ if [ ${n_pull} -eq 0 ]; then
 	echo "none"
 else
 	echo "${n_pull}"
-	echo -n "pull failures: "
-	if [ -z "$pull_fail" ]; then
-		echo "none"
-	else
-		echo -e "${GRH}$pull_fail${NORMAL}"
-	fi
 	echo -n "pull max time: ${t_pull_max} ns"
 	if command -v bc &>/dev/null; then
 		echo " or $(bc <<<"scale=3;$t_pull_max/1000000000") sec"
@@ -646,6 +640,13 @@ else
 		echo
 	fi
 fi
+echo -n "pull failures: "
+if [ -z "$pull_fail" ]; then
+	echo "none"
+else
+	echo -e "${GRH}$pull_fail${NORMAL}"
+fi
+
 echo -n "  force pulls: "
 if [ $n_fpull -eq 0 ]; then
 	echo "none"
@@ -659,18 +660,18 @@ if [ $n_push -eq 0 ]; then
 	echo "none"
 else
 	echo "${n_push}"
-	echo -n "push failures: "
-	if [ -z "$push_fail" ]; then
-		echo "none"
-	else
-		echo -e "${GRH}$push_fail${NORMAL}"
-	fi
 	echo -n "push max time: ${t_push_max} ns"
 	if command -v bc &>/dev/null; then
 		echo " or $(bc <<<"scale=3;$t_push_max/1000000000") sec"
 	else
 		echo
 	fi	
+fi
+echo -n "push failures: "
+if [ -z "$push_fail" ]; then
+	echo "none"
+else
+	echo -e "${GRH}$push_fail${NORMAL}"
 fi
 
 # modified
