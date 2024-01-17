@@ -49,7 +49,7 @@ for prog in $list_found; do
 	ps | grep "$prog" >/dev/null
 	RETVAL=$?
 	if [ $RETVAL = 0 ]; then
-		echo -e "\E[32mOK (running)\E[0m"
+		echo -e "\E[32mOK\E[0m"
 		list_run="$list_run $prog"
 	else
 		echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
