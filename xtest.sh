@@ -62,6 +62,7 @@ if [ -z "${list_run}" ]; then
 fi
 
 # close windows
+echo
 read -n 1 -s -r -p $'\E[32m> \E[0mPress any key to continue'
 echo
 for prog in $list_run; do
