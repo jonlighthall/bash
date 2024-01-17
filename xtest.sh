@@ -23,17 +23,15 @@ if [ -z "${list_found}" ]; then
     exit
 fi
 
-echo
 # open programs
 list_open=''
 for prog in $list_found; do
-    echo -e " opening $prog... \r\E[19C\c"
 	$prog 2>/dev/null & 
 	RETVAL=$?
 	if [ $RETVAL = 0 ]; then
-		echo -e "\E[32mOK (open)\E[0m"
 		list_open="$list_open $prog"
 	else
+		echo -e " opening $prog... \r\E[19C\c"
 		echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
 	fi		
 done
