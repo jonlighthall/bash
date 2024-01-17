@@ -12,7 +12,6 @@ for prog in $list_test; do
 	which $prog
 	RETVAL=$?
 	if [ $RETVAL = 0 ]; then
-		#		echo -e "   \E[32mOK (found)\E[0m"
 		list_found="$list_found $prog"
 	else
 		echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
@@ -29,22 +28,8 @@ echo
 list_open=''
 for prog in $list_found; do
     echo -e " opening $prog... \r\E[19C\c"
-	#		STDERR=$($prog & 2>&1 >/dev/null)
-	# if [ ${#STDERR} -eq 0]; then
-	# 	echo "no error"
-	# else
-	# 	echo "error"
-	# fi
-
-	#		$prog &
 	$prog 2>/dev/null & 
 	RETVAL=$?
-	#		echo "   RETVAL=$RETVAL"
-	PID=$!
-	#		echo "   PID=$PID"
-	#		echo -n "   ps: "
-	#		ps | grep "$PID"
-
 	if [ $RETVAL = 0 ]; then
 		echo -e "\E[32mOK (open)\E[0m"
 		list_open="$list_open $prog"
