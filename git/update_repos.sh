@@ -227,6 +227,7 @@ declare -i n_push=0
 
 # list failures and modifications
 loc_fail=''
+fetch_fail=''
 pull_fail=''
 push_fail=''
 mod_repos=''
@@ -235,11 +236,13 @@ unset OK_list
 host_OK=''
 host_bad=''
 
-# track push/pull times
+# track push/pull times (ns)
 t_fetch_max=0
-fetch_max=0
 t_pull_max=0
 t_push_max=0
+
+# track push/pull times (s)
+fetch_max=0
 
 for repo in $list; do
 	start_new_line
@@ -442,7 +445,8 @@ for repo in $list; do
 				# format timestamp in s
 				if [ $nd -gt $nd_max ]; then
 					echo "more than 1 sec"
-					ddeci=${deci:0:$nd_max}.${deci:$nd_max}
+					ni=$(($nd-$nd_max))
+					ddeci=${time0:0:$ni}.${time0:$ni}
 				else
 					echo "less than 1 sec"
 					ddeci="0.${time0}"
@@ -456,6 +460,7 @@ for repo in $list; do
 				fetch_max=$deci				
 			fi
 			if [ $RETVAL -ne 0 ]; then
+				fetch_fail+="$repo "
 				echo -e "\E[32m> \E[0mWSL may need to be restarted"
 				echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
 				read -e -i "shutdown_wsl" -p $'\e[0;32m$\e[0m ' -t 10 && eval $REPLY
@@ -670,6 +675,12 @@ if [ ${n_fetch} -eq 0 ]; then
 	echo "none"
 else
 	echo "$n_fetch"
+fi
+echo -n "fetch failures: "
+if [ -z "$fetch_fail" ]; then
+	echo "none"
+else
+	echo -e "${GRH}$fetch_fail${NORMAL}"
 fi
 
 # pull
