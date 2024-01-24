@@ -236,6 +236,8 @@ host_OK=''
 host_bad=''
 
 # track push/pull times
+t_fetch_max=0
+fetch_max=0
 t_pull_max=0
 t_push_max=0
 
@@ -376,6 +378,9 @@ for repo in $list; do
 			decho "updating..."
 			# specify number of seconds before kill
 			nsec=2
+			if [ $fetch_max -gt $nsec ]; then
+				nsec=$fetch_max
+			fi
 			to="timeout -s 9 ${nsec}s "
 			# concat commands
 			cmd_base="${to} git remote"
@@ -410,6 +415,46 @@ for repo in $list; do
 					fi
 				fi
 			done
+			
+			# update maximum fetch time
+			if [[ ${dt_fetch} -gt ${t_fetch_max} ]]; then
+				t_fetch_max=${dt_fetch}
+				# print maximum fetch time (in ns)
+				echo "maximum fetch time is $t_fetch_max ns"
+				echo "${#t_fetch_max} numbers long"
+
+				# define number of "decimals" for ns timestamp
+				declare -i nd_max=9
+
+				# pad timestamp with leading zeros
+				fmt="%0${nd_max}d"				
+				printf "$fmt\n" ${t_fetch_max}
+				time0=$(printf "$fmt" ${t_fetch_max})
+				echo "with leading zeros: $time0"
+				declare -i nd=${#time0}
+				echo "${nd} numbers long"
+				if [ $nd -eq $nd_max ]; then
+					echo "no change"
+				else
+					echo "change in length"
+				fi
+
+				# format timestamp in s
+				if [ $nd -gt $nd_max ]; then
+					echo "more than 1 sec"
+					ddeci=${deci:0:$nd_max}.${deci:$nd_max}
+				else
+					echo "less than 1 sec"
+					ddeci="0.${time0}"
+				fi
+				echo "decimalized: $ddeci"
+
+				# round timestamp to nearest second
+				fmt="%.0f"			
+				deci=$(printf "$fmt" ${ddeci})
+				echo "integerized: $deci"
+				fetch_max=$deci				
+			fi
 			if [ $RETVAL -ne 0 ]; then
 				echo -e "\E[32m> \E[0mWSL may need to be restarted"
 				echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
