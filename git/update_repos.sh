@@ -647,7 +647,7 @@ sort -u ${list_remote} -o ${list_remote}
 # print list of remotes
 echo -n "  all remotes: "
 head -n 1 ${list_remote}
-list_indent='               '
+list_indent='                '
 tail -n +2 ${list_remote} | sed "s/^/${list_indent}/"
 echo
 echo -n "these remotes: "
@@ -658,22 +658,22 @@ echo
 
 # print push/pull summary
 # all
-echo "   dirs found: ${n_found}"
-echo "  repos found: ${n_git}"
-echo -n "    not found: "
+echo "    dirs found: ${n_found}"
+echo "   repos found: ${n_git}"
+echo -n "     not found: "
 if [ -z "$loc_fail" ]; then
 	echo "none"
 else
-	echo "$loc_fail"
+	echo -e "${yellow}$loc_fail${NORMAL}"
 fi
 
 # matched
 if [ $n_match -gt 0 ]; then
-	echo "      matched: ${n_match} ($1)"
+	echo "       matched: ${n_match} ($1)"
 fi
 
 # fetched
-echo -n "      fetched: "
+echo -n "       fetched: "
 if [ ${n_fetch} -eq 0 ]; then
 	echo "none"
 else
@@ -687,7 +687,7 @@ else
 fi
 
 # pull
-echo -n " repos pulled: "
+echo -n "  repos pulled: "
 if [ ${n_pull} -eq 0 ]; then
 	echo "none"
 else
@@ -699,14 +699,14 @@ else
 		echo
 	fi
 fi
-echo -n "pull failures: "
+echo -n " pull failures: "
 if [ -z "$pull_fail" ]; then
 	echo "none"
 else
 	echo -e "${GRH}$pull_fail${NORMAL}"
 fi
 
-echo -n "  force pulls: "
+echo -n "   force pulls: "
 if [ $n_fpull -eq 0 ]; then
 	echo "none"
 else
@@ -714,19 +714,19 @@ else
 fi
 
 # push
-echo -n " repos pushed: "
+echo -n "  repos pushed: "
 if [ $n_push -eq 0 ]; then
 	echo "none"
 else
 	echo "${n_push}"
-	echo -n "push max time: ${t_push_max} ns"
+	echo -n " push max time: ${t_push_max} ns"
 	if command -v bc &>/dev/null; then
 		echo " or $(bc <<<"scale=3;$t_push_max/1000000000") sec"
 	else
 		echo
 	fi	
 fi
-echo -n "push failures: "
+echo -n " push failures: "
 if [ -z "$push_fail" ]; then
 	echo "none"
 else
@@ -734,7 +734,7 @@ else
 fi
 
 # modified
-echo -n "     modified: "
+echo -n "      modified: "
 if [ -z "$mod_repos" ]; then
 	echo "none"
 else
