@@ -83,28 +83,3 @@ echo "decimalized: $fracns "
 fmt="%.0f"			
 declare -i whols=$(printf "$fmt" ${fracns})
 echo "integerized: $whols "
-
-exit
-
-if [ $nd -gt $nd_max ]; then
-	whols=${deci:0:$nd_max}.${deci:$nd_max}
-	fmt="%.0f"
-	deci=$(printf "$fmt" ${whols})
-	nd=nd_max
-fi
-
-
-# get most significant decimal
-if [ $nd -gt 1 ]; then
-	declare -ir tenths=${deci::-$(($nd - 1))}
-else
-	declare -ir tenths=${deci}
-fi
-else
-	ELAP=$1
-	declare -ir nd=0
-	declare -r prnt_deci=
-	declare -ir tenths=0
-fi
-
-fi
