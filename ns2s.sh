@@ -34,13 +34,6 @@ else
 			echo "zero-padded: $pad0"
 			declare -i nl0=${#pad0}
 			echo $nl0
-			if [ $nw0 -eq ${nd_max} ]; then
-				echo "change in length"
-				echo "${nw0} numbers long"
-			else
-				echo "no change"
-				exit 1
-			fi
 		else
 			declare pad0="${whol}.${deci}"
 		fi
@@ -64,13 +57,6 @@ else
 			echo "zero-padded: $pad0"
 			declare -i nl0=${#pad0}
 			echo $nl0
-			if [ $nw0 -eq ${nd_max} ]; then
-				echo "change in length"
-				echo "${nw0} numbers long"
-			else
-				echo "no change"
-				exit 1
-			fi
 		else
 			declare pad0="${whol}"
 		fi
