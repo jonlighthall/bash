@@ -27,40 +27,30 @@ else
 		# pad timestamp with leading zeros
 		if [ $nw -lt $nd_max ]; then
 			fmt="%0${nd_max}d"
-			printf "$fmt\n" ${whol}
 			declare pad0=$(printf "$fmt" ${whol})
 			declare -i nw0=${#pad0}
 			pad0+=".${deci}"
-			echo "zero-padded: $pad0"
 			declare -i nl0=${#pad0}
 			echo $nl0
 		else
 			declare pad0="${whol}.${deci}"
 		fi
-
-		echo "zero-padded: $pad0"
-
 	else # input is integer
 		
 		# determine number of integer places
 		declare -i whol=${1}
 		declare -i nw=${#whol}
 
-		echo -e "\x1B[${ln}G has $nw integer places"
-
 		# pad timestamp with leading zeros
 		if [ $nw -lt $nd_max ]; then
 			fmt="%0${nd_max}d"
-			printf "$fmt\n" ${whol}
 			declare pad0=$(printf "$fmt" ${whol})
 			declare -i nw0=${#pad0}
-			echo "zero-padded: $pad0"
 			declare -i nl0=${#pad0}
 			echo $nl0
 		else
 			declare pad0="${whol}"
 		fi
-		echo "zero-padded: $pad0"		
 	fi
 
 	echo "zero-padded: $pad0"		
