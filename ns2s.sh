@@ -11,17 +11,20 @@ else
 
 	# define number of "decimals" for ns timestamp
 	declare -ir nd_max=9
+
+	# determine number of integer places
+	declare -i whol=${1%.*}
+	declare -i nw=${#whol}
+
+	echo -e "\x1B[${ln}G has $nw integer places"
 	
 	# check if input is floating point
 	if [[ "$1" = *"."* ]]; then
-		# determine number of integer places
-		declare -i whol=${1%.*}
-		declare -i nw=${#whol}
+
 		# determine number of decimal places
 		declare -i deci=${1#*.}
 		declare -i nd=${#deci}
 
-		echo -e "\x1B[${ln}G has $nw integer places"
 		echo -e "\x1B[${ln}G and $nd decimal places"
 
 		# pad timestamp with leading zeros
@@ -37,10 +40,6 @@ else
 		fi
 	else # input is integer
 		
-		# determine number of integer places
-		declare -i whol=${1}
-		declare -i nw=${#whol}
-
 		# pad timestamp with leading zeros
 		if [ $nw -lt $nd_max ]; then
 			fmt="%0${nd_max}d"
@@ -57,22 +56,21 @@ else
 
 fi
 
-	exit
+exit
 
+if [ $nd -gt $nd_max ]; then
+	ddeci=${deci:0:$nd_max}.${deci:$nd_max}
+	fmt="%.0f"
+	deci=$(printf "$fmt" ${ddeci})
+	nd=nd_max
+fi
 
-	if [ $nd -gt $nd_max ]; then
-		ddeci=${deci:0:$nd_max}.${deci:$nd_max}
-		fmt="%.0f"
-		deci=$(printf "$fmt" ${ddeci})
-		nd=nd_max
-	fi
-	
-	# get most significant decimal
-	if [ $nd -gt 1 ]; then
-		declare -ir tenths=${deci::-$(($nd - 1))}
-	else
-		declare -ir tenths=${deci}
-	fi
+# get most significant decimal
+if [ $nd -gt 1 ]; then
+	declare -ir tenths=${deci::-$(($nd - 1))}
+else
+	declare -ir tenths=${deci}
+fi
 else
 	ELAP=$1
 	declare -ir nd=0
