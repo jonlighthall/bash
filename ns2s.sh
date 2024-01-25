@@ -1,11 +1,20 @@
 #!/bin/bash -u
+declare -i DEBUG=0
+
+# conditional debug echo
+decho() {
+	if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
+		# if DEBUG is (unset or null) or greater than 0
+		echo "$@"
+	fi
+}
 
 if [ $# -eq 0 ]; then
 	echo "NULL"
 else
 	# determine input length
 	declare -i ln=${#1}
-	echo "$1 is $ln long"
+	decho "$1 is $ln long"
 
 	# define number of "decimals" for ns timestamp
 	declare -ir nd_max=9
@@ -14,7 +23,7 @@ else
 	declare -i whol=${1%.*}
 	declare -i nw=${#whol}
 
-	echo -e "\x1B[${ln}G has $nw integer places"
+	decho -e "\x1B[${ln}G has $nw integer places"
 	
 	# check if input is floating point
 	if [[ "$1" = *"."* ]]; then
@@ -27,12 +36,12 @@ else
 		declare -i nd=0
 		declare frac=''
 	fi
-	echo -e "\x1B[${ln}G and $nd decimal places"
+	decho -e "\x1B[${ln}G and $nd decimal places"
 
 	if [ $nd -gt 0 ]; then
-		echo "decimals: $deci"
-		echo "number of decimails: $nd"
-		echo "fractional part: $frac"
+		decho "decimals: $deci"
+		decho "number of decimails: $nd"
+		decho "fractional part: $frac"
 	fi
 
 	# pad timestamp with leading zeros
@@ -46,24 +55,24 @@ else
 
 	# check new length
 	# zero-padded whole number length shoudl be 9 or nw
-	echo "padded integer places: $nw0"
+	decho "padded integer places: $nw0"
 	if [ ${nw0} -ne ${nw} ]; then
-		echo "change in whole number length"
+		decho "change in whole number length"
 	else
-		echo "no change"
+		decho "no change"
 		if [ ${nw0} -lt ${nd_max} ]; then
-			echo "fail"
+			decho "fail"
 			exit 1
 		else
-			echo "ok"
+			decho "ok"
 		fi
 	fi
 
 	pad0f="${pad0}${frac}"	
 	declare -i nl0=${#pad0f}
-	echo "padded lenght: $nl0"
+	decho "padded lenght: $nl0"
 	
-	echo "zero-padded: $pad0f ns"		
+	decho "zero-padded: $pad0f ns"		
 fi
 
 # format timestamp in s
@@ -71,26 +80,26 @@ if [ $nw -gt $nd_max ]; then
 	ni=$(($nw-$nd_max))
 	declare sdec=${pad0:$ni}
 	if [ $sdec -gt 0 ]; then 
-		echo "greater than 1 s"
+		decho "greater than 1 s"
 	else
-		echo "equal to 1 s"
+		decho "equal to 1 s"
 	fi
 	wholns=${pad0:0:$ni}.${sdec}
 else
-	echo "less than 1 s"
+	decho "less than 1 s"
 	wholns="0.${pad0}"
 fi
-echo "   whole ns: $wholns"
+decho "   whole ns: $wholns"
 if [ $nd -gt 0 ]; then
-	echo "    deci ns: $deci"
+	decho "    deci ns: $deci"
 fi
 fracns="${wholns}${deci}"
-echo "decimalized: $fracns s"
+decho "decimalized: $fracns s"
 
 # round timestamp to nearest second
 fmt="%.0f"			
 declare -i whols=$(printf "$fmt" ${fracns})
-echo "integerized: $whols s"
+decho "integerized: $whols s"
 
 if [[ "$fracns" = *"."* ]]; then
 	# determine number of decimal places
@@ -100,15 +109,15 @@ else
 	declare -i decis=''
 	declare -i nds=0
 fi
-echo -e "\x1B[${ln}G and $nds decimal places"
+decho -e "\x1B[${ln}G and $nds decimal places"
 
-echo "remainder: 0.$decis"
+decho "remainder: 0.$decis"
 
 if [ ${decis} -gt 0 ]; then
-	echo "round up"
+	decho "round up"
 	declare rsec=$((whols+1))
 else
-	echo "no change"
+	decho "no change"
 	declare rsec=$whols
 fi
 
