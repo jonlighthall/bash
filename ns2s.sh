@@ -1,5 +1,5 @@
-#!/bin/bash -u
-declare -i DEBUG=0
+#!/bin/bash -ueE
+declare -ir DEBUG=0
 
 # conditional debug echo
 decho() {
@@ -28,7 +28,7 @@ else
 	# check if input is floating point
 	if [[ "$1" = *"."* ]]; then
 		# determine number of decimal places
-		declare -i deci=${1#*.}
+		declare deci=${1#*.}
 		declare -i nd=${#deci}
 		declare frac=".${deci}"
 	else
@@ -70,8 +70,7 @@ else
 
 	pad0f="${pad0}${frac}"	
 	declare -i nl0=${#pad0f}
-	decho "padded lenght: $nl0"
-	
+	decho "padded lenght: $nl0"	
 	decho "zero-padded: $pad0f ns"		
 fi
 
@@ -94,12 +93,12 @@ if [ $nd -gt 0 ]; then
 	decho "    deci ns: $deci"
 fi
 fracns="${wholns}${deci}"
-decho "decimalized: $fracns s"
+echo "decimalized: $fracns s"
 
 # round timestamp to nearest second
 fmt="%.0f"			
 declare -i whols=$(printf "$fmt" ${fracns})
-decho "integerized: $whols s"
+echo "integerized: $whols s"
 
 if [[ "$fracns" = *"."* ]]; then
 	# determine number of decimal places
@@ -121,4 +120,4 @@ else
 	declare rsec=$whols
 fi
 
-echo "    rounded: $rsec s"
+echo "    ceiling: $rsec s"
