@@ -31,21 +31,37 @@ else
 	fi
 	echo -e "\x1B[${ln}G and $nd decimal places"
 
-	echo $deci
-	echo $nd
-	echo $frac
+	echo "decimals: $deci"
+	echo "number of decimails: $nd"
+	echo "fractional part: $frac"
 
 	# pad timestamp with leading zeros
 	if [ $nw -lt $nd_max ]; then
 		fmt="%0${nd_max}d"
 		declare pad0=$(printf "$fmt" ${whol})
-		declare -i nw0=${#pad0}
 	else
 		declare pad0="${whol}"
 	fi
-	pad0f="${pad0}${frac}"
-	declare -i nl0=${#pad0}
-	echo $nl0
+	declare -i nw0=${#pad0}
+
+	# check new length
+	# zero-padded whole number length shoudl be 9 or nw
+	echo "padded integer places: $nw0"
+	if [ ${nw0} -ne ${nw} ]; then
+		echo "change in whole number length"
+	else
+		echo "no change"
+		if [ ${nw0} -lt ${nd_max} ]; then
+			echo "fail"
+			exit 1
+		else
+			echo "ok"
+		fi
+	fi
+
+	pad0f="${pad0}${frac}"	
+	declare -i nl0=${#pad0f}
+	echo "new lenght: $nl0"
 	
 	echo "zero-padded: $pad0f"		
 fi
@@ -54,21 +70,29 @@ fi
 if [ $nw -gt $nd_max ]; then
 	echo "greater than 1 s"
 	ni=$(($nw-$nd_max))
-	ddeci=${pad0:0:$ni}.${pad0:$ni}
+	wholns=${pad0:0:$ni}.${pad0:$ni}
 else
 	echo "less than or equal to 1 s"
-	ddeci="0.${pad0}${deci}"
+	wholns="0.${pad0}"
 fi
-echo "decimalized: $ddeci "
+echo "   whole ns: $wholns"
+fracns="${wholns}${deci}"
+echo "decimalized: $fracns "
+
+# round timestamp to nearest second
+fmt="%.0f"			
+declare -i whols=$(printf "$fmt" ${fracns})
+echo "integerized: $whols "
 
 exit
 
 if [ $nd -gt $nd_max ]; then
-	ddeci=${deci:0:$nd_max}.${deci:$nd_max}
+	whols=${deci:0:$nd_max}.${deci:$nd_max}
 	fmt="%.0f"
-	deci=$(printf "$fmt" ${ddeci})
+	deci=$(printf "$fmt" ${whols})
 	nd=nd_max
 fi
+
 
 # get most significant decimal
 if [ $nd -gt 1 ]; then
