@@ -678,6 +678,12 @@ if [ ${n_fetch} -eq 0 ]; then
 	echo "none"
 else
 	echo "$n_fetch"
+	echo -n "fetch max time: ${t_fetch_max} ns"
+	if command -v bc &>/dev/null; then
+		echo " or $(bc <<<"scale=3;$t_fetch_max/1000000000") sec"
+	else
+		echo
+	fi	
 fi
 echo -n "fetch failures: "
 if [ -z "$fetch_fail" ]; then
