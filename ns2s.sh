@@ -20,41 +20,46 @@ else
 	
 	# check if input is floating point
 	if [[ "$1" = *"."* ]]; then
-
 		# determine number of decimal places
 		declare -i deci=${1#*.}
 		declare -i nd=${#deci}
-
-		echo -e "\x1B[${ln}G and $nd decimal places"
-
-		# pad timestamp with leading zeros
-		if [ $nw -lt $nd_max ]; then
-			fmt="%0${nd_max}d"
-			declare pad0=$(printf "$fmt" ${whol})
-			declare -i nw0=${#pad0}
-			pad0+=".${deci}"
-			declare -i nl0=${#pad0}
-			echo $nl0
-		else
-			declare pad0="${whol}.${deci}"
-		fi
-	else # input is integer
-		
-		# pad timestamp with leading zeros
-		if [ $nw -lt $nd_max ]; then
-			fmt="%0${nd_max}d"
-			declare pad0=$(printf "$fmt" ${whol})
-			declare -i nw0=${#pad0}
-			declare -i nl0=${#pad0}
-			echo $nl0
-		else
-			declare pad0="${whol}"
-		fi
+		declare frac=".${deci}"
+	else
+		declare -i deci=''
+		declare -i nd=0
+		declare frac=''
 	fi
+	echo -e "\x1B[${ln}G and $nd decimal places"
 
-	echo "zero-padded: $pad0"		
+	echo $deci
+	echo $nd
+	echo $frac
 
+	# pad timestamp with leading zeros
+	if [ $nw -lt $nd_max ]; then
+		fmt="%0${nd_max}d"
+		declare pad0=$(printf "$fmt" ${whol})
+		declare -i nw0=${#pad0}
+	else
+		declare pad0="${whol}"
+	fi
+	pad0f="${pad0}${frac}"
+	declare -i nl0=${#pad0}
+	echo $nl0
+	
+	echo "zero-padded: $pad0f"		
 fi
+
+# format timestamp in s
+if [ $nw -gt $nd_max ]; then
+	echo "greater than 1 s"
+	ni=$(($nw-$nd_max))
+	ddeci=${pad0:0:$ni}.${pad0:$ni}
+else
+	echo "less than or equal to 1 s"
+	ddeci="0.${pad0}${deci}"
+fi
+echo "decimalized: $ddeci "
 
 exit
 
