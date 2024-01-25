@@ -423,9 +423,9 @@ for repo in $list; do
 			if [[ ${dt_fetch} -gt ${t_fetch_max} ]]; then
 				t_fetch_max=${dt_fetch}
 				# print maximum fetch time (in ns)
-				echo "${TAB}${fTAB}maximum fetch time is $t_fetch_max ns"
+				echo "${TAB}${fTAB}new maximum fetch time"
+				echo "${TAB}${fTAB}   raw time: $t_fetch_max ns"
 				declare -i nd=${#t_fetch_max}
-				echo "${TAB}${fTAB}${nd} numbers long"
 
 				# define number of "decimals" for ns timestamp
 				declare -i nd_max=9
@@ -434,7 +434,7 @@ for repo in $list; do
 				if [ $nd -lt $nd_max ]; then
 					fmt="%0${nd_max}d"				
 					declare -i time0=$(printf "$fmt" ${t_fetch_max})
-					echo "${TAB}${fTAB}with leading zeros: $time0"
+					echo "${TAB}${fTAB}zero-padded: $time0"
 					declare -i nd=${#time0}
 					if [ $nd -eq ${nd_max} ]; then
 						echo "${TAB}${fTAB}change in length"
@@ -449,19 +449,17 @@ for repo in $list; do
 
 				# format timestamp in s
 				if [ $nd -gt $nd_max ]; then
-					echo "${TAB}${fTAB}more than 1 sec"
 					ni=$(($nd-$nd_max))
 					ddeci=${time0:0:$ni}.${time0:$ni}
 				else
-					echo "${TAB}${fTAB}less than 1 sec"
 					ddeci="0.${time0}"
 				fi
-				echo "${TAB}${fTAB}decimalized: $ddeci"
+				echo "${TAB}${fTAB}decimalized: $ddeci "
 
 				# round timestamp to nearest second
 				fmt="%.0f"			
 				deci=$(printf "$fmt" ${ddeci})
-				echo "${TAB}${fTAB}integerized: $deci"
+				echo "${TAB}${fTAB}integerized: $deci "
 				fetch_max=$deci				
 			fi
 			if [ $RETVAL -ne 0 ]; then
