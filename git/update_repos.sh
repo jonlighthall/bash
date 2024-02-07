@@ -626,11 +626,19 @@ for repo in $list; do
 			fi
 		else
 			echo "${TAB}$repo not a Git repository"
-			loc_fail+="$repo "
+			if [ ! -z ${loc_fail:+dummy} ]; then
+				loc_fail+=$'\n'"$repo"
+			else
+				loc_fail+="$repo"
+			fi
 		fi
 	else
 		echo "not found"
-		loc_fail+="$repo "
+			if [ ! -z ${loc_fail:+dummy} ]; then
+				loc_fail+=$'\n'"$repo"
+			else
+				loc_fail+="$repo"
+			fi
 		unset_traps
 		bash test_file ${HOME}/$repo
 		set_traps
@@ -664,7 +672,10 @@ echo -n "     not found: "
 if [ -z "$loc_fail" ]; then
 	echo "none"
 else
-	echo -e "${yellow}$loc_fail${NORMAL}"
+	echo -ne "${yellow}"
+	echo "${loc_fail}" | head -n 1
+	echo "${loc_fail}" | tail -n +2 | sed "s/^/${list_indent}/"
+	echo -ne "${NORMAL}"
 fi
 
 # matched
