@@ -8,7 +8,7 @@ list_test="xeyes xclock xcalc xman xlogo xterm"
 # find programs
 list_found=''
 for prog in $list_test; do
-	which $prog >/dev/null
+	which $prog &>/dev/null
 	RETVAL=$?
 	if [ $RETVAL = 0 ]; then
 		list_found="$list_found $prog"
@@ -19,7 +19,7 @@ for prog in $list_test; do
 done
 
 if [ -z "${list_found}" ]; then
-    echo "FAIL: no X-programs found!"
+	echo -e "\E[31mFAIL\E[0m: no X11 programs found!"
     exit
 fi
 
@@ -37,7 +37,7 @@ for prog in $list_found; do
 done
 
 if [ -z "${list_open}" ]; then
-    echo "FAIL: no X-programs opened!"
+    echo -e "\E[31mFAIL\E[0m: no X11 programs opened!"
     exit
 fi
 
@@ -57,7 +57,7 @@ for prog in $list_found; do
 done
 
 if [ -z "${list_run}" ]; then
-    echo "FAIL: no X-programs running!"
+    echo -e "\E[31mFAIL\E[0m: no X11 programs running!"
     exit
 fi
 
