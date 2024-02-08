@@ -1,8 +1,8 @@
 #!/bin/bash -u
 #
-# find_matching.sh - Reads an input list of files name patterns. Any files matching the
-# individual patterns are saved to a new list of file names. Handling is included to backup any
-# duplicated input/output file names.
+# find_matching.sh - Reads an input list of files name patterns. Any files
+# matching the individual patterns are saved to a new list of file names.
+# Handling is included to backup any duplicated input/output file names.
 #
 # Adapted from find_missing_and_empty.sh
 #
@@ -14,9 +14,9 @@
 # Use example:
 # find_matching list_of_patterns.txt search_dir
 #
-# the command will locate the files matching the pattern and write the matches to file. For
-# example below, the search pattern (first line) matches the file name (second line) found by
-# running the command.
+# the command will locate the files matching the pattern and write the matches
+# to file. For example below, the search pattern (first line) matches the file
+# name (second line) found by running the command.
 #
 # file_name_???
 # dir/new_file_name123.bin

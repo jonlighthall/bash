@@ -1,5 +1,9 @@
 #!/bin/bash -u
 #
+# whatsup.sh - show... what's up
+#
+# Mar 2019 JCL
+#
 # Print host information
 #
 echo "   host:" $HOSTNAME

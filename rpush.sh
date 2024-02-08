@@ -1,4 +1,11 @@
 #!/bin/bash -u
+#
+# Dependences:
+#   rpath.sh
+#
+# Related scripts:
+#   rpull.sh
+
 # set paths
 source rpath.sh
 SOURCE=${LOCAL%/}

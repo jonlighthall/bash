@@ -1,22 +1,23 @@
 #!/bin/bash -u
 #
-# grep_matching.sh - Reads an input list of files name regex patterns. Any files matching the
-# individual patterns are saved to a new list of file names. Handling is included to backup any
-# duplicated input/output file names.
+# grep_matching.sh - Reads an input list of files name regex patterns. Any files
+# matching the individual patterns are saved to a new list of file names.
+# Handling is included to backup any duplicated input/output file names.
 #
 # Example:
 #
 #       grep_matching list_of_patterns.txt list_of_files.txt
 #
-#    The first argument is the FILE containing a list regex patterns corresponding to the desired
-#    files. The second argument is the FILE containing a list of files to be searched, e.g. the
-#    'ls' contents of a directory. The command will locate the files matching the pattern and
-#    write the matches to file.
+#    The first argument is the FILE containing a list regex patterns
+#    corresponding to the desired files. The second argument is the FILE
+#    containing a list of files to be searched, e.g. the 'ls' contents of a
+#    directory. The command will locate the files matching the pattern and write
+#    the matches to file.
 #
 # Generating the list of files:
 #
-#    Say ./big_dir is a huge directory for which using 'find' iteratively is too slow. Use one of
-#    the following commands to produce a list of files
+#    Say ./big_dir is a huge directory for which using 'find' iteratively is too
+#    slow. Use one of the following commands to produce a list of files
 #       \ls -L ./big_dir > list_of_files.txt
 #    then
 #       cat list_of_files | awk '{print $9}' | sed '/^$/d' > list_of_files.txt
@@ -27,15 +28,16 @@
 #
 # Generating the list of patterns:
 #
-#    For example, if you want to locate a file matching the pattern 'file_name_[0-9]\{6\},' save
-#    that pattern in a file, replacing all \ with \\.
+#    For example, if you want to locate a file matching the pattern
+#    'file_name_[0-9]\{6\},' save that pattern in a file, replacing all \ with
+#    \\.
 #
 # Operation:
 #
-#    Call the command with the pattern file as the first argument and the file to be searched as
-#    the second argument. If pattern matches a line in the search file, the resulting output
-#    file, list_of_patterns_found.txt, will have content such as
-#    'big_dir/new_file_name_123456.bin'
+#    Call the command with the pattern file as the first argument and the file
+#    to be searched as the second argument. If pattern matches a line in the
+#    search file, the resulting output file, list_of_patterns_found.txt, will
+#    have content such as 'big_dir/new_file_name_123456.bin'
 #
 # Next steps:
 #
