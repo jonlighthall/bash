@@ -1,6 +1,7 @@
 #!/bin/bash -u
 #
-# sort_hosts.sh - this script will merge all hosts in known_hosts and sort the result
+# sort_hosts.sh - this script will merge all hosts in known_hosts and sort the
+# result
 #
 # Aug 2023 JCL
 

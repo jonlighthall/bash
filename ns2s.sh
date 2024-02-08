@@ -1,4 +1,13 @@
 #!/bin/bash -ueE
+#
+# ns2s.sh - convert nanosecond timestamp to seconds, both fractional and
+# intereger
+#
+# adapted from sec2elap.sh
+#
+# Jan 2024 JCL
+
+# set debug level
 declare -ir DEBUG=0
 
 # conditional debug echo
@@ -24,7 +33,7 @@ else
 	declare -i nw=${#whol}
 
 	decho -e "\x1B[${ln}G has $nw integer places"
-	
+
 	# check if input is floating point
 	if [[ "$1" = *"."* ]]; then
 		# determine number of decimal places
@@ -68,17 +77,17 @@ else
 		fi
 	fi
 
-	pad0f="${pad0}${frac}"	
+	pad0f="${pad0}${frac}"
 	declare -i nl0=${#pad0f}
-	decho "padded lenght: $nl0"	
-	decho "zero-padded: $pad0f ns"		
+	decho "padded lenght: $nl0"
+	decho "zero-padded: $pad0f ns"
 fi
 
 # format timestamp in s
 if [ $nw -gt $nd_max ]; then
-	ni=$(($nw-$nd_max))
+	ni=$(($nw - $nd_max))
 	declare sdec=${pad0:$ni}
-	if [ $sdec -gt 0 ]; then 
+	if [ $sdec -gt 0 ]; then
 		decho "greater than 1 s"
 	else
 		decho "equal to 1 s"
@@ -96,14 +105,14 @@ fracns="${wholns}${deci}"
 echo "decimalized: $fracns s"
 
 # round timestamp to nearest second
-fmt="%.0f"			
+fmt="%.0f"
 declare -i whols=$(printf "$fmt" ${fracns})
 echo "integerized: $whols s"
 
 if [[ "$fracns" = *"."* ]]; then
 	# determine number of decimal places
-	declare  decis=${fracns#*.}
-	declare  nds=${#decis}
+	declare decis=${fracns#*.}
+	declare nds=${#decis}
 else
 	declare -i decis=''
 	declare -i nds=0
@@ -114,7 +123,7 @@ decho "remainder: 0.$decis"
 
 if [ ${decis} -gt 0 ]; then
 	decho "round up"
-	declare rsec=$((whols+1))
+	declare rsec=$((whols + 1))
 else
 	decho "no change"
 	declare rsec=$whols

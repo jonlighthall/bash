@@ -1,23 +1,24 @@
 #!/bin/bash -u
 #
-# find_matching.sh - Reads an input list of files name patterns. Any files matching the
-# individual patterns are saved to a new list of file names. Handling is included to backup any
-# duplicated input/output file names.
+# find_matching_and_move.sh - Reads an input list of files name patterns. Any
+# files matching the individual patterns are saved to a new list of file names.
+# Handling is included to backup any duplicated input/output file names.
 #
 # Adapted from find_missing_and_empty.sh
 #
 # The first argument is the FILE containing a list of files to be moved.
 #
-# The second argument is the DIRECTORY specifying the named sub-directory to move the matching files
+# The second argument is the DIRECTORY specifying the named sub-directory to
+# move the matching files
 #
 # Use example:
 #
 # find_matching output.txt subdir
 #
-#  the command will take the located files specified by the list and move them to the
-# sub-directory subdir. For example below, the search pattern (first line) matches the file name
-# (second line) found by running the first command. The file is then moved to the new
-# sub-directory with the second command.
+# the command will take the located files specified by the list and move them to
+# the sub-directory subdir. For example below, the search pattern (first line)
+# matches the file name (second line) found by running the first command. The
+# file is then moved to the new sub-directory with the second command.
 #
 # file_name_???
 # dir/new_file_name123.bin

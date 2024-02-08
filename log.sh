@@ -1,4 +1,7 @@
 #!/bin/bash -u
+#
+# log.sh - copy STDOUT and STDERR to log file with date
+
 if [ $# -eq 0 ]; then
     echo "Please provide an executable"
 else

@@ -1,10 +1,10 @@
 #!/bin/bash -u
 #
-# cp_tar.sh - Reads an input list of files name patterns. Any files
-# matching the individual patterns are copied to the ouput directory.
-# File names are expected to be formatted using semantic versioning of
-# the form name<major><minor><patch>. In this example, periods are not
-# expected in the file name between version sections.
+# cp_tar.sh - Reads an input list of files name patterns. Any files matching the
+# individual patterns are copied to the ouput directory. File names are expected
+# to be formatted using semantic versioning of the form
+# name<major><minor><patch>. In this example, periods are not expected in the
+# file name between version sections.
 #
 # Adapted from find_matching.sh
 #

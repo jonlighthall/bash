@@ -1,6 +1,9 @@
 #!/bin/bash -u
 #
-# sort_hosts.sh - this script will merge all hosts in authorized_keys and sort the result
+# sort_keys.sh - this script will merge all hosts in authorized_keys and sort
+# the result
+#
+# adapted from sort_hosts.sh
 #
 # Aug 2023 JCL
 

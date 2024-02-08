@@ -1,5 +1,8 @@
 #!/bin/bash -u
-# Purpose: Display a welcome message, including the host name, on remote host after login
+#
+# Purpose:
+#   Display a welcome message, including the host name, on remote host after
+#   login
 
 # define welcome message
 msg=$(echo " Welcome to $(hostname -s) ")

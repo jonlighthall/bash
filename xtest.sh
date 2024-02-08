@@ -1,4 +1,9 @@
 #!/bin/bash -u
+#
+# xtest.sh - test if X11 is working by opening a list of default programs. The
+# status of the programs is printed. The program waits for the user to hit any
+# key in the terminal window and the opened programs are subsequently closed.
+
 echo "${0##*/}"
 
 # test X11
@@ -42,7 +47,6 @@ if [ -z "${list_open}" ]; then
 fi
 
 # check if programs are running
-
 list_run=''
 for prog in $list_found; do
     echo -e " opening $prog... \r\E[19C\c"

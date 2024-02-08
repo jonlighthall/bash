@@ -1,6 +1,9 @@
 #!/bin/bash -u
 #
-# sort_creds.sh - this script will merge all credentials in .git_credentials and sort the result
+# sort_creds.sh - this script will merge all credentials in .git_credentials and
+# sort the result
+#
+# adapted from sort_hosts.sh
 #
 # Aug 2023 JCL
 
@@ -30,7 +33,7 @@ fi
 set_loc=C
 export LC_COLLATE=$set_loc
 
-# specify default known creds file
+# specify default git credentials file
 cred_ref=${HOME}/.git-credentials
 cred_bak=${cred_ref}_$(date -r ${cred_ref} +'%Y-%m-%d-t%H%M%S')
 echo "backup known creds file"
@@ -94,7 +97,7 @@ echo -n "${TAB}delete trailing whitespaces... "
 sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${cred_out}
 echo "done"
 
-# sort known creds
+# sort credentials
 echo -n "${TAB}sorting lines... "
 sort -u ${cred_out} -o ${cred_out}
 echo "done"

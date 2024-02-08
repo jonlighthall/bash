@@ -1,6 +1,6 @@
 #!/bin/bash -u
-# reads a list of input directories from a file and for each directory,
-# if the directory exists, performs a write test of the directory
+# reads a list of input directories from a file and for each directory, if the
+# directory exists, performs a write test of the directory
 FILE1=$1
 
 i=0

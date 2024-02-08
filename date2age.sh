@@ -9,7 +9,6 @@ echo "age is $A"
 echo "file date is $(date -r "$1")"
 declare -i B=$(date -r $1 +%s)
 echo "file age is $B"
-declare -i C=$(( A - B ))
+declare -i C=$((A - B))
 echo -n "file age is $C seconds or "
-sec2elap $C 
-
+sec2elap $C
