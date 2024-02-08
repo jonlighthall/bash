@@ -153,8 +153,10 @@ fi
 
 # list repository paths, relative to home
 # settings
-list="config \
-      config/private "
+list="config "
+if [[ ! ("$(hostname -f)" == *"navy.mil")  ]]; then
+	list+=" config/private "
+fi
 
 # scripting utilities
 dir_script="utils/"
