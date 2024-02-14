@@ -220,7 +220,7 @@ while [ -z ${hash_local} ]; do
 done
 
 # compare local commit to remote commit
-echo -n "${TAB}corresponding remote commit: "
+echo -n "${TAB}corresponding remote commit: .... "
 echo $hash_remote
 TAB+=${fTAB:='   '}
 echo -n "${TAB}local commit has... "
