@@ -1,5 +1,7 @@
 #!/bin/bash -u
-# add the following directories to the start of PATH
+# set_path.sh - prepends the parent and grandparent directories of the current directory to
+# PATH. Add the directories one and two levels up from the present working directory to the start
+# of the PATH environmental variable.
 #
 # NB: remember to 'source' this script, don't just execute it
 #
