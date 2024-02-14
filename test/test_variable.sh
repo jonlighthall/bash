@@ -271,6 +271,11 @@ for VAR in $input; do
 		# all [ -z ] tests are false when VAR is set
 		echo "no quotes"
 		echo -e "----------------------------------------------------"
+
+		#---------------
+		# no substition
+		#---------------
+		
 		echo -ne "    NULL [ -z \${VAR   } ]\t: "
 		# CONDITION 1: true when VAR is unset or null
 		if [ -z ${!VAR} ]; then
@@ -280,6 +285,10 @@ for VAR in $input; do
 		fi
 		echo -e "\t: '${!VAR}'"
 
+		#-----------------------------------
+		# substitute unset VAR with default
+		#-----------------------------------
+		
 		echo -ne "    NULL [ -z \${VAR-d } ]\t: "
 		# CONDITION 2: true when VAR is null
 		if [ -z ${!VAR-default} ]; then
@@ -309,6 +318,10 @@ for VAR in $input; do
 		fi
 		# substitution occurs when VAR is unset (has not been declared) or null (empty)
 		echo -e "\t: '${!VAR:-default}'"
+
+		#-----------------------------------
+		# substitute set VAR with alternate
+		#-----------------------------------
 
 		echo -ne "    NULL [ -z \${VAR+a } ]\t: "
 		# CONDITION 3: true when VAR is unset
