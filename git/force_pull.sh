@@ -354,7 +354,7 @@ cbar "${BOLD}pushing local changes...${NORMAL}"
 N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
-    echo "list of commits: "
+    echo "${TAB}${fTAB}list of commits: "
     git --no-pager log ${remote_tracking_branch}..HEAD
     git push
 else
@@ -385,3 +385,6 @@ else
     echo "${fTAB}no stash entries"
 fi
 cbar "${BOLD}you're done!${NORMAL}"
+
+# add exit code for parent script
+exit 0
