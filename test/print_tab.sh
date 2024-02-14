@@ -8,11 +8,11 @@ NORMAL='\E[0m'    # reset
 thisTAB='   '
 for var in TAB fTAB
 do
-    val=${!var}
-    echo -n "${thisTAB}$var "
+	echo -n "${thisTAB}$var "
     if [ -z ${!var+dummy} ]; then
 	echo -e "${yellow}unset${NORMAL}"
     else
+	val=${!var}
 	i=${#val}
 	echo -en "${GOOD}set${NORMAL} to ${space}${val}${NORMAL}"
 	[ $i -gt 0 ] && echo -n " "
