@@ -16,6 +16,7 @@ else
 	TAB+=${TAB+${fTAB:='   '}}
 fi
 
+# set debug level
 declare -i DEBUG=0
 
 # conditional debug echo
@@ -435,7 +436,7 @@ for repo in $list; do
 				# pad timestamp with leading zeros
 				if [ $nd -lt $nd_max ]; then
 					fmt="%0${nd_max}d"				
-					declare -i time0=$(printf "$fmt" ${t_fetch_max})
+					declare time0=$(printf "$fmt" ${t_fetch_max})
 					echo "${TAB}${fTAB}zero-padded: $time0"
 					declare -i nd=${#time0}
 					if [ $nd -eq ${nd_max} ]; then
