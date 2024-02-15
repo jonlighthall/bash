@@ -228,11 +228,19 @@ declare -i n_match=0
 declare -i n_pull=0
 declare -i n_push=0
 
-# list failures and modifications
+# list failures
 loc_fail=''
 fetch_fail=''
 pull_fail=''
 push_fail=''
+
+# list successes
+loc_OK=''
+fetch_OK=''
+pull_OK=''
+push_OK=''
+
+# list modifications
 mod_repos=''
 mod_files=''
 unset OK_list
@@ -536,6 +544,12 @@ for repo in $list; do
 					else
 						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 						((++n_pull))
+						if [ ! -z ${pull_OK:+dummy} ]; then
+							pull_OK+=$'\n'"$repo"
+						else
+							pull_OK+="$repo"
+						fi
+
 					fi
 				done
 				if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
@@ -600,6 +614,12 @@ for repo in $list; do
 					else
 						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 						((++n_push))
+						if [ ! -z ${push_OK:+dummy} ]; then
+							push_OK+=$'\n'"$repo"
+						else
+							push_OK+="$repo"
+						fi
+
 					fi
 				done
 				if [[ ${dt_push} -gt ${t_push_max} ]]; then
@@ -712,6 +732,11 @@ if [ ${n_pull} -eq 0 ]; then
 	echo "none"
 else
 	echo "${n_pull}"
+
+	echo -ne "${green}"
+	echo "${pull_OK}" | sed "s/^/${list_indent}/"
+	echo -ne "${NORMAL}"
+	
 	echo -n "pull max time: ${t_pull_max} ns"
 	if command -v bc &>/dev/null; then
 		echo " or $(bc <<<"scale=3;$t_pull_max/1000000000") sec"
@@ -719,6 +744,7 @@ else
 		echo
 	fi
 fi
+
 echo -n " pull failures: "
 if [ -z "$pull_fail" ]; then
 	echo "none"
@@ -739,6 +765,11 @@ if [ $n_push -eq 0 ]; then
 	echo "none"
 else
 	echo "${n_push}"
+
+	echo -ne "${green}"
+	echo "${push_OK}" | sed "s/^/${list_indent}/"
+	echo -ne "${NORMAL}"
+	
 	echo -n " push max time: ${t_push_max} ns"
 	if command -v bc &>/dev/null; then
 		echo " or $(bc <<<"scale=3;$t_push_max/1000000000") sec"
