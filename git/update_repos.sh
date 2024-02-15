@@ -398,11 +398,11 @@ for repo in $list; do
 			fi
 			to="timeout -s 9 ${nsec}s "
 			# concat commands
-			cmd_base="${to} git remote"
+			cmd_base="${to} git fetch"
 			if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
 				cmd_base+=" --verbose"
 			fi
-			cmd="${cmd_base} update"
+			cmd="${cmd_base} --all"
 			RETVAL=137
 			n_loops=0
 			while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
@@ -423,6 +423,10 @@ for repo in $list; do
 					echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 					echo "failed to fetch remote"
 					if [[ $RETVAL == 137 ]]; then
+						if [ $nsec -gt $fetch_max ]; then
+							fetch_max=$nsec
+							echo "${TAB}increasing fetch_max to $fetch_max"
+						fi
 						nsec=$((nsec * 2))
 						echo "${TAB}increasing fetch timeout to ${nsec}"
 						to="timeout -s 9 ${nsec}s "
@@ -472,7 +476,10 @@ for repo in $list; do
 				fmt="%.0f"			
 				deci=$(printf "$fmt" ${ddeci})
 				echo "${TAB}${fTAB}integerized: $deci "
-				fetch_max=$deci				
+				if [ $deci -gt $fetch_max ]; then 
+					fetch_max=$deci
+				fi
+				echo "     fetch_max: $fetch_max"
 			fi
 			if [ $RETVAL -ne 0 ]; then
 				fetch_fail+="$repo "
