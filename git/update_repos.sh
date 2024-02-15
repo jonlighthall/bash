@@ -652,12 +652,11 @@ for repo in $list; do
 			# check for stash entries
 			N_stash=$(git stash list | wc -l)
 			if [ $N_stash -gt 0 ]; then
-				echo -e "${yellow}$repo has $N_stash entries in stash${NORMAL}"
+				echo -e "$repo has $N_stash entries in stash"
 				if [ ! -z ${stash_list:+dummy} ]; then
-					stash_list+=$'\n'"$N_stash $repo"
-				else
-					stash_list+="$N_stash $repo"
+					stash_list+=$'\n'
 				fi
+				stash_list+=$(printf '%2d %s' $N_stash $repo)
 			fi
 		else
 			echo "${TAB}$repo not a Git repository"
@@ -810,8 +809,7 @@ echo -n " stash entries: "
 if [ -z "$stash_list" ]; then
 	echo "none"
 else
-	echo -ne "${yellow}"
+	stash_list=$(echo "${stash_list}" | sort -n)	
 	echo "${stash_list}" | head -n 1
 	echo "${stash_list}" | tail -n +2 | sed "s/^/${list_indent}/"
-	echo -ne "${NORMAL}"
 fi
