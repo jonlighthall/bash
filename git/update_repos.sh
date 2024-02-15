@@ -246,6 +246,7 @@ mod_files=''
 unset OK_list
 host_OK=''
 host_bad=''
+stash_list=''
 
 # track push/pull times (ns)
 t_fetch_max=0
@@ -652,8 +653,12 @@ for repo in $list; do
 			N_stash=$(git stash list | wc -l)
 			if [ $N_stash -gt 0 ]; then
 				echo -e "${yellow}$repo has $N_stash entries in stash${NORMAL}"
+				if [ ! -z ${stash_list:+dummy} ]; then
+					stash_list+=$'\n'"$N_stash $repo"
+				else
+					stash_list+="$N_stash $repo"
+				fi
 			fi
-
 		else
 			echo "${TAB}$repo not a Git repository"
 			if [ ! -z ${loc_fail:+dummy} ]; then
@@ -798,4 +803,15 @@ if [ -z "$mod_repos" ]; then
 else
 	echo "$mod_repos"
 	echo -e "${GRH}$mod_files${NORMAL}" | sed "s/^/${list_indent}/"
+fi
+
+# stash
+echo -n " stash entries: "
+if [ -z "$stash_list" ]; then
+	echo "none"
+else
+	echo -ne "${yellow}"
+	echo "${stash_list}" | head -n 1
+	echo "${stash_list}" | tail -n +2 | sed "s/^/${list_indent}/"
+	echo -ne "${NORMAL}"
 fi
