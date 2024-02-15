@@ -656,12 +656,12 @@ cd ${start_dir}
 sort -u ${list_remote} -o ${list_remote}
 
 # print list of remotes
-echo -n "  all remotes: "
+echo -n "   all remotes: "
 head -n 1 ${list_remote}
 list_indent='                '
 tail -n +2 ${list_remote} | sed "s/^/${list_indent}/"
 echo
-echo -n "these remotes: "
+echo -n " these remotes: "
 OK_list=$(echo ${OK_list} | sed 's/ /\n/g' | sort -n)
 echo "${OK_list}" | head -n 1
 echo "${OK_list}" | tail -n +2 | sed "s/^/${list_indent}/"
