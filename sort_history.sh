@@ -77,7 +77,7 @@ function gen_marker() {
     while [[ ! -z $(find_marker "$1") ]]; do
         echo -ne "${TAB}${fTAB}marker = ${marker}\t"
         echo -ne "found\t\t"
-        find_marker "$1" | sed "s/${marker}/\E[1;31m${marker}\E[0m/" | ([[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\E[1;31m\E[4m${TS_MARKER}\E[0m/") | cut -c -$line_width
+        find_marker "$1" | sed "s/${marker}/\x1b[1;31m${marker}\x1b[0m/" | ([[ -z ${TS_MARKER} ]] && cat || sed "s/${TS_MARKER}/\x1b[1;31m\x1b[4m${TS_MARKER}\x1b[0m/") | cut -c -$line_width
         add_marker
     done
     echo -e "${TAB}${fTAB}marker = ${marker}\tnot found"
