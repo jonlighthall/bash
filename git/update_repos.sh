@@ -647,6 +647,13 @@ for repo in $list; do
 				fi
 				mod_files+=$(echo "${list_mod}" | sed "s;^;${repo}/;")
 			fi
+
+			# check for stash entries
+			N_stash=$(git stash list | wc -l)
+			if [ $N_stash -gt 0 ]; then
+				echo -e "${yellow}$repo has $N_stash entries in stash${NORMAL}"
+			fi
+
 		else
 			echo "${TAB}$repo not a Git repository"
 			if [ ! -z ${loc_fail:+dummy} ]; then
