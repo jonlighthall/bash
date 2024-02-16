@@ -123,8 +123,30 @@ if [ $N_stash -gt 0 ]; then
 
 	for ((n=0;n<$N_stash;n++)); do
 		echo
-		echo "stash@{$n}:"
-		git log -1 stash@{$n}
+		stash="stash@{$n}"
+		echo "${stash}"
+		git log -1 ${stash}
+
+
+		unset n_min
+		unset hash_min
+
+		for hash in $(git rev-list HEAD); do
+
+			echo -n "$hash: "
+
+			n_diff=$(git diff $hash $stash | wc -l)
+			if [ -z $n_diff ]; then
+				
+			if [ $n_diff
+
+			echo $n_diff
+
+			
+		done
+
+
+		
 		
 	done
 fi
