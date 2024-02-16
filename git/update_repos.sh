@@ -256,6 +256,9 @@ t_push_max=0
 # track push/pull times (s)
 fetch_max=0
 
+# define timeout command
+declare -r to_base="timeout --preserve-status --foreground -s 9"
+
 for repo in $list; do
 	start_new_line
 	hline 70
@@ -396,22 +399,22 @@ for repo in $list; do
 			if [ $fetch_max -gt $nsec ]; then
 				nsec=$fetch_max
 			fi
-			to="timeout -s 9 ${nsec}s "
+			to="${to_base} ${nsec}s "
 			# concat commands
-			cmd_base="${to} git fetch"
+			cmd_base="git fetch"
 			if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
 				cmd_base+=" --verbose"
 			fi
-			cmd="${cmd_base} --all"
+			cmd="${to}${cmd_base} --all"
 			RETVAL=137
 			n_loops=0
-			while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
+			while [ $n_loops -lt 5 ]; do
 				((++n_loops))
 				if [ $n_loops -gt 1 ]; then
 					echo "${TAB}FETCH attempt $n_loops..."
 				fi
 				t_start=$(date +%s%N)
-				${cmd}
+				${cmd} 2>&1
 				RETVAL=$?
 				t_end=$(date +%s%N)
 				dt_fetch=$((${t_end} - ${t_start}))
@@ -419,6 +422,7 @@ for repo in $list; do
 				if [[ $RETVAL == 0 ]]; then
 					echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 					((++n_fetch))
+					break
 				else
 					echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 					echo "failed to fetch remote"
@@ -429,8 +433,8 @@ for repo in $list; do
 						fi
 						nsec=$((nsec * 2))
 						echo "${TAB}increasing fetch timeout to ${nsec}"
-						to="timeout -s 9 ${nsec}s "
-						cmd="${to}${cmd_base}"
+						to="${to_base} ${nsec}s "
+						cmd="${to}${cmd_base} --verbose --all"
 					fi
 				fi
 			done
@@ -505,7 +509,7 @@ for repo in $list; do
 				fi
 				# specify number of seconds before kill
 				nsec=4
-				to="timeout -s 9 ${nsec}s "
+				to="${to_base} ${nsec}s "
 				# concat commands
 				cmd="${to}${cmd_base}"
 				RETVAL=137
@@ -528,7 +532,7 @@ for repo in $list; do
 						if [[ $RETVAL == 137 ]]; then
 							nsec=$((nsec * 2))
 							echo "${TAB}increasing pull timeout to ${nsec}"
-							to="timeout -s 9 ${nsec}s "
+							to="${to_base} ${nsec}s "							
 							cmd="${to}${cmd_base}"
 						fi
 						# force pull
@@ -594,7 +598,7 @@ for repo in $list; do
 				fi
 				# specify number of seconds before kill
 				nsec=2
-				to="timeout -s 9 ${nsec}s "
+				to="${to_base} ${nsec}s "
 				# concat commands
 				cmd="${to}${cmd_base}"
 				RETVAL=137
@@ -616,7 +620,7 @@ for repo in $list; do
 						if [[ $RETVAL == 137 ]]; then
 							nsec=$((nsec * 2))
 							echo "${TAB}increasing push timeout to ${nsec}"
-							to="timeout -s 9 ${nsec}s "
+							to="${to_base} ${nsec}s "
 							cmd="${to}${cmd_base}"
 						fi
 					else
@@ -644,7 +648,7 @@ for repo in $list; do
 			list_mod=$(git diff --name-only --diff-filter=M)
 			if [[ ! -z "${list_mod}" ]]; then
 				# print file list
-				echo -e "modified: ${GRH}"
+				echo -e "modified: ${yellow}"
 				echo "${list_mod}" | sed "s/^/${fTAB}/"
 				echo -en "${NORMAL}"
 				# add repo to list
