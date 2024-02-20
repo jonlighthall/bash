@@ -59,6 +59,23 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
+# parse arguments
+cbar "${BOLD}parse arguments...${NORMAL}"
+if [ $# -ge 1 ]; then
+    remote_name=$1
+	echo "${TAB}pulling from remote $remote_name"
+else
+    echo "${TAB}no remote specified"
+    echo "${TAB}${fTAB}using $remote_name"
+fi
+if [ $# -ge 2 ]; then
+    branch_remote=$2
+	echo "${TAB}pulling from remote branch $branch_remote"
+else
+    echo "${TAB}no remote branch specified"
+    echo "${TAB}${fTAB}using $branch_remote"
+fi
+
 # parse remote
 cbar "${BOLD}parse remote...${NORMAL}"
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
@@ -104,20 +121,6 @@ fi
 branch_local=$(git branch | grep \* | sed 's/^\* //')
 echo -e "${TAB} local branch: ${green}${branch_local}${NORMAL}"
 
-# parse arguments
-cbar "${BOLD}parse arguments...${NORMAL}"
-if [ $# -ge 1 ]; then
-    remote_name=$1
-else
-    echo "${TAB}no remote specified"
-    echo "${TAB}${fTAB}using $remote_name"
-fi
-if [ $# -ge 2 ]; then
-    branch_remote=$2
-else
-    echo "${TAB}no remote branch specified"
-    echo "${TAB}${fTAB}using $branch_remote"
-fi
 branch_pull=${remote_name}/${branch_remote}
 if [ -z ${remote_name} ] || [ -z ${branch_remote} ]; then
     echo -e "${TAB}${BROKEN}ERROR: no remote tracking branch specified${NORMAL}"
