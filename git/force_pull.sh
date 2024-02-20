@@ -71,7 +71,27 @@ else
     remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
     echo "${TAB}remote url: ${remote_url}"
     remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-    echo "protocol:   ${remote_pro}"
+	if [[ "${remote_pro}" == "git" ]]; then
+		remote_pro="SSH"
+		rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
+		echo "      host: $rhost"
+		echo "  protocol: ${remote_pro}"
+		echo "checking SSH connection..."
+		ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${rhost}
+	else
+		rhost=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
+		if [[ "${remote_pro}" == "http"* ]]; then
+			remote_pro=${GRH}${remote_pro}${NORMAL}
+			remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
+			echo "  repo: ${remote_repo}"
+			remote_ssh="git@${rhost}:${remote_repo}"
+			echo " change URL to ${remote_ssh}..."
+			echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
+		else
+			remote_pro="local"
+		fi					
+	fi
+
     n_remotes=$(git remote | wc -l)
     if [ "${n_remotes}" -gt 1 ]; then
         echo "${n_remotes} remotes found"
