@@ -109,8 +109,8 @@ if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
 else
     remote_tracking_branch=$(git rev-parse --abbrev-ref master@{upstream})
     echo -e "${TAB}remote tracking branch: ${blue}${remote_tracking_branch}${NORMAL}"
-    upstream_remote=${remote_tracking_branch%%/*}
-    echo "${TAB}${fTAB}remote name: ....... $upstream_remote"
+    upstream_repo=${remote_tracking_branch%%/*}
+    echo "${TAB}${fTAB}remote name: ....... $upstream_repo"
 
 	# parse branches
     upstream_refspec=${remote_tracking_branch#*/}
@@ -137,8 +137,8 @@ if [ $# -ge 1 ]; then
 	fi	
 else
     echo "${TAB}no remote specified"
-    echo "${TAB}${fTAB}using $upstream_remote"
-	pull_repo=${upstream_remote}
+    echo "${TAB}${fTAB}using $upstream_repo"
+	pull_repo=${upstream_repo}
 fi
 if [ $# -ge 2 ]; then
 	echo "${TAB}reference specified"
@@ -183,13 +183,13 @@ if [ ! -z ${remote_tracking_branch} ]; then
 		echo "${TAB}${fTAB}${remote_tracking_branch}"
 
 		echo -n "remotes... "
-		if [ "$pull_repo" == "$upstream_remote" ]; then
+		if [ "$pull_repo" == "$upstream_repo" ]; then
 			echo "match"
 			echo "${TAB}${fTAB}${pull_repo}"
 		else
 			echo "do not match"
 			echo "${TAB}${fTAB}${pull_repo}"
-			echo "${TAB}${fTAB}${upstream_remote}"
+			echo "${TAB}${fTAB}${upstream_repo}"
 		fi		
 		echo -n "remote refspecs... "
 		if [ "$pull_refspec" == "$upstream_refspec" ]; then
@@ -218,19 +218,18 @@ cbar "${BOLD}comparing local branch ${green}$local_branch${NORMAL} with remote b
 # before starting, fetch remote
 echo "${TAB}fetching ${pull_repo}..."
 git fetch --verbose ${pull_repo} ${pull_refspec}
-exit
 
 echo "comparing repositories based on commit hash..."
 echo -n "${fTAB}leading remote commits: "
-N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
+N_remote=$(git rev-list HEAD..${pull_branch} | wc -l)
 echo "${N_remote}"
 
 echo -n "${fTAB}trailing local commits: "
-N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
+N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 echo "${N_local}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    echo -e "${fTAB}${yellow}local '${local_branch}' and remote '${remote_tracking_branch}' have diverged${NORMAL}"
+    echo -e "${fTAB}${yellow}local '${local_branch}' and remote '${pull_branch}' have diverged${NORMAL}"
 fi
 
 if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then
@@ -243,27 +242,27 @@ else
     if [ ${N_remote} -gt 0 ]; then
         # print local and remote times
         echo "${fTAB} local time is $(git log ${local_branch} --format="%ad" -1)"
-        echo "${fTAB}remote time is $(git log ${remote_tracking_branch} --format="%ad" -1)"
+        echo "${fTAB}remote time is $(git log ${pull_branch} --format="%ad" -1)"
 
         # get local commit time
         T_local=$(git log ${local_branch} --format="%at" -1)
 
         echo -n "remote commits commited after local HEAD:"
-        N_after=$(git rev-list ${remote_tracking_branch} --after=${T_local} | wc -l)
+        N_after=$(git rev-list ${pull_branch} --after=${T_local} | wc -l)
         if [ $N_after -eq 0 ]; then
             echo " none"
         else
             echo
-            git rev-list ${remote_tracking_branch} --after=${T_local} | sed "s/^/${fTAB}/"
+            git rev-list ${pull_branch} --after=${T_local} | sed "s/^/${fTAB}/"
             echo -e "number of commits:\n${fTAB}${N_after}"
 
             echo "list of commits: "
-            git --no-pager log ${remote_tracking_branch} --after=${T_local}
+            git --no-pager log ${pull_branch} --after=${T_local}
 
             echo -ne "start by checking commit:\n${fTAB}"
-            git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1
+            git rev-list ${pull_branch} --after=${T_local} | tail -1
 
-            iHEAD=$(git rev-list ${remote_tracking_branch} --after=${T_local} | tail -1)
+            iHEAD=$(git rev-list ${pull_branch} --after=${T_local} | tail -1)
             cbar "${BOLD}looping through remote commits...${NORMAL}"
         fi
     fi
@@ -281,7 +280,7 @@ while [ -z ${hash_local} ]; do
     hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
     hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
 
-    echo -n "${TAB}subject and time hashes... "
+    echo -n "${TAB}local subject and time hashes... "
     if [ "$hash_local" == "$hash_local_s" ]; then
         echo "match"
     else
@@ -392,6 +391,8 @@ else
     b_stash=true
 fi
 
+exit
+
 # copy leading commits to new branch
 cbar "${BOLD}copying local commits to new branch...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
@@ -452,11 +453,11 @@ else
 fi
 # push local commits
 cbar "${BOLD}pushing local changes...${NORMAL}"
-N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
+N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
     echo "${TAB}${fTAB}list of commits: "
-    git --no-pager log ${remote_tracking_branch}..HEAD
+    git --no-pager log ${pull_branch}..HEAD
     git push
 else
     echo -e "${TAB}${fTAB}no need to push"
