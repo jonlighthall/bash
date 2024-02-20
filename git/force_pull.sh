@@ -181,6 +181,8 @@ if [ ! -z ${remote_tracking_branch} ]; then
 		echo "do not match"
 		echo "${TAB}${fTAB}${pull_branch}"
 		echo "${TAB}${fTAB}${remote_tracking_branch}"
+		echo "setting upstream brach..."
+		git branch -u ${pull_branch}
 
 		echo -n "remotes... "
 		if [ "$pull_repo" == "$upstream_repo" ]; then
@@ -295,14 +297,14 @@ while [ -z ${hash_local} ]; do
         echo "$hash_local"
         # determine local commits not found on remote
         echo -n "${TAB}trailing local commits: "
-        hash_start=$(git rev-list $hash_local..HEAD | tail -n 1)
+        hash_start=$(git rev-list $hash_remote..HEAD | tail -n 1)
         if [ ! -z ${hash_start} ]; then
             echo
-            git rev-list $hash_local..HEAD | sed "s/^/${TAB}/"
-            N_local=$(git rev-list $hash_local..HEAD | wc -l)
+            git rev-list $hash_remote..HEAD | sed "s/^/${TAB}/"
+            N_local=$(git rev-list $hash_remote..HEAD | wc -l)
             if [ $N_local -gt 1 ]; then
                 echo -ne "${TAB}\E[3Dor ${hash_start}^.."
-                hash_end=$(git rev-list $hash_local..HEAD | head -n 1)
+                hash_end=$(git rev-list $hash_remote..HEAD | head -n 1)
                 echo ${hash_end}
             else
                 hash_end=$hash_start
@@ -345,14 +347,14 @@ fi
 
 # determine remote commits not found locally
 echo -n "${TAB}leading remote commits: "
-hash_start_remote=$(git rev-list $hash_remote..${pull_branch} | tail -n 1)
+hash_start_remote=$(git rev-list $hash_local..${pull_branch} | tail -n 1)
 if [ ! -z ${hash_start_remote} ]; then
     echo
-    git rev-list $hash_remote..${pull_branch} | sed "s/^/${TAB}/"
-    N_remote=$(git rev-list $hash_remote..${pull_branch} | wc -l)
+    git rev-list $hash_local..${pull_branch} | sed "s/^/${TAB}/"
+    N_remote=$(git rev-list $hash_local..${pull_branch} | wc -l)
     if [ $N_remote -gt 1 ]; then
         echo -ne "${TAB}\E[3Dor ${hash_start_remote}^.."
-        hash_end_remote=$(git rev-list $hash_remote..${pull_branch} | head -n 1)
+        hash_end_remote=$(git rev-list $hash_local..${pull_branch} | head -n 1)
         echo ${hash_end_remote}
     else
         hash_end_remote=$hash_start_remote
@@ -391,10 +393,12 @@ else
     b_stash=true
 fi
 
-exit
-
 # copy leading commits to new branch
 cbar "${BOLD}copying local commits to new branch...${NORMAL}"
+git branch -v --color=always | sed '/^*/!d'
+echo "${fTAB} local:  ahead $N_local"
+echo "${fTAB}remote: behind $N_remote"
+
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     branch_temp=${local_branch}.temp
     echo "generating temporary branch..."
@@ -436,6 +440,8 @@ else
     echo -e "${TAB}${fTAB}no need to pull"
 fi
 
+exit
+
 # rebase and merge oustanding local commits
 cbar "${BOLD}merging local changes...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
@@ -451,6 +457,9 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
 else
     echo -e "${TAB}${fTAB}no need to merge"
 fi
+
+exit
+
 # push local commits
 cbar "${BOLD}pushing local changes...${NORMAL}"
 N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
@@ -486,6 +495,9 @@ if [ $N_stash -gt 0 ]; then
 else
     echo "${fTAB}no stash entries"
 fi
+echo "resetting remote tracking branch"
+git branch -u ${remote_tracking_branch}"
+
 cbar "${BOLD}you're done!${NORMAL}"
 
 # add exit code for parent script
