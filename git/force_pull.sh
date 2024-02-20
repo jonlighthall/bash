@@ -97,29 +97,33 @@ for remote_name in ${r_names}; do
 	if [ "${n_remotes}" -gt 1 ]; then
 		TAB=${TAB%$fTAB}
 	fi
-done				
+done
+unset remote_url
+unset remote_pro
+unset rhost
 
-# parse remote tracking branch
+# parse remote tracking branch and local branch
 cbar "${BOLD}parse current settings...${NORMAL}"
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "${TAB}no remote tracking branch set for current branch"
 else
     remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
     echo -e "${TAB}remote tracking branch: ${blue}${remote_tracking_branch}${NORMAL}"
-    remote_name=${remote_tracking_branch%%/*}
-    echo "${TAB}${fTAB}remote name: ....... $remote_name"
+    tracking_remote=${remote_tracking_branch%%/*}
+    echo "${TAB}${fTAB}remote name: ....... $tracking_remote"
 
 	# parse branches
-    remote_branch=${remote_tracking_branch#*/}
-    echo "${TAB}${fTAB}remote branch: ..... $remote_branch"
-	branch_local=$(git branch | grep \* | sed 's/^\* //')
-	echo -e "${TAB}${fTAB}local branch: ...... ${green}${branch_local}${NORMAL}"
+    tracking_branch=${remote_tracking_branch#*/}
+    echo "${TAB}${fTAB}remote branch: ..... $tracking_branch"
 fi
+branch_local=$(git branch | grep \* | sed 's/^\* //')
+echo -e "${TAB}${fTAB}local branch: ...... ${green}${branch_local}${NORMAL}"
 
 # parse arguments
 cbar "${BOLD}parse arguments...${NORMAL}"
 if [ $# -ge 1 ]; then
 	echo "${TAB}remote specified"
+	unset remote_name
     remote_name=$1
 	echo -n "${TAB}${fTAB}remote name: ....... $remote_name "	
 	git remote | grep $remote_name &>/dev/null
@@ -133,10 +137,12 @@ if [ $# -ge 1 ]; then
 	fi	
 else
     echo "${TAB}no remote specified"
-    echo "${TAB}${fTAB}using $remote_name"
+    echo "${TAB}${fTAB}using $tracking_remote"
+	remote_name=${tracking_remote}
 fi
 if [ $# -ge 2 ]; then
 	echo "${TAB}remote specified"
+	unset remote_branch
     remote_branch=$2
     echo -n "${TAB}${fTAB}remote branch: ..... $remote_branch "
 	git branch -va | grep "$remote_name/${remote_branch}" &>/dev/null
@@ -150,7 +156,8 @@ if [ $# -ge 2 ]; then
 	fi	
 else
     echo "${TAB}no branch specified"
-    echo "${TAB}${fTAB}using $remote_branch"
+    echo "${TAB}${fTAB}using $tracking_branch"
+	remote_branch=${tracking_branch}
 fi
 
 if [ -z ${remote_name} ] || [ -z ${remote_branch} ]; then
@@ -162,89 +169,56 @@ fi
 
 branch_pull=${remote_name}/${remote_branch}
 echo -e "${TAB}pulling from: ......... ${blue}${branch_pull}${NORMAL}"
-echo -n "${TAB}target branch and remote tracking branch... "
-if [ "$branch_pull" == "$remote_tracking_branch" ]; then
+
+cbar "${BOLD}checking branches...${NORMAL}"
+if [ ! -z ${remote_tracking_branch} ]; then
+	echo -n "${TAB}remote tracking branches... "
+
+	if [ "$branch_pull" == "$remote_tracking_branch" ]; then
+		echo "match"
+		echo "${TAB}${fTAB}${branch_pull}"
+	else
+		echo "do not match"
+		echo "${TAB}${fTAB}${branch_pull}"
+		echo "${TAB}${fTAB}${remote_tracking_branch}"
+
+		echo -n "remotes... "
+		if [ "$remote_name" == "$tracking_remote" ]; then
+			echo "match"
+			echo "${TAB}${fTAB}${remote_name}"
+		else
+			echo "do not match"
+			echo "${TAB}${fTAB}${remote_name}"
+			echo "${TAB}${fTAB}${tracking_remote}"
+		fi		
+		echo -n "remote branches... "
+		if [ "$remote_branch" == "$tracking_branch" ]; then
+			echo "match"
+			echo "${TAB}${fTAB}${remote_branch}"
+		else
+			echo "do not match"
+			echo "${TAB}${fTAB}${remote_branch}"
+			echo "${TAB}${fTAB}${tracking_branch}"
+		fi
+	fi
+fi
+
+echo -n "local branch and upsream branch... "
+if [ "$branch_local" == "$remote_branch" ]; then
     echo "match"
+	echo "${TAB}${fTAB}${branch_local}"
 else
     echo "do not match"
+	echo "${TAB}${fTAB}${branch_local}"
+	echo "${TAB}${fTAB}${remote_branch}"
 fi
-
-exit
-
 
 cbar "${BOLD}comparing local branch ${green}$branch_local${NORMAL} with remote branch ${blue}$branch_pull${NORMAL}"
-remote_url=$(git remote get-url ${remote_name})
-echo "${TAB} remote url: ${remote_url}"
-
-exit
-
-
-remote_url=$(git remote get-url ${remote_name})
-TAB+=${fTAB:='   '}
-echo "${TAB}${fTAB}  url: ${remote_url}"
-remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-if [[ "${remote_pro}" == "git" ]]; then
-	remote_pro="SSH"
-	rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
-	echo "${TAB}${fTAB} host: $rhost"
-  	echo -e "${TAB}${fTAB}proto: ${remote_pro}"
-else
-	rhost=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
-	if [[ "${remote_pro}" == "http"* ]]; then
-		remote_pro=${GRH}${remote_pro}${NORMAL}
-		remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
-		echo "  repo: ${remote_repo}"
-		remote_ssh="git@${rhost}:${remote_repo}"
-		echo " change URL to ${remote_ssh}..."
-		echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
-	else
-		remote_pro="local"
-	fi					
-fi
-
-# parse remote
-cbar "${BOLD}parse remote...${NORMAL}"
-if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
-    echo "${TAB}no remote tracking branch set for current branch"
-else
-    remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "${TAB}remote tracking branch: ${blue}${remote_tracking_branch}${NORMAL}"
-    remote_name=${remote_tracking_branch%%/*}
-    echo "${TAB}remote name: .......... $remote_name"
-    remote_url=$(git remote get-url ${remote_name})
-    echo "${TAB}remote url: ${remote_url}"
-    remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-	if [[ "${remote_pro}" == "git" ]]; then
-		remote_pro="SSH"
-		rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
-		echo "      host: $rhost"
-		echo "  protocol: ${remote_pro}"
-		echo "checking SSH connection..."
-		ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${rhost}
-	else
-		rhost=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
-		if [[ "${remote_pro}" == "http"* ]]; then
-			remote_pro=${GRH}${remote_pro}${NORMAL}
-			remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
-			echo "  repo: ${remote_repo}"
-			remote_ssh="git@${rhost}:${remote_repo}"
-			echo " change URL to ${remote_ssh}..."
-			echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
-		else
-			remote_pro="local"
-		fi					
-	fi
-
-    # parse branches
-    remote_branch=${remote_tracking_branch#*/}
-    echo "${TAB}remote branch: $remote_branch"
-fi
-branch_local=$(git branch | grep \* | sed 's/^\* //')
-echo -e "${TAB} local branch: ${green}${branch_local}${NORMAL}"
 
 # before starting, fetch remote
 echo "${TAB}fetching ${remote_name}..."
 git fetch --verbose ${remote_name} ${remote_branch}
+exit
 
 echo "comparing repositories based on commit hash..."
 echo -n "${fTAB}leading remote commits: "
