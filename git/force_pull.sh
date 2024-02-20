@@ -81,18 +81,18 @@ for remote_name in ${r_names}; do
 	remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
 	if [[ "${remote_pro}" == "git" ]]; then
 		remote_pro="SSH"
-		rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
+		remote_host=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
 	else
-		rhost=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
+		remote_host=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
 		if [[ ! "${remote_pro}" == "http"* ]]; then
 			remote_pro="local"
 		fi							
 	fi	
-	echo "${TAB}${fTAB} host: $rhost"
+	echo "${TAB}${fTAB} host: $remote_host"
   	echo -e "${TAB}${fTAB}proto: ${remote_pro}"
 	if [[ "${remote_pro}" == "SSH" ]]; then
 		echo -n "${TAB}${fTAB}checking connection... "
-		ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${rhost}
+		ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${remote_host}
 	fi
 	if [ "${n_remotes}" -gt 1 ]; then
 		TAB=${TAB%$fTAB}
@@ -100,124 +100,124 @@ for remote_name in ${r_names}; do
 done
 unset remote_url
 unset remote_pro
-unset rhost
+unset remote_host
 
 # parse remote tracking branch and local branch
 cbar "${BOLD}parse current settings...${NORMAL}"
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "${TAB}no remote tracking branch set for current branch"
 else
-    remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
+    remote_tracking_branch=$(git rev-parse --abbrev-ref master@{upstream})
     echo -e "${TAB}remote tracking branch: ${blue}${remote_tracking_branch}${NORMAL}"
-    tracking_remote=${remote_tracking_branch%%/*}
-    echo "${TAB}${fTAB}remote name: ....... $tracking_remote"
+    upstream_remote=${remote_tracking_branch%%/*}
+    echo "${TAB}${fTAB}remote name: ....... $upstream_remote"
 
 	# parse branches
-    tracking_branch=${remote_tracking_branch#*/}
-    echo "${TAB}${fTAB}remote branch: ..... $tracking_branch"
+    upstream_refspec=${remote_tracking_branch#*/}
+    echo "${TAB}${fTAB}remote refspec: .... $upstream_refspec"
 fi
-branch_local=$(git branch | grep \* | sed 's/^\* //')
-echo -e "${TAB}${fTAB}local branch: ...... ${green}${branch_local}${NORMAL}"
+local_branch=$(git branch | grep \* | sed 's/^\* //')
+echo -e "${TAB}${fTAB}local branch: ...... ${green}${local_branch}${NORMAL}"
 
 # parse arguments
 cbar "${BOLD}parse arguments...${NORMAL}"
 if [ $# -ge 1 ]; then
 	echo "${TAB}remote specified"
 	unset remote_name
-    remote_name=$1
-	echo -n "${TAB}${fTAB}remote name: ....... $remote_name "	
-	git remote | grep $remote_name &>/dev/null
+    pull_repo=$1
+	echo -n "${TAB}${fTAB}remote name: ....... $pull_repo "	
+	git remote | grep $pull_repo &>/dev/null
 	RETVAL=$?
 	if [[ $RETVAL == 0 ]]; then
 		echo -e "${GOOD}OK${NORMAL}"
 	else
 		echo -e "${BAD}FAIL${NORMAL}"
-		echo "$remote_name not found"
+		echo "$pull_repo not found"
 		exit 1
 	fi	
 else
     echo "${TAB}no remote specified"
-    echo "${TAB}${fTAB}using $tracking_remote"
-	remote_name=${tracking_remote}
+    echo "${TAB}${fTAB}using $upstream_remote"
+	pull_repo=${upstream_remote}
 fi
 if [ $# -ge 2 ]; then
-	echo "${TAB}remote specified"
+	echo "${TAB}reference specified"
 	unset remote_branch
-    remote_branch=$2
-    echo -n "${TAB}${fTAB}remote branch: ..... $remote_branch "
-	git branch -va | grep "$remote_name/${remote_branch}" &>/dev/null
+    pull_refspec=$2
+    echo -n "${TAB}${fTAB}remote refspec: .... $pull_refspec "
+	git branch -va | grep "$pull_repo/${pull_refspec}" &>/dev/null
 	RETVAL=$?
 	if [[ $RETVAL == 0 ]]; then
 		echo -e "${GOOD}OK${NORMAL}"
 	else
 		echo -e "${BAD}FAIL${NORMAL}"
-		echo "$remote_branch not found"
+		echo "$pull_refspec not found"
 		exit 1
 	fi	
 else
-    echo "${TAB}no branch specified"
-    echo "${TAB}${fTAB}using $tracking_branch"
-	remote_branch=${tracking_branch}
+    echo "${TAB}no reference specified"
+    echo "${TAB}${fTAB}using $upstream_refspec"
+	pull_refspec=${upstream_refspec}
 fi
 
-if [ -z ${remote_name} ] || [ -z ${remote_branch} ]; then
+if [ -z ${pull_repo} ] || [ -z ${pull_refspec} ]; then
     echo -e "${TAB}${BROKEN}ERROR: no remote tracking branch specified${NORMAL}"
     echo "${TAB} HELP: specify remote tracking branch with"
     echo "${TAB}       ${TAB}${BASH_SOURCE##*/} <repository> <refspec>"
     exit 1
 fi
 
-branch_pull=${remote_name}/${remote_branch}
-echo -e "${TAB}pulling from: ......... ${blue}${branch_pull}${NORMAL}"
+pull_branch=${pull_repo}/${pull_refspec}
+echo -e "${TAB}pulling from: ......... ${blue}${pull_branch}${NORMAL}"
 
 cbar "${BOLD}checking branches...${NORMAL}"
 if [ ! -z ${remote_tracking_branch} ]; then
 	echo -n "${TAB}remote tracking branches... "
 
-	if [ "$branch_pull" == "$remote_tracking_branch" ]; then
+	if [ "$pull_branch" == "$remote_tracking_branch" ]; then
 		echo "match"
-		echo "${TAB}${fTAB}${branch_pull}"
+		echo "${TAB}${fTAB}${pull_branch}"
 	else
 		echo "do not match"
-		echo "${TAB}${fTAB}${branch_pull}"
+		echo "${TAB}${fTAB}${pull_branch}"
 		echo "${TAB}${fTAB}${remote_tracking_branch}"
 
 		echo -n "remotes... "
-		if [ "$remote_name" == "$tracking_remote" ]; then
+		if [ "$pull_repo" == "$upstream_remote" ]; then
 			echo "match"
-			echo "${TAB}${fTAB}${remote_name}"
+			echo "${TAB}${fTAB}${pull_repo}"
 		else
 			echo "do not match"
-			echo "${TAB}${fTAB}${remote_name}"
-			echo "${TAB}${fTAB}${tracking_remote}"
+			echo "${TAB}${fTAB}${pull_repo}"
+			echo "${TAB}${fTAB}${upstream_remote}"
 		fi		
-		echo -n "remote branches... "
-		if [ "$remote_branch" == "$tracking_branch" ]; then
+		echo -n "remote refspecs... "
+		if [ "$pull_refspec" == "$upstream_refspec" ]; then
 			echo "match"
-			echo "${TAB}${fTAB}${remote_branch}"
+			echo "${TAB}${fTAB}${pull_refspec}"
 		else
 			echo "do not match"
-			echo "${TAB}${fTAB}${remote_branch}"
-			echo "${TAB}${fTAB}${tracking_branch}"
+			echo "${TAB}${fTAB}${pull_refspec}"
+			echo "${TAB}${fTAB}${upstream_refspec}"
 		fi
 	fi
 fi
 
-echo -n "local branch and upsream branch... "
-if [ "$branch_local" == "$remote_branch" ]; then
+echo -n "local branch and remote branch name... "
+if [ "$local_branch" == "$pull_refspec" ]; then
     echo "match"
-	echo "${TAB}${fTAB}${branch_local}"
+	echo "${TAB}${fTAB}${local_branch}"
 else
     echo "do not match"
-	echo "${TAB}${fTAB}${branch_local}"
-	echo "${TAB}${fTAB}${remote_branch}"
+	echo "${TAB}${fTAB}${local_branch}"
+	echo "${TAB}${fTAB}${pull_refspec}"
 fi
 
-cbar "${BOLD}comparing local branch ${green}$branch_local${NORMAL} with remote branch ${blue}$branch_pull${NORMAL}"
+cbar "${BOLD}comparing local branch ${green}$local_branch${NORMAL} with remote branch ${blue}$pull_branch${NORMAL}"
 
 # before starting, fetch remote
-echo "${TAB}fetching ${remote_name}..."
-git fetch --verbose ${remote_name} ${remote_branch}
+echo "${TAB}fetching ${pull_repo}..."
+git fetch --verbose ${pull_repo} ${pull_refspec}
 exit
 
 echo "comparing repositories based on commit hash..."
@@ -230,23 +230,23 @@ N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
 echo "${N_local}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    echo -e "${fTAB}${yellow}local '${branch_local}' and remote '${remote_tracking_branch}' have diverged${NORMAL}"
+    echo -e "${fTAB}${yellow}local '${local_branch}' and remote '${remote_tracking_branch}' have diverged${NORMAL}"
 fi
 
 if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then
     hash_local=$(git rev-parse HEAD)
-    hash_remote=$(git rev-parse ${branch_pull})
+    hash_remote=$(git rev-parse ${pull_branch})
 else
     echo "comparing repositories based on commit time..."
     # determine latest common local commit, based on commit time
-    iHEAD=${branch_pull}
+    iHEAD=${pull_branch}
     if [ ${N_remote} -gt 0 ]; then
         # print local and remote times
-        echo "${fTAB} local time is $(git log ${branch_local} --format="%ad" -1)"
+        echo "${fTAB} local time is $(git log ${local_branch} --format="%ad" -1)"
         echo "${fTAB}remote time is $(git log ${remote_tracking_branch} --format="%ad" -1)"
 
         # get local commit time
-        T_local=$(git log ${branch_local} --format="%at" -1)
+        T_local=$(git log ${local_branch} --format="%at" -1)
 
         echo -n "remote commits commited after local HEAD:"
         N_after=$(git rev-list ${remote_tracking_branch} --after=${T_local} | wc -l)
@@ -328,8 +328,8 @@ echo -n "${TAB}local commit has... "
 if [ "$hash_local" == "$hash_remote" ]; then
     echo "the same hash"
     echo -n "${TAB}merge base: ............. "
-    git merge-base ${branch_local} ${branch_pull}
-    hash_merge=$(git merge-base ${branch_local} ${branch_pull})
+    git merge-base ${local_branch} ${pull_branch}
+    hash_merge=$(git merge-base ${local_branch} ${pull_branch})
     echo -n "${TAB}local commit has... "
     if [ $hash_local == $hash_merge ]; then
         echo "the same hash"
@@ -346,14 +346,14 @@ fi
 
 # determine remote commits not found locally
 echo -n "${TAB}leading remote commits: "
-hash_start_remote=$(git rev-list $hash_remote..${branch_pull} | tail -n 1)
+hash_start_remote=$(git rev-list $hash_remote..${pull_branch} | tail -n 1)
 if [ ! -z ${hash_start_remote} ]; then
     echo
-    git rev-list $hash_remote..${branch_pull} | sed "s/^/${TAB}/"
-    N_remote=$(git rev-list $hash_remote..${branch_pull} | wc -l)
+    git rev-list $hash_remote..${pull_branch} | sed "s/^/${TAB}/"
+    N_remote=$(git rev-list $hash_remote..${pull_branch} | wc -l)
     if [ $N_remote -gt 1 ]; then
         echo -ne "${TAB}\E[3Dor ${hash_start_remote}^.."
-        hash_end_remote=$(git rev-list $hash_remote..${branch_pull} | head -n 1)
+        hash_end_remote=$(git rev-list $hash_remote..${pull_branch} | head -n 1)
         echo ${hash_end_remote}
     else
         hash_end_remote=$hash_start_remote
@@ -395,14 +395,14 @@ fi
 # copy leading commits to new branch
 cbar "${BOLD}copying local commits to new branch...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    branch_temp=${branch_local}.temp
+    branch_temp=${local_branch}.temp
     echo "generating temporary branch..."
     i=0
     set +e
     while [[ ! -z $(git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep ${branch_temp}) ]]; do
         echo "${TAB}${fTAB}${branch_temp}"
         ((i++))
-        branch_temp=${branch_local}.temp${i}
+        branch_temp=${local_branch}.temp${i}
         echo "${TAB}${fTAB}checking ${branch_temp}"
     done
     echo "${TAB}${fTAB}found unused branch name ${branch_temp}"
@@ -438,12 +438,12 @@ fi
 # rebase and merge oustanding local commits
 cbar "${BOLD}merging local changes...${NORMAL}"
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    N_temp=$(git rev-list ${branch_temp}..${branch_local} | wc -l)
-    echo -e "${TAB}${fTAB}${yellow}branch '${branch_temp}' is ${N_temp} commits ahead of '${branch_local}'${NORMAL}"
+    N_temp=$(git rev-list ${branch_temp}..${local_branch} | wc -l)
+    echo -e "${TAB}${fTAB}${yellow}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${NORMAL}"
     echo "${TAB}rebase..."
     git checkout ${branch_temp}
-    git rebase ${branch_local}
-    git checkout ${branch_local}
+    git rebase ${local_branch}
+    git checkout ${local_branch}
     echo "${TAB}merge..."
     git merge ${branch_temp}
     git branch -d ${branch_temp}
