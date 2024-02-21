@@ -162,6 +162,10 @@ else
 	fi
 fi
 
+# list SSH status
+host_OK=''
+host_bad=''
+
 # get number of remotes
 cbar "${BOLD}parse remotes...${NORMAL}"
 n_remotes=$(git remote | wc -l)
@@ -195,25 +199,68 @@ for remote_name in ${r_names}; do
 	echo "${TAB}${fTAB} host: $remote_host"
   	echo -e "${TAB}${fTAB}proto: ${remote_pro}"
 	if [[ "${remote_pro}" == "SSH" ]]; then
-		# check connection before proceeding
-		echo -n "${TAB}${fTAB}checking connection... "
-		unset_traps
-		ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${remote_host}
-		RETVAL=$?
-		set_traps
-		if [[ $RETVAL == 0 ]]; then
-			echo -e "${fTAB}${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-		else
-			if [[ $RETVAL == 1 ]]; then
-				echo -e "${fTAB}${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-				if [[ $remote_host =~ "github.com" ]]; then
-					decho "host is github"
-					# Github will return 1 if everything is working
+		# default to checking host
+		do_check=true
+		decho "do_check = $do_check"
+
+		# check remote host name against list of checked hosts
+		if [ ! -z ${host_OK:+dummy} ]; then
+			decho "checking $remote_host against list of checked hosts"
+			for good_host in ${host_OK}; do
+				if [[ $remote_host =~ $good_host ]]; then
+					decho "$remote_host matches $good_host"
+					do_check=false
+					break
 				else
-					decho "host is not github"
+					continue
 				fi
+			done
+		else
+			decho "list of checked hosts empty"
+		fi
+		decho "do_check = $do_check"
+
+		# check connection before proceeding
+		if [ ${do_check} = 'true' ]; then
+			echo -n "${TAB}${fTAB}checking connection... "
+			unset_traps
+			ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${remote_host}
+			RETVAL=$?
+			set_traps
+			if [[ $RETVAL == 0 ]]; then
+				echo -e "${fTAB}${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+				# add to list
+				if [ ! -z ${host_OK:+dummy} ]; then
+					host_OK+=$'\n'
+				fi
+				host_OK+=${remote_host}
 			else
-				echo -e "${fTAB}${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+				if [[ $RETVAL == 1 ]]; then
+					echo -e "${fTAB}${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+					if [[ $remote_host =~ "github.com" ]]; then
+						decho "host is github"
+						# Github will return 1 if everything is working
+						# add to list
+						if [ ! -z ${host_OK:+dummy} ]; then
+							host_OK+=$'\n'
+						fi
+						host_OK+=${remote_host}
+					else
+						decho "host is not github"
+						# add to list
+						if [ ! -z ${host_bad:+dummy} ]; then
+							host_bad+=$'\n'
+						fi
+						host_bad+=${remote_host}
+					fi
+				else
+					echo -e "${fTAB}${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+					# add to list
+					if [ ! -z ${host_bad:+dummy} ]; then
+						host_bad+=$'\n'
+					fi
+					host_bad+=${remote_host}
+				fi
 			fi
 		fi
 	fi
