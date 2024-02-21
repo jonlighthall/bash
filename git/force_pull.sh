@@ -477,10 +477,10 @@ else
 fi
 
 # rebase and merge oustanding local commits
-if [ -z ${branch_temp} ]; then
+cbar "${BOLD}rebasing temporary branch...${NORMAL}"
+if [ -z ${branch_temp+default} ]; then
 	N_temp=0
 else
-	cbar "${BOLD}rebasing temporary branch...${NORMAL}"
 	echo "${TAB}before rebase:"
 	N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
 fi
