@@ -10,6 +10,9 @@ TAB=${TAB:=''}
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
+	# set debug level
+	declare -i DEBUG=0
+	set_traps
 fi
 
 # determine if script is being sourced or executed and add conditional behavior
@@ -27,8 +30,7 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
-# define traps
-trap print_exit EXIT
+# define trap
 trap 'start_new_line; echo -e "breaking..."; break;' INT
 
 # print instructions
