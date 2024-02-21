@@ -228,6 +228,7 @@ push_fail=''
 
 # list successes
 loc_OK=''
+unset git_OK
 fetch_OK=''
 pull_OK=''
 push_OK=''
@@ -235,9 +236,12 @@ push_OK=''
 # list modifications
 mod_repos=''
 mod_files=''
-unset OK_list
+
+# list SSH status
 host_OK=''
 host_bad=''
+
+# list stash
 stash_list=''
 
 # track push/pull times (ns)
@@ -296,10 +300,10 @@ for repo in $list; do
 			fi
 
 			# add to list
-			if [ ! -z ${OK_list:+dummy} ]; then
-				OK_list+=$'\n'
+			if [ ! -z ${git_OK:+dummy} ]; then
+				git_OK+=$'\n'
 			fi
-			OK_list+=${upstream_url}
+			git_OK+=${upstream_url}
 
 			# push/pull setting
 			GIT_HIGHLIGHT='\E[7m'
@@ -336,14 +340,15 @@ for repo in $list; do
 				else
 					remote_host=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
 					if [[ "${remote_pro}" == "http"* ]]; then
+						# warn about HTTP remotes
 						remote_pro=${GRH}${remote_pro}${NORMAL}
 						remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
 						echo "  repo: ${remote_repo}"
+						# change remote to SSH
 						remote_ssh="git@${remote_host}:${remote_repo}"
 						echo " change URL to ${remote_ssh}..."
 						echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
-						git remote set-url ${remote_name} ${remote_ssh}
-						
+						git remote set-url ${remote_name} ${remote_ssh}						
 					else
 						remote_pro="local"
 					fi					
@@ -401,9 +406,21 @@ for repo in $list; do
 									host_OK+=${remote_host}
 								else
 									decho "host is not github"
+									# add to list
+									if [ ! -z ${host_bad:+dummy} ]; then
+										host_bad+=$'\n'
+									fi
+									host_bad+=${remote_host}
+
 								fi
 							else
 								echo -e "${fTAB}${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+								# add to list
+								if [ ! -z ${host_bad:+dummy} ]; then
+									host_bad+=$'\n'
+								fi
+								host_bad+=${remote_host}
+
 							fi
 						fi
 					fi
@@ -727,9 +744,9 @@ list_indent='                '
 tail -n +2 ${list_remote} | sed "s/^/${list_indent}/"
 echo
 echo -n " these remotes: "
-OK_list=$(echo ${OK_list} | sed 's/ /\n/g' | sort -n)
-echo "${OK_list}" | head -n 1
-echo "${OK_list}" | tail -n +2 | sed "s/^/${list_indent}/"
+git_OK=$(echo ${git_OK} | sed 's/ /\n/g' | sort -n)
+echo "${git_OK}" | head -n 1
+echo "${git_OK}" | tail -n +2 | sed "s/^/${list_indent}/"
 echo
 
 # print push/pull summary
