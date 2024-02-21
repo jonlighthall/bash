@@ -231,7 +231,7 @@ for remote_name in ${r_names}; do
 			RETVAL=$?
 			set_traps
 			if [[ $RETVAL == 0 ]]; then
-				echo -e "${fTAB}${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+				echo -e "${TAB}${fTAB}${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 				# add to list
 				if [ ! -z ${host_OK:+dummy} ]; then
 					host_OK+=$'\n'
@@ -239,7 +239,7 @@ for remote_name in ${r_names}; do
 				host_OK+=${remote_host}
 			else
 				if [[ $RETVAL == 1 ]]; then
-					echo -e "${fTAB}${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+					echo -e "${TAB}${fTAB}${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 					if [[ $remote_host =~ "github.com" ]]; then
 						decho "host is github"
 						# Github will return 1 if everything is working
@@ -257,7 +257,7 @@ for remote_name in ${r_names}; do
 						host_bad+=${remote_host}
 					fi
 				else
-					echo -e "${fTAB}${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+					echo -e "${TAB}${fTAB}${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 					# add to list
 					if [ ! -z ${host_bad:+dummy} ]; then
 						host_bad+=$'\n'
