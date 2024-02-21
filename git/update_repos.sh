@@ -38,7 +38,7 @@ function set_traps() {
 	fi
 	set -E
 	decho "the following traps are saved"
-	if [ -z "${save_traps}" ]; then
+	if [ -z "${save_traps+default}" ]; then
 		decho "${fTAB}none"
 
 		decho "setting traps..."
@@ -136,7 +136,7 @@ echo -n "${TAB}Checking Git... "
 if command -v git &>/dev/null; then
 	echo -e "${GOOD}OK${NORMAL} Git is defined"
 	# get Git version
-	git --version
+	git --version | sed "s/^/${fTAB}/"
 	git_ver=$(git --version | awk '{print $3}')
 	git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
 	git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
@@ -272,11 +272,11 @@ for repo in $list; do
 			echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 			((++n_git))
 			# parse remote
-			if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
+			remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
+			if [ -z ${remote_tracking_branch+default} ]; then
 				echo "${TAB}no remote tracking branch set for current branch"
 				continue
 			else
-				remote_tracking_branch=$(git rev-parse --abbrev-ref master@{upstream})
 				upstream_repo=${remote_tracking_branch%%/*}
 				upstream_url=$(git remote get-url ${upstream_repo})
 				# add remote to list
@@ -380,7 +380,7 @@ for repo in $list; do
 						RETVAL=$?
 						set_traps
 						if [[ $RETVAL == 0 ]]; then
-							echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+							echo -e "${fTAB}${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 							# add to list
 							if [ ! -z ${host_OK:+dummy} ]; then
 								host_OK+=$'\n'
@@ -388,7 +388,7 @@ for repo in $list; do
 							host_OK+=${remote_host}
 						else
 							if [[ $RETVAL == 1 ]]; then
-								echo -e "${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+								echo -e "${fTAB}${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 
 								if [[ $remote_host =~ "github.com" ]]; then
 									decho "host is github"
@@ -403,7 +403,7 @@ for repo in $list; do
 									decho "host is not github"
 								fi
 							else
-								echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+								echo -e "${fTAB}${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 							fi
 						fi
 					fi
