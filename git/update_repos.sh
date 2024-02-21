@@ -143,6 +143,12 @@ echo "starting directory = ${start_dir}"
 echo -n "${TAB}Checking Git... "
 if command -v git &>/dev/null; then
 	echo -e "${GOOD}OK${NORMAL} Git is defined"
+	# get Git version
+	git --version
+	git_ver=$(git --version | awk '{print $3}')
+	git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+	git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+	git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
 else
 	echo -e "${BAD}FAIL${NORMAL} Git not defined"
 	if (return 0 2>/dev/null); then
@@ -212,12 +218,6 @@ if [ -f ${fname_project} ]; then
 	done <${fname_project}
 fi
 
-# get Git version
-git_ver=$(git --version | awk '{print $3}')
-git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-
 # declare counting variables
 declare -i n_fetch=0
 declare -i n_found=0
@@ -284,17 +284,17 @@ for repo in $list; do
 				echo "${TAB}no remote tracking branch set for current branch"
 				continue
 			else
-				remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-				remote_name=${remote_tracking_branch%%/*}
-				remote_url=$(git remote get-url ${remote_name})
+				remote_tracking_branch=$(git rev-parse --abbrev-ref master@{upstream})
+				upstream_repo=${remote_tracking_branch%%/*}
+				upstream_url=$(git remote get-url ${upstream_repo})
 				# add remote to list
-				echo "${remote_url}" >>${list_remote}
+				echo "${upstream_url}" >>${list_remote}
 			fi
 
 			# check against argument
 			if [ $# -gt 0 ]; then
 				echo -n "matching argument ""$1""... "
-				if [[ $remote_url =~ $1 ]]; then
+				if [[ $upstream_url =~ $1 ]]; then
 					echo -e "${GOOD}OK${NORMAL}"
 					((++n_match))
 				else
@@ -307,84 +307,18 @@ for repo in $list; do
 			if [ ! -z ${OK_list:+dummy} ]; then
 				OK_list+=$'\n'
 			fi
-			OK_list+=${remote_url}
+			OK_list+=${upstream_url}
 
 			# push/pull setting
 			GIT_HIGHLIGHT='\E[7m'
 
 			# print remote parsing
 			decho -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
-			decho "${TAB}remote name is $remote_name"
-			decho "  remote ${remote_url}"
-
-			# parse protocol
-			remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-			if [[ "${remote_pro}" == "git" ]]; then
-				remote_pro="SSH"
-				rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
-				decho "    host $rhost"
-
-				# default to checking host
-				do_check=true
-				decho "do_check = $do_check"
-
-				# check remote host name against list of checked hosts
-				if [ ! -z ${host_OK:+dummy} ]; then
-					decho "checking $rhost against list of checked hosts"
-					for good_host in ${host_OK}; do
-						if [[ $rhost =~ $good_host ]]; then
-							decho "$rhost matches $good_host"
-							do_check=false
-							break
-						else
-							continue
-						fi
-					done
-				else
-					decho "list of checked hosts empty"
-				fi
-
-				decho "do_check = $do_check"
-
-				if [ ${do_check} = 'true' ]; then
-					# check connection before proceeding
-					echo "checking SSH connection..."
-					unset_traps
-					ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${rhost}
-					RETVAL=$?
-					set_traps
-					if [[ $RETVAL == 0 ]]; then
-						echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-						# add to list
-						if [ ! -z ${host_OK:+dummy} ]; then
-							host_OK+=$'\n'
-						fi
-						host_OK+=${rhost}
-					else
-						if [[ $RETVAL == 1 ]]; then
-							echo -e "${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-
-							if [[ $rhost =~ "github.com" ]]; then
-								decho "host is github"
-								# Github will return 1 if everything is working
-
-								# add to list
-								if [ ! -z ${host_OK:+dummy} ]; then
-									host_OK+=$'\n'
-								fi
-								host_OK+=${rhost}
-							else
-								decho "host is not github"
-							fi
-						else
-							echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-						fi
-					fi
-				fi
-			fi
-			decho "protocol ${remote_pro}"
+			decho "${TAB}remote name is $upstream_repo"
+			decho "  remote ${upstream_url}"
 
 			# get number of remotes
+			cbar "${BOLD}parse remotes...${NORMAL}"
 			n_remotes=$(git remote | wc -l)
 			r_names=$(git remote)
 			if [ "${n_remotes}" -gt 1 ]; then
@@ -392,21 +326,28 @@ for repo in $list; do
 			else
 				echo -n "remote: "
 			fi
+			declare -i i=0
 			for remote_name in ${r_names}; do
-				echo "${TAB}$remote_name"
+				if [ "${n_remotes}" -gt 1 ]; then
+					((++i))
+					echo -n "${TAB}${fTAB}$i) "
+					TAB+=${fTAB:='   '}
+				fi	
+				echo "$remote_name"
 				remote_url=$(git remote get-url ${remote_name})
-				echo "${fTAB}url: ${remote_url}"
+				echo "${TAB}${fTAB}url: ${remote_url}"
+				# parse protocol
 				remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
 				if [[ "${remote_pro}" == "git" ]]; then
 					remote_pro="SSH"
-					rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
+					remote_host=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
 				else
-					rhost=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
+					remote_host=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
 					if [[ "${remote_pro}" == "http"* ]]; then
 						remote_pro=${GRH}${remote_pro}${NORMAL}
 						remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
 						echo "  repo: ${remote_repo}"
-						remote_ssh="git@${rhost}:${remote_repo}"
+						remote_ssh="git@${remote_host}:${remote_repo}"
 						echo " change URL to ${remote_ssh}..."
 						echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
 						git remote set-url ${remote_name} ${remote_ssh}
@@ -414,10 +355,70 @@ for repo in $list; do
 					else
 						remote_pro="local"
 					fi					
-					
 				fi
-				echo "  host: $rhost"
-  			 echo -e " proto: ${remote_pro}"
+				echo "${TAB}${fTAB} host: $remote_host"
+  				echo -e "${TAB}${fTAB}proto: ${remote_pro}"
+				if [[ "${remote_pro}" == "SSH" ]]; then
+					# default to checking host
+					do_check=true
+					decho "do_check = $do_check"
+
+					# check remote host name against list of checked hosts
+					if [ ! -z ${host_OK:+dummy} ]; then
+						decho "checking $remote_host against list of checked hosts"
+						for good_host in ${host_OK}; do
+							if [[ $remote_host =~ $good_host ]]; then
+								decho "$remote_host matches $good_host"
+								do_check=false
+								break
+							else
+								continue
+							fi
+						done
+					else
+						decho "list of checked hosts empty"
+					fi
+					decho "do_check = $do_check"
+
+					# check connection before proceeding
+					if [ ${do_check} = 'true' ]; then
+						echo -n "${TAB}${fTAB}checking connection... "
+						unset_traps
+						ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${remote_host}
+						RETVAL=$?
+						set_traps
+						if [[ $RETVAL == 0 ]]; then
+							echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+							# add to list
+							if [ ! -z ${host_OK:+dummy} ]; then
+								host_OK+=$'\n'
+							fi
+							host_OK+=${remote_host}
+						else
+							if [[ $RETVAL == 1 ]]; then
+								echo -e "${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+
+								if [[ $remote_host =~ "github.com" ]]; then
+									decho "host is github"
+									# Github will return 1 if everything is working
+
+									# add to list
+									if [ ! -z ${host_OK:+dummy} ]; then
+										host_OK+=$'\n'
+									fi
+									host_OK+=${remote_host}
+								else
+									decho "host is not github"
+								fi
+							else
+								echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+							fi
+						fi
+					fi
+				fi
+				if [ "${n_remotes}" -gt 1 ]; then
+					TAB=${TAB%$fTAB}
+				fi
 			done				
 
 			#------------------------------------------------------
@@ -709,11 +710,11 @@ for repo in $list; do
 		fi
 	else
 		echo "not found"
-			if [ ! -z ${loc_fail:+dummy} ]; then
-				loc_fail+=$'\n'"$repo"
-			else
-				loc_fail+="$repo"
-			fi
+		if [ ! -z ${loc_fail:+dummy} ]; then
+			loc_fail+=$'\n'"$repo"
+		else
+			loc_fail+="$repo"
+		fi
 		unset_traps
 		bash test_file ${HOME}/$repo
 		set_traps
