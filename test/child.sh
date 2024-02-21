@@ -121,6 +121,24 @@ else
     echo -e "\E[34m   not sourced\E[0m"
 fi
 
+BASE_LVL=0
+echo "compare shell level..."
+if (return 0 2>/dev/null); then
+    echo -e "\x1b[33m   sourced\x1b[0m"
+    nstack=1
+
+else
+    echo -e "\x1b[34m   not sourced\x1b[0m"
+    nstack=2
+    BASE_LVL=$((BASE_LVL+1))
+fi
+
+echo "   assuming stack size is ${nstack}"
+echo "   shell level = $SHLVL"
+echo "BASE_LVL = $BASE_LVL"
+
+
+
 [[ $SHLVL -gt ${nstack} ]] &&
     echo "   called from parent" ||
     echo "   called directly"
@@ -139,15 +157,13 @@ fi
 
 # print time at exit
 echo -en "${TAB}${PSDIR}$(basename $BASH_SOURCE)${NORMAL} "
-end_time=$(date +%s%N)
-elap_time=$((${end_time} - ${start_time}))
-dT_sec=$(bc <<<"scale=3;$elap_time/1000000000")
-if command -v sec2elap &>/dev/null; then
-    echo -n "$(sec2elap $dT_sec | tr -d '\n')"
+print_elap
+echo -en "\n${fTAB}DUMMY"
+if [ -z ${DUMMY+dummy} ]; then
+	echo " undefined"
 else
-    echo -en "elapsed time is ${white}${dT_sec} sec${NORMAL}"
+	echo "=$DUMMY"
 fi
-echo " on $(date +"%a %b %-d at %-l:%M %p %Z") DUMMY=$DUMMY"
 
 #./ par pslvl 1, child pslvl 2; par by shell, child by other; both not sourced
 
