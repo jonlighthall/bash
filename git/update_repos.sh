@@ -286,7 +286,7 @@ for repo in $list; do
 			else
 				remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
 				remote_name=${remote_tracking_branch%%/*}
-				remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
+				remote_url=$(git remote get-url ${remote_name})
 				# add remote to list
 				echo "${remote_url}" >>${list_remote}
 			fi
@@ -394,7 +394,7 @@ for repo in $list; do
 			fi
 			for remote_name in ${r_names}; do
 				echo "${TAB}$remote_name"
-				remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
+				remote_url=$(git remote get-url ${remote_name})
 				echo "${fTAB}url: ${remote_url}"
 				remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
 				if [[ "${remote_pro}" == "git" ]]; then
