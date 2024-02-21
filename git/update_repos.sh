@@ -19,14 +19,6 @@ fi
 # set debug level
 declare -i DEBUG=0
 
-# conditional debug echo
-decho() {
-	if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
-		# if DEBUG is (unset or null) or greater than 0
-		echo "$@"
-	fi
-}
-
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
