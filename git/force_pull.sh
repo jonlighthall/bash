@@ -181,7 +181,7 @@ if [ ! -z ${remote_tracking_branch} ]; then
 		echo "do not match"
 		echo "${TAB}${fTAB}${pull_branch}"
 		echo "${TAB}${fTAB}${remote_tracking_branch}"
-		echo "setting upstream brach..."
+		echo "setting upstream remote tracking branch..."
 		git branch -u ${pull_branch}
 
 		echo -n "remotes... "
@@ -394,7 +394,7 @@ else
 fi
 
 # copy leading commits to new branch
-cbar "${BOLD}copying local commits to new branch...${NORMAL}"
+cbar "${BOLD}copying local commits to temporary branch...${NORMAL}"
 echo "${TAB}before reset:"
 git branch -v --color=always | sed '/^*/!d'
 echo -e "${fTAB} local:  ${yellow}ahead $N_local${NORMAL}"
@@ -448,22 +448,27 @@ else
 fi
 
 # rebase and merge oustanding local commits
-cbar "${BOLD}merging local changes...${NORMAL}"
+cbar "${BOLD}rebasing temporary branch...${NORMAL}"
+echo "${TAB}before rebase:"
 N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
 if [ $N_temp -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${NORMAL}"
-    echo "${TAB}rebase..."
+
+	# rebase
     git checkout ${branch_temp}
     git rebase ${local_branch}
+	echo "${TAB}after rebase:"
+	N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
+	echo -e "${TAB}${fTAB}${yellow}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${NORMAL}"
+		
+	# merge
+	cbar "${BOLD}merging local changes...${NORMAL}"
     git checkout ${local_branch}
-    echo "${TAB}merge..."
     git merge ${branch_temp}
     git branch -d ${branch_temp}
 else
     echo -e "${TAB}${fTAB}no need to merge"
 fi
-
-exit
 
 # push local commits
 cbar "${BOLD}pushing local changes...${NORMAL}"
@@ -500,8 +505,8 @@ if [ $N_stash -gt 0 ]; then
 else
     echo "${fTAB}no stash entries"
 fi
-echo "resetting remote tracking branch"
-git branch -u ${remote_tracking_branch}"
+echo "resetting upstream remote tracking branch..."
+git branch -u "${remote_tracking_branch}"
 
 cbar "${BOLD}you're done!${NORMAL}"
 
