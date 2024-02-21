@@ -46,6 +46,15 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 	echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
+# print source path
+## physical
+src_dir_phys=${src_name%/*}
+echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
+## logical
+src_dir_logi=${BASH_SOURCE%/*}
+echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
+
+
 # set sort order (C sorting is the most consistient)
 # must 'export' setting to take effect
 set_loc=C
@@ -115,8 +124,38 @@ echo
 
 # specify default history file
 hist_ref=${HOME}/.bash_history
-if [ -d "${HOME}/home" ]; then
-    hist_bak=${HOME}/home/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
+save_dir=${HOME}/home
+
+echo -n "${hist_ref} is a "
+if [ -L ${hist_ref} ]; then
+	echo -n "is a "
+	hist_link=$(readlink ${hist_ref})
+
+	if [ -e ${hist_ref} ]; then
+		echo -e "${VALID}valid${NORMAL} ${UL}link${NORMAL}"
+		echo "${hist_ref} points to ${hist_link}"
+	else
+		echo -e "${BROKEN}broken${NORMAL} ${UL}link${NORMAL}"
+		echo "${hist_ref} points to ${hist_link}"
+		echo "touching ${hist_link}..."
+		touch "${hist_link}"
+	fi
+elif [ -e ${hist_ref} ]; then
+	echo -n "exists and "
+	if [ -f ${hist_ref} ]; then
+		echo -e "is a regular ${UL}file${NORMAL}"
+	else
+		echo -e "${yellow}is not a file or link${NORMAL}"
+		exit 1
+	fi
+else
+ 	echo -e "${BAD}${UL}does not exist${NORMAL}"
+	exit 1
+fi
+test_file ${hist_ref}
+
+if [ -d "${save_dir}" ]; then
+    hist_bak=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
 else
     hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
 fi
