@@ -22,8 +22,8 @@
 #
 # Apr 2023 JCL
 
-# start timer
-start_time=$(date +%s%N)
+# get starting time in nanoseconds
+declare -i start_time=$(date +%s%N)
 
 # set tab
 called_by=$(ps -o comm= $PPID)
@@ -34,13 +34,13 @@ else
 	TAB+=${TAB+${fTAB:='   '}}
 fi
 
-# load formatting
+# load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+	source $fpretty
 fi
 
-# print source name at start
+# determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
     set -TE +e
@@ -53,10 +53,43 @@ else
     # print time at exit
     trap print_exit EXIT
 fi
+
+# print run type and source name
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+	echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+fi
+
+# print source path
+## physical
+src_dir_phys=${src_name%/*}
+echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
+## logical
+src_dir_logi=${BASH_SOURCE%/*}
+echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
+
+# save and print starting directory
+start_dir=$PWD
+echo "starting directory = ${start_dir}"
+
+# check if Git is defined
+echo -n "${TAB}Checking Git... "
+if command -v git &>/dev/null; then
+	echo -e "${GOOD}OK${NORMAL} Git is defined"
+	# get Git version
+	git --version | sed "s/^/${fTAB}/"
+	git_ver=$(git --version | awk '{print $3}')
+	git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+	git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+	git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
+else
+	echo -e "${BAD}FAIL${NORMAL} Git not defined"
+	if (return 0 2>/dev/null); then
+		return 1
+	else
+		exit 1
+	fi
 fi
 
 # get number of remotes
@@ -78,6 +111,7 @@ for remote_name in ${r_names}; do
 	echo "$remote_name"
 	remote_url=$(git remote get-url ${remote_name})
 	echo "${TAB}${fTAB}  url: ${remote_url}"
+	# parse protocol
 	remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
 	if [[ "${remote_pro}" == "git" ]]; then
 		remote_pro="SSH"
@@ -91,6 +125,7 @@ for remote_name in ${r_names}; do
 	echo "${TAB}${fTAB} host: $remote_host"
   	echo -e "${TAB}${fTAB}proto: ${remote_pro}"
 	if [[ "${remote_pro}" == "SSH" ]]; then
+		# check connection before proceeding
 		echo -n "${TAB}${fTAB}checking connection... "
 		ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${remote_host}
 	fi
@@ -367,12 +402,6 @@ fi
 TAB=${TAB%$fTAB}
 TAB=${TAB%$fTAB}
 
-# get Git version
-git_ver=$(git --version | awk '{print $3}')
-git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-
 # stash local changes
 cbar "${BOLD}stashing local changes...${NORMAL}"
 if [ -z "$(git diff)" ]; then
@@ -448,9 +477,13 @@ else
 fi
 
 # rebase and merge oustanding local commits
-cbar "${BOLD}rebasing temporary branch...${NORMAL}"
-echo "${TAB}before rebase:"
-N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
+if [ -z ${branch_temp} ]; then
+	N_temp=0
+else
+	cbar "${BOLD}rebasing temporary branch...${NORMAL}"
+	echo "${TAB}before rebase:"
+	N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
+fi
 if [ $N_temp -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${NORMAL}"
 
