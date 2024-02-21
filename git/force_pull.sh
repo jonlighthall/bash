@@ -395,9 +395,10 @@ fi
 
 # copy leading commits to new branch
 cbar "${BOLD}copying local commits to new branch...${NORMAL}"
+echo "${TAB}before reset:"
 git branch -v --color=always | sed '/^*/!d'
-echo "${fTAB} local:  ahead $N_local"
-echo "${fTAB}remote: behind $N_remote"
+echo -e "${fTAB} local:  ${yellow}ahead $N_local${NORMAL}"
+echo -e "${fTAB}remote: ${yellow}behind $N_remote${NORMAL}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     branch_temp=${local_branch}.temp
@@ -405,10 +406,9 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     i=0
     set +e
     while [[ ! -z $(git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep ${branch_temp}) ]]; do
-        echo "${TAB}${fTAB}${branch_temp}"
-        ((i++))
+        echo "${TAB}${fTAB}${branch_temp} exists" 
+        ((++i))
         branch_temp=${local_branch}.temp${i}
-        echo "${TAB}${fTAB}checking ${branch_temp}"
     done
     echo "${TAB}${fTAB}found unused branch name ${branch_temp}"
     if (! return 0 2>/dev/null); then
@@ -426,8 +426,15 @@ if [ $N_remote -gt 0 ]; then
     if [ $N_local -eq 0 ]; then
         echo "${TAB}${fTAB}no need to reset"
     else
-        echo "${TAB}${fTAB}resetting HEAD to $hash_remote..."
+        echo "${TAB}resetting HEAD to $hash_remote..."
         git reset --hard $hash_remote | sed "s/^/${TAB}/"
+		N_remote_old=$N_remote
+		N_remote=$(git rev-list HEAD..${pull_branch} | wc -l)
+		if [ $N_remote -ne $N_remote_old ]; then
+			echo "${TAB}after reset:"
+			git branch -v --color=always | sed '/^*/!d'
+			echo -e "${fTAB}remote: ${yellow}behind $N_remote${NORMAL}"
+		fi
     fi
 fi
 
@@ -440,12 +447,10 @@ else
     echo -e "${TAB}${fTAB}no need to pull"
 fi
 
-exit
-
 # rebase and merge oustanding local commits
 cbar "${BOLD}merging local changes...${NORMAL}"
-if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    N_temp=$(git rev-list ${branch_temp}..${local_branch} | wc -l)
+N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
+if [ $N_temp -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${NORMAL}"
     echo "${TAB}rebase..."
     git checkout ${branch_temp}
