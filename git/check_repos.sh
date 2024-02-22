@@ -133,7 +133,17 @@ for remote_name in ${r_names}; do
 		remote_host=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
 	else
 		remote_host=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
-		if [[ ! "${remote_pro}" == "http"* ]]; then
+		if [[ "${remote_pro}" == "http"* ]]; then
+			# warn about HTTP remotes
+			remote_pro=${GRH}${remote_pro}${NORMAL}
+			remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
+			echo "  repo: ${remote_repo}"
+			# change remote to SSH
+			remote_ssh="git@${remote_host}:${remote_repo}"
+			echo " change URL to ${remote_ssh}..."
+			echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
+			git remote set-url ${remote_name} ${remote_ssh}						
+		else
 			remote_pro="local"
 		fi							
 	fi	
@@ -213,5 +223,6 @@ unset remote_url
 unset remote_pro
 unset remote_host
 
+echo "done"
 # add exit code for parent script
 exit 0
