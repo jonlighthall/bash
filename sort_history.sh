@@ -21,22 +21,15 @@ fi
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
 	source $fpretty
+	set_traps
 fi
 
-# define traps
-trap 'print_error $LINENO $? $BASH_COMMAND' ERR
-trap print_exit EXIT
-trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
-trap print_int INT
-
-# determine if script is being sourced or executed and add conditional behavior
+# determine if script is being sourced or executed
 if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"
-	set -TE +e
+	set -T +e
 else
 	RUN_TYPE="executing"
-	# exit on errors
-	set -eE
 fi
 
 # print run type and source name

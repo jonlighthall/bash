@@ -11,6 +11,7 @@
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
+	set_traps
 fi
 
 # print source name at start
@@ -46,6 +47,3 @@ bar "autoclean..."
 sudo apt autoclean
 bar "clean..."
 sudo apt clean
-
-# print time at exit
-echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
