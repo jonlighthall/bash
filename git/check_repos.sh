@@ -23,85 +23,15 @@ declare -i DEBUG=0
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
 	source $fpretty
+	set_traps
 fi
-
-# define traps
-function set_traps() {
-	decho -e "${magenta}\E[7mset traps${NORMAL}"
-	decho "setting shell options..."
-	if (return 0 2>/dev/null); then
-		decho -e "${magenta}\E[7mreturn flags${NORMAL}"
-		#		set -TE +e
-	else
-		decho -e "${magenta}\E[7mexit flags${NORMAL}"
-		set -e
-	fi
-	set -E
-	decho "the following traps are saved"
-	if [ -z "${save_traps+default}" ]; then
-		decho "${fTAB}none"
-		decho "setting traps..."
-		trap 'print_error $LINENO $? $BASH_COMMAND' ERR
-		trap 'print_exit $? ' EXIT
-	else
-		decho "${save_traps}" | sed "s/^/${fTAB}/"
-		decho "setting saved traps..."
-		eval $(echo "${save_traps}" | sed "s/$/;/g")
-	fi
-	decho "on set trap retrun, the following traps are set"
-	if [ -z "$(trap -p)" ]; then
-		decho "${fTAB}none"
-		exit
-	else
-		decho $(trap -p | sed "s/^/${fTAB}/")
-	fi
-}
-
-function unset_traps() {
-	decho -e "${cyan}\E[7mun-set traps${NORMAL}"
-	decho "setting shell options..."
-	#	set +eET
-	set +eE
-
-	decho "the current traps are set"
-
-	if [ -z "$(trap -p)" ]; then
-		decho "${fTAB}none"
-	else
-		decho $(trap -p | sed "s/^/${fTAB}/")
-		# save traps
-		save_traps=$(trap -p | sed 's/-- //g')
-
-		if [ ! -z "${save_traps}" ]; then
-			decho "the current traps are saved"
-			decho "${save_traps}" | sed "s/^/${fTAB}/"
-		fi
-
-		trap - ERR
-		trap - EXIT
-		trap - RETURN
-
-	fi
-
-	decho "on unset trap retrun, the following traps are set"
-	if [ -z $(trap -p) ]; then
-		decho "${fTAB}none"
-	else
-		decho $(trap -p)
-		exit
-	fi
-}
-
-set_traps
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"
-	set -TE +e
+	set -T +e
 else
 	RUN_TYPE="executing"
-	# exit on errors
-	set -eE
 fi
 
 # list SSH status
