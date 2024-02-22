@@ -41,18 +41,15 @@ declare -i DEBUG=1
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
 	source $fpretty
+	set_traps
 fi
-
-set_traps
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"
-	set -TE +e
+	set -T +e
 else
 	RUN_TYPE="executing"
-	# exit on errors
-	set -eE
 fi
 
 # print run type and source name
@@ -506,6 +503,8 @@ echo "resetting upstream remote tracking branch..."
 git branch -u "${remote_tracking_branch}"
 
 cbar "${BOLD}you're done!${NORMAL}"
+
+print_elap
 
 # add exit code for parent script
 exit 0
