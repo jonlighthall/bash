@@ -260,7 +260,7 @@ for repo in $list; do
 			if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
 				cmd_base+=" --verbose"
 			fi
-			cmd="${to}${cmd_base} --all"
+			cmd="${to}${cmd_base}"
 			RETVAL=137
 			n_loops=0
 			while [ $n_loops -lt 5 ]; do
