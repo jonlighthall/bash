@@ -10,27 +10,20 @@ start_time=$(date +%s%N)
 fpretty="${HOME}/utils/bash/.bashrc_pretty"
 if [ -e "$fpretty" ]; then
     source "$fpretty"
+	set_traps
 fi
 
-# determine if script is being sourced or executed and add conditional behavior
+# determine if script is being sourced or executed
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
-    # exit on errors
-    set -eE    
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f "$BASH_SOURCE")
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
-
-# define traps
-trap 'print_error $LINENO $? $BASH_COMMAND' ERR
-trap print_int INT
-trap print_exit EXIT
-trap print_return RETURN
 
 # set target and link directories
 target_dir=$(dirname "$src_name")
