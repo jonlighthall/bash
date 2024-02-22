@@ -11,6 +11,7 @@
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
+	set_traps
 fi
 
 # print source name at start
@@ -44,11 +45,3 @@ sudo apt clean
 # check for distro update
 bar "release upgrade..."
 sudo do-release-upgrade
-
-# print time at exit
-echo -en "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
-if command -v sec2elap &>/dev/null; then
-    bash sec2elap ${SECONDS}
-else
-    echo "elapsed time is ${white}${SECONDS} sec${NORMAL}"
-fi
