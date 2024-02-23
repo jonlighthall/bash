@@ -13,13 +13,18 @@ declare -r thisTAB='   '
 for var in TAB fTAB
 do
 	echo -n "${thisTAB}$var "
+	# check if variable is set
     if [ -z ${!var+dummy} ]; then
 		echo -e "${yellow}unset${NORMAL}"
-    else
-		val=${!var}
-		i=${#val}
-		echo -en "${GOOD}set${NORMAL} to ${space}${val}${NORMAL}"
-		[ $i -gt 0 ] && echo -n " "
-		echo "length = $i"
-    fi
+		continue
+	fi
+
+	#print variable value
+	val=${!var}
+	echo -en "${GOOD}set${NORMAL} to ${space}${val}${NORMAL}"
+
+	# print variable length
+	i=${#val}
+	[ $i -gt 0 ] && echo -n " "
+	echo "length = $i"
 done
