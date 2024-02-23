@@ -36,6 +36,18 @@ fi
 
 # list SSH status
 host_OK=''
+
+# bad hosts
+echo -n "bad hosts: "
+if [ -z "$host_bad" ]; then
+	echo "none"
+else
+	host_bad=$(echo "${host_bad}" | sort -n)
+	echo
+	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+fi
+
+
 host_bad=''
 
 # get number of remotes
@@ -153,6 +165,18 @@ unset remote_url
 unset remote_pro
 unset remote_host
 
+# bad hosts
+echo -n "bad hosts: "
+if [ -z "$host_bad" ]; then
+	echo "none"
+else
+	host_bad=$(echo "${host_bad}" | sort -n)
+	echo
+	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+fi
+
+export host_bad
+
 echo "done"
-# add exit code for parent script
-exit 0
+# add return code for parent script
+return 0
