@@ -236,9 +236,12 @@ for repo in $list; do
 			source "${src_dir_phys}/check_repos.sh"
 
 			# print remote parsing
-			echo -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
-			echo "${TAB}remote name is $upstream_repo"
-			echo "  remote ${upstream_url}"
+			cbar "${BOLD}parse remote tracking branch...${NORMAL}"
+			echo -e "${TAB}remote tracking branch: ${blue}${remote_tracking_branch}${NORMAL}"
+			echo "${TAB}${fTAB}remote name: ....... $upstream_repo"
+			upstream_refspec=${remote_tracking_branch#*/}
+			echo "${TAB}${fTAB}remote refspec: .... $upstream_refspec"
+			echo "${TAB}upsream url: ${upstream_url}"
 
 			# parse protocol
 			upstream_pro=$(echo ${upstream_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
@@ -265,9 +268,7 @@ for repo in $list; do
 				echo
 				echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
 			fi
-
-			echo "here"
-
+			
 			# check remote host name against list of checked hosts
 			if [ ! -z ${host_bad:+dummy} ]; then
 				echo "checking $upstream_host against list of checked hosts"
