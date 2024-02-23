@@ -50,8 +50,8 @@ RETVAL=$?
 
 if [[ $RETVAL == 0 ]]; then
 	echo "process tree contains Relay"
-	pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*Relay([0-9]*)//"
-	SH_LEV=$(pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*Relay([0-9]*)//" | grep -o "\-\-\-" | wc -l)
+	pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*Relay([0-9]*)([0-9]*)//"
+	SH_LEV=$(pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*Relay([0-9]*)([0-9]*)//" | grep -o "\-\-\-" | wc -l)
 else
 	echo "no relay"
 	pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//"
