@@ -27,7 +27,7 @@ echo
 echo "compare process name..."
 called_by=$(ps -o comm= $PPID)
 echo -n "   called by ${called_by}: "
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]] ; then
     echo -e "\E[0;36menvoked by shell\E[0m"
     #(return not_child)
 else
@@ -43,8 +43,21 @@ echo
 echo "compare pstree"
 pstree -Apu | grep $$ | xargs
 pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/"
-pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//"
-SH_LEV=$(pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//" | grep -o "\-\-\-" | wc -l)
+
+
+pstree -Apu | grep $$ | grep "Relay(" &>/dev/null
+RETVAL=$?
+
+if [[ $RETVAL == 0 ]]; then
+	echo "process tree contains Relay"
+	pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*Relay([0-9]*)//"
+	SH_LEV=$(pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*Relay([0-9]*)//" | grep -o "\-\-\-" | wc -l)
+else
+	echo "no relay"
+	pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//"
+	SH_LEV=$(pstree -Apu | grep $$ | xargs | sed "s/\($$[^)]*)\).*/\1/" | sed "s/^.*SessionLeader([0-9]*)//" | grep -o "\-\-\-" | wc -l)
+fi
+
 echo "   ps tree shell level = $SH_LEV"
 echo "           shell level = $SHLVL"
 echo -n "   same as SHLVL? "
@@ -58,6 +71,7 @@ else
     echo "           shell level = $SH_LEV"
     #  exit 1
 fi
+
 
 SHELL_NAME=${SHELL##*/}
 echo
