@@ -13,8 +13,13 @@
 declare -i start_time=$(date +%s%N)
 
 # set tab
-: ${TAB:=''}
-: ${fTAB:='   '}
+called_by=$(ps -o comm= $PPID)
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]] ; then
+	TAB=''
+	: ${fTAB:='   '}
+else
+	TAB+=${TAB+${fTAB:='   '}}
+fi
 
 # set debug level
 declare -i DEBUG=0
@@ -34,10 +39,7 @@ else
 	RUN_TYPE="executing"
 fi
 
-# list SSH status
-host_OK=''
-
-# bad hosts
+# show bad hosts
 echo -n "existing bad hosts: "
 if [ -z "${host_bad:+dummy}" ]; then
 	echo "none"
@@ -47,6 +49,8 @@ else
 	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
 fi
 
+# reset SSH status list
+host_OK=''
 host_bad=''
 
 # check if Git is defined
@@ -71,11 +75,7 @@ fi
 # get number of remotes
 n_remotes=$(git remote | wc -l)
 r_names=$(git remote)
-if [ "${n_remotes}" -gt 1 ]; then
-	echo "remotes found: ${n_remotes}"
-else
-	echo -n "remote: "
-fi
+echo "remotes found: ${n_remotes}"
 declare -i i=0
 for remote_name in ${r_names}; do
 	if [ "${n_remotes}" -gt 1 ]; then
