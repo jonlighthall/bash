@@ -5,6 +5,7 @@ TAB+=${fTAB:='   '}
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
 	source $fpretty
+	set_traps
 fi
 #
 # check for input
