@@ -23,7 +23,7 @@ else
 		
 		# get most significant decimal
 		if [ $nd -gt 1 ]; then
-			declare -ir tenths=${deci::-$(($nd - 1))}
+			declare -ir tenths=${deci::$(($nd - 1))}
 		else
 			declare -ir tenths=${deci}
 		fi
@@ -43,7 +43,7 @@ else
 		# reduce precision
 		if [ ${nd} -gt 0 ]; then
 			((nd--))
-			prnt_deci=${deci::-1}
+			prnt_deci=${deci::1}
 		fi
 		# less than 10 seconds
 		if (( $ELAP < 10 )); then
@@ -53,7 +53,7 @@ else
 			# reduce precision
 			if [ ${nd} -gt 0 ]; then
 				((nd--))
-				prnt_deci=${prnt_deci::-1}
+				prnt_deci=${prnt_deci::1}
 			fi
 
 			# less than 1 minute
@@ -65,14 +65,14 @@ else
 					# reduce precision
 					if [ ${nd} -gt 0 ]; then
 						((nd--))
-						prnt_deci=${prnt_deci::-1}					
+						prnt_deci=${prnt_deci::1}					
 					fi
 				fi
 				if [ $ELAP -ge $((10**3)) ]; then
 					# reduce precision
 					if [ ${nd} -gt 0 ]; then
 						((nd--))
-						prnt_deci=${prnt_deci::-1}					
+						prnt_deci=${prnt_deci::1}					
 					fi
 				fi				
 				# round to the nearest integer
@@ -101,7 +101,7 @@ else
 						# reduce precision
 						if [ ${nd} -gt 0 ]; then
 							((nd--))
-							prnt_deci=${prnt_deci::-1}					
+							prnt_deci=${prnt_deci::1}					
 						fi
 					fi				
 					# if less than a day					
@@ -119,14 +119,14 @@ else
 							# reduce precision
 							if [ ${nd} -gt 0 ]; then
 								((nd--))
-								prnt_deci=${prnt_deci::-1}					
+								prnt_deci=${prnt_deci::1}					
 							fi
 						fi
 						if [ $ELAP -ge $((10**6)) ]; then
 							# reduce precision
 							if [ ${nd} -gt 0 ]; then
 								((nd--))
-								prnt_deci=${prnt_deci::-1}					
+								prnt_deci=${prnt_deci::1}					
 							fi
 						fi				
 
@@ -145,7 +145,7 @@ else
 								# reduce precision
 								if [ ${nd} -gt 0 ]; then
 									((nd--))
-									prnt_deci=${prnt_deci::-1}					
+									prnt_deci=${prnt_deci::1}					
 								fi
 							fi
 							echo -n $(date -d @${ELAP} +"$YR years $DY days $HR hours %M min %S")
