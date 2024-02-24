@@ -36,6 +36,17 @@ fi
 
 # list SSH status
 host_OK=''
+
+# bad hosts
+echo -n "existing bad hosts: "
+if [ -z "${host_bad:+dummy}" ]; then
+	echo "none"
+else
+	host_bad=$(echo "${host_bad}" | sort -n)
+	echo
+	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+fi
+
 host_bad=''
 
 # get number of remotes
@@ -95,8 +106,6 @@ for remote_name in ${r_names}; do
 				if [[ $remote_host =~ $good_host ]]; then
 					decho "$remote_host matches $good_host"
 					do_check=false
-					break
-				else
 					continue
 				fi
 			done
@@ -109,7 +118,16 @@ for remote_name in ${r_names}; do
 		if [ ${do_check} = 'true' ]; then
 			echo -n "${TAB}${fTAB}checking connection... "
 			unset_traps
-			ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${remote_host}
+			ssh_cmd_base="ssh -o ConnectTimeout=6 -o ConnectionAttempts=2 -T ${remote_host}"
+			if [[ "${remote_host}" == *"navy.mil" ]]; then
+				$ssh_cmd_base -o LogLevel=error 2> >(sed $'s,.*,\e[31m&\e[m,'>&2) 1> >(sed $'s,.*,\e[32m&\e[m,'>&1)
+			else
+				if [[ ${remote_host} =~ "github.com" ]]; then
+					$ssh_cmd_base -o LogLevel=info 2> >(sed $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,'>&2)
+				else
+					$ssh_cmd_base -o LogLevel=info 2> >(sed $'s,.*,\e[31m&\e[m,'>&2)
+				fi
+			fi			
 			RETVAL=$?
 			set_traps
 			if [[ $RETVAL == 0 ]]; then
@@ -157,6 +175,22 @@ unset remote_url
 unset remote_pro
 unset remote_host
 
+# bad hosts
+echo -n "  bad hosts: "
+if [ -z "$host_bad" ]; then
+	echo "none"
+else
+	host_bad=$(echo "${host_bad}" | sort -n)
+	echo
+	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+fi
+
+export host_bad
+
 echo "done"
-# add exit code for parent script
-exit 0
+# add return code for parent script
+if (return 0 2>/dev/null); then
+	return 0
+else
+	exit 0
+fi

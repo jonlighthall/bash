@@ -27,7 +27,7 @@ declare -i start_time=$(date +%s%N)
 
 # set tab
 called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
+	if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]] ; then
 	TAB=''
 	: ${fTAB:='   '}
 else

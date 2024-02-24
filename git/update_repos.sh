@@ -148,6 +148,8 @@ declare -i n_match=0
 declare -i n_pull=0
 declare -i n_push=0
 
+export host_bad=hello
+
 # list failures
 loc_fail=''
 fetch_fail=''
@@ -164,10 +166,6 @@ push_OK=''
 # list modifications
 mod_repos=''
 mod_files=''
-
-# list SSH status
-host_OK=''
-host_bad=''
 
 # list stash
 stash_list=''
@@ -237,18 +235,64 @@ for repo in $list; do
 			fi
 			git_OK+=${upstream_url}
 
-			# push/pull setting
-			GIT_HIGHLIGHT='\E[7m'
-
-			# print remote parsing
-			decho -e "${TAB}remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
-			decho "${TAB}remote name is $upstream_repo"
-			decho "  remote ${upstream_url}"
-
 			# get number of remotes
 			cbar "${BOLD}parse remotes...${NORMAL}"
-			"${src_dir_phys}/check_repos.sh"
+			source "${src_dir_phys}/check_repos.sh"
 
+			# print remote parsing
+			cbar "${BOLD}parse remote tracking branch...${NORMAL}"
+			echo -e "${TAB}remote tracking branch: ${blue}${remote_tracking_branch}${NORMAL}"
+			echo "${TAB}${fTAB}remote name: ....... $upstream_repo"
+			upstream_refspec=${remote_tracking_branch#*/}
+			echo "${TAB}${fTAB}remote refspec: .... $upstream_refspec"
+			echo "${TAB}upsream url: ${upstream_url}"
+
+			# parse protocol
+			upstream_pro=$(echo ${upstream_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+			if [[ "${upstream_pro}" == "git" ]]; then
+				upstream_pro="SSH"
+				upstream_host=$(echo ${upstream_url} | sed 's/\(^[^:]*\):.*$/\1/')
+			else
+				upstream_host=$(echo ${upstream_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
+				if [[ "${upstream_pro}" == "http"* ]]; then
+					echo "  repo: ${upstream_repo}"
+				else
+					upstream_pro="local"
+				fi							
+			fi	
+			echo "${TAB}${fTAB} host: $upstream_host"
+  			echo -e "${TAB}${fTAB}proto: ${upstream_pro}"
+
+			# bad hosts
+			echo -n "bad hosts: "
+			if [ -z "$host_bad" ]; then
+				echo "none"
+			else
+				host_bad=$(echo "${host_bad}" | sort -n)
+				echo
+				echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+			fi
+			
+			# check remote host name against list of checked hosts
+			if [ ! -z ${host_bad:+dummy} ]; then
+				echo "checking $upstream_host against list of checked hosts"
+				for bad_host in ${host_bad}; do
+					if [[ $upstream_host =~ $bad_host ]]; then
+						echo "$upstream_host matches $bad_host"
+						echo "skipping fetch..."
+						fetch_fail+="$repo ($upstream_repo)"
+						break 2
+					else
+						continue
+					fi
+				done
+			else
+				echo "list of bad hosts empty"
+			fi
+
+			# push/pull setting
+			GIT_HIGHLIGHT='\E[7m'
+			
 			#------------------------------------------------------
 			# fetch
 			#------------------------------------------------------
@@ -563,10 +607,14 @@ list_indent='                '
 tail -n +2 ${list_remote} | sed "s/^/${list_indent}/"
 echo
 echo -n " these remotes: "
-git_OK=$(echo ${git_OK} | sed 's/ /\n/g' | sort -n)
-echo "${git_OK}" | head -n 1
-echo "${git_OK}" | tail -n +2 | sed "s/^/${list_indent}/"
-echo
+if [ -z "$git_OK" ]; then
+	echo "none"
+else
+	git_OK=$(echo ${git_OK} | sed 's/ /\n/g' | sort -n)
+	echo "${git_OK}" | head -n 1
+	echo "${git_OK}" | tail -n +2 | sed "s/^/${list_indent}/"
+	echo
+fi
 
 # print push/pull summary
 # all
