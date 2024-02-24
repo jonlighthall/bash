@@ -181,18 +181,12 @@ fetch_max=0
 timeout_ver=$(timeout --version | head -1 | sed 's/^.*) //')
 declare -ir timeout_ver_maj=$(echo $timeout_ver | awk -F. '{print $1}')
 declare -ir timeout_ver_min=$(echo $timeout_ver | awk -F. '{print $2}')
-echo $timeout_ver
-echo $timeout_ver_maj
-echo $timeout_ver_min
 to_base0="timeout"
-echo $to_base0
 if [[ $timeout_ver_min -gt 4 ]]; then 
 	to_base0+=" --foreground --preserve-status"
 fi
 to_base0+=" -s 9"
-echo $to_base0
 declare -r to_base="${to_base0}"
-echo $to_base
 
 for repo in $list; do
 	start_new_line
