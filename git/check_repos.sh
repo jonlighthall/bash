@@ -102,8 +102,6 @@ for remote_name in ${r_names}; do
 				if [[ $remote_host =~ $good_host ]]; then
 					decho "$remote_host matches $good_host"
 					do_check=false
-					break
-				else
 					continue
 				fi
 			done
@@ -116,7 +114,16 @@ for remote_name in ${r_names}; do
 		if [ ${do_check} = 'true' ]; then
 			echo -n "${TAB}${fTAB}checking connection... "
 			unset_traps
-			ssh -o ConnectTimeout=6 -o ConnectionAttempts=2 -o LogLevel=info -T ${remote_host} 2> >(sed $'s,.*,\e[31m&\e[m,'>&2)
+			ssh_cmd_base="ssh -o ConnectTimeout=6 -o ConnectionAttempts=2 -T ${remote_host}"
+			if [[ "${remote_host}" == *"navy.mil" ]]; then
+				$ssh_cmd_base -o LogLevel=error 2> >(sed $'s,.*,\e[31m&\e[m,'>&2) 1> >(sed $'s,.*,\e[32m&\e[m,'>&1)
+			else
+				if [[ ${remote_host} =~ "github.com" ]]; then
+					$ssh_cmd_base -o LogLevel=info 2> >(sed $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,'>&2)
+				else
+					$ssh_cmd_base -o LogLevel=info 2> >(sed $'s,.*,\e[31m&\e[m,'>&2)
+				fi
+			fi			
 			RETVAL=$?
 			set_traps
 			if [[ $RETVAL == 0 ]]; then
