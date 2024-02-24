@@ -210,7 +210,11 @@ for repo in $list; do
 				continue
 			else
 				upstream_repo=${remote_tracking_branch%%/*}
-				upstream_url=$(git remote get-url ${upstream_repo})
+				if [ $git_ver_maj -lt 2 ]; then
+					upstream_url=$(git remote -v | grep ${upstream_repo} | awk '{print $2}' | uniq)
+				else
+					upstream_url=$(git remote get-url ${upstream_repo})
+				fi
 				# add remote to list
 				echo "${upstream_url}" >>${list_remote}
 			fi

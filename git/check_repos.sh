@@ -54,7 +54,11 @@ for remote_name in ${r_names}; do
 		TAB+=${fTAB:='   '}
 	fi
 	echo "$remote_name"
-	remote_url=$(git remote get-url ${remote_name})
+	if [ $git_ver_maj -lt 2 ]; then
+		remote_url=$(git remote -v | grep ${remote_repo} | awk '{print $2}' | uniq)
+	else
+		remote_url=$(git remote get-url ${remote_repo})
+	fi
 	echo "${TAB}${fTAB}  url: ${remote_url}"
 	# parse protocol
 	remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
