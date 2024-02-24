@@ -9,7 +9,7 @@ declare -i start_time=$(date +%s%N)
 
 # set tab
 called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]] ; then
 	TAB=''
 	: ${fTAB:='   '}
 else
@@ -29,7 +29,7 @@ fi
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"
-	set -TE +e
+	set -T +e
 else
 	RUN_TYPE="executing"
 	# exit on errors
@@ -147,7 +147,8 @@ declare -i n_match=0
 declare -i n_pull=0
 declare -i n_push=0
 
-export host_bad=hello
+# reset SSH status list
+export host_bad=''
 
 # list failures
 loc_fail=''
@@ -157,7 +158,7 @@ push_fail=''
 
 # list successes
 loc_OK=''
-unset git_OK
+git_OK=''
 fetch_OK=''
 pull_OK=''
 push_OK=''
@@ -242,8 +243,8 @@ for repo in $list; do
 			fi
 			git_OK+=${upstream_url}
 
-			# get number of remotes
-			cbar "${BOLD}parse remotes...${NORMAL}"
+			# check remotes
+			cbar "${BOLD}check remotes...${NORMAL}"
 			source "${src_dir_phys}/check_repos.sh"
 
 			# print remote parsing
@@ -284,13 +285,11 @@ for repo in $list; do
 			if [ ! -z ${host_bad:+dummy} ]; then
 				echo "checking $upstream_host against list of checked hosts"
 				for bad_host in ${host_bad}; do
-					if [[ $upstream_host =~ $bad_host ]]; then
+					if [[ "$upstream_host" == "$bad_host" ]]; then
 						echo "$upstream_host matches $bad_host"
 						echo "skipping fetch..."
 						fetch_fail+="$repo ($upstream_repo)"
-						break 2
-					else
-						continue
+						continue 2
 					fi
 				done
 			else
