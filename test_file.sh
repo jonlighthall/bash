@@ -1,13 +1,10 @@
 #!/bin/bash -u
-# get starting time in nanoseconds
-declare -i start_time=$(date +%s%N)
 # set tab
 TAB+=${fTAB:='   '}
 # no echo source since this is a utility
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
 	source $fpretty
-	set_traps
 fi
 #
 # check for input
