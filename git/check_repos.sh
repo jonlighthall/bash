@@ -38,15 +38,14 @@ fi
 host_OK=''
 
 # bad hosts
-echo -n "bad hosts: "
-if [ -z "$host_bad" ]; then
+echo -n "existing bad hosts: "
+if [ -z "${host_bad:+dummy}" ]; then
 	echo "none"
 else
 	host_bad=$(echo "${host_bad}" | sort -n)
 	echo
 	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
 fi
-
 
 host_bad=''
 
@@ -117,7 +116,7 @@ for remote_name in ${r_names}; do
 		if [ ${do_check} = 'true' ]; then
 			echo -n "${TAB}${fTAB}checking connection... "
 			unset_traps
-			ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -T ${remote_host}
+			ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -o LogLevel=info -T ${remote_host} 2> >(sed $'s,.*,\e[31m&\e[m,'>&2)
 			RETVAL=$?
 			set_traps
 			if [[ $RETVAL == 0 ]]; then
@@ -166,7 +165,7 @@ unset remote_pro
 unset remote_host
 
 # bad hosts
-echo -n "bad hosts: "
+echo -n "  bad hosts: "
 if [ -z "$host_bad" ]; then
 	echo "none"
 else
