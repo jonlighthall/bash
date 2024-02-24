@@ -49,6 +49,25 @@ fi
 
 host_bad=''
 
+# check if Git is defined
+echo -n "${TAB}Checking Git... "
+if command -v git &>/dev/null; then
+	echo -e "${GOOD}OK${NORMAL} Git is defined"
+	# get Git version
+	git --version | sed "s/^/${fTAB}/"
+	git_ver=$(git --version | awk '{print $3}')
+	git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+	git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+	git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
+else
+	echo -e "${BAD}FAIL${NORMAL} Git not defined"
+	if (return 0 2>/dev/null); then
+		return 1
+	else
+		exit 1
+	fi
+fi
+
 # get number of remotes
 n_remotes=$(git remote | wc -l)
 r_names=$(git remote)
