@@ -1,4 +1,6 @@
 #!/bin/bash -u
+# get starting time in nanoseconds
+declare -i start_time=$(date +%s%N)
 # set tab
 TAB+=${fTAB:='   '}
 # no echo source since this is a utility
