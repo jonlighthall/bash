@@ -9,6 +9,7 @@
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
+	set_traps
 fi
 
 # print source name at start
@@ -16,9 +17,6 @@ if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
-    # exit on errors
-    set -eE
-    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
@@ -125,12 +123,4 @@ if [ "${N}" -gt 0 ]; then
     diff --color=auto --suppress-common-lines -yiEZbwB ${host_bak} ${host_ref} | sed '/<$/d' | head -n 20
 else
     rm -vf $host_bak{,~} 2>/dev/null | sed "s/^/${TAB}/"
-fi
-
-# print time at exit
-echo -en "$(date +"%a %b %d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
-if command -v sec2elap &>/dev/null; then
-    bash sec2elap ${SECONDS}
-else
-    echo "elapsed time is ${white}${SECONDS} sec${NORMAL}"
 fi

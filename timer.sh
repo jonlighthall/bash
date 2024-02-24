@@ -31,11 +31,10 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 fi
 
 # define trap
-trap 'start_new_line; echo -e "breaking..."; break;' INT
+trap 'print_int; echo " breaking..."; break;' INT
 
 # print instructions
 echo "press Ctrl-C to exit"
 while [ .true ]; do
 	echo -en "\E[2K\r$(print_elap)"
 done
-
