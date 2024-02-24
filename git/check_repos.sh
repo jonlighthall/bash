@@ -178,4 +178,8 @@ export host_bad
 
 echo "done"
 # add return code for parent script
-return 0
+if (return 0 2>/dev/null); then
+	return 0
+else
+	exit 0
+fi
