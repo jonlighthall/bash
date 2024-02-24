@@ -27,7 +27,7 @@ declare -i start_time=$(date +%s%N)
 
 # set tab
 called_by=$(ps -o comm= $PPID)
-	if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]] ; then
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]] ; then
 	TAB=''
 	: ${fTAB:='   '}
 else
@@ -90,13 +90,12 @@ else
 	fi
 fi
 
-# list SSH status
-host_OK=''
-host_bad=''
+# reset SSH status list
+export host_bad=''
 
-# get number of remotes
-cbar "${BOLD}parse remotes...${NORMAL}"
-"${src_dir_phys}/check_repos.sh"
+# check remotes
+cbar "${BOLD}check remotes...${NORMAL}"
+source "${src_dir_phys}/check_repos.sh"
 
 # parse remote tracking branch and local branch
 cbar "${BOLD}parse current settings...${NORMAL}"
@@ -166,7 +165,54 @@ fi
 pull_branch=${pull_repo}/${pull_refspec}
 echo -e "${TAB}pulling from: ......... ${blue}${pull_branch}${NORMAL}"
 
-cbar "${BOLD}checking branches...${NORMAL}"
+cbar "${BOLD}checking remote host...${NORMAL}"
+
+# print remote parsing
+pull_url=$(git remote get-url ${pull_repo})
+echo "${TAB}remote url: ${pull_url}"
+
+# parse protocol
+pull_pro=$(echo ${pull_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+if [[ "${pull_pro}" == "git" ]]; then
+	pull_pro="SSH"
+	pull_host=$(echo ${pull_url} | sed 's/\(^[^:]*\):.*$/\1/')
+else
+	pull_host=$(echo ${pull_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
+	if [[ "${pull_pro}" == "http"* ]]; then
+		echo "  repo: ${pull_repo}"
+	else
+		pull_pro="local"
+	fi							
+fi	
+echo "${TAB}${fTAB} host: $pull_host"
+echo -e "${TAB}${fTAB}proto: ${pull_pro}"
+
+# bad hosts
+echo -n "bad hosts: "
+if [ -z "$host_bad" ]; then
+	echo "none"
+else
+	host_bad=$(echo "${host_bad}" | sort -n)
+	echo
+	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+fi
+
+# check remote host name against list of checked hosts
+if [ ! -z ${host_bad:+dummy} ]; then
+	echo "checking $pull_host against list of checked hosts"
+	for bad_host in ${host_bad}; do
+		if [[ "$pull_host" == "$bad_host" ]]; then
+			echo "$pull_host matches $bad_host"
+			echo "skipping fetch..."
+			fetch_fail+="$repo ($pull_repo)"
+			continue 2
+		fi
+	done
+else
+	echo "list of bad hosts empty"
+fi
+
+cbar "${BOLD}comparing branches...${NORMAL}"
 if [ ! -z ${remote_tracking_branch} ]; then
 	echo -n "${TAB}remote tracking branches... "
 
