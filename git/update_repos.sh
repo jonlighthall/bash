@@ -23,9 +23,8 @@ declare -i DEBUG=0
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
 	source $fpretty
+	set_traps
 fi
-
-set_traps
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
