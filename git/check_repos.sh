@@ -116,7 +116,7 @@ for remote_name in ${r_names}; do
 		if [ ${do_check} = 'true' ]; then
 			echo -n "${TAB}${fTAB}checking connection... "
 			unset_traps
-			ssh -o ConnectTimeout=1 -o ConnectionAttempts=1 -o LogLevel=info -T ${remote_host} 2> >(sed $'s,.*,\e[31m&\e[m,'>&2)
+			ssh -o ConnectTimeout=6 -o ConnectionAttempts=2 -o LogLevel=info -T ${remote_host} 2> >(sed $'s,.*,\e[31m&\e[m,'>&2)
 			RETVAL=$?
 			set_traps
 			if [[ $RETVAL == 0 ]]; then
