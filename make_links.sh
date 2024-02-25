@@ -19,6 +19,7 @@ if (return 0 2>/dev/null); then
 else
     RUN_TYPE="executing"
 fi
+# print source name at start
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f "$BASH_SOURCE")
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
@@ -120,7 +121,7 @@ for my_link in \
         fi
 
         # begin linking...
-        echo -n "${TAB}link $link... "
+        echo -n "${TAB}link ${link}... "
         TAB+=${fTAB:='   '}
         # first, check for existing copy
         if [ -L "${link}" ] || [ -f "${link}" ] || [ -d "${link}" ]; then
@@ -134,13 +135,13 @@ for my_link in \
                 continue
             else
                 # next, delete or backup existing copy
-                if [ $(diff -ebwB "${target}" "${link}" | wc -c) -eq 0 ]; then
+                if [ $(diff -ebwB "${target}" "${link}" 2>&1 | wc -c) -eq 0 ]; then
                     echo "has the same contents"
                     echo -n "${TAB}deleting... "
                     rm -v "${link}"
                 else
                     echo "will be backed up..."
-                    mv -v "${link}" ${link}_$(date -r "${link}" +'%Y-%m-%d-t%H%M') | sed "s/^/${TAB}/"
+                    mv -v "${link}" "${link}"_$(date -r "${link}" +'%Y-%m-%d-t%H%M') | sed "s/^/${TAB}/"
                 fi
             fi
         else
