@@ -17,6 +17,7 @@ fi
 
 # set output file name
 fname=ls2md.md
+echo "Output file = ${fname}"
 
 # print current directory
 echo -e "# Contents of $(pwd)\n" >${fname}
@@ -37,3 +38,19 @@ echo "done"
 # print contents of file
 echo "Contents of ${fname}:"
 cat ${fname} | sed "s/^/   /"
+
+# define ignore file
+echo
+ignore_file=$(pwd)/.gitignore
+echo "Checking ${ignore_file}..."
+if [ -f ${ignore_file} ]; then
+    if grep -q ${fname} ${ignore_file}; then
+        echo "${fname} already in ${ignore_file}"
+    else
+        echo "Adding ${fname} to ${ignore_file}..."
+        echo ${fname} >>${ignore_file}
+    fi
+else
+    echo "Creating ${ignore_file}..."
+    echo ${fname} >${ignore_file}
+fi
