@@ -3,33 +3,41 @@
 # whatsup.sh - show... what's up
 #
 # Mar 2019 JCL
-#
-# Print host information
-#
+
+# print host name
 echo "   host:" $HOSTNAME
-echo -n " domain: " 
+
+# print domain name if set
+echo -n " domain: "
 $(hostname -y &> /dev/null)
 DOM_RET_VAL=$?
 DOMAIN=$(hostname -d)
-if [ $DOM_RET_VAL -ne 0 ] && [ -z ${DOMAIN} ] ; then
+if [ $DOM_RET_VAL -ne 0 ] || [ -z ${DOMAIN} ] ; then
     echo -e "\E[31mnot set\E[0m"
 else
     echo "${DOMAIN}"
 fi
+
+# print IP address
 echo -n "     IP: "
 IP=$(hostname -i | sed 's/^[^\.]* //')
 echo "${IP}"
+
 # select hostname or IP address for SSH path
-if [ $DOM_RET_VAL -ne 0 ]; then
+if [ $DOM_RET_VAL -ne 0 ] || [ -z "${DOMAIN}" ]; then
     SSH_HOST=${IP}
 else
     SSH_HOST=${DOMAIN}
 fi
+
+# print display
 echo -n "display: "
 if [ -z $DISPLAY ]; then
     echo -e "\E[31mnot set\E[0m"
 fi
 echo "$DISPLAY"
+
+# print OS information
 echo -n "     OS: "
 if [ -f /etc/os-release ]; then
     \grep -i pretty /etc/os-release | sed 's/.*="\([^"].*\)"/\1/'
@@ -40,6 +48,9 @@ else
         cat /etc/*release | sort -u
     fi
 fi
+echo -n " kernel: "
+uname -srm
+
 #
 # Print user information
 #
@@ -83,7 +94,7 @@ echo
 echo "   home:" $HOME
 echo "    pwd:" $PWD
 # print full path for SSH, etc.
-echo -n "   path: $UNAME@"
+echo -n "SSH path: $UNAME@"
 if [[ "$HOSTNAME" == *"."* ]]; then
     echo -n "$HOSTNAME"
 else
