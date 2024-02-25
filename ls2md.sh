@@ -28,7 +28,7 @@ done
 
 # save root directories to file
 echo -e "\n## Directories\n" >>${fname}
-find -L ./ -not -path "*/.git*" -not -path "*/.vscode*" -type d | sed 's,^./,,;/\//d;/^$/d' >>${fname}
+find -L ./ -not -path "*/.git*" -not -path "*/.vscode*" -type d | sed 's,^./,,;/\//d;/^$/d' | sort | sed "s,^.*$,[\`&\`] (&)," >>${fname}
 
 echo "done"
 
