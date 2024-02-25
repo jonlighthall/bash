@@ -25,12 +25,12 @@ echo -e "# Contents of $(pwd)\n" >${fname}
 for ext in $arg; do
     echo "filtering $arg"
     echo -e "## ${ext} files\n" >>${fname}
-    find -L ./ -not -path "*/.git*/*" -type f -name "*${ext}" | sed "s,^./,,;s/${ext}$//" | sort | sed "s,^.*$,[\`&\`](&${ext})," >>${fname}
+    find -L ./ -not -path "*/.git*/*" -type f -name "*${ext}" | sed "s,^./,,;s/${ext}$//" | sort | sed "s,^.*$,[\`&\`](&${ext}),;$ ! s,$, \\\\," >>${fname}
 done
 
 # save root directories to file
 echo -e "\n## Directories\n" >>${fname}
-find -L ./ -not -path "*/.git*" -not -path "*/.vscode*" -type d | sed 's,^./,,;/\//d;/^$/d' | sort | sed "s,^.*$,[\`&\`](&)," >>${fname}
+find -L ./ -not -path "*/.git*" -not -path "*/.vscode*" -type d | sed 's,^./,,;/\//d;/^$/d' | sort | sed "s,^.*$,[\`&\`](&),;$ ! s,$, \\\\," >>${fname}
 
 echo "done"
 
