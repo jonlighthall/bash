@@ -48,9 +48,11 @@ if [ -f ${ignore_file} ]; then
         echo "${fname} already in ${ignore_file}"
     else
         echo "Adding ${fname} to ${ignore_file}..."
+        echo -e "\n#Markdown list" >>${ignore_file}
         echo ${fname} >>${ignore_file}
     fi
 else
     echo "Creating ${ignore_file}..."
-    echo ${fname} >${ignore_file}
+    echo -e "#Markdown list" >${ignore_file}
+    echo ${fname} >>${ignore_file}
 fi
