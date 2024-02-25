@@ -1,7 +1,9 @@
 # git
+
 Git bash scripts.
 
 ## general
+
 | script               | description                           |
 | -------------------- | ------------------------------------  |
 | [`apply_hashes`](apply_hashes.sh) |
@@ -16,9 +18,11 @@ Git bash scripts.
 | [`update_repos`](update_repos.sh) |
 
 ## git filter-
+
 The `filter-repo` scripts are preferred, but the `filter-branch` scripts are included for use on systems that do not or cannot have `filter-repo` installed.
 
 ### `filter-branch`
+
 Author names can be rewritten with the following code
 
 from <https://help.github.com/articles/changing-author-info/>
@@ -36,6 +40,7 @@ git push --force --tags origin 'refs/heads/*'
 | [`filter-branch-hello`](filter-branch-hello.sh) |
 
 ### `filter-repo`
+
 | script               | description                           |
 | -------------------- | ------------------------------------  |
 | [`filter-repo-author`](filter-repo-author.sh) |
@@ -45,13 +50,17 @@ git push --force --tags origin 'refs/heads/*'
 | [`unfilter-repo-author`](unfilter-repo-author.sh) |
 
 ### Settings
+
 Before running, check the individual scripts and confirm that the author emails are correct.
 Unlisted urls maybe saved in the file [`url.txt`](url.txt).
 To keep changes to `url.txt` unreported (and ignore upstream changes), the following command may be used
+
 ```bash
 git update-index --skip-worktree url.txt
 ```
+
 to undo this action, use the following command
+
 ```bash
 git update-index --no-skip-worktree url.txt
 ```
@@ -59,21 +68,26 @@ git update-index --no-skip-worktree url.txt
 The scripts can take inputs such as `--force` or `--prune-empty`
 
 ### Execution
+
 Fist, make sure your local repository is up to date
-```
+
+```bash
 git fetch origin
 git status
 git pull origin master
 git diff origin/master
 ```
+
 Then rewrite history and push the changes
-```
+
+```bash
 bash ${HOME}/utils/bash/git/filter-repo-author.sh
 git fetch
 git push --force-with-lease
 ```
 
 ### Aftermath
+
 If the filter scripts are utilized, it will case diverging commits with the remote repository.
 To address this, the following steps must be taken.
 Locate the local repository that has not been updated.
@@ -95,7 +109,8 @@ or
 get the most recent common local commit with the following command
 `git log | grep -B4 "$(git log origin/master --format=%s -n 1)" | head -n 1 | awk '{print $2}'`
 or
-```
+
+```bash
 unset hash_local
 hash_local=$(git log | grep -B4 "$(git log origin/master --format=%s -n 1)" | head -n 1 | awk '{print $2}')
 if [ ! -z ${hash_local} ]; then
@@ -125,6 +140,7 @@ Reset the local branch to the most recent common commit message on the remote
 `git reset $(git log origin/master | grep -B4 "$(git log --format=%s -n 1)" | head -n 1 | awk '{print $2}')`
 
 Nominally, the following commands should work
+
 ```
 git fetch origin
 git diff origin/master
@@ -132,7 +148,7 @@ git reset $(git log origin/master | grep -B4 "$(git log --format=%s -n 1)" | hea
 ```
 
 If necessary, merge, fast-forward, or cherry-pick the outstanding commits from the local repository
-Similaryly, pull the remainign commits from the remote.
+Similarly, pull the remaining commits from the remote.
 
 That should be it.
 Your local branch should have updated history.
