@@ -6,16 +6,16 @@ Git bash scripts.
 
 | script               | description                           |
 | -------------------- | ------------------------------------  |
-| [`apply_hashes`](apply_hashes.sh) |
-| [`force_pull`](force_pull.sh) |
-| [`gita`](gita.sh) |
-| [`gitac`](gitac.sh) |
-| [`gitact`](gitact.sh) |
-| [`pull_all_branches`](pull_all_branches.sh) |
-| [`set_config`](set_config.sh) |
-| [`sort_hash`](sort_hash.sh) |
-| [`undel_repo`](undel_repo.sh) |
-| [`update_repos`](update_repos.sh) |
+| [`apply_hashes`](apply_hashes.sh) | |
+| [`force_pull`](force_pull.sh) | |
+| [`gita`](gita.sh) | |
+| [`gitac`](gitac.sh) | |
+| [`gitact`](gitact.sh) | |
+| [`pull_all_branches`](pull_all_branches.sh) | |
+| [`set_config`](set_config.sh) | |
+| [`sort_hash`](sort_hash.sh) | |
+| [`undel_repo`](undel_repo.sh) | |
+| [`update_repos`](update_repos.sh) | |
 
 ## git filter-
 
@@ -34,20 +34,20 @@ git push --force --tags origin 'refs/heads/*'
 
 | script               | description                           |
 | -------------------- | ------------------------------------  |
-| [`filter-branch-author`](filter-branch-author.sh) |
-| [`filter-branch-committer`](filter-branch-committer.sh) |
-| [`filter-branch-email`](filter-branch-email.sh) |
-| [`filter-branch-hello`](filter-branch-hello.sh) |
+| [`filter-branch-author`](filter-branch-author.sh) | |
+| [`filter-branch-committer`](filter-branch-committer.sh) | |
+| [`filter-branch-email`](filter-branch-email.sh) | |
+| [`filter-branch-hello`](filter-branch-hello.sh) | |
 
 ### `filter-repo`
 
 | script               | description                           |
 | -------------------- | ------------------------------------  |
-| [`filter-repo-author`](filter-repo-author.sh) |
-| [`filter-repo-author-loop`](filter-repo-author-loop.sh) |
-| [`filter-repo-committer`](filter-repo-committer.sh) |
-| [`filter-repo-email`](filter-repo-email.sh) |
-| [`unfilter-repo-author`](unfilter-repo-author.sh) |
+| [`filter-repo-author`](filter-repo-author.sh) | |
+| [`filter-repo-author-loop`](filter-repo-author-loop.sh) | |
+| [`filter-repo-committer`](filter-repo-committer.sh) | |
+| [`filter-repo-email`](filter-repo-email.sh) | |
+| [`unfilter-repo-author`](unfilter-repo-author.sh) | |
 
 ### Settings
 
@@ -141,7 +141,7 @@ Reset the local branch to the most recent common commit message on the remote
 
 Nominally, the following commands should work
 
-```
+```bash
 git fetch origin
 git diff origin/master
 git reset $(git log origin/master | grep -B4 "$(git log --format=%s -n 1)" | head -n 1 | awk '{print $2}')
