@@ -248,16 +248,23 @@ for repo in $list; do
 			git_OK+=${upstream_url}
 
 			# check remotes
-			cbar "${BOLD}check remotes...${NORMAL}"
+			if [ $DEBUG -ge 0 ]; then
+				cbar "${BOLD}check remotes...${NORMAL}"
+			fi
 			source "${src_dir_phys}/check_repos.sh"
 
-			# print remote parsing
-			cbar "${BOLD}parse remote tracking branch...${NORMAL}"
-			echo -e "${TAB}remote tracking branch: ${blue}${remote_tracking_branch}${NORMAL}"
-			echo "${TAB}${fTAB}remote name: ....... $upstream_repo"
+			# parse remote
 			upstream_refspec=${remote_tracking_branch#*/}
-			echo "${TAB}${fTAB}remote refspec: .... $upstream_refspec"
-			echo "${TAB}upsream url: ${upstream_url}"
+			# print remote parsing
+			if [ $DEBUG -ge 0 ]; then
+				cbar "${BOLD}parse remote tracking branch...${NORMAL}"
+				(
+					echo -e "${TAB}remote tracking branch+ ${blue}${remote_tracking_branch}${NORMAL}"
+					echo "${TAB}${fTAB}remote name+ $upstream_repo"
+					echo "${TAB}${fTAB}remote refspec+ $upstream_refspec"					
+				) | column -t -s+ -o : -R 1				
+				
+			fi
 
 			# parse protocol
 			upstream_pro=$(echo ${upstream_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
@@ -272,10 +279,43 @@ for repo in $list; do
 					upstream_pro="local"
 				fi							
 			fi	
-			echo "${TAB}${fTAB} host: $upstream_host"
-  			echo -e "${TAB}${fTAB}proto: ${upstream_pro}"
+
+			# print host parsing
+			if [ $DEBUG -ge 0 ]; then
+				cbar "${BOLD}parse remote host...${NORMAL}"
+				(
+					echo "${TAB}upsream url+ ${upstream_url}"
+					echo "${TAB}${fTAB} host+ $upstream_host"
+  					echo -e "${TAB}${fTAB}proto+ ${upstream_pro}"
+				) | column -t -s+ -o : -R 1				
+				
+			fi
+
 			
 			# check remote host name against list of checked hosts
+			if [ ! -z ${host_OK:+dummy} ]; then
+				echo "checking $upstream_host against list of checked hosts"
+				# good hosts
+				echo -n "good hosts: "
+				if [ -z "$host_OK" ]; then
+					echo "none"
+				else
+					host_OK=$(echo "${host_OK}" | sort -n)
+					echo
+					echo -e "${OK}${host_OK}${NORMAL}" | sed "s/^/${fTAB}/"
+				fi
+				
+				for OK_host in ${host_OK}; do
+					if [[ "$upstream_host" == "$OK_host" ]]; then
+						echo "$upstream_host matches $OK_host"
+						echo "proceeding with fetch..."
+						continue 1
+					fi
+				done
+			else
+				echo "list of good hosts empty"
+			fi
+
 			if [ ! -z ${host_bad:+dummy} ]; then
 				echo "checking $upstream_host against list of checked hosts"
 				# bad hosts
@@ -299,6 +339,8 @@ for repo in $list; do
 			else
 				echo "list of bad hosts empty"
 			fi
+
+			
 
 			# push/pull setting
 			GIT_HIGHLIGHT='\E[7m'
