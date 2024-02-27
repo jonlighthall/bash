@@ -35,7 +35,7 @@ else
 fi
 
 # set debug level
-declare -i DEBUG=1
+declare -i DEBUG=0
 
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
@@ -50,6 +50,8 @@ if (return 0 2>/dev/null); then
 	set -T +e
 else
 	RUN_TYPE="executing"
+	# exit on errors
+	set -eE
 fi
 
 # print run type and source name
@@ -72,26 +74,30 @@ start_dir=$PWD
 echo "starting directory = ${start_dir}"
 
 # check if Git is defined
-echo -n "${TAB}Checking Git... "
-if command -v git &>/dev/null; then
-	echo -e "${GOOD}OK${NORMAL} Git is defined"
-	# get Git version
-	git --version | sed "s/^/${fTAB}/"
-	git_ver=$(git --version | awk '{print $3}')
-	git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-	git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-	git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-else
-	echo -e "${BAD}FAIL${NORMAL} Git not defined"
-	if (return 0 2>/dev/null); then
-		return 1
+if [ -z "${check_git:+dummy}" ]; then
+	echo -n "${TAB}Checking Git... "
+	if command -v git &>/dev/null; then
+		echo -e "${GOOD}OK${NORMAL} Git is defined"
+		# get Git version
+		git --version | sed "s/^/${fTAB}/"
+		git_ver=$(git --version | awk '{print $3}')
+		git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+		git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+		git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
+		export check_git=false
 	else
-		exit 1
+		echo -e "${BAD}FAIL${NORMAL} Git not defined"
+		if (return 0 2>/dev/null); then
+			return 1
+		else
+			exit 1
+		fi
 	fi
 fi
 
 # reset SSH status list
 export host_bad=''
+export host_OK=''
 
 # check remotes
 cbar "${BOLD}check remotes...${NORMAL}"
@@ -187,19 +193,18 @@ fi
 echo "${TAB}${fTAB} host: $pull_host"
 echo -e "${TAB}${fTAB}proto: ${pull_pro}"
 
-# bad hosts
-echo -n "bad hosts: "
-if [ -z "$host_bad" ]; then
-	echo "none"
-else
-	host_bad=$(echo "${host_bad}" | sort -n)
-	echo
-	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
-fi
-
 # check remote host name against list of checked hosts
 if [ ! -z ${host_bad:+dummy} ]; then
 	echo "checking $pull_host against list of checked hosts"
+	# bad hosts
+	echo -n "bad hosts: "
+	if [ -z "$host_bad" ]; then
+		echo "none"
+	else
+		host_bad=$(echo "${host_bad}" | sort -n)
+		echo
+		echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+	fi
 	for bad_host in ${host_bad}; do
 		if [[ "$pull_host" == "$bad_host" ]]; then
 			echo "$pull_host matches $bad_host"
