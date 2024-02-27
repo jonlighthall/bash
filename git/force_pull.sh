@@ -266,7 +266,11 @@ cbar "${BOLD}comparing local branch ${green}$local_branch${NORMAL} with remote b
 
 # before starting, fetch remote
 echo "${TAB}fetching ${pull_repo}..."
-git fetch --verbose ${pull_repo} ${pull_refspec}
+itab
+echo -ne "\e[38;5;11m"
+git fetch --verbose ${pull_repo} ${pull_refspec} 2>&1 | sed "s/^/${TAB}/"
+echo -ne "\e[0m"
+dtab
 
 echo "comparing repositories based on commit hash..."
 echo -n "${fTAB}leading remote commits: "
@@ -521,7 +525,9 @@ N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
     echo "${TAB}${fTAB}list of commits: "
-    git --no-pager log ${pull_branch}..HEAD
+	itab
+    git --no-pager log ${pull_branch}..HEAD | sed "s/^/${TAB}/"
+	dtab
     git push
 else
     echo -e "${TAB}${fTAB}no need to push"
