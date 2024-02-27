@@ -279,42 +279,46 @@ for repo in $list; do
 					upstream_pro="local"
 				fi							
 			fi	
-
-			# print host parsing
-			if [ $DEBUG -ge 0 ]; then
-				cbar "${BOLD}parse remote host...${NORMAL}"
-				(
-					echo "${TAB}upsream url+ ${upstream_url}"
-					echo "${TAB}${fTAB} host+ $upstream_host"
-  					echo -e "${TAB}${fTAB}proto+ ${upstream_pro}"
-				) | column -t -s+ -o : -R 1				
-				
-			fi
-			
+		
 			# check remote host name against list of checked hosts
+			decho "checking $upstream_host against list of checked hosts"
 			if [ ! -z ${host_OK:+dummy} ]; then
-				echo "checking $upstream_host against list of checked hosts"
 				for OK_host in ${host_OK}; do
 					if [[ "$upstream_host" == "$OK_host" ]]; then
-						echo "$upstream_host matches $OK_host"
-						echo "proceeding with fetch..."
+						decho "$upstream_host matches $OK_host"
+						host_stat=$(echo -e "${GOOD}OK${NORMAL}")
 						continue 1
 					fi
 				done
 			fi
 
 			if [ ! -z ${host_bad:+dummy} ]; then
-				echo "checking $upstream_host against list of checked hosts"
-				
 				for bad_host in ${host_bad}; do
 					if [[ "$upstream_host" == "$bad_host" ]]; then
-						echo "$upstream_host matches $bad_host"
-						echo "skipping fetch..."
+						decho "$upstream_host matches $bad_host"			
 						fetch_fail+="$repo ($upstream_repo)"
-						continue 2
+						host_stat=$(echo -e "${BAD}BAD{NORMAL}")
+						continue 1
 					fi
 				done
-			fi	
+			fi
+
+			# print host parsing
+			if [ $DEBUG -ge 0 ]; then
+				cbar "${BOLD}parse remote host...${NORMAL}"
+				(
+					echo "${TAB}upsream url+ ${upstream_url}"
+					echo "${TAB}${fTAB} host+ $upstream_host ${host_stat}"
+  					echo -e "${TAB}${fTAB}proto+ ${upstream_pro}"
+				) | column -t -s+ -o : -R 1								
+			fi
+
+			if [[ "$host_stat" =~ *"BAD"* ]]; then
+				decho "skipping fetch..."
+				continue
+			else
+				decho "proceeding with fetch..."
+			fi			
 
 			# push/pull setting
 			GIT_HIGHLIGHT='\E[7m'
