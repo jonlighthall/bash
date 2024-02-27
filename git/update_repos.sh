@@ -59,21 +59,24 @@ start_dir=$PWD
 echo "starting directory = ${start_dir}"
 
 # check if Git is defined
-echo -n "${TAB}Checking Git... "
-if command -v git &>/dev/null; then
-	echo -e "${GOOD}OK${NORMAL} Git is defined"
-	# get Git version
-	git --version | sed "s/^/${fTAB}/"
-	git_ver=$(git --version | awk '{print $3}')
-	git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-	git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-	git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-else
-	echo -e "${BAD}FAIL${NORMAL} Git not defined"
-	if (return 0 2>/dev/null); then
-		return 1
+if [ -z "${check_git:+dummy}" ]; then
+	echo -n "${TAB}Checking Git... "
+	if command -v git &>/dev/null; then
+		echo -e "${GOOD}OK${NORMAL} Git is defined"
+		# get Git version
+		git --version | sed "s/^/${fTAB}/"
+		git_ver=$(git --version | awk '{print $3}')
+		git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+		git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+		git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
+		export check_git=false
 	else
-		exit 1
+		echo -e "${BAD}FAIL${NORMAL} Git not defined"
+		if (return 0 2>/dev/null); then
+			return 1
+		else
+			exit 1
+		fi
 	fi
 fi
 
@@ -149,6 +152,7 @@ declare -i n_push=0
 
 # reset SSH status list
 export host_bad=''
+export host_OK=''
 
 # list failures
 loc_fail=''
@@ -270,20 +274,20 @@ for repo in $list; do
 			fi	
 			echo "${TAB}${fTAB} host: $upstream_host"
   			echo -e "${TAB}${fTAB}proto: ${upstream_pro}"
-
-			# bad hosts
-			echo -n "bad hosts: "
-			if [ -z "$host_bad" ]; then
-				echo "none"
-			else
-				host_bad=$(echo "${host_bad}" | sort -n)
-				echo
-				echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
-			fi
 			
 			# check remote host name against list of checked hosts
 			if [ ! -z ${host_bad:+dummy} ]; then
 				echo "checking $upstream_host against list of checked hosts"
+				# bad hosts
+				echo -n "bad hosts: "
+				if [ -z "$host_bad" ]; then
+					echo "none"
+				else
+					host_bad=$(echo "${host_bad}" | sort -n)
+					echo
+					echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+				fi
+				
 				for bad_host in ${host_bad}; do
 					if [[ "$upstream_host" == "$bad_host" ]]; then
 						echo "$upstream_host matches $bad_host"

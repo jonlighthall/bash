@@ -39,6 +39,16 @@ else
 	RUN_TYPE="executing"
 fi
 
+# show good hosts
+echo -n "existing good hosts: "
+if [ -z "${host_OK:+dummy}" ]; then
+	echo "none"
+else
+	host_OK=$(echo "${host_OK}" | sort -n)
+	echo
+	echo -e "${GOOD}${host_OK}${NORMAL}" | sed "s/^/${fTAB}/"
+fi
+
 # show bad hosts
 echo -n "existing bad hosts: "
 if [ -z "${host_bad:+dummy}" ]; then
@@ -49,26 +59,25 @@ else
 	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
 fi
 
-# reset SSH status list
-host_OK=''
-host_bad=''
-
 # check if Git is defined
-echo -n "${TAB}Checking Git... "
-if command -v git &>/dev/null; then
-	echo -e "${GOOD}OK${NORMAL} Git is defined"
-	# get Git version
-	git --version | sed "s/^/${fTAB}/"
-	git_ver=$(git --version | awk '{print $3}')
-	git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-	git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-	git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-else
-	echo -e "${BAD}FAIL${NORMAL} Git not defined"
-	if (return 0 2>/dev/null); then
-		return 1
+if [ -z "${check_git:+dummy}" ]; then
+	echo -n "${TAB}Checking Git... "
+	if command -v git &>/dev/null; then
+		echo -e "${GOOD}OK${NORMAL} Git is defined"
+		# get Git version
+		git --version | sed "s/^/${fTAB}/"
+		git_ver=$(git --version | awk '{print $3}')
+		git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+		git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+		git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
+		export check_git=false
 	else
-		exit 1
+		echo -e "${BAD}FAIL${NORMAL} Git not defined"
+		if (return 0 2>/dev/null); then
+			return 1
+		else
+			exit 1
+		fi
 	fi
 fi
 
@@ -194,6 +203,16 @@ unset remote_url
 unset remote_pro
 unset remote_host
 
+# show good hosts
+echo -n " good hosts: "
+if [ -z "${host_OK:+dummy}" ]; then
+	echo "none"
+else
+	host_OK=$(echo "${host_OK}" | sort -n)
+	echo
+	echo -e "${GOOD}${host_OK}${NORMAL}" | sed "s/^/${fTAB}/"
+fi
+
 # bad hosts
 echo -n "  bad hosts: "
 if [ -z "$host_bad" ]; then
@@ -204,6 +223,7 @@ else
 	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
 fi
 
+export host_OK
 export host_bad
 
 echo "done"
