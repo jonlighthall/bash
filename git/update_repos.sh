@@ -273,9 +273,7 @@ for repo in $list; do
 				upstream_host=$(echo ${upstream_url} | sed 's/\(^[^:]*\):.*$/\1/')
 			else
 				upstream_host=$(echo ${upstream_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
-				if [[ "${upstream_pro}" == "http"* ]]; then
-					echo "  repo: ${upstream_repo}"
-				else
+				if [[ ! "${upstream_pro}" == "http"* ]]; then
 					upstream_pro="local"
 				fi							
 			fi	
@@ -287,7 +285,7 @@ for repo in $list; do
 					if [[ "$upstream_host" == "$OK_host" ]]; then
 						decho "$upstream_host matches $OK_host"
 						host_stat=$(echo -e "${GOOD}OK${NORMAL}")
-						continue 1
+						break
 					fi
 				done
 			fi
@@ -298,7 +296,7 @@ for repo in $list; do
 						decho "$upstream_host matches $bad_host"			
 						fetch_fail+="$repo ($upstream_repo)"
 						host_stat=$(echo -e "${BAD}BAD{NORMAL}")
-						continue 1
+						break
 					fi
 				done
 			fi
@@ -308,7 +306,7 @@ for repo in $list; do
 				cbar "${BOLD}parse remote host...${NORMAL}"
 				(
 					echo "${TAB}upsream url+ ${upstream_url}"
-					echo "${TAB}${fTAB} host+ $upstream_host ${host_stat}"
+					echo -e "${TAB}${fTAB} host+ $upstream_host ${host_stat}"
   					echo -e "${TAB}${fTAB}proto+ ${upstream_pro}"
 				) | column -t -s+ -o : -R 1								
 			fi
@@ -645,6 +643,30 @@ else
 	echo "${git_OK}" | tail -n +2 | sed "s/^/${list_indent}/"
 	echo
 fi
+
+# print good hosts
+if [ $DEBUG -ge 0 ]; then
+	echo -n "${TAB}    good hosts: "
+	if [ -z "${host_OK:+dummy}" ]; then
+		echo "none"
+	else
+		host_OK=$(echo "${host_OK}" | sort -n)
+		echo -e "${GOOD}${host_OK}${NORMAL}" | head -n 1
+		echo -e "${GOOD}${host_OK}${NORMAL}" | tail +2 | sed "s/^/${list_indent}/"
+	fi
+
+	# print bad hosts
+	echo -n "${TAB}     bad hosts: "
+	if [ -z "$host_bad" ]; then
+		echo "none"
+	else
+		host_bad=$(echo "${host_bad}" | sort -n)
+		echo -e "${BAD}${host_bad}${NORMAL}" | head -n 1
+		echo -e "${BAD}${host_bad}${NORMAL}" | tail -n +2 | sed "s/^/${list_indent}/"
+	fi
+fi
+
+echo
 
 # print push/pull summary
 # all
