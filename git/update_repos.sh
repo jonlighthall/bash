@@ -290,21 +290,10 @@ for repo in $list; do
 				) | column -t -s+ -o : -R 1				
 				
 			fi
-
 			
 			# check remote host name against list of checked hosts
 			if [ ! -z ${host_OK:+dummy} ]; then
 				echo "checking $upstream_host against list of checked hosts"
-				# good hosts
-				echo -n "good hosts: "
-				if [ -z "$host_OK" ]; then
-					echo "none"
-				else
-					host_OK=$(echo "${host_OK}" | sort -n)
-					echo
-					echo -e "${OK}${host_OK}${NORMAL}" | sed "s/^/${fTAB}/"
-				fi
-				
 				for OK_host in ${host_OK}; do
 					if [[ "$upstream_host" == "$OK_host" ]]; then
 						echo "$upstream_host matches $OK_host"
@@ -312,21 +301,10 @@ for repo in $list; do
 						continue 1
 					fi
 				done
-			else
-				echo "list of good hosts empty"
 			fi
 
 			if [ ! -z ${host_bad:+dummy} ]; then
 				echo "checking $upstream_host against list of checked hosts"
-				# bad hosts
-				echo -n "bad hosts: "
-				if [ -z "$host_bad" ]; then
-					echo "none"
-				else
-					host_bad=$(echo "${host_bad}" | sort -n)
-					echo
-					echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
-				fi
 				
 				for bad_host in ${host_bad}; do
 					if [[ "$upstream_host" == "$bad_host" ]]; then
@@ -336,11 +314,7 @@ for repo in $list; do
 						continue 2
 					fi
 				done
-			else
-				echo "list of bad hosts empty"
-			fi
-
-			
+			fi	
 
 			# push/pull setting
 			GIT_HIGHLIGHT='\E[7m'
