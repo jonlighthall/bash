@@ -40,23 +40,23 @@ else
 fi
 
 # show good hosts
-echo -n "existing good hosts: "
+decho -n "existing good hosts: "
 if [ -z "${host_OK:+dummy}" ]; then
-	echo "none"
+	decho "none"
 else
 	host_OK=$(echo "${host_OK}" | sort -n)
-	echo
-	echo -e "${GOOD}${host_OK}${NORMAL}" | sed "s/^/${fTAB}/"
+	decho
+	decho -e "${GOOD}${host_OK}${NORMAL}" | sed "s/^/${fTAB}/"
 fi
 
 # show bad hosts
-echo -n "existing bad hosts: "
+decho -n "existing bad hosts: "
 if [ -z "${host_bad:+dummy}" ]; then
-	echo "none"
+	decho "none"
 else
 	host_bad=$(echo "${host_bad}" | sort -n)
-	echo
-	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+	decho
+	decho -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
 fi
 
 # check if Git is defined
@@ -92,13 +92,14 @@ for remote_name in ${r_names}; do
 		echo -n "${TAB}${fTAB}$i) "
 		TAB+=${fTAB:='   '}
 	fi
+	# get URL
 	echo "$remote_name"
 	if [ $git_ver_maj -lt 2 ]; then
 		remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
 	else
 		remote_url=$(git remote get-url ${remote_name})
 	fi
-	echo "${TAB}${fTAB}  url: ${remote_url}"
+
 	# parse protocol
 	remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
 	if [[ "${remote_pro}" == "git" ]]; then
@@ -120,81 +121,102 @@ for remote_name in ${r_names}; do
 			remote_pro="local"
 		fi							
 	fi	
-	echo "${TAB}${fTAB} host: $remote_host"
-  	echo -e "${TAB}${fTAB}proto: ${remote_pro}"
 	if [[ "${remote_pro}" == "SSH" ]]; then
 		# default to checking host
 		do_check=true
+		host_stat=$(echo -e "${yellow}CHECK${NORMAL}")
 		decho "do_check = $do_check"
 
 		# check remote host name against list of checked hosts
-		if [ ! -z ${host_OK:+dummy} ]; then
-			decho "checking $remote_host against list of checked hosts"
-			for good_host in ${host_OK}; do
-				if [[ $remote_host =~ $good_host ]]; then
-					decho "$remote_host matches $good_host"
-					do_check=false
-					continue
-				fi
-			done
-		else
-			decho "list of checked hosts empty"
-		fi
-		decho "do_check = $do_check"
-
-		# check connection before proceeding
-		if [ ${do_check} = 'true' ]; then
-			echo -n "${TAB}${fTAB}checking connection... "
-			unset_traps
-			ssh_cmd_base="ssh -o ConnectTimeout=6 -o ConnectionAttempts=2 -T ${remote_host}"
-			if [[ "${remote_host}" == *"navy.mil" ]]; then
-				$ssh_cmd_base -o LogLevel=error 2> >(sed $'s,.*,\e[31m&\e[m,'>&2) 1> >(sed $'s,.*,\e[32m&\e[m,'>&1)
-			else
-				if [[ ${remote_host} =~ "github.com" ]]; then
-					$ssh_cmd_base -o LogLevel=info 2> >(sed $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,'>&2)
-				else
-					$ssh_cmd_base -o LogLevel=info 2> >(sed $'s,.*,\e[31m&\e[m,'>&2)
-				fi
-			fi			
-			RETVAL=$?
-			set_traps
-			if [[ $RETVAL == 0 ]]; then
-				echo -e "${TAB}${fTAB}${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-				# add to list
-				if [ ! -z ${host_OK:+dummy} ]; then
-					host_OK+=$'\n'
-				fi
-				host_OK+=${remote_host}
-			else
-				if [[ $RETVAL == 1 ]]; then
-					echo -e "${TAB}${fTAB}${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-					if [[ $remote_host =~ "github.com" ]]; then
-						decho "host is github"
-						# Github will return 1 if everything is working
-						# add to list
-						if [ ! -z ${host_OK:+dummy} ]; then
-							host_OK+=$'\n'
-						fi
-						host_OK+=${remote_host}
-					else
-						decho "host is not github"
-						# add to list
-						if [ ! -z ${host_bad:+dummy} ]; then
-							host_bad+=$'\n'
-						fi
-						host_bad+=${remote_host}
+		if [ ! -z ${host_OK:+dummy} ] || [ ! -z ${host_bad:+dummy} ]; then
+			decho "checking $remote_host against list of checked hosts..."			
+			if [ ! -z ${host_OK:+dummy} ]; then
+				for good_host in ${host_OK}; do
+					if [[ $remote_host =~ $good_host ]]; then
+						decho "${TAB}${remote_host} matches $good_host"
+						host_stat=$(echo -e "${GOOD}OK${NORMAL}")
+						do_check=false
+						break
 					fi
+				done
+			fi
+
+			if [ ! -z ${host_bad:+dummy} ]; then
+				for bad_host in ${host_bad}; do
+					if [[ "$remote_host" == "$bad_host" ]]; then
+						decho "${TAB}${remote_host} matches $bad_host"			
+						host_stat=$(echo -e "${BAD}BAD{NORMAL}")
+						do_check=false
+						break
+					fi
+				done
+			fi		
+		fi
+	else
+		do_check=false
+		host_stat=$(echo -e "${gray}CHECK{NORMAL}")							
+	fi # SSH
+	
+	(
+		echo "${TAB}${fTAB}url+ ${remote_url}"
+		echo -e "${TAB}${fTAB}host+ ${remote_host} ${host_stat}"
+  		echo -e "${TAB}${fTAB}proto+ ${remote_pro}"
+	) | column -t -s+ -o : -R 1
+	decho "do_check = $do_check"
+
+	# check connection before proceeding
+	if [ ${do_check} = 'true' ]; then
+		echo -n "${TAB}${fTAB}checking connection... "
+		unset_traps
+		ssh_cmd_base="ssh -o ConnectTimeout=6 -o ConnectionAttempts=2 -T ${remote_host}"
+		if [[ "${remote_host}" == *"navy.mil" ]]; then
+			$ssh_cmd_base -o LogLevel=error 2> >(sed $'s,.*,\e[31m&\e[m,'>&2) 1> >(sed $'s,.*,\e[32m&\e[m,'>&1)
+		else
+			if [[ ${remote_host} =~ "github.com" ]]; then
+				$ssh_cmd_base -o LogLevel=info 2> >(sed $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,'>&2)
+			else
+				$ssh_cmd_base -o LogLevel=info 2> >(sed $'s,.*,\e[31m&\e[m,'>&2)
+			fi
+		fi			
+		RETVAL=$?
+		set_traps
+		if [[ $RETVAL == 0 ]]; then
+			echo -e "${TAB}${fTAB}${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+			# add to list
+			if [ ! -z ${host_OK:+dummy} ]; then
+				host_OK+=$'\n'
+			fi
+			host_OK+=${remote_host}
+		else
+			if [[ $RETVAL == 1 ]]; then
+				echo -e "${TAB}${fTAB}${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+				if [[ $remote_host =~ "github.com" ]]; then
+					decho "host is github"
+					# Github will return 1 if everything is working
+					# add to list
+					if [ ! -z ${host_OK:+dummy} ]; then
+						host_OK+=$'\n'
+					fi
+					host_OK+=${remote_host}
 				else
-					echo -e "${TAB}${fTAB}${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+					decho "host is not github"
 					# add to list
 					if [ ! -z ${host_bad:+dummy} ]; then
 						host_bad+=$'\n'
 					fi
 					host_bad+=${remote_host}
 				fi
-			fi
-		fi
-	fi
+			else
+				echo -e "${TAB}${fTAB}${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+				# add to list
+				if [ ! -z ${host_bad:+dummy} ]; then
+					host_bad+=$'\n'
+				fi
+				host_bad+=${remote_host}
+			fi # retval 1
+		fi # retval 0
+	fi # do check
+
 	if [ "${n_remotes}" -gt 1 ]; then
 		TAB=${TAB%$fTAB}
 	fi
@@ -203,24 +225,26 @@ unset remote_url
 unset remote_pro
 unset remote_host
 
-# show good hosts
-echo -n " good hosts: "
-if [ -z "${host_OK:+dummy}" ]; then
-	echo "none"
-else
-	host_OK=$(echo "${host_OK}" | sort -n)
-	echo
-	echo -e "${GOOD}${host_OK}${NORMAL}" | sed "s/^/${fTAB}/"
-fi
+# print good hosts
+if [ $DEBUG -gt 0 ]; then
+	echo -n "${TAB}good hosts: "
+	if [ -z "${host_OK:+dummy}" ]; then
+		echo "none"
+	else
+		host_OK=$(echo "${host_OK}" | sort -n)
+		echo
+		echo -e "${GOOD}${host_OK}${NORMAL}" | sed "s/^/${fTAB}/"
+	fi
 
-# bad hosts
-echo -n "  bad hosts: "
-if [ -z "$host_bad" ]; then
-	echo "none"
-else
-	host_bad=$(echo "${host_bad}" | sort -n)
-	echo
-	echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+	# print bad hosts
+	echo -n "${TAB} bad hosts: "
+	if [ -z "$host_bad" ]; then
+		echo "none"
+	else
+		host_bad=$(echo "${host_bad}" | sort -n)
+		echo
+		echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+	fi
 fi
 
 export host_OK
