@@ -656,7 +656,7 @@ if [ $DEBUG -ge 0 ]; then
 	fi
 
 	# print bad hosts
-	echo -n "${TAB}     bad hosts: "
+	echo -ne "\n${TAB}     bad hosts: "
 	if [ -z "$host_bad" ]; then
 		echo "none"
 	else
