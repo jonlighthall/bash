@@ -277,7 +277,7 @@ for VAR in $input; do
 		#---------------
 		# no substition
 		#---------------
-		
+
 		echo -ne "    NULL [ -z \${VAR   } ]\t: "
 		# CONDITION 1: true when VAR is unset or null
 		if [ -z ${!VAR} ]; then
@@ -285,12 +285,13 @@ for VAR in $input; do
 		else
 			echo -ne "${FALSE}: ${a1}"
 		fi
-		echo -e "\t: '${!VAR}'"
+		echo -ne "\t: "
+		echo "'${!VAR}'"
 
 		#-----------------------------------
 		# substitute unset VAR with default
 		#-----------------------------------
-		
+
 		echo -ne "    NULL [ -z \${VAR-d } ]\t: "
 		# CONDITION 2: true when VAR is null
 		if [ -z ${!VAR-default} ]; then
@@ -304,7 +305,8 @@ for VAR in $input; do
 			fi
 		fi
 		# substitution occurs when VAR is unset (has not been declared)
-		echo -e "\t: '${!VAR:-default}'"
+		echo -ne "\t: "
+		echo "'${!VAR:-default}'"
 
 		echo -ne "    NULL [ -z \${VAR:-d} ]\t: "
 		# CONDITION 1: true when VAR is unset or null and default is null (impossible with text)
@@ -319,7 +321,8 @@ for VAR in $input; do
 			fi
 		fi
 		# substitution occurs when VAR is unset (has not been declared) or null (empty)
-		echo -e "\t: '${!VAR:-default}'"
+		echo -ne "\t: "
+		echo "'${!VAR:-default}'"
 
 		#-----------------------------------
 		# substitute set VAR with alternate
@@ -333,7 +336,8 @@ for VAR in $input; do
 			echo -ne "${FALSE}: ${a3}"
 		fi
 		# substitution occurs when VAR is set or null
-		echo -e "\t: '${!VAR+alternate}'"
+		echo -ne "\t: "
+		echo "'${!VAR+alternate}'"
 
 		echo -ne "    NULL [ -z \${VAR:+a} ]\t: "
 		# CONDITION 1: true if VAR is unset or null
@@ -343,7 +347,8 @@ for VAR in $input; do
 			echo -ne "${FALSE}: ${a1}"
 		fi
 		# substitution occurs when VAR is set and not null
-		echo -e "\t: '${!VAR:+alternate}'"
+		echo -ne "\t: "
+		echo "'${!VAR:+alternate}'"
 
 		# not null, no quotes
 		echo -e "----------------------------------------------------"
