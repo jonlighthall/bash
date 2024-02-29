@@ -22,9 +22,7 @@ declare -i DEBUG=0
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-	if [ -z ${fpretty_loaded+dummy} ];then
 	    source $fpretty
-	fi
 	set_traps
 fi
 
@@ -189,7 +187,7 @@ timeout_ver=$(timeout --version | head -1 | sed 's/^.*) //')
 declare -ir timeout_ver_maj=$(echo $timeout_ver | awk -F. '{print $1}')
 declare -ir timeout_ver_min=$(echo $timeout_ver | awk -F. '{print $2}')
 to_base0="timeout"
-if [[ $timeout_ver_min -gt 4 ]]; then 
+if [[ $timeout_ver_min -gt 4 ]]; then
 	to_base0+=" --foreground --preserve-status"
 fi
 to_base0+=" -s 9"
@@ -263,9 +261,9 @@ for repo in $list; do
 				(
 					echo -e "${TAB}remote tracking branch+ ${blue}${remote_tracking_branch}${NORMAL}"
 					echo "${TAB}${fTAB}remote name+ $upstream_repo"
-					echo "${TAB}${fTAB}remote refspec+ $upstream_refspec"					
-				) | column -t -s+ -o : -R 1				
-				
+					echo "${TAB}${fTAB}remote refspec+ $upstream_refspec"
+				) | column -t -s+ -o : -R 1
+
 			fi
 
 			# parse protocol
@@ -277,9 +275,9 @@ for repo in $list; do
 				upstream_host=$(echo ${upstream_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
 				if [[ ! "${upstream_pro}" == "http"* ]]; then
 					upstream_pro="local"
-				fi							
-			fi	
-		
+				fi
+			fi
+
 			# check remote host name against list of checked hosts
 			decho "checking $upstream_host against list of checked hosts"
 			if [ ! -z ${host_OK:+dummy} ]; then
@@ -295,7 +293,7 @@ for repo in $list; do
 			if [ ! -z ${host_bad:+dummy} ]; then
 				for bad_host in ${host_bad}; do
 					if [[ "$upstream_host" == "$bad_host" ]]; then
-						decho "$upstream_host matches $bad_host"			
+						decho "$upstream_host matches $bad_host"
 						fetch_fail+="$repo ($upstream_repo)"
 						host_stat=$(echo -e "${BAD}BAD{NORMAL}")
 						break
@@ -310,7 +308,7 @@ for repo in $list; do
 					echo "${TAB}upsream url+ ${upstream_url}"
 					echo -e "${TAB}${fTAB} host+ $upstream_host ${host_stat}"
   					echo -e "${TAB}${fTAB}proto+ ${upstream_pro}"
-				) | column -t -s+ -o : -R 1								
+				) | column -t -s+ -o : -R 1
 			fi
 
 			if [[ "$host_stat" =~ *"BAD"* ]]; then
@@ -318,11 +316,11 @@ for repo in $list; do
 				continue
 			else
 				decho "proceeding with fetch..."
-			fi			
+			fi
 
 			# push/pull setting
 			GIT_HIGHLIGHT='\E[7m'
-			
+
 			#------------------------------------------------------
 			# fetch
 			#------------------------------------------------------
@@ -371,7 +369,7 @@ for repo in $list; do
 					fi
 				fi
 			done
-			
+
 			# update maximum fetch time
 			if [[ ${dt_fetch} -gt ${t_fetch_max} ]]; then
 				t_fetch_max=${dt_fetch}
@@ -385,7 +383,7 @@ for repo in $list; do
 
 				# pad timestamp with leading zeros
 				if [ $nd -lt $nd_max ]; then
-					fmt="%0${nd_max}d"				
+					fmt="%0${nd_max}d"
 					declare time0=$(printf "$fmt" ${t_fetch_max})
 					echo "${TAB}${fTAB}zero-padded: $time0"
 					declare -i nd=${#time0}
@@ -410,10 +408,10 @@ for repo in $list; do
 				echo "${TAB}${fTAB}decimalized: $ddeci "
 
 				# round timestamp to nearest second
-				fmt="%.0f"			
+				fmt="%.0f"
 				deci=$(printf "$fmt" ${ddeci})
 				echo "${TAB}${fTAB}integerized: $deci "
-				if [ $deci -gt $fetch_max ]; then 
+				if [ $deci -gt $fetch_max ]; then
 					fetch_max=$deci
 				fi
 				echo "     fetch_max: $fetch_max"
@@ -465,7 +463,7 @@ for repo in $list; do
 						if [[ $RETVAL == 137 ]]; then
 							nsec=$((nsec * 2))
 							echo "${TAB}increasing pull timeout to ${nsec}"
-							to="${to_base} ${nsec}s "							
+							to="${to_base} ${nsec}s "
 							cmd="${to}${cmd_base}"
 						fi
 						# force pull
@@ -700,7 +698,7 @@ else
 		echo " or $(bc <<<"scale=3;$t_fetch_max/1000000000") sec"
 	else
 		echo
-	fi	
+	fi
 fi
 echo -n "fetch failures: "
 if [ -z "$fetch_fail" ]; then
@@ -719,7 +717,7 @@ else
 	echo -ne "${green}"
 	echo "${pull_OK}" | sed "s/^/${list_indent}/"
 	echo -ne "${NORMAL}"
-	
+
 	echo -n "pull max time: ${t_pull_max} ns"
 	if command -v bc &>/dev/null; then
 		echo " or $(bc <<<"scale=3;$t_pull_max/1000000000") sec"
@@ -752,13 +750,13 @@ else
 	echo -ne "${green}"
 	echo "${push_OK}" | sed "s/^/${list_indent}/"
 	echo -ne "${NORMAL}"
-	
+
 	echo -n " push max time: ${t_push_max} ns"
 	if command -v bc &>/dev/null; then
 		echo " or $(bc <<<"scale=3;$t_push_max/1000000000") sec"
 	else
 		echo
-	fi	
+	fi
 fi
 echo -n " push failures: "
 if [ -z "$push_fail" ]; then
@@ -781,7 +779,7 @@ echo -n " stash entries: "
 if [ -z "$stash_list" ]; then
 	echo "none"
 else
-	stash_list=$(echo "${stash_list}" | sort -n)	
+	stash_list=$(echo "${stash_list}" | sort -n)
 	echo "${stash_list}" | head -n 1
 	echo "${stash_list}" | tail -n +2 | sed "s/^/${list_indent}/"
 fi
