@@ -10,10 +10,8 @@
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-    if [ -z ${fpretty_loaded+dummy} ];then
-        source $fpretty
-    fi
-	set_traps
+source $fpretty
+    set_traps
 fi
 
 # print source name at start

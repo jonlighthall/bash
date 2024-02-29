@@ -1,9 +1,7 @@
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-	if [ -z ${fpretty_loaded+dummy} ];then
-	    source $fpretty
-	fi
+    source $fpretty
 fi
 
 # print source name at start

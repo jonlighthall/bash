@@ -27,9 +27,7 @@ declare -i DEBUG=0
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-	if [ -z ${fpretty_loaded+dummy} ];then
-	    source $fpretty
-	fi
+    source $fpretty
 	set_traps
 fi
 

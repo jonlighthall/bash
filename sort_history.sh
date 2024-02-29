@@ -20,9 +20,7 @@ fi
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-	if [ -z ${fpretty_loaded+dummy} ];then
-	    source $fpretty
-	fi
+source $fpretty
 	set_traps
 fi
 
@@ -48,7 +46,6 @@ echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
 ## logical
 src_dir_logi=${BASH_SOURCE%/*}
 echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
-
 
 # set sort order (C sorting is the most consistient)
 # must 'export' setting to take effect
