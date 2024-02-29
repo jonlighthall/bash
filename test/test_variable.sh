@@ -278,26 +278,26 @@ for VAR in $input; do
 		# no substition
 		#---------------
 
-		echo -ne "    NULL [ -z \${VAR   } ]\t: "
+		(
+		echo -ne "    NULL [ -z \${VAR   } ]>"
 		# CONDITION 1: true when VAR is unset or null
 		if [ -z ${!VAR} ]; then
-			echo -ne " ${TRUE}: ${c1}"
+			echo -ne " ${TRUE}>${c1}"
 		else
-			echo -ne "${FALSE}: ${a1}"
+			echo -ne "${FALSE}>${a1}"
 		fi
-		echo -ne "\t: "
-		echo "'${!VAR}'"
+		echo ">'${!VAR}'"
 
 		#-----------------------------------
 		# substitute unset VAR with default
 		#-----------------------------------
 
-		echo -ne "    NULL [ -z \${VAR-d } ]\t: "
+		echo -ne "    NULL [ -z \${VAR-d } ]>"
 		# CONDITION 2: true when VAR is null
 		if [ -z ${!VAR-default} ]; then
-			echo -ne " ${TRUE}: ${c2}"
+			echo -ne " ${TRUE}>${c2}"
 		else
-			echo -ne "${FALSE}: "
+			echo -ne "${FALSE}>"
 			if [[ ${!VAR-default} == default ]]; then
 				echo -ne "${UNSET}\t"
 			else
@@ -305,15 +305,15 @@ for VAR in $input; do
 			fi
 		fi
 		# substitution occurs when VAR is unset (has not been declared)
-		echo -ne "\t: "
+		echo -ne ">"
 		echo "'${!VAR:-default}'"
 
-		echo -ne "    NULL [ -z \${VAR:-d} ]\t: "
+		echo -ne "    NULL [ -z \${VAR:-d} ]>"
 		# CONDITION 1: true when VAR is unset or null and default is null (impossible with text)
 		if [ -z ${!VAR:-default} ]; then
-			echo -ne " ${TRUE}: ${c1}"
+			echo -ne " ${TRUE}>${c1}"
 		else
-			echo -ne "${FALSE}: "
+			echo -ne "${FALSE}>"
 			if [[ ${!VAR:-default} == default ]]; then
 				echo -ne "${c1}"
 			else
@@ -321,34 +321,35 @@ for VAR in $input; do
 			fi
 		fi
 		# substitution occurs when VAR is unset (has not been declared) or null (empty)
-		echo -ne "\t: "
+		echo -ne ">"
 		echo "'${!VAR:-default}'"
 
 		#-----------------------------------
 		# substitute set VAR with alternate
 		#-----------------------------------
 
-		echo -ne "    NULL [ -z \${VAR+a } ]\t: "
+		echo -ne "    NULL [ -z \${VAR+a } ]>"
 		# CONDITION 3: true when VAR is unset
 		if [ -z ${!VAR+alternate} ]; then
-			echo -ne " ${TRUE}: ${c3}\t"
+			echo -ne " ${TRUE}>${c3}\t"
 		else
-			echo -ne "${FALSE}: ${a3}"
+			echo -ne "${FALSE}>${a3}"
 		fi
 		# substitution occurs when VAR is set or null
-		echo -ne "\t: "
+		echo -ne ">"
 		echo "'${!VAR+alternate}'"
 
-		echo -ne "    NULL [ -z \${VAR:+a} ]\t: "
+		echo -ne "    NULL [ -z \${VAR:+a} ]>"
 		# CONDITION 1: true if VAR is unset or null
 		if [ -z ${!VAR:+alternate} ]; then
-			echo -ne " ${TRUE}: ${c1}"
+			echo -ne " ${TRUE}>${c1}"
 		else
-			echo -ne "${FALSE}: ${a1}"
+			echo -ne "${FALSE}>${a1}"
 		fi
 		# substitution occurs when VAR is set and not null
-		echo -ne "\t: "
+		echo -ne ">"
 		echo "'${!VAR:+alternate}'"
+		) | column -t -s '>' -o ' : '
 
 		# not null, no quotes
 		echo -e "----------------------------------------------------"
