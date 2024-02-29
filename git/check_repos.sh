@@ -147,7 +147,7 @@ for remote_name in ${r_names}; do
 				for bad_host in ${host_bad}; do
 					if [[ "$remote_host" == "$bad_host" ]]; then
 						decho "${TAB}${remote_host} matches $bad_host"			
-						host_stat=$(echo -e "${BAD}BAD{NORMAL}")
+						host_stat=$(echo -e "${BAD}FAIL${NORMAL}")
 						do_check=false
 						break
 					fi
