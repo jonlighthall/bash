@@ -16,8 +16,8 @@ fi
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-	if [ -z ${fpretty_loaded+dummy} ];then
-	    source $fpretty
+	if [ -z ${fpretty_loaded+dummy} ]; then
+		source $fpretty
 	fi
 fi
 
@@ -150,7 +150,7 @@ for VAR in $input; do
 		echo -e "\n\E[1m${VAR} is ${UNSET}"
 	fi
 
-	if [ ! -z ${!VAR+alternate} ]; then # set
+	if [ ! -z ${!VAR+alternate} ]; then  # set
 		if [ ! -z "${!VAR-default}" ]; then # not null
 			echo -e "----------------------------------------------------"
 			# true/false
@@ -279,114 +279,109 @@ for VAR in $input; do
 		#---------------
 
 		(
-		echo -ne "    NULL [ -z \${VAR   } ]>"
-		# CONDITION 1: true when VAR is unset or null
-		if [ -z ${!VAR} ]; then
-			echo -ne " ${TRUE}>${c1}"
-		else
-			echo -ne "${FALSE}>${a1}"
-		fi
-		echo ">'${!VAR}'"
-
-		#-----------------------------------
-		# substitute unset VAR with default
-		#-----------------------------------
-
-		echo -ne "    NULL [ -z \${VAR-d } ]>"
-		# CONDITION 2: true when VAR is null
-		if [ -z ${!VAR-default} ]; then
-			echo -ne " ${TRUE}>${c2}"
-		else
-			echo -ne "${FALSE}>"
-			if [[ ${!VAR-default} == default ]]; then
-				echo -ne "${UNSET}\t"
+			echo -ne "NULL [ -z \${VAR   } ]>"
+			# CONDITION 1: true when VAR is unset or null
+			if [ -z ${!VAR} ]; then
+				echo -ne " ${TRUE}>${c1}"
 			else
-				echo -n "${a1}"
+				echo -ne "${FALSE}>${a1}"
 			fi
-		fi
-		# substitution occurs when VAR is unset (has not been declared)
-		echo -ne ">"
-		echo "'${!VAR:-default}'"
+			echo ">'${!VAR}'"
 
-		echo -ne "    NULL [ -z \${VAR:-d} ]>"
-		# CONDITION 1: true when VAR is unset or null and default is null (impossible with text)
-		if [ -z ${!VAR:-default} ]; then
-			echo -ne " ${TRUE}>${c1}"
-		else
-			echo -ne "${FALSE}>"
-			if [[ ${!VAR:-default} == default ]]; then
-				echo -ne "${c1}"
+			#-----------------------------------
+			# substitute unset VAR with default
+			#-----------------------------------
+
+			echo -ne "NULL [ -z \${VAR-d } ]>"
+			# CONDITION 2: true when VAR is null
+			if [ -z ${!VAR-default} ]; then
+				echo -ne " ${TRUE}>${c2}"
 			else
-				echo -n "${a1}"
+				echo -ne "${FALSE}>"
+				if [[ ${!VAR-default} == default ]]; then
+					echo -ne "${UNSET}\t"
+				else
+					echo -n "${a1}"
+				fi
 			fi
-		fi
-		# substitution occurs when VAR is unset (has not been declared) or null (empty)
-		echo -ne ">"
-		echo "'${!VAR:-default}'"
+			# substitution occurs when VAR is unset (has not been declared)
+			echo ">'${!VAR:-default}'"
 
-		#-----------------------------------
-		# substitute set VAR with alternate
-		#-----------------------------------
+			echo -ne "NULL [ -z \${VAR:-d} ]>"
+			# CONDITION 1: true when VAR is unset or null and default is null (impossible with text)
+			if [ -z ${!VAR:-default} ]; then
+				echo -ne " ${TRUE}>${c1}"
+			else
+				echo -ne "${FALSE}>"
+				if [[ ${!VAR:-default} == default ]]; then
+					echo -ne "${c1}"
+				else
+					echo -n "${a1}"
+				fi
+			fi
+			# substitution occurs when VAR is unset (has not been declared) or null (empty)
+			echo ">'${!VAR:-default}'"
 
-		echo -ne "    NULL [ -z \${VAR+a } ]>"
-		# CONDITION 3: true when VAR is unset
-		if [ -z ${!VAR+alternate} ]; then
-			echo -ne " ${TRUE}>${c3}\t"
-		else
-			echo -ne "${FALSE}>${a3}"
-		fi
-		# substitution occurs when VAR is set or null
-		echo -ne ">"
-		echo "'${!VAR+alternate}'"
+			#-----------------------------------
+			# substitute set VAR with alternate
+			#-----------------------------------
 
-		echo -ne "    NULL [ -z \${VAR:+a} ]>"
-		# CONDITION 1: true if VAR is unset or null
-		if [ -z ${!VAR:+alternate} ]; then
-			echo -ne " ${TRUE}>${c1}"
-		else
-			echo -ne "${FALSE}>${a1}"
-		fi
-		# substitution occurs when VAR is set and not null
-		echo -ne ">"
-		echo "'${!VAR:+alternate}'"
-		) | column -t -s '>' -o ' : '
+			echo -ne "NULL [ -z \${VAR+a } ]>"
+			# CONDITION 3: true when VAR is unset
+			if [ -z ${!VAR+alternate} ]; then
+				echo -ne " ${TRUE}>${c3}\t"
+			else
+				echo -ne "${FALSE}>${a3}"
+			fi
+			# substitution occurs when VAR is set or null
+			echo ">'${!VAR+alternate}'"
+
+			echo -ne "NULL [ -z \${VAR:+a} ]>"
+			# CONDITION 1: true if VAR is unset or null
+			if [ -z ${!VAR:+alternate} ]; then
+				echo -ne " ${TRUE}>${c1}"
+			else
+				echo -ne "${FALSE}>${a1}"
+			fi
+			# substitution occurs when VAR is set and not null
+			echo ">'${!VAR:+alternate}'"
 
 		# not null, no quotes
-		echo -e "----------------------------------------------------"
-		echo -ne "NOT NULL (! -z)       : "
-		if [ ! -z ${!VAR} ]; then
-			echo -e " ${TRUE}: ${a1}"
-		else
-			echo -e "${FALSE}: ${c1}"
-		fi
+			echo -ne "NOT NULL [ ! -z \${VAR} ]>"
+			if [ ! -z ${!VAR} ]; then
+				echo -e " ${TRUE}>${a1}"
+			else
+				echo -e "${FALSE}>${c1}"
+			fi
 
-		echo -ne "NOT NULL (! -z -)     : "
-		if [ ! -z ${!VAR-default} ]; then
-			echo -e " ${TRUE}: ${a2}"
-		else
-			echo -e "${FALSE}: ${c2}"
-		fi
+			echo -ne "NOT NULL [ ! -z \${VAR-d} ]>"
+			if [ ! -z ${!VAR-default} ]; then
+				echo -e " ${TRUE}>${a2}"
+			else
+				echo -e "${FALSE}>${c2}"
+			fi
 
-		echo -ne "NOT NULL (! -z :-)    : "
-		if [ ! -z ${!VAR:-default} ]; then
-			echo -e " ${TRUE}: ${a2}"
-		else
-			echo -e "${FALSE}: ${c2}"
-		fi
+			echo -ne "NOT NULL [ ! -z \${VAR:-d} ]>"
+			if [ ! -z ${!VAR:-default} ]; then
+				echo -e " ${TRUE}>${a2}"
+			else
+				echo -e "${FALSE}>${c2}"
+			fi
 
-		echo -ne "NOT NULL (! -z +)     : "
-		if [ ! -z ${!VAR+alternate} ]; then
-			echo -e " ${TRUE}: ${a3}"
-		else
-			echo -e "${FALSE}: ${UNSET}"
-		fi
+			echo -ne "NOT NULL [ ! -z \${VAR+a} ]>"
+			if [ ! -z ${!VAR+alternate} ]; then
+				echo -e " ${TRUE}>${a3}"
+			else
+				echo -e "${FALSE}>${UNSET}"
+			fi
 
-		echo -ne "NOT NULL (! -z :+)    : "
-		if [ ! -z ${!VAR:+alternate} ]; then
-			echo -e " ${TRUE}: ${a1}"
-		else
-			echo -e "${FALSE}: ${c1}"
-		fi
+			echo -ne "NOT NULL [ ! -z \${VAR:+}]>"
+			if [ ! -z ${!VAR:+alternate} ]; then
+				echo -e " ${TRUE}>${a1}"
+			else
+				echo -e "${FALSE}>${c1}"
+			fi
+		) | column -t -s '$' -o '$' -R 1 | column -t -s '>' -o ' : '
 	fi
 
 	echo -e "----------------------------------------------------"
