@@ -678,7 +678,7 @@ echo -n "     not found: "
 if [ -z "$loc_fail" ]; then
 	echo "none"
 else
-	echo -ne "${yellow}"
+	echo -ne "${red}"
 	echo "${loc_fail}" | head -n 1
 	echo "${loc_fail}" | tail -n +2 | sed "s/^/${list_indent}/"
 	echo -ne "${NORMAL}"
@@ -773,7 +773,7 @@ if [ -z "$mod_repos" ]; then
 	echo "none"
 else
 	echo "$mod_repos"
-	echo -e "${GRH}$mod_files${NORMAL}" | sed "s/^/${list_indent}/"
+	echo -e "${yellow}$mod_files${NORMAL}" | sed "s/^/${list_indent}/"
 fi
 
 # stash
