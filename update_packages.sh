@@ -10,7 +10,9 @@
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+    if [ -z ${fpretty_loaded+dummy} ];then
+        source $fpretty
+    fi
 	set_traps
 fi
 
