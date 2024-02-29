@@ -9,7 +9,9 @@ TAB=${TAB:=''}
 # load formatting
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+    if [ -z ${fpretty_loaded+dummy} ];then
+        source $fpretty
+    fi
 	# set debug level
 	declare -i DEBUG=0
 	set_traps
