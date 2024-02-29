@@ -3,9 +3,7 @@ echo $BASH_SOURCE
 
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-    if [ -z ${fpretty_loaded+dummy} ];then
-        source $fpretty
-    fi
+    source $fpretty
 fi
 
 # get list of deleted files
