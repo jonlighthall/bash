@@ -6,10 +6,10 @@ start_time=$(date +%s%N)
 # set tab
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-	TAB=''
-	: ${fTAB:='	'}
+    TAB=''
+    : ${fTAB:='	'}
 else
-	TAB+=${TAB+${fTAB:='	'}}
+    TAB+=${TAB+${fTAB:='	'}}
 fi
 
 # load formatting
@@ -41,10 +41,10 @@ echo -n "checking repository status... "
 git rev-parse --is-inside-work-tree &>/dev/null
 RETVAL=$?
 if [[ $RETVAL -eq 0 ]]; then
-	echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
 else
-	echo "${TAB}$repo not a Git repository"
-	exit 1
+    echo "${TAB}$repo not a Git repository"
+    exit 1
 fi
 
 # get repo name
@@ -68,87 +68,74 @@ else
     remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
     echo "protocol:   ${remote_pro}"
     n_remotes=$(git remote | wc -l)
-	# parse branches
-	branch_remote=${remote_tracking_branch#*/}
-	echo "${TAB}remote branch: $branch_remote"
+    # parse branches
+    branch_remote=${remote_tracking_branch#*/}
+    echo "${TAB}remote branch: $branch_remote"
 
-	branch_local=$(git branch | grep \* | sed 's/^\* //')
-	echo -e "${TAB} local branch: ${green}${branch_local}${NORMAL}"
-	echo
+    branch_local=$(git branch | grep \* | sed 's/^\* //')
+    echo -e "${TAB} local branch: ${green}${branch_local}${NORMAL}"
+    echo
 fi
 
 # check remotes
 cbar "${BOLD}parsing remotes...${NORMAL}"
 r_names=$(git remote)
 if [ "${n_remotes}" -gt 1 ]; then
-	echo "remotes found: ${n_remotes}"
+    echo "remotes found: ${n_remotes}"
 else
-	echo -n "remote: "
+    echo -n "remote: "
 fi
 for remote_name in ${r_names}; do
-	echo
-	echo "${TAB}$remote_name"
-	remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
-	echo "${fTAB}url: ${remote_url}"
-	remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-	if [[ "${remote_pro}" == "git" ]]; then
-		remote_pro="SSH"
-		rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
-	else
-		rhost=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
-		if [[ "${remote_pro}" == "http"* ]]; then
-			remote_pro=${GRH}${remote_pro}${NORMAL}
-			remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
-			echo "  repo: ${remote_repo}"
-			remote_ssh="git@${rhost}:${remote_repo}"
-			echo " change URL to ${remote_ssh}..."
-			echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
-			git remote set-url ${remote_name} ${remote_ssh}
-			
-		else
-			remote_pro="local"
-		fi					
-		
-	fi
-	echo "  host: $rhost"
-  	echo -e " proto: ${remote_pro}"
-done				
+    echo
+    echo "${TAB}$remote_name"
+    remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
+    echo "${fTAB}url: ${remote_url}"
+    remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+    if [[ "${remote_pro}" == "git" ]]; then
+        remote_pro="SSH"
+        rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
+    else
+        rhost=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
+        if [[ "${remote_pro}" == "http"* ]]; then
+            remote_pro=${GRH}${remote_pro}${NORMAL}
+            remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
+            echo "  repo: ${remote_repo}"
+            remote_ssh="git@${rhost}:${remote_repo}"
+            echo " change URL to ${remote_ssh}..."
+            echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
+            git remote set-url ${remote_name} ${remote_ssh}
+        else
+            remote_pro="local"
+        fi
+    fi
+    echo "  host: $rhost"
+    echo -e " proto: ${remote_pro}"
+done
 
 # check for stash entries
 echo
 cbar "${BOLD}parsing stash...${NORMAL}"
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
-	echo -e "$repo has $N_stash entries in stash"
+    echo -e "$repo has $N_stash entries in stash"
 
-	for ((n=0;n<$N_stash;n++)); do
-		echo
-		stash="stash@{$n}"
-		echo "${stash}"
-		git log -1 ${stash}
+    for ((n = 0; n < $N_stash; n++)); do
+        echo
+        stash="stash@{$n}"
+        echo "${stash}"
+        git log -1 ${stash}
 
+        unset n_min
+        unset hash_min
 
-		unset n_min
-		unset hash_min
-
-		for hash in $(git rev-list HEAD); do
-
-			echo -n "$hash: "
-
-			n_diff=$(git diff $hash $stash | wc -l)
-			if [ -z $n_diff ]; then
-				
-			if [ $n_diff
-
-			echo $n_diff
-
-			
-		done
-
-
-		
-		
-	done
+        for hash in $(git rev-list HEAD); do
+            echo -n "$hash: "
+            n_diff=$(git diff $hash $stash | wc -l)
+            if [ -z $n_diff ]; then
+                echo $n_diff
+            fi
+        done
+    done
 fi
 
 echo
