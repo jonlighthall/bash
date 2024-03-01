@@ -193,6 +193,24 @@ fi
 to_base0+=" -s 9"
 declare -r to_base="${to_base0}"
 
+# beautify settings
+GIT_HIGHLIGHT='\E[7m'
+function set_color () {
+	echo -ne "\e[38;5;11m"
+}
+function unset_color () {
+	echo -ne "\e[0m"
+}
+
+function do_cmd () {
+	cmd=$(echo $@)
+	set_color
+	$cmd 2>&1
+	RETVAL=$?
+	unset_color
+	return $RETVAL
+}
+
 for repo in $list; do
 	start_new_line
 	hline 70
@@ -311,15 +329,12 @@ for repo in $list; do
 				) | column -t -s+ -o : -R 1
 			fi
 
-			if [[ "$host_stat" =~ *"BAD"* ]]; then
+			if [[ "$host_stat" =~ *"FAIL"* ]]; then
 				decho "skipping fetch..."
 				continue
 			else
 				decho "proceeding with fetch..."
-			fi
-
-			# push/pull setting
-			GIT_HIGHLIGHT='\E[7m'
+			fi			
 
 			#------------------------------------------------------
 			# fetch
@@ -345,7 +360,7 @@ for repo in $list; do
 					echo "${TAB}FETCH attempt $n_loops..."
 				fi
 				t_start=$(date +%s%N)
-				${cmd} 2>&1
+				do_cmd ${cmd}
 				RETVAL=$?
 				t_end=$(date +%s%N)
 				dt_fetch=$((${t_end} - ${t_start}))
@@ -450,10 +465,12 @@ for repo in $list; do
 					if [ $n_loops -gt 1 ]; then
 						echo "${TAB}PULL attempt $n_loops..."
 					fi
+					set_color
 					t_start=$(date +%s%N)
 					${cmd}
 					RETVAL=$?
 					t_end=$(date +%s%N)
+					unset_color
 					dt_pull=$((${t_end} - ${t_start}))
 
 					echo -en "${GIT_HIGHLIGHT} pull ${NORMAL} "
@@ -540,7 +557,7 @@ for repo in $list; do
 						echo "${TAB}PUSH attempt $n_loops..."
 					fi
 					t_start=$(date +%s%N)
-					${cmd}
+					do_cmd ${cmd}
 					RETVAL=$?
 					t_end=$(date +%s%N)
 					dt_push=$((${t_end} - ${t_start}))
