@@ -17,8 +17,7 @@ else
 fi
 
 # set debug level
-declare -i DEBUG=1
-echo "DEBUG = $DEBUG"
+declare -i DEBUG=0
 
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
@@ -26,6 +25,8 @@ if [ -e $fpretty ]; then
     source $fpretty
 	set_traps
 fi
+
+decho "DEBUG = $DEBUG"
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
