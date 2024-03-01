@@ -22,13 +22,14 @@ else
 fi
 
 # set debug level
-declare -i DEBUG=0
+declare -i DEBUG=${DEBUG:=0}
 
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
 	set_traps
+	decho "DEBUG = $DEBUG"
 fi
 
 # determine if script is being sourced or executed and add conditional behavior
@@ -37,12 +38,14 @@ if (return 0 2>/dev/null); then
 	set -T +e
 else
 	RUN_TYPE="executing"
+	set -e
 fi
 
 # show good hosts
 decho -n "existing good hosts: "
 if [ -z "${host_OK:+dummy}" ]; then
 	decho "none"
+	export host_OK=''
 else
 	host_OK=$(echo "${host_OK}" | sort -n)
 	decho
@@ -53,6 +56,7 @@ fi
 decho -n "existing bad hosts: "
 if [ -z "${host_bad:+dummy}" ]; then
 	decho "none"
+	export host_bad=''
 else
 	host_bad=$(echo "${host_bad}" | sort -n)
 	decho
@@ -168,7 +172,7 @@ for remote_name in ${r_names}; do
 	if [ ${do_check} = 'true' ]; then
 		echo -n "${TAB}${fTAB}checking connection... "
 		unset_traps
-		ssh_cmd_base="ssh -o ConnectTimeout=6 -o ConnectionAttempts=2 -T ${remote_host}"
+		ssh_cmd_base="ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 -T ${remote_host}"
 		if [[ "${remote_host}" == *"navy.mil" ]]; then
 			$ssh_cmd_base -o LogLevel=error 2> >(sed $'s,.*,\e[31m&\e[m,'>&2) 1> >(sed $'s,.*,\e[32m&\e[m,'>&1)
 		else
@@ -250,7 +254,7 @@ fi
 export host_OK
 export host_bad
 
-echo "done"
+decho "done"
 # add return code for parent script
 if (return 0 2>/dev/null); then
 	return 0
