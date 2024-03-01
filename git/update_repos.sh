@@ -17,7 +17,8 @@ else
 fi
 
 # set debug level
-declare -i DEBUG=0
+declare -i DEBUG=1
+echo "DEBUG = $DEBUG"
 
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
