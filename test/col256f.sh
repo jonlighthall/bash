@@ -13,18 +13,32 @@ export TERM
 echo "printing $TERM colors..."
 
 # set looping limits
-declare -i fore_max=256
-declare -ir back_max=0
+declare -ir control_var=0
+declare -ir loop_limit=255
 
 # loop through colors
-tput setab $back_max
-for fore in $(seq 0 ${fore_max}); do
-	tput setaf $fore
-	printf ' f=%3d ' $fore
-	if [ $((fore % 16)) -eq 0  ]; then
-		echo -e "\E[m"
+tput setab $control_var
+for col in $(seq 0 ${loop_limit}); do
+	tput setaf $col
+	printf ' f=%3d ' $col
+	if [ $col -lt 15 ] || [ $col -gt 231 ]; then
+		# display system colors in groups of 8
+		if [ $((((col + 1)) % 8)) -eq 0  ] ; then
+			echo -e "\E[m"
+		fi
+	else
+		# display non-system colors in 6 groups of 36
+		if [ $((((col -16 + 1)) % 6)) -eq 0  ] ; then
+			echo -ne "\E[m"
+		fi
+		if [ $((((col -16 + 1)) % ((6 *6)))) -eq 0  ] ; then
+			echo -e "\E[m"
+		fi
+		# seperate out system colors and grays		
+		if [ $col = 15 ] || [ $col = 231 ]; then
+			echo -e "\E[m"
+		fi
 	fi
 done
 tput sgr0
-printf '\n\n'
 
