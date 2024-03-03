@@ -198,7 +198,7 @@ declare -r to_base="${to_base0}"
 # beautify settings
 GIT_HIGHLIGHT='\E[7m'
 function set_color() {
-  echo -ne "\e[38;5;11m"
+  echo -ne "\e[38;5;173m"
 }
 function unset_color() {
   echo -ne "\e[0m"
@@ -206,10 +206,13 @@ function unset_color() {
 
 function do_cmd() {
   cmd=$(echo $@)
+  itab
   set_color
-  $cmd 2>&1
+  #export $TAB
+  $cmd 2>&1 2> >(sed $"s/^/$TAB/">&2)
   RETVAL=$?
   unset_color
+  dtab
   return $RETVAL
 }
 
@@ -467,12 +470,13 @@ for repo in $list; do
           if [ $n_loops -gt 1 ]; then
             echo "${TAB}PULL attempt $n_loops..."
           fi
-          set_color
+          #set_color
           t_start=$(date +%s%N)
-          ${cmd}
+          do_cmd ${cmd}
+          #${cmd}
           RETVAL=$?
           t_end=$(date +%s%N)
-          unset_color
+          #unset_color
           dt_pull=$((${t_end} - ${t_start}))
 
           echo -en "${GIT_HIGHLIGHT} pull ${NORMAL} "
