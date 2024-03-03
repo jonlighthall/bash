@@ -208,12 +208,21 @@ function do_cmd() {
   cmd=$(echo $@)
   itab
   set_color
-  #export $TAB
   $cmd 2>&1 2> >(sed $"s/^/$TAB/">&2)
   RETVAL=$?
   unset_color
   dtab
   return $RETVAL
+}
+
+function exit_on_fail() {
+  echo -e "\x1b[38;5;164m ${BASH_SOURCE[1]##*/} failed\x1b[0m"
+local do_exit=true
+if [[ $do_exit == true ]]; then
+  exit 1 || return 1
+else
+  return 0
+fi
 }
 
 for repo in $list; do
@@ -336,6 +345,7 @@ for repo in $list; do
 
       if [[ "$host_stat" =~ *"FAIL"* ]]; then
         decho "skipping fetch..."
+        exit_on_fail
         continue
       else
         decho "proceeding with fetch..."
@@ -439,6 +449,7 @@ for repo in $list; do
       if [ $RETVAL -ne 0 ]; then
         fetch_fail+="$repo "
         echo -e "\E[32m> \E[0mWSL may need to be restarted"
+        exit_on_fail
         echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
         read -e -i "shutdown_wsl" -p $'\e[0;32m$\e[0m ' -t 10 && eval $REPLY
       fi
@@ -470,14 +481,11 @@ for repo in $list; do
           if [ $n_loops -gt 1 ]; then
             echo "${TAB}PULL attempt $n_loops..."
           fi
-          #set_color
           t_start=$(date +%s%N)
           do_cmd ${cmd}
-          #${cmd}
           RETVAL=$?
           t_end=$(date +%s%N)
-          #unset_color
-          dt_pull=$((${t_end} - ${t_start}))
+                    dt_pull=$((${t_end} - ${t_start}))
 
           echo -en "${GIT_HIGHLIGHT} pull ${NORMAL} "
           if [[ $RETVAL != 0 ]]; then
@@ -524,6 +532,7 @@ for repo in $list; do
         if [[ $RETVAL != 0 ]]; then
           # add to failure list
           pull_fail+="$repo "
+          exit_on_fail
         else
           # update links after pull
           prog=make_links.sh
@@ -594,6 +603,7 @@ for repo in $list; do
         if [[ $RETVAL != 0 ]]; then
           # add to failure list
           push_fail+="$repo "
+          exit_on_fail
         fi
       fi
 
