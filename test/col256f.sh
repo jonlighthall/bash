@@ -29,7 +29,7 @@ for col in $(seq 0 ${loop_limit}); do
 	else
 		# display non-system colors in 6 groups of 36
 		if [ $((((col -16 + 1)) % 6)) -eq 0  ] ; then
-			echo -ne "\E[m"
+			echo -ne "\E[m  "
 		fi
 		if [ $((((col -16 + 1)) % ((6 *6)))) -eq 0  ] ; then
 			echo -e "\E[m"
@@ -40,5 +40,18 @@ for col in $(seq 0 ${loop_limit}); do
 		fi
 	fi
 done
-tput sgr0
 
+echo
+for grp in $(seq 0 5); do
+	for row in $(seq 0 5); do		
+		for ele in $(seq 0 5); do
+			set_col=$((16 + ele + ((row * 36)) + ((grp * 6))))
+			tput setaf $set_col
+			printf ' f=%3d ' $set_col			
+		done
+		echo
+	done
+	echo
+done
+
+tput sgr0
