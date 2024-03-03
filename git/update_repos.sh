@@ -386,7 +386,6 @@ for repo in $list; do
                     break
                 else
                     echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-                    echo "failed to fetch remote"
                     if [[ $RETVAL == 137 ]]; then
                         if [ $nsec -gt $fetch_max ]; then
                             fetch_max=$nsec
@@ -490,13 +489,14 @@ for repo in $list; do
                     echo -en "${GIT_HIGHLIGHT} pull ${NORMAL} "
                     if [[ $RETVAL != 0 ]]; then
                         echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
-                        echo "failed to pull remote"
                         if [[ $RETVAL == 1 ]]; then
+                            itab
                             echo -e "${TAB}merge conflicts found"
-
+                            itab
                             if [ $(git diff --name-only --diff-filter=M | wc -l) -gt 0 ]; then
                                 echo -e "${TAB}modified files found"
                                 git diff --name-only --diff-filter=M | sed "s/^/${fTAB}/"
+                                dtab
                                 exit_on_fail
                             else
                                 echo -e "${TAB}no modified files found"
@@ -505,17 +505,10 @@ for repo in $list; do
                             if [ $(git diff --name-only --diff-filter=U | wc -l) -gt 0 ]; then
                                 echo -e "${TAB}unmerged files found"
                                 git diff --name-only --diff-filter=U | sed "s/^/${fTAB}/"
+                                dtab
                                 exit_on_fail
                             else
                                 echo -e "${TAB}no unmerged files found"
-                            fi
-
-                            if [ $(git diff --name-only --diff-filter=X | wc -l) -gt 0 ]; then
-                                echo -e "${TAB}unknown files found"
-                                git diff --name-only --diff-filter=X | sed "s/^/${fTAB}/"
-                                exit_on_fail
-                            else
-                                echo -e "${TAB}no unknown files found"
                             fi
 
                             if [ $(git ls-files -v | grep ^[[:lower:]] | awk '{print $2}' | wc -l) -gt 0 ]; then
@@ -530,10 +523,12 @@ for repo in $list; do
                                 echo "n_loops = $n_loops"
                                 # reset RETVAL to stay in loop
                                 RETVAL=137
+                                dtab
                                 continue
                             else
                                 echo -e "${TAB}no untracked files found"
                             fi
+                            dtab
                         fi
 
                         # increase time
@@ -572,26 +567,30 @@ for repo in $list; do
 
                     fi
                 done
+                # check if assume-unchanged files were stashed
                 if [ -z ${do_update+dummy} ]; then
-                    echo "do_update is unset"
+                    decho "do_update is unset"
                 else
-                    echo "do_update is set"
-                    echo "do_update = $do_update"
-                fi
-
-                if [[ ${do_update} == true ]]; then
-                    echo "do_update is true"
-                    echo "applying stash for assume-unchanged files..."
-                    git stash pop
-                    unset do_update
-                    echo "updating index for assume-unchanged files..."
-                    for file in $unchanged; do
-                        git update-index --verbose --assume-unchanged $file
-                    done
-
-                else
-                    echo "do_update is not true"
-                    echo "do_update = $do_update"
+                    decho "do_update is set"
+                    if [[ ${do_update} == true ]]; then
+                        decho "do_update is true"
+                        echo "applying stash for assume-unchanged files..."
+                        set_color
+                        git stash pop
+                        unset_color
+                        unset do_update
+                        echo "updating index for assume-unchanged files..."
+                        set_color
+                        for file in $unchanged; do
+                            git update-index --verbose --assume-unchanged $file
+                        done
+                        unset_color
+                    else
+                        echo "$do_update is not true"
+                        echo "$do_update = $do_update"
+                        exit 1
+                    fi
+                    dtab
                 fi
 
                 if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
