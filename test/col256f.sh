@@ -1,4 +1,6 @@
 #!/bin/bash -u
+
+# determine terminal colors
 case $TERM in
     xterm*)
         TERM=xterm-256color
@@ -8,17 +10,21 @@ case $TERM in
         ;;
 esac
 export TERM
+echo "printing $TERM colors..."
+
+# set looping limits
 declare -i fore_max=256
-declare -i back_max=0
+declare -ir back_max=0
+
+# loop through colors
+tput setab $back_max
 for fore in $(seq 0 ${fore_max}); do
-    tput setaf $fore
-	for back in $(seq 0 ${back_max}); do
-		tput setab $back
-		printf ' b=%3d f=%3d ' $back $fore
-		if [ $((back % 16)) -eq 0  ]; then
-			echo -e "\E[m"
-		fi
-	done
-	tput sgr0
-	printf '\n\n'
+	tput setaf $fore
+	printf ' f=%3d ' $fore
+	if [ $((fore % 16)) -eq 0  ]; then
+		echo -e "\E[m"
+	fi
 done
+tput sgr0
+printf '\n\n'
+
