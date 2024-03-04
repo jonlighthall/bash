@@ -606,9 +606,10 @@ for repo in $list; do
                 else
                     # update links after pull
                     prog=make_links.sh
-                    echo -e "\x1b[7mchecking for ${prog}... "
+                    echo -ne "\x1b[7mchecking for ${prog}... \x1b[0m"
                     if [ -f ${prog} ]; then
                         if [[ ! (("$(hostname -f)" == *"navy.mil") && ($repo =~ "private")) ]]; then
+                            echo "found"
                             bash ${prog}
                         else
                             echo "skip"
