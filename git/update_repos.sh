@@ -457,7 +457,7 @@ for repo in $list; do
             #------------------------------------------------------
             decho -n "leading remote commits: "
             N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
-            if [ ${N_remote} -lt 0 ]; then
+            if [ ${N_remote} -eq 0 ]; then
                 decho "none"
             else
                 decho "${N_remote}"
