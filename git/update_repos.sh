@@ -567,6 +567,7 @@ for repo in $list; do
 
                     fi
                 done
+
                 # check if assume-unchanged files were stashed
                 if [ -z ${do_update+dummy} ]; then
                     decho "do_update is unset"
@@ -593,9 +594,12 @@ for repo in $list; do
                     dtab
                 fi
 
+                # check if maximum pull time increased
                 if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
                     t_pull_max=${dt_pull}
                 fi
+
+                # check if pull was successful
                 if [[ $RETVAL != 0 ]]; then
                     # add to failure list
                     pull_fail+="$repo "
@@ -603,9 +607,15 @@ for repo in $list; do
                 else
                     # update links after pull
                     prog=make_links.sh
+                    echo -e "\x1b[7mchecking for ${prog}... "
                     if [ -f ${prog} ]; then
                         if [[ ! (("$(hostname -f)" == *"navy.mil") && ($repo =~ "private")) ]]; then
                             bash ${prog}
+                        else
+                            echo "skip"
+                        fi
+                        else
+                            echo "not found"
                         fi
                     fi
                 fi
