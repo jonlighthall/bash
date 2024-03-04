@@ -59,7 +59,7 @@ else
     mkdir -pv "$link_dir"
 fi
 
-bar 38 "------ Start Linking Repo Files-------"
+bar 38 "------ Start Linking Repo Files ------"
 
 # list of files to be linked
 ext=.sh
@@ -92,8 +92,10 @@ for my_link in \
     whatsup \
     add_path \
     xtest; do
+
     # define target (source)
     target=${target_dir}/${my_link}${ext}
+
     # define link (destination)
     sub_dir=$(dirname "$my_link")
     if [ ! $sub_dir = "." ]; then
@@ -101,8 +103,8 @@ for my_link in \
         my_link=$(basename "$my_link")
     fi
     link=${link_dir}/${my_link}
-    echo "linking $target to $link..."
 
+    # create link
     do_link_exe "$target" "$link"
 done
 bar 38 "--------- Done Making Links ----------"
