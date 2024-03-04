@@ -3,8 +3,10 @@
 # get starting time in nanoseconds
 start_time=$(date +%s%N)
 
+target_dir="${HOME}/utils/bash"
+
 # load formatting
-fpretty="${HOME}/utils/bash/.bashrc_pretty"
+fpretty="${target_dir}/.bashrc_pretty"
 if [ -e "$fpretty" ]; then
     source "$fpretty"
     set_traps
@@ -13,7 +15,7 @@ if [ -e "$fpretty" ]; then
 fi
 
 # load formatting
-flink="${HOME}/utils/bash/.bash_links"
+flink="${target_dir}/.bash_links"
 if [ -e "$flink" ]; then
     source "$flink"
 fi
@@ -32,7 +34,6 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 fi
 
 # set target and link directories
-target_dir=$(dirname "$src_name")
 link_dir=$HOME/bin
 
 # check directories
@@ -94,9 +95,16 @@ for my_link in \
         my_link=$(basename "$my_link")
     fi
     link=${link_dir}/${my_link}
+    echo "linking $target to $link..."
 
     do_link_exe "$target" "$link"
+
 done
 bar 38 "--------- Done Making Links ----------"
 
+# save and print starting directory
+start_dir=$PWD
+echo "starting directory = ${start_dir}"
+cd $target_dir
 git update-index --skip-worktree git/url.txt
+cd $start_dir
