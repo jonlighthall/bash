@@ -20,10 +20,10 @@ else
 			deci=$(printf "$fmt" ${ddeci})
 			nd=nd_max
 		fi
-		
+
 		# get most significant decimal
 		if [ $nd -gt 1 ]; then
-			declare -ir tenths=${deci::$(($nd - 1))}
+			declare -ir tenths=${deci::1}
 		else
 			declare -ir tenths=${deci}
 		fi
@@ -65,16 +65,16 @@ else
 					# reduce precision
 					if [ ${nd} -gt 0 ]; then
 						((nd--))
-						prnt_deci=${prnt_deci::1}					
+						prnt_deci=${prnt_deci::1}
 					fi
 				fi
 				if [ $ELAP -ge $((10**3)) ]; then
 					# reduce precision
 					if [ ${nd} -gt 0 ]; then
 						((nd--))
-						prnt_deci=${prnt_deci::1}					
+						prnt_deci=${prnt_deci::1}
 					fi
-				fi				
+				fi
 				# round to the nearest integer
 				if [ ${nd} -eq 0 ] && [ ${tenths} -ge 5 ]; then
 					((ELAP++))
@@ -86,8 +86,8 @@ else
 				if [ $tenths_fmt -eq 0 ]; then
 					ELAP=$(printf "$fmt" $1 | sed 's/\..*$//')
 				fi
-				
-				# less than 1 hour	
+
+				# less than 1 hour
 				if (($ELAP < $((60 * 60)))) ; then
 					echo -n $(date -d @${ELAP} +"%M min %S")
 					if [ ${nd} -gt 0 ]; then
@@ -101,17 +101,17 @@ else
 						# reduce precision
 						if [ ${nd} -gt 0 ]; then
 							((nd--))
-							prnt_deci=${prnt_deci::1}					
+							prnt_deci=${prnt_deci::1}
 						fi
-					fi				
-					# if less than a day					
-					if (($HR < 24)); then					
+					fi
+					# if less than a day
+					if (($HR < 24)); then
 						echo -n $(date -d @${ELAP} +"$HR hours %M min %S")
 						if [ ${nd} -gt 0 ]; then
 							fmt="%.${nd}f"
 							printf "$fmt" $1 | sed 's/^.*\././'
 						fi
-						echo " sec"					
+						echo " sec"
 					else
 						DY=$(($HR / 24))
 						HR=$(($HR - $DY * 24))
@@ -119,16 +119,16 @@ else
 							# reduce precision
 							if [ ${nd} -gt 0 ]; then
 								((nd--))
-								prnt_deci=${prnt_deci::1}					
+								prnt_deci=${prnt_deci::1}
 							fi
 						fi
 						if [ $ELAP -ge $((10**6)) ]; then
 							# reduce precision
 							if [ ${nd} -gt 0 ]; then
 								((nd--))
-								prnt_deci=${prnt_deci::1}					
+								prnt_deci=${prnt_deci::1}
 							fi
-						fi				
+						fi
 
 						# if less than a year
 						if (($DY < $((365)))); then
@@ -145,7 +145,7 @@ else
 								# reduce precision
 								if [ ${nd} -gt 0 ]; then
 									((nd--))
-									prnt_deci=${prnt_deci::1}					
+									prnt_deci=${prnt_deci::1}
 								fi
 							fi
 							echo -n $(date -d @${ELAP} +"$YR years $DY days $HR hours %M min %S")
