@@ -3,19 +3,20 @@
 # get starting time in nanoseconds
 start_time=$(date +%s%N)
 
-target_dir="${HOME}/utils/bash"
+utils_dir="${HOME}/utils"
+bash_utils_dir="${utils_dir}/bash"
 
 # load formatting
-fpretty="${target_dir}/.bashrc_pretty"
+fpretty="${bash_utils_dir}/.bashrc_pretty"
 if [ -e "$fpretty" ]; then
     source "$fpretty"
     set_traps
-    # set tab
+    # reset tab
     rtab
 fi
 
-# load formatting
-flink="${target_dir}/.bash_links"
+# load linking scripts
+flink="${bash_utils_dir}/.bash_links"
 if [ -e "$flink" ]; then
     source "$flink"
 fi
@@ -25,6 +26,8 @@ if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
+# exit on errors
+    set -e
 fi
 # print source name at start
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
@@ -34,6 +37,9 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
 fi
 
 # set target and link directories
+src_dir_logi=$(dirname "$src_name")
+proj_name=$(basename "$src_dir_logi")
+target_dir="${utils_dir}/${proj_name}"
 link_dir=$HOME/bin
 
 # check directories
@@ -98,7 +104,6 @@ for my_link in \
     echo "linking $target to $link..."
 
     do_link_exe "$target" "$link"
-
 done
 bar 38 "--------- Done Making Links ----------"
 
