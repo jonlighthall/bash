@@ -19,7 +19,7 @@ echo "argument 1: $1"
 
 TAB+=${fTAB:='   '}
 echo -n "${TAB} input path: ${in_file}... "
- if [ -L "${in_file}" ] || [ -f "${in_file}" ] || [ -d "${in_file}" ]; then
+if [ -L "${in_file}" ] || [ -f "${in_file}" ] || [ -d "${in_file}" ]; then
 	echo "exits"
 
 	# parse input
@@ -76,8 +76,15 @@ echo -n "${TAB} input path: ${in_file}... "
 else
 	echo "is not valid"
 	test_file $1 | sed "s/^/${TAB}/"
-	echo "${TAB}exiting..."
-	exit 1
+	if [ -L "$1" ]; then
+		in_file=$1
+		echo "${in_file} is a broken link!"
+		mdate=$(stat -c '%y' ${in_file} | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
+		out_file=$1_${mdate}
+	else		
+		echo "${TAB}exiting..."
+		exit 1
+	fi
 fi
 
 # now move file
