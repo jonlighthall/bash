@@ -145,7 +145,7 @@ for my_link in \
                         mdate=$(date -r "${link}" +'%Y-%m-%d-t%H%M')
                     else
                         echo -n "is a broken link..."
-                        mdate=$(stat -c '%y' ${in_file} | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
+                        mdate=$(stat -c '%y' ${link} | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
                     fi
                     link_copy="${link}_${mdate}"
                     mv -v "${link}" "${link_copy}" | sed "s/^/${TAB}/"
