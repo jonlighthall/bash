@@ -16,9 +16,10 @@ echo "number of arguments = $#"
 # set file names
 in_file=$(readlink -f $1)
 echo "argument 1: $1"
+
 TAB+=${fTAB:='   '}
 echo -n "${TAB} input path: ${in_file}... "
-if [ -f "${in_file}" ]; then
+ if [ -L "${in_file}" ] || [ -f "${in_file}" ] || [ -d "${in_file}" ]; then
 	echo "exits"
 
 	# parse input
@@ -73,7 +74,8 @@ if [ -f "${in_file}" ]; then
 		echo "${TAB}does not exist (uniquely named)"
 	fi
 else
-	echo "is not a file"
+	echo "is not valid"
+	test_file $1 | sed "s/^/${TAB}/"
 	echo "${TAB}exiting..."
 	exit 1
 fi
