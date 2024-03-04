@@ -10,7 +10,7 @@ start_time=$(date +%s%N)
 fpretty="${HOME}/utils/bash/.bashrc_pretty"
 if [ -e "$fpretty" ]; then
     source "$fpretty"
-	set_traps
+    set_traps
 fi
 
 # determine if script is being sourced or executed
@@ -140,8 +140,15 @@ for my_link in \
                     echo -n "${TAB}deleting... "
                     rm -v "${link}"
                 else
-                    echo "will be backed up..."
-                    mv -v "${link}" "${link}"_$(date -r "${link}" +'%Y-%m-%d-t%H%M') | sed "s/^/${TAB}/"
+                    if [ -e "${link}" ]; then
+                        echo "will be backed up..."
+                        mdate=$(date -r "${link}" +'%Y-%m-%d-t%H%M')
+                    else
+                        echo -n "is a broken link..."
+                        mdate=$(stat -c '%y' ${in_file} | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
+                    fi
+                    link_copy="${link}_${mdate}"
+                    mv -v "${link}" "${link_copy}" | sed "s/^/${TAB}/"
                 fi
             fi
         else
