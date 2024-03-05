@@ -27,11 +27,11 @@ declare -i start_time=$(date +%s%N)
 
 # set tab
 called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]] ; then
-	TAB=''
-	: ${fTAB:='   '}
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]]; then
+    TAB=''
+    : ${fTAB:='   '}
 else
-	TAB+=${TAB+${fTAB:='   '}}
+    TAB+=${TAB+${fTAB:='   '}}
 fi
 
 # set debug level
@@ -41,24 +41,24 @@ declare -i DEBUG=0
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-	set_traps
+    set_traps
 fi
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
-	RUN_TYPE="sourcing"
-	set -T +e
+    RUN_TYPE="sourcing"
+    set -T +e
 else
-	RUN_TYPE="executing"
-	# exit on errors
-	set -eE
+    RUN_TYPE="executing"
+    # exit on errors
+    set -eE
 fi
 
 # print run type and source name
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-	echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
 # print source path
@@ -75,24 +75,24 @@ echo "starting directory = ${start_dir}"
 
 # check if Git is defined
 if [ -z "${check_git:+dummy}" ]; then
-	echo -n "${TAB}Checking Git... "
-	if command -v git &>/dev/null; then
-		echo -e "${GOOD}OK${NORMAL} Git is defined"
-		# get Git version
-		git --version | sed "s/^/${fTAB}/"
-		git_ver=$(git --version | awk '{print $3}')
-		git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-		git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-		git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-		export check_git=false
-	else
-		echo -e "${BAD}FAIL${NORMAL} Git not defined"
-		if (return 0 2>/dev/null); then
-			return 1
-		else
-			exit 1
-		fi
-	fi
+    echo -n "${TAB}Checking Git... "
+    if command -v git &>/dev/null; then
+        echo -e "${GOOD}OK${NORMAL} Git is defined"
+        # get Git version
+        git --version | sed "s/^/${fTAB}/"
+        git_ver=$(git --version | awk '{print $3}')
+        git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+        git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+        git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
+        export check_git=false
+    else
+        echo -e "${BAD}FAIL${NORMAL} Git not defined"
+        if (return 0 2>/dev/null); then
+            return 1
+        else
+            exit 1
+        fi
+    fi
 fi
 
 # reset SSH status list
@@ -113,7 +113,7 @@ else
     upstream_repo=${remote_tracking_branch%%/*}
     echo "${TAB}${fTAB}remote name: ....... $upstream_repo"
 
-	# parse branches
+    # parse branches
     upstream_refspec=${remote_tracking_branch#*/}
     echo "${TAB}${fTAB}remote refspec: .... $upstream_refspec"
 fi
@@ -123,42 +123,42 @@ echo -e "${TAB}${fTAB}local branch: ...... ${green}${local_branch}${NORMAL}"
 # parse arguments
 cbar "${BOLD}parse arguments...${NORMAL}"
 if [ $# -ge 1 ]; then
-	echo "${TAB}remote specified"
-	unset remote_name
+    echo "${TAB}remote specified"
+    unset remote_name
     pull_repo=$1
-	echo -n "${TAB}${fTAB}remote name: ....... $pull_repo "	
-	git remote | grep $pull_repo &>/dev/null
-	RETVAL=$?
-	if [[ $RETVAL == 0 ]]; then
-		echo -e "${GOOD}OK${NORMAL}"
-	else
-		echo -e "${BAD}FAIL${NORMAL}"
-		echo "$pull_repo not found"
-		exit 1
-	fi	
+    echo -n "${TAB}${fTAB}remote name: ....... $pull_repo "
+    git remote | grep $pull_repo &>/dev/null
+    RETVAL=$?
+    if [[ $RETVAL == 0 ]]; then
+        echo -e "${GOOD}OK${NORMAL}"
+    else
+        echo -e "${BAD}FAIL${NORMAL}"
+        echo "$pull_repo not found"
+        exit 1
+    fi
 else
     echo "${TAB}no remote specified"
     echo "${TAB}${fTAB}using $upstream_repo"
-	pull_repo=${upstream_repo}
+    pull_repo=${upstream_repo}
 fi
 if [ $# -ge 2 ]; then
-	echo "${TAB}reference specified"
-	unset remote_branch
+    echo "${TAB}reference specified"
+    unset remote_branch
     pull_refspec=$2
     echo -n "${TAB}${fTAB}remote refspec: .... $pull_refspec "
-	git branch -va | grep "$pull_repo/${pull_refspec}" &>/dev/null
-	RETVAL=$?
-	if [[ $RETVAL == 0 ]]; then
-		echo -e "${GOOD}OK${NORMAL}"
-	else
-		echo -e "${BAD}FAIL${NORMAL}"
-		echo "$pull_refspec not found"
-		exit 1
-	fi	
+    git branch -va | grep "$pull_repo/${pull_refspec}" &>/dev/null
+    RETVAL=$?
+    if [[ $RETVAL == 0 ]]; then
+        echo -e "${GOOD}OK${NORMAL}"
+    else
+        echo -e "${BAD}FAIL${NORMAL}"
+        echo "$pull_refspec not found"
+        exit 1
+    fi
 else
     echo "${TAB}no reference specified"
     echo "${TAB}${fTAB}using $upstream_refspec"
-	pull_refspec=${upstream_refspec}
+    pull_refspec=${upstream_refspec}
 fi
 
 if [ -z ${pull_repo} ] || [ -z ${pull_refspec} ]; then
@@ -180,86 +180,86 @@ echo "${TAB}remote url: ${pull_url}"
 # parse protocol
 pull_pro=$(echo ${pull_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
 if [[ "${pull_pro}" == "git" ]]; then
-	pull_pro="SSH"
-	pull_host=$(echo ${pull_url} | sed 's/\(^[^:]*\):.*$/\1/')
+    pull_pro="SSH"
+    pull_host=$(echo ${pull_url} | sed 's/\(^[^:]*\):.*$/\1/')
 else
-	pull_host=$(echo ${pull_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
-	if [[ "${pull_pro}" == "http"* ]]; then
-		echo "  repo: ${pull_repo}"
-	else
-		pull_pro="local"
-	fi							
-fi	
+    pull_host=$(echo ${pull_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
+    if [[ "${pull_pro}" == "http"* ]]; then
+        echo "  repo: ${pull_repo}"
+    else
+        pull_pro="local"
+    fi
+fi
 echo "${TAB}${fTAB} host: $pull_host"
 echo -e "${TAB}${fTAB}proto: ${pull_pro}"
 
 # check remote host name against list of checked hosts
 if [ ! -z ${host_bad:+dummy} ]; then
-	echo "checking $pull_host against list of checked hosts"
-	# bad hosts
-	echo -n "bad hosts: "
-	if [ -z "$host_bad" ]; then
-		echo "none"
-	else
-		host_bad=$(echo "${host_bad}" | sort -n)
-		echo
-		echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
-	fi
-	for bad_host in ${host_bad}; do
-		if [[ "$pull_host" == "$bad_host" ]]; then
-			echo "$pull_host matches $bad_host"
-			echo "skipping fetch..."
-			fetch_fail+="$repo ($pull_repo)"
-			continue 2
-		fi
-	done
+    echo "checking $pull_host against list of checked hosts"
+    # bad hosts
+    echo -n "bad hosts: "
+    if [ -z "$host_bad" ]; then
+        echo "none"
+    else
+        host_bad=$(echo "${host_bad}" | sort -n)
+        echo
+        echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+    fi
+    for bad_host in ${host_bad}; do
+        if [[ "$pull_host" == "$bad_host" ]]; then
+            echo "$pull_host matches $bad_host"
+            echo "skipping fetch..."
+            fetch_fail+="$repo ($pull_repo)"
+            continue 2
+        fi
+    done
 else
-	echo "list of bad hosts empty"
+    echo "list of bad hosts empty"
 fi
 
 cbar "${BOLD}comparing branches...${NORMAL}"
 if [ ! -z ${remote_tracking_branch} ]; then
-	echo -n "${TAB}remote tracking branches... "
+    echo -n "${TAB}remote tracking branches... "
 
-	if [ "$pull_branch" == "$remote_tracking_branch" ]; then
-		echo "match"
-		echo "${TAB}${fTAB}${pull_branch}"
-	else
-		echo "do not match"
-		echo "${TAB}${fTAB}${pull_branch}"
-		echo "${TAB}${fTAB}${remote_tracking_branch}"
-		echo "setting upstream remote tracking branch..."
-		git branch -u ${pull_branch}
+    if [ "$pull_branch" == "$remote_tracking_branch" ]; then
+        echo "match"
+        echo "${TAB}${fTAB}${pull_branch}"
+    else
+        echo "do not match"
+        echo "${TAB}${fTAB}${pull_branch}"
+        echo "${TAB}${fTAB}${remote_tracking_branch}"
+        echo "setting upstream remote tracking branch..."
+        git branch -u ${pull_branch}
 
-		echo -n "remotes... "
-		if [ "$pull_repo" == "$upstream_repo" ]; then
-			echo "match"
-			echo "${TAB}${fTAB}${pull_repo}"
-		else
-			echo "do not match"
-			echo "${TAB}${fTAB}${pull_repo}"
-			echo "${TAB}${fTAB}${upstream_repo}"
-		fi		
-		echo -n "remote refspecs... "
-		if [ "$pull_refspec" == "$upstream_refspec" ]; then
-			echo "match"
-			echo "${TAB}${fTAB}${pull_refspec}"
-		else
-			echo "do not match"
-			echo "${TAB}${fTAB}${pull_refspec}"
-			echo "${TAB}${fTAB}${upstream_refspec}"
-		fi
-	fi
+        echo -n "remotes... "
+        if [ "$pull_repo" == "$upstream_repo" ]; then
+            echo "match"
+            echo "${TAB}${fTAB}${pull_repo}"
+        else
+            echo "do not match"
+            echo "${TAB}${fTAB}${pull_repo}"
+            echo "${TAB}${fTAB}${upstream_repo}"
+        fi
+        echo -n "remote refspecs... "
+        if [ "$pull_refspec" == "$upstream_refspec" ]; then
+            echo "match"
+            echo "${TAB}${fTAB}${pull_refspec}"
+        else
+            echo "do not match"
+            echo "${TAB}${fTAB}${pull_refspec}"
+            echo "${TAB}${fTAB}${upstream_refspec}"
+        fi
+    fi
 fi
 
 echo -n "local branch and remote branch name... "
 if [ "$local_branch" == "$pull_refspec" ]; then
     echo "match"
-	echo "${TAB}${fTAB}${local_branch}"
+    echo "${TAB}${fTAB}${local_branch}"
 else
     echo "do not match"
-	echo "${TAB}${fTAB}${local_branch}"
-	echo "${TAB}${fTAB}${pull_refspec}"
+    echo "${TAB}${fTAB}${local_branch}"
+    echo "${TAB}${fTAB}${pull_refspec}"
 fi
 
 cbar "${BOLD}comparing local branch ${green}$local_branch${NORMAL} with remote branch ${blue}$pull_branch${NORMAL}"
@@ -451,7 +451,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     i=0
     set +e
     while [[ ! -z $(git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep ${branch_temp}) ]]; do
-        echo "${TAB}${fTAB}${branch_temp} exists" 
+        echo "${TAB}${fTAB}${branch_temp} exists"
         ((++i))
         branch_temp=${local_branch}.temp${i}
     done
@@ -473,13 +473,13 @@ if [ $N_remote -gt 0 ]; then
     else
         echo "${TAB}resetting HEAD to $hash_remote..."
         git reset --hard $hash_remote | sed "s/^/${TAB}/"
-		N_remote_old=$N_remote
-		N_remote=$(git rev-list HEAD..${pull_branch} | wc -l)
-		if [ $N_remote -ne $N_remote_old ]; then
-			echo "${TAB}after reset:"
-			git branch -v --color=always | sed '/^*/!d'
-			echo -e "${fTAB}remote: ${yellow}behind $N_remote${NORMAL}"
-		fi
+        N_remote_old=$N_remote
+        N_remote=$(git rev-list HEAD..${pull_branch} | wc -l)
+        if [ $N_remote -ne $N_remote_old ]; then
+            echo "${TAB}after reset:"
+            git branch -v --color=always | sed '/^*/!d'
+            echo -e "${fTAB}remote: ${yellow}behind $N_remote${NORMAL}"
+        fi
     fi
 fi
 
@@ -495,23 +495,23 @@ fi
 # rebase and merge oustanding local commits
 cbar "${BOLD}rebasing temporary branch...${NORMAL}"
 if [ -z ${branch_temp+default} ]; then
-	N_temp=0
+    N_temp=0
 else
-	echo "${TAB}before rebase:"
-	N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
+    echo "${TAB}before rebase:"
+    N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
 fi
 if [ $N_temp -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${NORMAL}"
 
-	# rebase
+    # rebase
     git checkout ${branch_temp}
     git rebase ${local_branch}
-	echo "${TAB}after rebase:"
-	N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
-	echo -e "${TAB}${fTAB}${yellow}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${NORMAL}"
-	
-	# merge
-	cbar "${BOLD}merging local changes...${NORMAL}"
+    echo "${TAB}after rebase:"
+    N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
+    echo -e "${TAB}${fTAB}${yellow}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${NORMAL}"
+
+    # merge
+    cbar "${BOLD}merging local changes...${NORMAL}"
     git checkout ${local_branch}
     git merge ${branch_temp}
     git branch -d ${branch_temp}
@@ -525,9 +525,9 @@ N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${fTAB}${yellow}local branch is $N_local commits ahead of remote${NORMAL}"
     echo "${TAB}${fTAB}list of commits: "
-	itab
+    itab
     git --no-pager log ${pull_branch}..HEAD | sed "s/^/${TAB}/"
-	dtab
+    dtab
     git push
 else
     echo -e "${TAB}${fTAB}no need to push"

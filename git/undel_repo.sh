@@ -31,13 +31,13 @@ list=$(git ls-files -d)
 
 # checkout deleted files
 for fname in $list; do
-	((++found))
+    ((++found))
     echo $fname
     git checkout $fname
-	RETVAL=$?
-	if [[ $RETVAL -eq 0 ]]; then
-		((++check))
-	fi
+    RETVAL=$?
+    if [[ $RETVAL -eq 0 ]]; then
+        ((++check))
+    fi
 done
 wait
 
