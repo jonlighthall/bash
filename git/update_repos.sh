@@ -385,6 +385,7 @@ for repo in $list; do
                     break
                 else
                     echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                    echo "failed to fetch remote"
                     if [[ $RETVAL == 137 ]]; then
                         if [ $nsec -gt $fetch_max ]; then
                             fetch_max=$nsec
