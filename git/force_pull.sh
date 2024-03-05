@@ -545,7 +545,7 @@ if [ $N_stash -gt 0 ]; then
         set -eE
         echo -ne "stash made... "
         if [ -z "$(git diff)" ]; then
-            echo "${green}no changes${NORMAL}"
+            echo -e "${green}no changes${NORMAL}"
         else
             echo -e "${yellow}changes!${NORMAL}"
             git reset HEAD
