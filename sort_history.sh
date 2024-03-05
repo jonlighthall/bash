@@ -11,32 +11,32 @@ start_time=$(date +%s%N)
 # set tab
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-	TAB=''
-	: ${fTAB:='   '}
+	  TAB=''
+	  : ${fTAB:='   '}
 else
-	TAB+=${TAB+${fTAB:='   '}}
+	  TAB+=${TAB+${fTAB:='   '}}
 fi
 
 # load formatting and functions
 fpretty=${HOME}/utils/bash/.bashrc_pretty
 if [ -e $fpretty ]; then
-source $fpretty
-	set_traps
+    source $fpretty
+	  set_traps
 fi
 
 # determine if script is being sourced or executed
 if (return 0 2>/dev/null); then
-	RUN_TYPE="sourcing"
-	set -T +e
+	  RUN_TYPE="sourcing"
+	  set -T +e
 else
-	RUN_TYPE="executing"
+	  RUN_TYPE="executing"
 fi
 
 # print run type and source name
 echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-	echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+	  echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
 # print source path
@@ -118,37 +118,37 @@ echo
 hist_ref=${HOME}/.bash_history
 save_dir=${HOME}/home
 
-echo -n "${hist_ref} is a "
+echo -n "${hist_ref} "
 if [ -L ${hist_ref} ]; then
-	echo -n "is a "
-	hist_link=$(readlink ${hist_ref})
-
-	if [ -e ${hist_ref} ]; then
-		echo -e "${VALID}valid${NORMAL} ${UL}link${NORMAL}"
-		echo "${hist_ref} points to ${hist_link}"
-	else
-		echo -e "${BROKEN}broken${NORMAL} ${UL}link${NORMAL}"
-		echo "${hist_ref} points to ${hist_link}"
-		echo "touching ${hist_link}..."
-		touch "${hist_link}"
-	fi
+    echo -n "is a "
+	  if [ -e ${hist_ref} ]; then
+		    echo -e "${VALID}valid${NORMAL} ${UL}link${NORMAL}"
+		    echo "${hist_ref} points to ${hist_link}"
+	  else
+		    echo -e "${BROKEN}broken${NORMAL} ${UL}link${NORMAL}"
+		    echo "${hist_ref} points to ${hist_link}"
+		    echo "touching ${hist_link}..."
+		    touch "${hist_link}"
+	  fi
 elif [ -e ${hist_ref} ]; then
-	echo -n "exists and "
-	if [ -f ${hist_ref} ]; then
-		echo -e "is a regular ${UL}file${NORMAL}"
-	else
-		echo -e "${yellow}is not a file or link${NORMAL}"
-		exit 1
-	fi
+	  echo -n "exists and "
+	  if [ -f ${hist_ref} ]; then
+		    echo -e "is a regular ${UL}file${NORMAL}"
+	  else
+		    echo -e "${yellow}is not a file or link${NORMAL}"
+		    exit 1
+	  fi
 else
- 	echo -e "${BAD}${UL}does not exist${NORMAL}"
-	exit 1
+ 	  echo -e "${BAD}${UL}does not exist${NORMAL}"
+	  exit 1
 fi
 test_file ${hist_ref}
 
 if [ -d "${save_dir}" ]; then
+	  echo "save dir ${save_dir} found"
     hist_bak=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
 else
+	  echo "save dir ${save_dir} NOT found"
     hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
 fi
 echo "backup history file"
