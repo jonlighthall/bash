@@ -30,6 +30,7 @@ if (return 0 2>/dev/null); then
 	  set -T +e
 else
 	  RUN_TYPE="executing"
+    set -e
 fi
 
 # print run type and source name
@@ -115,56 +116,126 @@ done
 echo
 
 # specify default history file
-hist_ref=${HOME}/.bash_history
+hist_name=.bash_history
+hist_ref=${HOME}/${hist_name}
 save_dir=${HOME}/home
+unset list_in
 
-echo -n "${hist_ref} "
-if [ -L ${hist_ref} ]; then
-    echo -n "is a "
-	  if [ -e ${hist_ref} ]; then
-		    echo -e "${VALID}valid${NORMAL} ${UL}link${NORMAL}"
-		    echo "${hist_ref} points to ${hist_link}"
-	  else
-		    echo -e "${BROKEN}broken${NORMAL} ${UL}link${NORMAL}"
-		    echo "${hist_ref} points to ${hist_link}"
-		    echo "touching ${hist_link}..."
-		    touch "${hist_link}"
-	  fi
-elif [ -e ${hist_ref} ]; then
-	  echo -n "exists and "
-	  if [ -f ${hist_ref} ]; then
+set -e
+
+# check save directory
+if [ -d "${save_dir}" ]; then
+	  echo "save dir ${save_dir} found"
+
+    # if the save directory exists, history should be saved there
+    hist_save=${save_dir}/${hist_name}
+    
+    # check if the history file is a link
+    echo -n "${hist_ref} is a "    
+    if [ -L ${hist_ref} ]; then
+        echo -n "link and "
+        # check if the link is valid
+	      if [ -e ${hist_ref} ]; then
+            # check if the link points where we want it
+            if [[ "${hist_ref}" -ef "${hist_save}" ]];then
+                echo "already points to ${hist_save}"
+
+                # you're done!
+            else
+		            echo -en "$points to "
+		            echo -en "${VALID}valid${NORMAL} link "
+                hist_link=$(reaklink -f ${hist_ref})
+                echo "${hist_link}"
+
+                # add link to list
+                list_in+=( "${hist_link}")                
+                # remove bad link
+                echo "remove"
+                #rm -v "${hist_ref}"
+                # re-link
+                
+            fi
+	      else
+		        echo -e "${BROKEN}broken${NORMAL} ${UL}link${NORMAL}"
+		        echo "${hist_ref} points to ${hist_link}"
+
+            # if link points to the correct location, touch link to create dummy file            
+		        echo "touching ${hist_link}..." 
+		        #touch "${hist_link}"
+            # otherwise delete link
+	      fi
+    else
+        echo "not a link"
+
+        # check if the original file exits
+        if [ -f ${hist_ref} ]; then
+		        echo -e "is a regular ${UL}file${NORMAL}"
+            #hist_temp1=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
+            #list_in+=( "${hist_temp1}" )
+            #mv -nv "${hist_ref}" "${hist_temp1}"
+
+            # check if the target exists
+            echo -n "indented link name file ${hist_save} "
+            if [ -f ${hist_save} ]; then
+                echo "exits"
+                hist_temp2=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_save} +'%Y-%m-%d-t%H%M%S')
+                list_in+=( "${hist_temp2}" )
+                # move the existing file out of the way
+                echo "move link name"
+                mv -nv ${hist_save} ${hist_temp2}                
+            else
+                echo "does not exit"
+            fi
+
+            # move and re-link
+            echo "move link"
+            mv -nv "${hist_ref}" "${hist_save}"
+            echo "link target to link"
+            ln -sv "${hist_save}" "${hist_ref}"
+        else
+		        echo -e "${yellow}is not a file or link${NORMAL}"
+		        exit 1
+	      fi
+        
+    fi
+
+    hist_bak=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
+    
+else
+	  echo "save dir ${save_dir} NOT found"
+
+    if [ -f ${hist_ref} ]; then
 		    echo -e "is a regular ${UL}file${NORMAL}"
-	  else
+        hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
+    else
 		    echo -e "${yellow}is not a file or link${NORMAL}"
 		    exit 1
 	  fi
-else
- 	  echo -e "${BAD}${UL}does not exist${NORMAL}"
-	  exit 1
 fi
-test_file ${hist_ref}
 
-if [ -d "${save_dir}" ]; then
-	  echo "save dir ${save_dir} found"
-    hist_bak=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
-else
-	  echo "save dir ${save_dir} NOT found"
-    hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
-fi
+echo " backup file is $hist_bak"
+
 echo "backup history file"
 cp -pv $hist_ref ${hist_bak} | sed "s/^/${TAB}${fTAB}/"
 
 # set list of files to check
-list_in=${hist_ref}
+list_in+=( "${hist_ref}" )
+echo "${#list_in[@]} files in list"
+echo "${list_in[@]}"
+
 if [ $# -gt 0 ]; then
-    list_in+=" $@"
     echo "${TAB}list of arguments:"
     for arg in "$@"; do
         echo "${TAB}${fTAB}$arg"
+        list_in+=( "$arg" )
     done
+fi
 
+echo "${#list_in[@]} files in list"
+echo "${list_in[@]}"
+if [ ${#list_in[@]} -gt 0 ]; then
     echo "${TAB}list of files (input):"
-    for file in $list_in; do
+    for file in ${list_in[@]}; do
         echo "${TAB}${fTAB}$file"
     done
 fi
@@ -174,7 +245,7 @@ echo "${TAB}checking file list..."
 list_out=''
 list_del=''
 set +eE
-for hist_in in $list_in; do
+for hist_in in ${list_in[@]}; do
     echo -n "${TAB}${fTAB}${hist_in}... "
     if [ -f ${hist_in} ]; then
         echo -e "is a regular ${UL}file${NORMAL}"
