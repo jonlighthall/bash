@@ -30,7 +30,7 @@ fi
 # set target and link directories
 src_dir_logi=$(dirname "$src_name")
 proj_name=$(basename "$src_dir_logi")
-target_dir="${HOME}/utils/${proj_name}/bin"
+target_dir="${HOME}/utils/${proj_name}"
 link_dir=$HOME/bin
 
 # check directories
