@@ -491,13 +491,31 @@ for repo in $list; do
                         echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
                         if [[ $RETVAL == 1 ]]; then
                             itab
-                            echo -e "${TAB}${BAD}merge conflicts found!${NORMAL}"
+                            echo -e "${TAB}merge conflicts found!"
                             itab
                             if [ $(git diff --name-only --diff-filter=M | wc -l) -gt 0 ]; then
-                                echo -e "${TAB}${BAD}modified files found${NORMAL}:"
-                                git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[31m&\x1b[m/"
-                                dtab
-                                exit_on_fail
+                                echo -en "${TAB}modified files found, "
+                                if [ $(git diff -w --diff-filter=M | wc -l) -gt 0 ]; then
+                                    echo "modifications are non-trivial: "
+                                    git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[31m&\x1b[m/"
+                                    dtab 2                                
+                                    exit_on_fail
+                                else
+                                    echo "modifications are trivial: "
+                                    git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[33m&\x1b[m/"
+
+                                    echo "${TAB}checking out modified files..."
+                                    git diff --name-only --diff-filter=M | xargs -L 1 git checkout
+
+                                    
+                                    # reset RETVAL to stay in loop
+                                    RETVAL=137
+                                    dtab 2
+                                    continue
+
+                                    
+                                fi
+
                             else
                                 echo -e "${TAB}no modified files found"
                             fi
