@@ -491,11 +491,11 @@ for repo in $list; do
                         echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
                         if [[ $RETVAL == 1 ]]; then
                             itab
-                            echo -e "${TAB}merge conflicts found"
+                            echo -e "${TAB}${BAD}merge conflicts found!${NORMAL}"
                             itab
                             if [ $(git diff --name-only --diff-filter=M | wc -l) -gt 0 ]; then
-                                echo -e "${TAB}modified files found"
-                                git diff --name-only --diff-filter=M | sed "s/^/${fTAB}/"
+                                echo -e "${TAB}${BAD}modified files found${NORMAL}:"
+                                git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[31m&\x1b[m/"
                                 dtab
                                 exit_on_fail
                             else
