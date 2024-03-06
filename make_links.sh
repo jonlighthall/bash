@@ -3,22 +3,13 @@
 # get starting time in nanoseconds
 start_time=$(date +%s%N)
 
-utils_dir="${HOME}/utils"
-bash_utils_dir="${utils_dir}/bash"
-
 # load formatting
-fpretty="${bash_utils_dir}/.bashrc_pretty"
+fpretty=${HOME}/config/.bashrc_pretty
 if [ -e "$fpretty" ]; then
     source "$fpretty"
     set_traps
     # reset tab
     rtab
-fi
-
-# load linking scripts
-flink="${bash_utils_dir}/.bash_links"
-if [ -e "$flink" ]; then
-    source "$flink"
 fi
 
 # determine if script is being sourced or executed
@@ -39,6 +30,7 @@ fi
 # set target and link directories
 src_dir_logi=$(dirname "$src_name")
 proj_name=$(basename "$src_dir_logi")
+utils_dir="${HOME}/utils"
 target_dir="${utils_dir}/${proj_name}"
 link_dir=$HOME/bin
 

@@ -6,7 +6,7 @@
 # Apr 2023 JCL
 
 # load formatting
-fpretty=${HOME}/utils/bash/.bashrc_pretty
+fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
 fi

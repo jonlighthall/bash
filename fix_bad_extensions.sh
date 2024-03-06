@@ -5,12 +5,12 @@
 # Nov 2021 JCL
 
 # load formatting
-fpretty=${HOME}/utils/bash/.bashrc_pretty
+fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-	set_traps
+	  set_traps
+    itab
 fi
-TAB+=${fTAB:='   '}
 
 # print source name at start
 if (return 0 2>/dev/null); then
@@ -34,18 +34,18 @@ else
     echo -n "${TAB}target directory $1 "
     if [[ -d $1 ]]; then
         echo "found"
-        TAB+=$fTAB
+        itab
         for bad in bat bin cmd csh exe gz osx out prf ps ps1; do
             echo "${TAB}replacing \".$bad\" with \"${sep}${bad}\"..."
             for fname in $(find $1 -name "*.${bad}"); do
                 mv -nv "$fname" "$(echo $fname | sed "s/\.$bad/$sep$bad/")" | sed "s/^/${TAB}${fTAB}/"
             done
         done
-        TAB=${TAB#$fTAB}
+        dtab
     else
         echo "not found"
         exit 1
     fi
 fi
 
-TAB=${TAB#$fTAB}
+dtab
