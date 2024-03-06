@@ -37,10 +37,11 @@ fi
 
 # print display
 echo -n " display: "
-if [ -z $DISPLAY ]; then
+if [ -z ${DISPLAY+dummy} ]; then
     echo -e "\E[31mnot set\E[0m"
+else
+	echo "$DISPLAY"
 fi
-echo "$DISPLAY"
 
 # print OS information
 echo -n "      OS: "
