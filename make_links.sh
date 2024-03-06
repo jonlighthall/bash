@@ -17,7 +17,7 @@ if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
-# exit on errors
+    # exit on errors
     set -e
 fi
 # print source name at start
@@ -30,8 +30,7 @@ fi
 # set target and link directories
 src_dir_logi=$(dirname "$src_name")
 proj_name=$(basename "$src_dir_logi")
-utils_dir="${HOME}/utils"
-target_dir="${utils_dir}/${proj_name}"
+target_dir="${HOME}/utils/${proj_name}/bin"
 link_dir=$HOME/bin
 
 # check directories
@@ -97,6 +96,7 @@ for my_link in \
     link=${link_dir}/${my_link}
 
     # create link
+    decho "linking $target to $link..."
     do_link_exe "$target" "$link"
 done
 bar 38 "--------- Done Making Links ----------"
