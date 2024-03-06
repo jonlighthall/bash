@@ -56,6 +56,9 @@ echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
 src_dir_logi=${BASH_SOURCE%/*}
 echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
 
+# load check repos script
+source "${src_dir_phys}/check_repos.sh"
+
 # save and print starting directory
 start_dir=$PWD
 echo "starting directory = ${start_dir}"
@@ -282,7 +285,8 @@ for repo in $list; do
             if [ $DEBUG -ge 0 ]; then
                 cbar "${BOLD}check remotes...${NORMAL}"
             fi
-            source "${src_dir_phys}/check_repos.sh"
+
+            check_repos
 
             # parse remote
             upstream_refspec=${remote_tracking_branch#*/}
@@ -780,7 +784,7 @@ if [ $DEBUG -ge 0 ]; then
     else
         host_OK=$(echo "${host_OK}" | sort -n)
         echo -e "${GOOD}${host_OK}${NORMAL}" | head -n 1
-        echo -e "${GOOD}${host_OK}${NORMAL}" | tail +2 | sed "s/^/${list_indent}/"
+        echo -e "${GOOD}${host_OK}${NORMAL}" | tail -n +2 | sed "s/^/${list_indent}/"
     fi
 
     # print bad hosts
