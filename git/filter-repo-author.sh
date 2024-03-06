@@ -5,7 +5,7 @@ if [ ! -z $TAB ]; then
 fi
 
 # load formatting
-fpretty=${HOME}/utils/bash/.bashrc_pretty
+fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
 fi
@@ -80,7 +80,7 @@ git filter-repo $@ --partial --commit-callback '
             commit.author_name = correct_name
 '
 
-TAB=${TAB#$fTAB}
+dtab
 
 # print time at exit
 echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
