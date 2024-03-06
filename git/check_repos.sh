@@ -10,7 +10,8 @@
 # Apr 2023 JCL
 
 # get starting time in nanoseconds
-declare -i start_time=$(date +%s%N)
+function check_repos() {
+local -i start_time=$(date +%s%N)
 
 # set tab
 called_by=$(ps -o comm= $PPID)
@@ -261,3 +262,4 @@ if (return 0 2>/dev/null); then
 else
     exit 0
 fi
+}
