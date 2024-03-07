@@ -35,7 +35,7 @@ if (return 0 2>/dev/null); then
 else
     RUN_TYPE="executing"
     # exit on errors
-    set -eE
+    set -e
     # print note
     echo "NB: ${BASH_SOURCE##*/} has not been sourced"
     echo "    user SSH config settings MAY not be loaded??"
