@@ -31,7 +31,6 @@ decho "DEBUG = $DEBUG"
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
-    set -T +e
 else
     RUN_TYPE="executing"
     # exit on errors
@@ -70,10 +69,10 @@ if [ -z "${check_git:+dummy}" ]; then
         echo -e "${GOOD}OK${NORMAL} Git is defined"
         # get Git version
         git --version | sed "s/^/${fTAB}/"
-        git_ver=$(git --version | awk '{print $3}')
-        git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-        git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-        git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
+        export git_ver=$(git --version | awk '{print $3}')
+        export git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+        export git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+        export git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
         export check_git=false
     else
         echo -e "${BAD}FAIL${NORMAL} Git not defined"
