@@ -11,7 +11,6 @@
 
 # get starting time in nanoseconds
 function check_repos() {
-    trap 'print_return $?; trap - RETURN' RETURN
     local -i start_time=$(date +%s%N)
 
     # set tab
@@ -37,11 +36,10 @@ function check_repos() {
     # determine if script is being sourced or executed and add conditional behavior
     if (return 0 2>/dev/null); then
         RUN_TYPE="sourcing"
-        set -T +e
+        set +e
     else
         RUN_TYPE="executing"
         set -e
-      
     fi
 
     # show good hosts
@@ -259,5 +257,6 @@ function check_repos() {
 
     decho "done"
     # add return code for parent script
-return 0
+    trap 'print_return $?; trap - RETURN' RETURN
+    return 0
 }
