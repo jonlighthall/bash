@@ -161,6 +161,7 @@ export host_OK=''
 
 # list failures
 loc_fail=''
+unset upstream_fail
 fetch_fail=''
 pull_fail=''
 push_fail=''
@@ -257,7 +258,8 @@ for repo in $list; do
             set -e
             if [ -z ${remote_tracking_branch+default} ]; then
                 echo "${TAB}no remote tracking branch set for current branch"
-                echo "skipping..."
+                decho "skipping..."
+                upstream_fail+=( "${repo}" )
                 continue
             else
                 upstream_repo=${remote_tracking_branch%%/*}
@@ -792,10 +794,11 @@ if [ $DEBUG -ge 0 ]; then
         host_OK=$(echo "${host_OK}" | sort -n)
         echo -e "${GOOD}${host_OK}${NORMAL}" | head -n 1
         echo -e "${GOOD}${host_OK}${NORMAL}" | tail -n +2 | sed "s/^/${list_indent}/"
+        echo
     fi
 
     # print bad hosts
-    echo -ne "\n${TAB}     bad hosts: "
+    echo -ne "${TAB}     bad hosts: "
     if [ -z "$host_bad" ]; then
         echo "none"
     else
@@ -825,6 +828,17 @@ fi
 if [ $n_match -gt 0 ]; then
     echo "       matched: ${n_match} ($1)"
 fi
+
+# parse upstream branch
+if [ ${#upstream_fail[@]} -gt 0 ]; then
+    echo -en "   no upstream: ${yellow}"
+    (
+        for repo in ${upstream_fail[@]}; do 
+            echo "${repo}"
+        done
+        ) | sed "1! {s/^/${list_indent}/}"
+fi
+echo -en "${NORMAL}"
 
 # fetched
 echo -n "       fetched: "
