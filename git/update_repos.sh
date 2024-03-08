@@ -17,7 +17,8 @@ else
 fi
 
 # set debug level
-declare -i DEBUG=0
+declare -i DEBUG=1
+set -T
 
 # load formatting and functions
 fpretty=${HOME}/config/.bashrc_pretty
@@ -247,9 +248,16 @@ for repo in $list; do
             echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
             ((++n_git))
             # parse remote
-            remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
+            unset_traps
+            set +e
+            set_color
+            remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream}) || unset remote_tracking_branch
+            unset_color
+            set_traps
+            set -e
             if [ -z ${remote_tracking_branch+default} ]; then
                 echo "${TAB}no remote tracking branch set for current branch"
+                echo "skipping..."
                 continue
             else
                 upstream_repo=${remote_tracking_branch%%/*}
