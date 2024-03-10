@@ -234,6 +234,24 @@ function exit_on_fail() {
     fi
 }
 
+function check_mod() {
+    # check for modified files
+    local list_mod=$(git diff --name-only --diff-filter=M)
+    if [[ ! -z "${list_mod}" ]]; then
+        # print file list
+        echo -e "modified: ${yellow}"
+        echo "${list_mod}" | sed "s/^/${fTAB}/"
+        echo -en "${NORMAL}"
+        # add repo to list
+        mod_repos+="$repo "
+        # add to files to list
+        if [ ! -z ${mod_files:+dummy} ]; then
+            mod_files+=$'\n'
+        fi
+        mod_files+=$(echo "${list_mod}" | sed "s;^;${repo}/;")
+    fi
+}
+
 for repo in $list; do
     start_new_line
     hline 70
@@ -266,6 +284,7 @@ for repo in $list; do
                 echo "${TAB}no remote tracking branch set for current branch"
                 decho "skipping..."
                 upstream_fail+=( "${repo}" )
+                check_mod                
                 continue
             else
                 upstream_repo=${remote_tracking_branch%%/*}
@@ -519,7 +538,8 @@ for repo in $list; do
                                 if [ $(git diff -w --diff-filter=M | wc -l) -gt 0 ]; then
                                     echo "modifications are non-trivial: "
                                     git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[31m&\x1b[m/"
-                                    dtab 2                                
+                                    dtab 2
+                                    check_mod                
                                     exit_on_fail
                                 else
                                     echo "modifications are trivial: "
@@ -527,16 +547,12 @@ for repo in $list; do
 
                                     echo "${TAB}checking out modified files..."
                                     git diff --name-only --diff-filter=M | xargs -L 1 git checkout
-
                                     
                                     # reset RETVAL to stay in loop
                                     RETVAL=137
                                     dtab 2
-                                    continue
-
-                                    
+                                    continue                                    
                                 fi
-
                             else
                                 echo -e "${TAB}no modified files found"
                             fi
@@ -723,22 +739,7 @@ for repo in $list; do
                 fi
             fi
 
-            # check for modified files
-            unset list_mod
-            list_mod=$(git diff --name-only --diff-filter=M)
-            if [[ ! -z "${list_mod}" ]]; then
-                # print file list
-                echo -e "modified: ${yellow}"
-                echo "${list_mod}" | sed "s/^/${fTAB}/"
-                echo -en "${NORMAL}"
-                # add repo to list
-                mod_repos+="$repo "
-                # add to files to list
-                if [ ! -z ${mod_files:+dummy} ]; then
-                    mod_files+=$'\n'
-                fi
-                mod_files+=$(echo "${list_mod}" | sed "s;^;${repo}/;")
-            fi
+            check_mod
 
             # check for stash entries
             N_stash=$(git stash list | wc -l)
