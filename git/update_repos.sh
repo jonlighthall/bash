@@ -17,7 +17,7 @@ else
 fi
 
 # set debug level
-declare -i DEBUG=1
+declare -i DEBUG=2
 set -T
 
 # load formatting and functions
@@ -202,7 +202,12 @@ declare -r to_base="${to_base0}"
 # beautify settings
 GIT_HIGHLIGHT='\E[7m'
 function set_color() {
-    echo -ne "\e[38;5;173m"
+    # get color index
+    local -i idx
+    unset idx
+    dbg2idx 3
+    # set color
+    echo -ne "${dcolor[$idx]}"
 }
 function unset_color() {
     echo -ne "\e[0m"
@@ -212,7 +217,7 @@ function do_cmd() {
     cmd=$(echo $@)
     itab
     set_color
-    $cmd 2> >(sed "s/.*/${TAB}\x1b[38;5;38m&\x1b[m/")
+    $cmd 2> >(sed "s/.*/${TAB}&/")
     RETVAL=$?
     unset_color
     dtab
@@ -251,6 +256,7 @@ for repo in $list; do
             # parse remote
             unset_traps
             set +e
+            decho "${TAB}checking remote tracking branch..."
             set_color
             remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream}) || unset remote_tracking_branch
             unset_color
@@ -300,7 +306,7 @@ for repo in $list; do
             # parse remote
             upstream_refspec=${remote_tracking_branch#*/}
             # print remote parsing
-            if [ $DEBUG -ge 0 ]; then
+            if [ $DEBUG -gt 0 ]; then
                 cbar "${BOLD}parse remote tracking branch...${NORMAL}"
                 (
                     echo -e "${TAB}remote tracking branch+ ${blue}${remote_tracking_branch}${NORMAL}"
@@ -346,7 +352,7 @@ for repo in $list; do
             fi
 
             # print host parsing
-            if [ $DEBUG -ge 0 ]; then
+            if [ $DEBUG -gt 0 ]; then
                 cbar "${BOLD}parse remote host...${NORMAL}"
                 (
                     echo "${TAB}upsream url+ ${upstream_url}"
@@ -377,6 +383,8 @@ for repo in $list; do
             cmd_base="git fetch"
             if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
                 cmd_base+=" --verbose"
+            else
+                cmd_base+=" --quiet"
             fi
             cmd="${to}${cmd_base}"
             RETVAL=137
@@ -836,7 +844,7 @@ if [ ${#upstream_fail[@]} -gt 0 ]; then
         for repo in ${upstream_fail[@]}; do 
             echo "${repo}"
         done
-        ) | sed "1! {s/^/${list_indent}/}"
+    ) | sed "1! {s/^/${list_indent}/}"
 fi
 echo -en "${NORMAL}"
 
