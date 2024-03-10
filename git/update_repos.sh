@@ -16,9 +16,9 @@ else
     TAB+=${TAB+${fTAB:='   '}}
 fi
 
-# set debug level
-declare -i DEBUG=2
-set -T
+# set debug level if DEBUG is unset or null
+DEBUG=${DEBUG:-1}
+set -eT
 
 # load formatting and functions
 fpretty=${HOME}/config/.bashrc_pretty
@@ -381,7 +381,7 @@ for repo in $list; do
             to="${to_base} ${nsec}s "
             # concat commands
             cmd_base="git fetch"
-            if [ -z ${DEBUG:+dummy} ] || [ $DEBUG -gt 0 ]; then
+            if [ $DEBUG -gt 0 ]; then
                 cmd_base+=" --verbose"
             else
                 cmd_base+=" --quiet"
