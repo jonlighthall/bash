@@ -269,44 +269,54 @@ for repo in $list; do
         RETVAL=$?
         set_traps
         if [[ $RETVAL -eq 0 ]]; then
-            echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+            echo -e "${GOOD}OK${NORMAL}"
             ((++n_git))
             # parse remote
             unset_traps
             set +e
-            decho "${TAB}checking remote tracking branch..."
-            set_color
-            remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream}) || unset remote_tracking_branch
-            unset_color
-            set_traps
-            set -e
-            if [ -z ${remote_tracking_branch+default} ]; then
+            echo -n "checking remote tracking branch... "
+            git rev-parse --abbrev-ref @{upstream} &>/dev/null
+            RETVAL=$?
+            if [[ $RETVAL -eq 0 ]]; then
+                echo -e "${GOOD}OK${NORMAL}"
+            else
+                echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                set_color
+                git rev-parse --abbrev-ref @{upstream} 2>&1 | sed "s/^/${TAb}/"
+                unset_color
                 echo "${TAB}no remote tracking branch set for current branch"
                 decho "skipping..."
                 upstream_fail+=( "${repo}" )
                 check_mod                
                 continue
+            fi            
+            set_traps
+            set -e
+            remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
+            
+            upstream_repo=${remote_tracking_branch%%/*}
+            if [ $git_ver_maj -lt 2 ]; then
+                upstream_url=$(git remote -v | grep ${upstream_repo} | awk '{print $2}' | uniq)
             else
-                upstream_repo=${remote_tracking_branch%%/*}
-                if [ $git_ver_maj -lt 2 ]; then
-                    upstream_url=$(git remote -v | grep ${upstream_repo} | awk '{print $2}' | uniq)
-                else
-                    upstream_url=$(git remote get-url ${upstream_repo})
-                fi
-                # add remote to list
-                echo "${upstream_url}" >>${list_remote}
+                upstream_url=$(git remote get-url ${upstream_repo})
             fi
-
+            # add remote to list
+            echo "${upstream_url}" >>${list_remote}
+            
             # check against argument
             if [ $# -gt 0 ]; then
-                echo -n "matching argument ""$1""... "
-                if [[ $upstream_url =~ $1 ]]; then
-                    echo -e "${GOOD}OK${NORMAL}"
-                    ((++n_match))
-                else
-                    echo -e "${gray}SKIP${NORMAL}"
-                    continue
-                fi
+                for arg in $@; do
+                    echo -en "matching argument \x1b[36m$arg\x1b[m... "
+                    if [[ $upstream_url =~ $arg ]]; then
+                        echo -e "${GOOD}OK${NORMAL}"
+                        ((++n_match))
+                        break
+                    else
+                        echo -e "${gray}SKIP${NORMAL}"
+                        continue
+                    fi
+                done
+                continue
             fi
 
             # add to list
@@ -420,7 +430,7 @@ for repo in $list; do
                 dt_fetch=$((${t_end} - ${t_start}))
                 echo -en "${GIT_HIGHLIGHT} fetch ${NORMAL} "
                 if [[ $RETVAL == 0 ]]; then
-                    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                    echo -e "${GOOD}OK${NORMAL}"
                     ((++n_fetch))
                     break
                 else
@@ -606,13 +616,13 @@ for repo in $list; do
                                     echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL3${NORMAL}"
                                     exit || return
                                 else
-                                    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL2${NORMAL}"
+                                    echo -e "${GOOD}OK${NORMAL}"
                                     ((++n_fpull))
                                 fi
                             fi
                         fi
                     else
-                        echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                        echo -e "${GOOD}OK${NORMAL}"
                         ((++n_pull))
                         if [ ! -z ${pull_OK:+dummy} ]; then
                             pull_OK+=$'\n'"$repo"
@@ -719,7 +729,7 @@ for repo in $list; do
                             cmd="${to}${cmd_base}"
                         fi
                     else
-                        echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                        echo -e "${GOOD}OK${NORMAL}"
                         ((++n_push))
                         if [ ! -z ${push_OK:+dummy} ]; then
                             push_OK+=$'\n'"$repo"
