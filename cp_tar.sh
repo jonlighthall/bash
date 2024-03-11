@@ -52,7 +52,7 @@ while read line; do
 
 		big_ver="${ver:0:2}"
 		echo "expected version is ${maj_ver}.${min_ver}.${pat_ver} or ${big_ver}"
-		dir_ver=${dir_mv%/*}/${big_ver}
+		dir_ver=$(dirname ${dir_mv})/${big_ver}
 		mkdir -pv ${dir_ver}
 		echo -n "${TAB}checking output ${dir_ver}/${base}... "
 		if [ -f "${dir_ver}/${base}" ]; then

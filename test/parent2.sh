@@ -3,8 +3,8 @@
 # get source name
 declare src_name=$(readlink -f $BASH_SOURCE)
 # get source path
-declare src_dir_phys=${src_name%/*}
-declare src_dir_logi=${BASH_SOURCE%/*}
+declare src_dir_phys=$(dirname ${src_name})
+declare src_dir_logi=$(dirname ${BASH_SOURCE})
 # get starting directory
 declare start_dir=$PWD
 
