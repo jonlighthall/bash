@@ -50,10 +50,10 @@ fi
 
 # print source path
 ## physical
-src_dir_phys=${src_name%/*}
+src_dir_phys=$(dirname ${src_name})
 echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
 ## logical
-src_dir_logi=${BASH_SOURCE%/*}
+src_dir_logi=$(dirname ${BASH_SOURCE})
 echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
 
 # load check repos script
@@ -269,7 +269,7 @@ for repo in $list; do
         RETVAL=$?
         set_traps
         if [[ $RETVAL -eq 0 ]]; then
-            echo -e "${GOOD}OK${NORMAL}"
+            echo -e "${GOOD}OK${NORMAL} "
             ((++n_git))
             # parse remote
             unset_traps
@@ -277,9 +277,7 @@ for repo in $list; do
             echo -n "checking remote tracking branch... "
             git rev-parse --abbrev-ref @{upstream} &>/dev/null
             RETVAL=$?
-            if [[ $RETVAL -eq 0 ]]; then
-                echo -e "${GOOD}OK${NORMAL}"
-            else
+            if [[ $RETVAL -ne 0 ]]; then
                 echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
                 set_color
                 git rev-parse --abbrev-ref @{upstream} 2>&1 | sed "s/^/${TAb}/"
@@ -293,6 +291,7 @@ for repo in $list; do
             set_traps
             set -e
             remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
+            echo "$remote_tracking_branch"
             
             upstream_repo=${remote_tracking_branch%%/*}
             if [ $git_ver_maj -lt 2 ]; then
