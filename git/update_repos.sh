@@ -16,15 +16,16 @@ else
     TAB+=${TAB+${fTAB:='   '}}
 fi
 
-# set debug level if DEBUG is unset or null
-DEBUG=${DEBUG:-1}
+# set debug level
+# substitue default value if DEBUG is unset or null
+DEBUG=${DEBUG:-0}
 set -eT
 
 # load formatting and functions
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-    set_traps
+ #   set_traps
 fi
 
 decho "DEBUG = $DEBUG"
@@ -48,12 +49,16 @@ if [ ! "$BASH_SOURCE" = "$src_name" ]; then
     echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
 fi
 
+# get source path
+## physical (canonical)
+src_dir_phys=$(dirname "$src_name")
+## logical (links)
+src_dir_logi=$(dirname "$BASH_SOURCE")
+
 # print source path
 ## physical
-src_dir_phys=$(dirname ${src_name})
 echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
 ## logical
-src_dir_logi=$(dirname ${BASH_SOURCE})
 echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
 
 # load check repos script
