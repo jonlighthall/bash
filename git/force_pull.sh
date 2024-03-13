@@ -47,11 +47,11 @@ fi
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
-    set -T +e
+    set +e
 else
     RUN_TYPE="executing"
     # exit on errors
-    set -eE
+    set -e
 fi
 
 # print run type and source name
@@ -63,10 +63,10 @@ fi
 
 # print source path
 ## physical
-src_dir_phys=$(dirname ${src_name})
+src_dir_phys=$(dirname "${src_name}")
 echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
 ## logical
-src_dir_logi=$(dirname ${BASH_SOURCE})
+src_dir_logi=$(dirname "${BASH_SOURCE}")
 echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
 
 # save and print starting directory

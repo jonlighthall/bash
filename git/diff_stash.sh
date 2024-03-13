@@ -21,12 +21,12 @@ fi
 # print source name at start
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
-    set -TE +e
+    set +e
     trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
 else
     RUN_TYPE="executing"
     # exit on errors
-    set -eE
+    set -e
     trap 'print_error $LINENO $? $BASH_COMMAND' ERR
     # print time at exit
     trap print_exit EXIT

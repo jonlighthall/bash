@@ -103,7 +103,7 @@ function set_traps() {
 	fi
 	echo -e "\E[7m${RUN_TYPE}\E[0m"
 	# trace ERR traps
-	set -E
+#	set -E
 	echo "the following traps are saved"
 	if [ -z "${save_traps+default}" ]; then
 		echo "none"
