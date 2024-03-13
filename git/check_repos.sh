@@ -101,7 +101,7 @@ function check_repos() {
             itab
         fi
         # get URL
-        echo "$remote_name"
+        echo -e "\x1b[0;36m$remote_name\x1b[0m"
         local remote_url
         if [ $git_ver_maj -lt 2 ]; then
             remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
