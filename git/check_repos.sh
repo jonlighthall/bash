@@ -23,7 +23,10 @@ function check_repos() {
     fi
 
     # set debug level
-    local -i DEBUG=${DEBUG:=0} # default value if DEBUG is unset or null
+    # automaticly set default value if DEBUG is unset or null
+    local -i DEBUG=${DEBUG:=0}
+    # manually set
+    #DEBUG=0
 
     # load formatting and functions
     local fpretty=${HOME}/config/.bashrc_pretty
@@ -122,8 +125,8 @@ function check_repos() {
                 echo "  repo: ${remote_repo}"
                 # change remote to SSH
                 remote_ssh="git@${remote_host}:${remote_repo}"
-                echo " change URL to ${remote_ssh}..."
-                echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
+                echo -e "${yellow} change URL to ${remote_ssh}..."
+                echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}${NORMAL}"
                 git remote set-url ${remote_name} ${remote_ssh}
             else
                 remote_pro="local"
@@ -226,6 +229,7 @@ function check_repos() {
             fi # retval 0
         else
             decho "skipping connection check..."
+            dtab 
             continue
         fi # do check
 
