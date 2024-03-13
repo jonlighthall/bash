@@ -83,7 +83,7 @@ else
 		echo "${TAB}printing one results for every $nprint lines"
 
 		# parse input
-		dir1=$(dirname $file_in)
+		dir1=$(dirname "$file_in")
 		echo "${TAB}input dir = $dir1"
 		fname1=$(basename $file_in)
 		echo "${TAB}input file = $fname1"

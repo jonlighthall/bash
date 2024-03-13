@@ -42,10 +42,10 @@ fi
 
 # print source path
 ## physical
-src_dir_phys=$(dirname ${src_name})
+src_dir_phys=$(dirname "${src_name}")
 echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
 ## logical
-src_dir_logi=$(dirname ${BASH_SOURCE})
+src_dir_logi=$(dirname "${BASH_SOURCE}")
 echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
 
 # set sort order (C sorting is the most consistient)

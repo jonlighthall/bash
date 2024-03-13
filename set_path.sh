@@ -14,8 +14,8 @@ if ! (return 0 2>/dev/null); then
 fi
 
 # Path additions
-path=$(dirname $PWD)
-path+=( $(dirname $path) )
+path=$(dirname "$PWD")
+path+=( $(dirname "$path") )
 
 for ADDPATH in ${path[@]}; do
 	  echo -en "   \x1b[33m${ADDPATH}\x1b[m... "
