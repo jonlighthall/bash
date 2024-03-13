@@ -41,7 +41,7 @@ else
     echo "input file: ${file_in}"
 
     # set default output file name to match input
-    dir1=$(dirname $file_in)
+    dir1=$(dirname "$file_in")
     echo "input dir = $dir1"
     fname1=$(basename $file_in)
     echo "input file = $fname1"

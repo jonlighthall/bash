@@ -74,7 +74,7 @@ else
 				echo -ne " looking for ${fname}... "
 			fi
 			# define subdir
-			dir_par=$(dirname ${fname})
+			dir_par=$(dirname "${fname}")
 			dir_mv=${dir_par}/$2
 			if ! [ -d ${dir_mv} ]; then
 				echo "${dir_mv} not found"

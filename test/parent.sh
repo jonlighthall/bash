@@ -167,7 +167,7 @@ fi
 # call child process
 echo
 echo "calling child process..."
-source_dir=$(dirname $BASH_SOURCE)
+source_dir=$(dirname "$BASH_SOURCE")
 ${source_dir}/child.sh
 
 # print time at exit
