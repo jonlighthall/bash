@@ -173,6 +173,7 @@ function check_repos() {
         decho "do_connect = $do_connect"
         dtab
         # check connection before proceeding
+        set -ET
         unset_traps
         if [ ${do_connect} = 'true' ]; then
             echo -n "${TAB}${fTAB}checking connection... "
