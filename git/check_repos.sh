@@ -125,7 +125,7 @@ function check_repos() {
                 echo "  repo: ${remote_repo}"
                 # change remote to SSH
                 remote_ssh="git@${remote_host}:${remote_repo}"
-                echo -e "${yellow} change URL to ${remote_ssh}..."
+                echo -e "${YELLOW} change URL to ${remote_ssh}..."
                 echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}${RESET}"
                 git remote set-url ${remote_name} ${remote_ssh}
             else
@@ -135,7 +135,7 @@ function check_repos() {
         if [[ "${remote_pro}" == "SSH" ]]; then
             # default to checking host
             local do_connect=true
-            host_stat=$(echo -e "${yellow}CHECK${RESET}")
+            host_stat=$(echo -e "${YELLOW}CHECK${RESET}")
             decho "do_connect = $do_connect"
             itab
             # check remote host name against list of checked hosts
@@ -201,7 +201,7 @@ function check_repos() {
                 host_OK+=${remote_host}
             else
                 if [[ $RETVAL == 1 ]]; then
-                    echo -e "${TAB}${fTAB}${yellow}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+                    echo -e "${TAB}${fTAB}${YELLOW}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
                     if [[ $remote_host =~ "github.com" ]]; then
                         decho "host is github"
                         # Github will return 1 if everything is working

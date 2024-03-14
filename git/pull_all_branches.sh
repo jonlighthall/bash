@@ -33,7 +33,7 @@ if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "no remote tracking branch set for current branch"
 else
     remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "remote tracking branch is ${blue}${remote_tracking_branch}${RESET}"
+    echo -e "remote tracking branch is ${BLUE}${remote_tracking_branch}${RESET}"
     remote_name=${remote_tracking_branch%%/*}
     echo "remote is name $remote_name"
     remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | sort -u)
@@ -45,7 +45,7 @@ fi
 bar 56 "branch"
 # parse branches
 branch_local=$(git branch | grep \* | sed 's/^\* //')
-echo -e " local branch is ${green}${branch_local}${RESET}"
+echo -e " local branch is ${GREEN}${branch_local}${RESET}"
 branch_list=$(git branch -va | sed 's/^*/ /' | awk '{print $1}' | sed 's|remotes/.*/||' | sort -u | sed '/HEAD/d')
 echo "list of all branches: "
 echo "${branch_list}" | sed "s/^/${fTAB}/"
@@ -82,7 +82,7 @@ echo "start looping through branches..."
 for branch in $branch_list_pull; do
     bar 56 "$(git checkout $branch 2>&1)"
     remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "remote tracking branch is ${blue}${remote_tracking_branch}${RESET}"
+    echo -e "remote tracking branch is ${BLUE}${remote_tracking_branch}${RESET}"
     remote_name=${remote_tracking_branch%%/*}
 
     git fetch ${remote_name} ${branch}

@@ -15,7 +15,7 @@ do
 	echo -n "${thisTAB}$var "
 	# check if variable is set
     if [ -z ${!var+dummy} ]; then
-		echo -e "${yellow}unset${RESET}"
+		echo -e "${YELLOW}unset${RESET}"
 		continue
 	fi
 

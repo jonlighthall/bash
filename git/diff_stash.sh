@@ -22,7 +22,7 @@ fi
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
     set +e
-    trap 'echo -en "${yellow}RETURN${RESET}: ${BASH_SOURCE##*/} "' RETURN
+    trap 'echo -en "${YELLOW}RETURN${RESET}: ${BASH_SOURCE##*/} "' RETURN
 else
     RUN_TYPE="executing"
     # exit on errors
@@ -60,7 +60,7 @@ if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "${TAB}no remote tracking branch set for current branch"
 else
     remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "${TAB}remote tracking branch: ${blue}${remote_tracking_branch}${RESET}"
+    echo -e "${TAB}remote tracking branch: ${BLUE}${remote_tracking_branch}${RESET}"
     remote_name=${remote_tracking_branch%%/*}
     echo "${TAB}remote name: .......... $remote_name"
     remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
@@ -73,7 +73,7 @@ else
     echo "${TAB}remote branch: $branch_remote"
 
     branch_local=$(git branch | grep \* | sed 's/^\* //')
-    echo -e "${TAB} local branch: ${green}${branch_local}${RESET}"
+    echo -e "${TAB} local branch: ${GREEN}${branch_local}${RESET}"
     echo
 fi
 
