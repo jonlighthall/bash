@@ -19,12 +19,12 @@ if (return 0 2>/dev/null); then
 else
     RUN_TYPE="executing"
     set -eE
-    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
+    trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
+echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
 fi
 
 # parse remote
@@ -33,7 +33,7 @@ if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "no remote tracking branch set for current branch"
 else
     remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
+    echo -e "remote tracking branch is ${blue}${remote_tracking_branch}${RESET}"
     remote_name=${remote_tracking_branch%%/*}
     echo "remote is name $remote_name"
     remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | sort -u)
@@ -45,7 +45,7 @@ fi
 bar 56 "branch"
 # parse branches
 branch_local=$(git branch | grep \* | sed 's/^\* //')
-echo -e " local branch is ${green}${branch_local}${NORMAL}"
+echo -e " local branch is ${green}${branch_local}${RESET}"
 branch_list=$(git branch -va | sed 's/^*/ /' | awk '{print $1}' | sed 's|remotes/.*/||' | sort -u | sed '/HEAD/d')
 echo "list of all branches: "
 echo "${branch_list}" | sed "s/^/${fTAB}/"
@@ -82,7 +82,7 @@ echo "start looping through branches..."
 for branch in $branch_list_pull; do
     bar 56 "$(git checkout $branch 2>&1)"
     remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "remote tracking branch is ${blue}${remote_tracking_branch}${NORMAL}"
+    echo -e "remote tracking branch is ${blue}${remote_tracking_branch}${RESET}"
     remote_name=${remote_tracking_branch%%/*}
 
     git fetch ${remote_name} ${branch}
@@ -199,7 +199,7 @@ for i in 1; do
     git log ${remote_name}/${branch} --pretty=format:"%aN %aE" | sort | uniq -c | sort -n
     N=$(git log ${remote_name}/${branch} --pretty=format:"%aN %aE" | sort -u | wc -l)
     if [ $N -gt 1 ]; then
-        echo "${TAB}${GRH}more than one author on remote branch ${remote_name}/${branch} (N=$N)${NORMAL}"
+        echo "${TAB}${GRH}more than one author on remote branch ${remote_name}/${branch} (N=$N)${RESET}"
         echo "${TAB}filtering repo..."
         ${HOME}/utils/bash/git/filter-repo-author.sh $@
         echo "${TAB}done filtering repo"
@@ -268,9 +268,9 @@ for i in 1; do
                 hash_local=$(git rev-parse HEAD)
                 echo -n "${TAB}local and remote hashes..."
                 if [[ "$hash_remote" == "$hash_local" ]]; then
-                    echo -e "${GOOD}match${NORMAL}"
+                    echo -e "${GOOD}match${RESET}"
                 else
-                    echo -e "${BAD}no not match${NORMAL}"
+                    echo -e "${BAD}no not match${RESET}"
                     echo $hash_local
                     echo $hash_remote
 

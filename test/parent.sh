@@ -8,7 +8,7 @@ else
     RUN_TYPE="executing (not sourced)"
     # exit on errors
     set -eE
-    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
+    trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
 
 # load formatting
@@ -20,7 +20,7 @@ fi
 echo -e "\$BASH_SOURCE = $BASH_SOURCE"
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "        ${VALID}link${NORMAL} = $src_name"
+    echo -e "        ${VALID}link${RESET} = $src_name"
 fi
 
 echo
@@ -171,7 +171,7 @@ source_dir=$(dirname "$BASH_SOURCE")
 ${source_dir}/child.sh
 
 # print time at exit
-echo -en "${TAB}${PSDIR}$(basename $BASH_SOURCE)${NORMAL} "
+echo -en "${TAB}${PSDIR}$(basename $BASH_SOURCE)${RESET} "
 print_elap
 echo -en "\n${fTAB}DUMMY"
 if [ -z ${DUMMY+dummy} ]; then

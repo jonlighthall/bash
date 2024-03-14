@@ -17,12 +17,12 @@ if (return 0 2>/dev/null); then
 else
     RUN_TYPE="executing"
     set -e
-    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
+    trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
+echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
 fi
 
 # define random marker functions
@@ -170,5 +170,5 @@ echo -en "$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
 if command -v sec2elap &>/dev/null; then
     bash sec2elap ${SECONDS}
 else
-    echo "elapsed time is ${white}${SECONDS} sec${NORMAL}"
+    echo "elapsed time is ${white}${SECONDS} sec${RESET}"
 fi

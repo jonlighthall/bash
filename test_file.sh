@@ -17,25 +17,25 @@ else
 		if [ -L $arg ]; then
 			echo -n "is a "
 			if [ -e $arg ]; then
-				echo -e -n "${VALID}valid${NORMAL}"
+				echo -e -n "${VALID}valid${RESET}"
 			else
-				echo -e -n "${BROKEN}broken${NORMAL}"
+				echo -e -n "${BROKEN}broken${RESET}"
 			fi
-			echo -e " ${UL}link${NORMAL}"
+			echo -e " ${UL}link${RESET}"
 		elif [ -e $arg ]; then
 			echo -n "exists and "
 			if [ -f $arg ]; then
-				echo -e "is a regular ${UL}file${NORMAL}"
+				echo -e "is a regular ${UL}file${RESET}"
 			else
 				if [ -d $arg ]; then
-					echo -e "is a ${DIR}${UL}directory${NORMAL}"
+					echo -e "is a ${DIR}${UL}directory${RESET}"
 					exit 1
 				else
 					echo -e "${UL} is not a link, file, or directory"
 				fi
 			fi
 		else
-			echo -e "${BAD}${UL}does not exist${NORMAL}"
+			echo -e "${BAD}${UL}does not exist${RESET}"
 			exit 1
 		fi
 	done
