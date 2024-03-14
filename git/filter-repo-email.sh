@@ -23,7 +23,7 @@ if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "no remote tracking branch set for current branch"
 else
     branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "remote tracking branch is ${blue}${branch_tracking}${RESET}"
+    echo -e "remote tracking branch is ${BLUE}${branch_tracking}${RESET}"
     name_remote=${branch_tracking%%/*}
     echo "remote is name $name_remote"
     url_remote=$(git remote -v | grep ${name_remote} | awk '{print $2}' | sort -u)
@@ -33,7 +33,7 @@ else
     echo "remote branch is $branch_remote"
 fi
 branch_local=$(git branch | grep \* | sed 's/^\* //')
-echo -e " local branch is ${green}${branch_local}${RESET}"
+echo -e " local branch is ${GREEN}${branch_local}${RESET}"
 
 branch_list=$(git branch -va | sed 's/^*/ /' | awk '{print $1}' | sed 's|remotes/.*/||' | sort -u | sed '/HEAD/d')
 echo "list of branches: "

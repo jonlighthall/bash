@@ -193,7 +193,7 @@ if [ -d "${save_dir}" ]; then
             echo "link target to link"
             ln -sv "${hist_save}" "${hist_ref}"
         else
-		        echo -e "${yellow}is not a file or link${RESET}"
+		        echo -e "${YELLOW}is not a file or link${RESET}"
 		        exit 1
 	      fi
         
@@ -208,7 +208,7 @@ else
 		    echo -e "is a regular ${UL}file${RESET}"
         hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
     else
-		    echo -e "${yellow}is not a file or link${RESET}"
+		    echo -e "${YELLOW}is not a file or link${RESET}"
 		    exit 1
 	  fi
 fi
