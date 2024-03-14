@@ -27,7 +27,7 @@ fi
 echo "${TAB}${RUN_TYPE} $BASH_SOURCE..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
 fi
 
 # define trap

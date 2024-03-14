@@ -18,9 +18,9 @@ do
     RETVAL=$?
     echo -n "$fname "
     if [[ $RETVAL -eq 137 ]]; then
-	echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+	echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
     else
-	echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+	echo -e "${GOOD}OK${RESET} ${gray}RETVAL=$RETVAL${RESET}"
 	test_file $fname
     fi
 done

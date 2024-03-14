@@ -10,12 +10,12 @@ if (return 0 2>/dev/null); then
 else
     RUN_TYPE="executing"
     set -eE
-    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
+    trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
+echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
 fi
 
 # parse remote
@@ -23,7 +23,7 @@ if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "no remote tracking branch"
 else
     branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "remote tracking branch is ${blue}${branch_tracking}${NORMAL}"
+    echo -e "remote tracking branch is ${blue}${branch_tracking}${RESET}"
     name_remote=${branch_tracking%%/*}
     echo "remote is name $name_remote"
     url_remote=$(git remote -v | grep ${name_remote} | awk '{print $2}' | sort -u)
@@ -33,7 +33,7 @@ else
     echo "remote branch is $branch_remote"
 fi
 branch_local=$(git branch | grep \* | sed 's/^\* //')
-echo -e " local branch is ${green}${branch_local}${NORMAL}"
+echo -e " local branch is ${green}${branch_local}${RESET}"
 
 branch_list=$(git branch -va | sed 's/^*/ /' | awk '{print $1}' | sed 's|remotes/.*/||' | sort -u | sed '/HEAD/d')
 echo "list of branches: "
