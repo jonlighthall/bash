@@ -61,33 +61,15 @@ echo -e "${TAB}${gray}phys -> $src_dir_phys${RESET}"
 ## logical
 echo -e "${TAB}${gray}logi -> $src_dir_logi${RESET}"
 
-# load check repos script
-source "${src_dir_phys}/check_repos.sh"
+# load git utils
+fgit="${src_dir_phys}/lib_git.sh"
+if [ -e "$fgit" ]; then
+    source "$fgit"
+fi
+
 # save and print starting directory
 start_dir=$PWD
 echo "starting directory = ${start_dir}"
-
-# check if Git is defined
-if [ -z "${check_git:+dummy}" ]; then
-    echo -n "${TAB}Checking Git... "
-    if command -v git &>/dev/null; then
-        echo -e "${GOOD}OK${NORMAL} Git is defined"
-        # get Git version
-        git --version | sed "s/^/${fTAB}/"
-        export git_ver=$(git --version | awk '{print $3}')
-        export git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-        export git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-        export git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-        export check_git=false
-    else
-        echo -e "${BAD}FAIL${NORMAL} Git not defined"
-        if (return 0 2>/dev/null); then
-            return 1
-        else
-            exit 1
-        fi
-    fi
-fi
 
 # list repository paths, relative to home
 # settings
@@ -205,56 +187,6 @@ declare -r to_base="${to_base0}"
 
 # beautify settings
 GIT_HIGHLIGHT='\E[7m'
-function set_color() {
-    # get color index
-    local -i idx
-    unset idx
-    dbg2idx 3
-    # set color
-    echo -ne "${dcolor[$idx]}"
-}
-function unset_color() {
-    echo -ne "\e[0m"
-}
-
-function do_cmd() {
-    cmd=$(echo $@)
-    itab
-    set_color
-    $cmd 2> >(sed "s/.*/${TAB}&/")
-    RETVAL=$?
-    unset_color
-    dtab
-    return $RETVAL
-}
-
-function exit_on_fail() {
-    echo -e "       ${yellow}\x1b[7m${BASH_SOURCE[1]##*/} failed\x1b[0m"
-    local do_exit=true
-    if [[ $do_exit == true ]]; then
-        exit 1 || return 1
-    else
-        return 0
-    fi
-}
-
-function check_mod() {
-    # check for modified files
-    local list_mod=$(git diff --name-only --diff-filter=M)
-    if [[ ! -z "${list_mod}" ]]; then
-        # print file list
-        echo -e "modified: ${yellow}"
-        echo "${list_mod}" | sed "s/^/${fTAB}/"
-        echo -en "${NORMAL}"
-        # add repo to list
-        mod_repos+="$repo "
-        # add to files to list
-        if [ ! -z ${mod_files:+dummy} ]; then
-            mod_files+=$'\n'
-        fi
-        mod_files+=$(echo "${list_mod}" | sed "s;^;${repo}/;")
-    fi
-}
 
 for repo in $list; do
     start_new_line
