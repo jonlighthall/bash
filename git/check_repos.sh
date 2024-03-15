@@ -50,7 +50,7 @@ function check_repos() {
     else
         host_OK=$(echo "${host_OK}" | sort -n)
         decho
-        decho -e "${GOOD}${host_OK}${NORMAL}" | sed "$ ! s/^/${fTAB}/"
+        decho -e "${GOOD}${host_OK}${RESET}" | sed "$ ! s/^/${fTAB}/"
     fi
 
     # show bad hosts
@@ -61,14 +61,14 @@ function check_repos() {
     else
         host_bad=$(echo "${host_bad}" | sort -n)
         decho
-        decho -e "${BAD}${host_bad}${NORMAL}" | sed "$ ! s/^/${fTAB}/"
+        decho -e "${BAD}${host_bad}${RESET}" | sed "$ ! s/^/${fTAB}/"
     fi
 
     # check if Git is defined
     if [ -z "${check_git:+dummy}" ]; then
         echo -n "${TAB}Checking Git... "
         if command -v git &>/dev/null; then
-            echo -e "${GOOD}OK${NORMAL} Git is defined"
+            echo -e "${GOOD}OK${RESET} Git is defined"
             # get Git version
             git --version | sed "s/^/${fTAB}/"
             export git_ver=$(git --version | awk '{print $3}')
@@ -77,7 +77,7 @@ function check_repos() {
             export git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
             export check_git=false
         else
-            echo -e "${BAD}FAIL${NORMAL} Git not defined"
+            echo -e "${BAD}FAIL${RESET} Git not defined"
             if (return 0 2>/dev/null); then
                 return 1
             else
@@ -117,7 +117,7 @@ function check_repos() {
             remote_host=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
             if [[ "${remote_pro}" == "http"* ]]; then
                 # warn about HTTP remotes
-                remote_pro=${GRH}${remote_pro}${NORMAL}
+                remote_pro=${GRH}${remote_pro}${RESET}
                 remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
                 echo "  repo: ${remote_repo}"
                 # change remote to SSH
@@ -132,7 +132,7 @@ function check_repos() {
         if [[ "${remote_pro}" == "SSH" ]]; then
             # default to checking host
             local do_connect=true
-            host_stat=$(echo -e "${yellow}CHECK${NORMAL}")
+            host_stat=$(echo -e "${yellow}CHECK${RESET}")
             decho "do_connect = $do_connect"
             itab
             # check remote host name against list of checked hosts
@@ -142,7 +142,7 @@ function check_repos() {
                     for good_host in ${host_OK}; do
                         if [[ $remote_host =~ $good_host ]]; then
                             decho "${TAB}${remote_host} matches $good_host"
-                            host_stat=$(echo -e "${GOOD}OK${NORMAL}")
+                            host_stat=$(echo -e "${GOOD}OK${RESET}")
                             do_connect=false
                             break
                         fi
@@ -153,7 +153,7 @@ function check_repos() {
                     for bad_host in ${host_bad}; do
                         if [[ "$remote_host" == "$bad_host" ]]; then
                             decho "${TAB}${remote_host} matches $bad_host"
-                            host_stat=$(echo -e "${BAD}FAIL${NORMAL}")
+                            host_stat=$(echo -e "${BAD}FAIL${RESET}")
                             do_connect=false
                             break
                         fi
@@ -162,7 +162,7 @@ function check_repos() {
             fi
         else
             do_connect=false
-            host_stat=$(echo -e "${gray}CHECK${NORMAL}")
+            host_stat=$(echo -e "${gray}CHECK${RESET}")
         fi # SSH
 
         (
@@ -191,7 +191,7 @@ function check_repos() {
             RETVAL=$?
             set_traps
             if [[ $RETVAL == 0 ]]; then
-                echo -e "${TAB}${fTAB}${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                echo -e "${TAB}${fTAB}${GOOD}OK${RESET} ${gray}RETVAL=$RETVAL${RESET}"
                 # add to list
                 if [ ! -z ${host_OK:+dummy} ]; then
                     host_OK+=$'\n'
@@ -199,7 +199,7 @@ function check_repos() {
                 host_OK+=${remote_host}
             else
                 if [[ $RETVAL == 1 ]]; then
-                    echo -e "${TAB}${fTAB}${yellow}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                    echo -e "${TAB}${fTAB}${yellow}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
                     if [[ $remote_host =~ "github.com" ]]; then
                         decho "host is github"
                         # Github will return 1 if everything is working
@@ -217,7 +217,7 @@ function check_repos() {
                         host_bad+=${remote_host}
                     fi
                 else
-                    echo -e "${TAB}${fTAB}${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                    echo -e "${TAB}${fTAB}${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
                     # add to list
                     if [ ! -z ${host_bad:+dummy} ]; then
                         host_bad+=$'\n'
@@ -246,7 +246,7 @@ function check_repos() {
         else
             host_OK=$(echo "${host_OK}" | sort -n)
             echo
-            echo -e "${GOOD}${host_OK}${NORMAL}" | sed "s/^/${fTAB}/"
+            echo -e "${GOOD}${host_OK}${RESET}" | sed "s/^/${fTAB}/"
         fi
 
         # print bad hosts
@@ -256,7 +256,7 @@ function check_repos() {
         else
             host_bad=$(echo "${host_bad}" | sort -n)
             echo
-            echo -e "${BAD}${host_bad}${NORMAL}" | sed "s/^/${fTAB}/"
+            echo -e "${BAD}${host_bad}${RESET}" | sed "s/^/${fTAB}/"
         fi
     fi
 
