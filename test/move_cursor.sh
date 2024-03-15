@@ -6,8 +6,8 @@ function cursor_pos() {
 	  # parse the cursor position
 	  CURPOS=${CURPOS#*[}
           #}# dummy bracket for emacs indenting
-	  x_pos=${CURPOS#*;}
-	  y_pos=${CURPOS%;*}
+	  local -irg x_pos=${CURPOS#*;}
+	  local -irg y_pos=${CURPOS%;*}
 	  # print the cursor position
 	  echo -e "\nposition is x=$x_pos y=$y_pos"
 }
@@ -16,10 +16,10 @@ clear -x
 echo -en "\E[1;34mhere\E[0m"
 sleep 1
 cursor_pos
-set -x
+set -v
 ls -la --color=always
 sleep 1
-set +x
+set +v
 echo -en "\E[6n"
 read -sdR CURPOS
 CURPOS=${CURPOS#*[}
