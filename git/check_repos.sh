@@ -10,6 +10,47 @@
 # Apr 2023 JCL
 
 # get starting time in nanoseconds
+
+function print_remotes() {
+    local DEBUG=1
+    rtab
+    echo -n "${TAB}checking repository status... "
+    old_opts=$(echo "$-")
+    # exit on errors must be turned off; otherwise shell will exit when not inside a repository
+    set +e
+    git rev-parse --is-inside-work-tree &>/dev/null
+    RETVAL=$?
+    reset_shell $old_opts
+    if [[ $RETVAL -eq 0 ]]; then
+        echo -e "${GOOD}OK${RESET} "        
+
+        # get number of remotes
+        local -i n_remotes=$(git remote | wc -l)
+        local r_names=$(git remote)
+        echo "${TAB}remotes found: ${n_remotes}"
+        local -i i=0
+        for remote_name in ${r_names}; do
+            if [ "${n_remotes}" -gt 1 ]; then
+                ((++i))
+                echo -n "${TAB}${fTAB}$i) "
+                itab
+            fi
+            # get URL
+            echo "$remote_name"
+            local remote_url
+            if [ $git_ver_maj -lt 2 ]; then
+                remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
+            else
+                remote_url=$(git remote get-url ${remote_name})
+            fi
+            dtab
+        done
+    else
+        echo "not a Git repository"
+        return 0
+    fi
+}
+
 function check_repos() {
     local -i start_time=$(date +%s%N)
 
