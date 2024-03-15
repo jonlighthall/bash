@@ -829,7 +829,7 @@ else
     echo "${pull_OK}" | sed "s/^/${list_indent}/"
     echo -ne "${RESET}"
 
-    echo -n "pull max time: ${t_pull_max} ns"
+    echo -n " pull max time: ${t_pull_max} ns"
     if command -v bc &>/dev/null; then
         echo " or $(bc <<<"scale=3;$t_pull_max/1000000000") sec"
     else
