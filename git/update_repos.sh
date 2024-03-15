@@ -4,6 +4,11 @@
 #
 # Apr 2022 JCL
 
+# ignore undefined variables
+set +u 
+# exit on errors
+set -e 
+
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
 
@@ -19,7 +24,6 @@ fi
 # set debug level
 # substitue default value if DEBUG is unset or null
 DEBUG=${DEBUG:-0}
-set -eT
 
 # load formatting and functions
 fpretty=${HOME}/config/.bashrc_pretty
@@ -35,8 +39,6 @@ if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
-    # exit on errors
-    set -e
     # print note
     echo "NB: ${BASH_SOURCE##*/} has not been sourced"
     echo "    user SSH config settings MAY not be loaded??"
@@ -209,10 +211,12 @@ for repo in $list; do
             ((++n_git))
             # parse remote
             unset_traps
-            set +e
+
             echo -n "checking remote tracking branch... "
+            set +e
             git rev-parse --abbrev-ref @{upstream} &>/dev/null
             RETVAL=$?
+            set -e
             if [[ $RETVAL -ne 0 ]]; then
                 echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
                 set_color
@@ -225,7 +229,7 @@ for repo in $list; do
                 continue
             fi            
             set_traps
-            set -e
+#            set -e
             remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
             echo "$remote_tracking_branch"
             
