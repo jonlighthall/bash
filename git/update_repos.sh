@@ -43,10 +43,10 @@ else
 fi
 
 # print run type and source name
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
+echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
 fi
 
 # get source path
@@ -57,13 +57,12 @@ src_dir_logi=$(dirname "$BASH_SOURCE")
 
 # print source path
 ## physical
-echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
+echo -e "${TAB}${gray}phys -> $src_dir_phys${RESET}"
 ## logical
-echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
+echo -e "${TAB}${gray}logi -> $src_dir_logi${RESET}"
 
 # load check repos script
 source "${src_dir_phys}/check_repos.sh"
-
 # save and print starting directory
 start_dir=$PWD
 echo "starting directory = ${start_dir}"
@@ -263,9 +262,9 @@ for repo in $list; do
     #------------------------------------------------------
     # find
     #------------------------------------------------------
-    echo -e "locating ${PSDIR}$repo${NORMAL}... \c"
+    echo -e "locating ${PSDIR}$repo${RESET}... \c"
     if [ -e ${HOME}/$repo ]; then
-        echo -e "${GOOD}OK${NORMAL}"
+        echo -e "${GOOD}OK${RESET}"
         ((++n_found))
         cd ${HOME}/$repo
         echo -n "checking repository status... "
@@ -274,7 +273,7 @@ for repo in $list; do
         RETVAL=$?
         set_traps
         if [[ $RETVAL -eq 0 ]]; then
-            echo -e "${GOOD}OK${NORMAL} "
+            echo -e "${GOOD}OK${RESET} "
             ((++n_git))
             # parse remote
             unset_traps
@@ -283,7 +282,7 @@ for repo in $list; do
             git rev-parse --abbrev-ref @{upstream} &>/dev/null
             RETVAL=$?
             if [[ $RETVAL -ne 0 ]]; then
-                echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
                 set_color
                 git rev-parse --abbrev-ref @{upstream} 2>&1 | sed "s/^/${TAb}/"
                 unset_color
@@ -312,11 +311,11 @@ for repo in $list; do
                 for arg in $@; do
                     echo -en "matching argument \x1b[36m$arg\x1b[m... "
                     if [[ $upstream_url =~ $arg ]]; then
-                        echo -e "${GOOD}OK${NORMAL}"
+                        echo -e "${GOOD}OK${RESET}"
                         ((++n_match))
                         break
                     else
-                        echo -e "${gray}SKIP${NORMAL}"
+                        echo -e "${gray}SKIP${RESET}"
                         continue
                     fi
                 done
@@ -331,7 +330,7 @@ for repo in $list; do
 
             # check remotes
             if [ $DEBUG -ge 0 ]; then
-                cbar "${BOLD}check remotes...${NORMAL}"
+                cbar "${BOLD}check remotes...${RESET}"
             fi
 
             check_repos
@@ -340,9 +339,9 @@ for repo in $list; do
             upstream_refspec=${remote_tracking_branch#*/}
             # print remote parsing
             if [ $DEBUG -gt 0 ]; then
-                cbar "${BOLD}parse remote tracking branch...${NORMAL}"
+                cbar "${BOLD}parse remote tracking branch...${RESET}"
                 (
-                    echo -e "${TAB}remote tracking branch+ ${blue}${remote_tracking_branch}${NORMAL}"
+                    echo -e "${TAB}remote tracking branch+ ${blue}${remote_tracking_branch}${RESET}"
                     echo "${TAB}${fTAB}remote name+ $upstream_repo"
                     echo "${TAB}${fTAB}remote refspec+ $upstream_refspec"
                 ) | column -t -s+ -o : -R 1
@@ -367,7 +366,7 @@ for repo in $list; do
                 for OK_host in ${host_OK}; do
                     if [[ "$upstream_host" == "$OK_host" ]]; then
                         decho "$upstream_host matches $OK_host"
-                        host_stat=$(echo -e "${GOOD}OK${NORMAL}")
+                        host_stat=$(echo -e "${GOOD}OK${RESET}")
                         break
                     fi
                 done
@@ -378,7 +377,7 @@ for repo in $list; do
                     if [[ "$upstream_host" == "$bad_host" ]]; then
                         decho "$upstream_host matches $bad_host"
                         fetch_fail+="$repo ($upstream_repo)"
-                        host_stat=$(echo -e "${BAD}FAIL${NORMAL}")
+                        host_stat=$(echo -e "${BAD}FAIL${RESET}")
                         break
                     fi
                 done
@@ -386,7 +385,7 @@ for repo in $list; do
 
             # print host parsing
             if [ $DEBUG -gt 0 ]; then
-                cbar "${BOLD}parse remote host...${NORMAL}"
+                cbar "${BOLD}parse remote host...${RESET}"
                 (
                     echo "${TAB}upsream url+ ${upstream_url}"
                     echo -e "${TAB}${fTAB} host+ $upstream_host ${host_stat}"
@@ -432,13 +431,13 @@ for repo in $list; do
                 RETVAL=$?
                 t_end=$(date +%s%N)
                 dt_fetch=$((${t_end} - ${t_start}))
-                echo -en "${GIT_HIGHLIGHT} fetch ${NORMAL} "
+                echo -en "${GIT_HIGHLIGHT} fetch ${RESET} "
                 if [[ $RETVAL == 0 ]]; then
-                    echo -e "${GOOD}OK${NORMAL}"
+                    echo -e "${GOOD}OK${RESET}"
                     ((++n_fetch))
                     break
                 else
-                    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                    echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
                     echo "failed to fetch remote"
                     if [[ $RETVAL == 137 ]]; then
                         if [ $nsec -gt $fetch_max ]; then
@@ -540,9 +539,9 @@ for repo in $list; do
                     t_end=$(date +%s%N)
                     dt_pull=$((${t_end} - ${t_start}))
 
-                    echo -en "${GIT_HIGHLIGHT} pull ${NORMAL} "
+                    echo -en "${GIT_HIGHLIGHT} pull ${RESET} "
                     if [[ $RETVAL != 0 ]]; then
-                        echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                        echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
                         if [[ $RETVAL == 1 ]]; then
                             itab
                             echo -e "${TAB}merge conflicts found!"
@@ -609,24 +608,24 @@ for repo in $list; do
                         fi
                         # force pull
                         if [[ $RETVAL == 128 ]]; then
-                            cbar "${TAB}${GRH}should I force pull!? ${NORMAL}"
+                            cbar "${TAB}${GRH}should I force pull!? ${RESET}"
                             echo -e "${TAB}source directory = $src_dir_logi"
                             prog=${src_dir_logi}/force_pull
                             if [ -f ${prog} ]; then
                                 bash ${prog}
                                 RETVAL2=$?
-                                echo -en "${TAB}${GRH}force_pull${NORMAL}: "
+                                echo -en "${TAB}${GRH}force_pull${RESET}: "
                                 if [[ $RETVAL != 0 ]]; then
-                                    echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL3${NORMAL}"
+                                    echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL3${RESET}"
                                     exit || return
                                 else
-                                    echo -e "${GOOD}OK${NORMAL}"
+                                    echo -e "${GOOD}OK${RESET}"
                                     ((++n_fpull))
                                 fi
                             fi
                         fi
                     else
-                        echo -e "${GOOD}OK${NORMAL}"
+                        echo -e "${GOOD}OK${RESET}"
                         ((++n_pull))
                         if [ ! -z ${pull_OK:+dummy} ]; then
                             pull_OK+=$'\n'"$repo"
@@ -723,9 +722,9 @@ for repo in $list; do
                     t_end=$(date +%s%N)
                     dt_push=$((${t_end} - ${t_start}))
 
-                    echo -en "${GIT_HIGHLIGHT} push ${NORMAL} "
+                    echo -en "${GIT_HIGHLIGHT} push ${RESET} "
                     if [[ $RETVAL != 0 ]]; then
-                        echo -e "${BAD}FAIL${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+                        echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
                         if [[ $RETVAL == 137 ]]; then
                             nsec=$((nsec * 2))
                             echo "${TAB}increasing push timeout to ${nsec}"
@@ -733,7 +732,7 @@ for repo in $list; do
                             cmd="${to}${cmd_base}"
                         fi
                     else
-                        echo -e "${GOOD}OK${NORMAL}"
+                        echo -e "${GOOD}OK${RESET}"
                         ((++n_push))
                         if [ ! -z ${push_OK:+dummy} ]; then
                             push_OK+=$'\n'"$repo"
@@ -815,8 +814,8 @@ if [ $DEBUG -ge 0 ]; then
         echo "none"
     else
         host_OK=$(echo "${host_OK}" | sort -n)
-        echo -e "${GOOD}${host_OK}${NORMAL}" | head -n 1
-        echo -e "${GOOD}${host_OK}${NORMAL}" | tail -n +2 | sed "s/^/${list_indent}/"
+        echo -e "${GOOD}${host_OK}${RESET}" | head -n 1
+        echo -e "${GOOD}${host_OK}${RESET}" | tail -n +2 | sed "s/^/${list_indent}/"
         echo
     fi
 
@@ -826,8 +825,8 @@ if [ $DEBUG -ge 0 ]; then
         echo "none"
     else
         host_bad=$(echo "${host_bad}" | sort -n)
-        echo -e "${BAD}${host_bad}${NORMAL}" | head -n 1
-        echo -e "${BAD}${host_bad}${NORMAL}" | tail -n +2 | sed "s/^/${list_indent}/"
+        echo -e "${BAD}${host_bad}${RESET}" | head -n 1
+        echo -e "${BAD}${host_bad}${RESET}" | tail -n +2 | sed "s/^/${list_indent}/"
     fi
 fi
 
@@ -844,7 +843,7 @@ else
     echo -ne "${red}"
     echo "${loc_fail}" | head -n 1
     echo "${loc_fail}" | tail -n +2 | sed "s/^/${list_indent}/"
-    echo -ne "${NORMAL}"
+    echo -ne "${RESET}"
 fi
 
 # matched
@@ -861,7 +860,7 @@ if [ ${#upstream_fail[@]} -gt 0 ]; then
         done
     ) | sed "1! {s/^/${list_indent}/}"
 fi
-echo -en "${NORMAL}"
+echo -en "${RESET}"
 
 # fetched
 echo -n "       fetched: "
@@ -880,7 +879,7 @@ echo -n "fetch failures: "
 if [ -z "$fetch_fail" ]; then
     echo "none"
 else
-    echo -e "${GRH}$fetch_fail${NORMAL}"
+    echo -e "${GRH}$fetch_fail${RESET}"
 fi
 
 # pull
@@ -892,7 +891,7 @@ else
 
     echo -ne "${green}"
     echo "${pull_OK}" | sed "s/^/${list_indent}/"
-    echo -ne "${NORMAL}"
+    echo -ne "${RESET}"
 
     echo -n "pull max time: ${t_pull_max} ns"
     if command -v bc &>/dev/null; then
@@ -906,14 +905,14 @@ echo -n " pull failures: "
 if [ -z "$pull_fail" ]; then
     echo "none"
 else
-    echo -e "${GRH}$pull_fail${NORMAL}"
+    echo -e "${GRH}$pull_fail${RESET}"
 fi
 
 echo -n "   force pulls: "
 if [ $n_fpull -eq 0 ]; then
     echo "none"
 else
-    echo -e "${yellow}$n_fpull${NORMAL}"
+    echo -e "${yellow}$n_fpull${RESET}"
 fi
 
 # push
@@ -925,7 +924,7 @@ else
 
     echo -ne "${green}"
     echo "${push_OK}" | sed "s/^/${list_indent}/"
-    echo -ne "${NORMAL}"
+    echo -ne "${RESET}"
 
     echo -n " push max time: ${t_push_max} ns"
     if command -v bc &>/dev/null; then
@@ -938,7 +937,7 @@ echo -n " push failures: "
 if [ -z "$push_fail" ]; then
     echo "none"
 else
-    echo -e "${GRH}$push_fail${NORMAL}"
+    echo -e "${GRH}$push_fail${RESET}"
 fi
 
 # modified
@@ -947,7 +946,7 @@ if [ -z "$mod_repos" ]; then
     echo "none"
 else
     echo "$mod_repos"
-    echo -e "${yellow}$mod_files${NORMAL}" | sed "s/^/${list_indent}/"
+    echo -e "${yellow}$mod_files${RESET}" | sed "s/^/${list_indent}/"
 fi
 
 # stash
