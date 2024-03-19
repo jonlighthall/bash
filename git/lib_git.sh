@@ -174,7 +174,7 @@ function check_repos() {
         if [[ "${remote_pro}" == "SSH" ]]; then
             # default to checking host
             local do_connect=true
-            host_stat=$(echo -e "${yellow}CHECK${RESET}")
+            host_stat=$(echo -e "${YELLOW}CHECK${RESET}")
             decho "do_connect = $do_connect"
             itab
             # check remote host name against list of checked hosts
@@ -243,7 +243,7 @@ function check_repos() {
                 host_OK+=${remote_host}
             else
                 if [[ $RETVAL == 1 ]]; then
-                    echo -e "${TAB}${fTAB}${yellow}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+                    echo -e "${TAB}${fTAB}${YELLOW}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
                     if [[ $remote_host =~ "github.com" ]]; then
                         decho "host is github"
                         # Github will return 1 if everything is working
@@ -362,7 +362,7 @@ function do_cmd() {
 }
 
 function exit_on_fail() {
-    echo -e "       ${yellow}\x1b[7m${BASH_SOURCE[1]##*/} failed\x1b[0m"
+    echo -e "       ${YELLOW}\x1b[7m${BASH_SOURCE[1]##*/} failed\x1b[0m"
     local do_exit=true
     if [[ $do_exit == true ]]; then
         exit 1 || return 1
@@ -376,7 +376,7 @@ function check_mod() {
     local list_mod=$(git diff --name-only --diff-filter=M)
     if [[ ! -z "${list_mod}" ]]; then
         # print file list
-        echo -e "modified: ${yellow}"
+        echo -e "modified: ${YELLOW}"
         echo "${list_mod}" | sed "s/^/${fTAB}/"
         echo -en "${RESET}"
         # add repo to list
