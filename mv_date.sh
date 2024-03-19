@@ -6,41 +6,56 @@
 #
 # Apr 2023 JCL
 
-# check for input
-if [ $# -eq 0 ]; then
+function get_mod_date() {
+echo "${FUNCNAME}"
+    if [ $# -lt 2 ]; then
 	echo "Please provide an input file"
-	exit 1
+	return 1
 fi
 echo "number of arguments = $#"
 
-# set file names
-in_file=$(readlink -f $1)
+local -r in_file=$(readlink -f $1)
 echo "argument 1: $1"
 
+local -n outfile=$2
+echo "argument 2: $2"
+    
 TAB+=${fTAB:='   '}
-echo -n "${TAB} input path: ${in_file}... "
+echo -n "${TAB}input path: ${in_file}... "
 if [ -L "${in_file}" ] || [ -f "${in_file}" ] || [ -d "${in_file}" ]; then
 	echo "exits"
 
 	# parse input
-	in_dir=$(dirname "${in_file}")
-	echo "${TAB}  input dir: $in_dir"
+  # directory name
+  in_dir=$(dirname "${in_file}")
+  # base name
 	in_fname=$(basename "${in_file}")
-	echo "${TAB} input file: $in_fname"
+  # file name
 	in_base="${in_fname%.*}"
-	echo "${TAB}  base name: $in_base"
-	if [[ $in_fname == *"."* ]]; then
+  # extension
+  if [[ $in_fname == *"."* ]]; then
 		ext=".${in_fname##*.}"
 	else
 		ext=""
 	fi
-	echo -n "${TAB}   ext name: ${ext}"
+  # redefine if hidden file
+  if [ -z ${in_base} ] && [[ "${in_fname::1}" == "." ]]; then
+      in_base="${ext}"
+      ext=''
+  fi
+
+  (
+  echo "input dir: $in_dir"
+	echo "input file: $in_fname"
+	echo "base name: $in_base"
+	echo -n "ext name: ${ext}"
 	if [ ${#ext} -eq 0 ]; then
 		echo "EMPTY"
 	else
 		echo
 	fi
-
+  ) | column -t -s: -o ":" -R1 | sed "s/^/${TAB}/"
+  
 	# set default output file name to match input
 	out_base="${in_base}"
 	out_file="${in_dir}/${out_base}${ext}"
@@ -86,6 +101,22 @@ else
 		exit 1
 	fi
 fi
+}
+
+# check for input
+if [ $# -eq 0 ]; then
+	echo "Please provide an input file"
+	exit 1
+fi
+echo "number of arguments = $#"
+
+# set file names
+in_file=$(readlink -f $1)
+echo "argument 1: $1"
+
+declare out_file
+
+get_mod_date "${in_file}" out_file
 
 # now move file
 mv -nv "${in_file}" "${out_file}"
