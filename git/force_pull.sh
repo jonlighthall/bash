@@ -105,6 +105,9 @@ source "${src_dir_phys}/check_repos.sh"
 
 # parse remote tracking branch and local branch
 cbar "${BOLD}parse current settings...${RESET}"
+if [[ "$-" == *e* ]]; then
+    set +e
+fi
 remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
 if [ -z ${remote_tracking_branch+default} ]; then
     echo "${TAB}no remote tracking branch set for current branch"
@@ -556,8 +559,10 @@ if [ $N_stash -gt 0 ]; then
 else
     echo "${fTAB}no stash entries"
 fi
-echo "resetting upstream remote tracking branch..."
-git branch -u "${remote_tracking_branch}"
+if [ ! -z ${remote_tracking_branch} ]; then
+    echo "resetting upstream remote tracking branch..."
+    git branch -u "${remote_tracking_branch}"
+fi
 
 cbar "${BOLD}you're done!${RESET}"
 
