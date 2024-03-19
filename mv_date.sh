@@ -79,7 +79,7 @@ else
 	if [ -L "$1" ]; then
 		in_file=$1
 		echo "${in_file} is a broken link!"
-		mdate=$(stat -c '%y' ${in_file} | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
+		mdate=$(stat -c '%y' "${in_file}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
 		out_file=$1_${mdate}
 	else		
 		echo "${TAB}exiting..."
