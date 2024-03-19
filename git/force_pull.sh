@@ -490,7 +490,7 @@ fi
 cbar "${BOLD}pulling remote changes...${RESET}"
 if [ $N_remote -gt 0 ]; then
     echo -e "${TAB}${fTAB}${YELLOW}remote branch is $N_remote commits ahead of local${RESET}"
-    git pull --ff-only
+    git pull --ff-only ${pull_repo} ${pull_refspec}
 else
     echo -e "${TAB}${fTAB}no need to pull"
 fi
@@ -531,7 +531,7 @@ if [ $N_local -gt 0 ]; then
     itab
     git --no-pager log ${pull_branch}..HEAD | sed "s/^/${TAB}/"
     dtab
-    git push
+    git push --set-upstream ${pull_repo} ${pull_refspec}
 else
     echo -e "${TAB}${fTAB}no need to push"
 fi
