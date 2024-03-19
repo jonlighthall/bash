@@ -34,19 +34,19 @@ else
 fi
 
 # print run type and source name
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
+echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-	  echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+	  echo -e "${TAB}${VALID}link${RESET} -> $src_name"
 fi
 
 # print source path
 ## physical
 src_dir_phys=$(dirname "${src_name}")
-echo -e "${TAB}${gray}phys -> $src_dir_phys${NORMAL}"
+echo -e "${TAB}${gray}phys -> $src_dir_phys${RESET}"
 ## logical
 src_dir_logi=$(dirname "${BASH_SOURCE}")
-echo -e "${TAB}${gray}logi -> $src_dir_logi${NORMAL}"
+echo -e "${TAB}${gray}logi -> $src_dir_logi${RESET}"
 
 # set sort order (C sorting is the most consistient)
 # must 'export' setting to take effect
@@ -143,7 +143,7 @@ if [ -d "${save_dir}" ]; then
                 # you're done!
             else
 		            echo -en "$points to "
-		            echo -en "${VALID}valid${NORMAL} link "
+		            echo -en "${VALID}valid${RESET} link "
                 hist_link=$(reaklink -f ${hist_ref})
                 echo "${hist_link}"
 
@@ -156,7 +156,7 @@ if [ -d "${save_dir}" ]; then
                 
             fi
 	      else
-		        echo -e "${BROKEN}broken${NORMAL} ${UL}link${NORMAL}"
+		        echo -e "${BROKEN}broken${RESET} ${UL}link${RESET}"
 		        echo "${hist_ref} points to ${hist_link}"
 
             # if link points to the correct location, touch link to create dummy file            
@@ -169,16 +169,24 @@ if [ -d "${save_dir}" ]; then
 
         # check if the original file exits
         if [ -f ${hist_ref} ]; then
-		        echo -e "is a regular ${UL}file${NORMAL}"
+		        echo -e "is a regular ${UL}file${RESET}"
             #hist_temp1=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
             #list_in+=( "${hist_temp1}" )
             #mv -nv "${hist_ref}" "${hist_temp1}"
 
             # check if the target exists
-            echo -n "indented link name file ${hist_save} "
+            echo -n "intended link name file ${hist_save} "
             if [ -f ${hist_save} ]; then
-                echo "exits"
+                echo "exits"                
                 hist_temp2=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_save} +'%Y-%m-%d-t%H%M%S')
+                echo "$hist_temp2"
+                if [ -e "${hist_temp2}" ]; then
+                    echo "backup already exists"
+                else
+                    echo "does not exist"
+                fi
+
+                
                 list_in+=( "${hist_temp2}" )
                 # move the existing file out of the way
                 echo "move link name"
@@ -193,7 +201,7 @@ if [ -d "${save_dir}" ]; then
             echo "link target to link"
             ln -sv "${hist_save}" "${hist_ref}"
         else
-		        echo -e "${yellow}is not a file or link${NORMAL}"
+		        echo -e "${yellow}is not a file or link${RESET}"
 		        exit 1
 	      fi
         
@@ -205,10 +213,10 @@ else
 	  echo "save dir ${save_dir} NOT found"
 
     if [ -f ${hist_ref} ]; then
-		    echo -e "is a regular ${UL}file${NORMAL}"
+		    echo -e "is a regular ${UL}file${RESET}"
         hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
     else
-		    echo -e "${yellow}is not a file or link${NORMAL}"
+		    echo -e "${yellow}is not a file or link${RESET}"
 		    exit 1
 	  fi
 fi
@@ -248,7 +256,7 @@ set +eE
 for hist_in in ${list_in[@]}; do
     echo -n "${TAB}${fTAB}${hist_in}... "
     if [ -f ${hist_in} ]; then
-        echo -e "is a regular ${UL}file${NORMAL}"
+        echo -e "is a regular ${UL}file${RESET}"
         list_out+="${hist_in} "
         if [ ! ${hist_in} -ef ${hist_ref} ]; then
             echo "${TAB}${fTAB}${hist_in} is not the same as ${hist_ref}"
@@ -276,7 +284,7 @@ for hist_in in ${list_in[@]}; do
             mv -v ${hist_temp} ${hist_in}
         fi
     else
-        echo -e "${BAD}${UL}does not exist${NORMAL}"
+        echo -e "${BAD}${UL}does not exist${RESET}"
     fi
 done
 set -eE
@@ -387,7 +395,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     echo -n "${TAB}sorting lines... "
     sort -u ${hist_edit} -o ${hist_edit}
     echo "done"
-    echo -e "${TAB}\E[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
+    echo -e "${TAB}\E[1;31msorted $L lines in $SECONDS seconds${RESET}"
 
     # unmark log in/out lines
     echo -n "${TAB}unmark login lines... "
@@ -462,7 +470,7 @@ echo "done"
 
 # save markers
 N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_out} | wc -l)
-echo -e "${TAB}\E[1;31mnumber of differences = $N${NORMAL}"
+echo -e "${TAB}\E[1;31mnumber of differences = $N${RESET}"
 echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_out}
 
 cp -Lpv ${hist_out} ${hist_ref}
