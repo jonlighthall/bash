@@ -268,7 +268,7 @@ for repo in $list; do
                 cbar "${BOLD}check remotes...${RESET}"
             fi
 
-            check_repos $@
+            check_remotes $@
 
             # parse remote
             upstream_refspec=${remote_tracking_branch#*/}

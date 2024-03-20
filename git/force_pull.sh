@@ -111,7 +111,7 @@ export host_OK=''
 
 # check remotes
 cbar "${BOLD}check remotes...${RESET}"
-check_repos
+check_remotes
 
 # parse remote tracking branch and local branch
 cbar "${BOLD}parse current settings...${RESET}"
