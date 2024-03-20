@@ -107,16 +107,6 @@ function check_remotes() {
         set_traps
     fi
 
-    # determine if script is being sourced or executed and add conditional behavior
-    local RUN_TYPE
-    if (return 0 2>/dev/null); then
-        RUN_TYPE="sourcing"
-        #set +e
-    else
-        RUN_TYPE="executing"
-        #set -e
-    fi
-
     # show good hosts
     decho -n "existing good hosts: "
     if [ -z "${host_OK:+dummy}" ]; then
@@ -201,7 +191,7 @@ function check_remotes() {
                         url_stat=$(echo -e "${GOOD}OK${RESET}")
                         break
                     else
-                        decho -e "${gray}SKIP${RESET}"
+                        decho -e "${GRAY}SKIP${RESET}"
                         url_stat=$(echo -e "${GRAY}SKIP${RESET}")
                         do_connect=false
                         continue 2
@@ -238,7 +228,7 @@ function check_remotes() {
             fi
         else
             do_connect=false
-            host_stat=$(echo -e "${gray}CHECK${RESET}")
+            host_stat=$(echo -e "${GRAY}CHECK${RESET}")
         fi # SSH
 
         (
@@ -269,7 +259,7 @@ function check_remotes() {
             RETVAL=$?
             set_traps
             if [[ $RETVAL == 0 ]]; then
-                echo -e "${TAB}${fTAB}${GOOD}OK${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+                echo -e "${TAB}${fTAB}${GOOD}OK${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                 # add to list
                 if [ ! -z ${host_OK:+dummy} ]; then
                     host_OK+=$'\n'
@@ -277,7 +267,7 @@ function check_remotes() {
                 host_OK+=${remote_host}
             else
                 if [[ $RETVAL == 1 ]]; then
-                    echo -e "${TAB}${fTAB}${YELLOW}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+                    echo -e "${TAB}${fTAB}${YELLOW}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                     if [[ $remote_host =~ "github.com" ]]; then
                         decho "host is github"
                         # Github will return 1 if everything is working
@@ -295,7 +285,7 @@ function check_remotes() {
                         host_bad+=${remote_host}
                     fi
                 else
-                    echo -e "${TAB}${fTAB}${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+                    echo -e "${TAB}${fTAB}${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                     # add to list
                     if [ ! -z ${host_bad:+dummy} ]; then
                         host_bad+=$'\n'

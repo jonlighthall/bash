@@ -43,10 +43,10 @@ fi
 # print source path
 ## physical
 src_dir_phys=$(dirname "${src_name}")
-echo -e "${TAB}${gray}phys -> $src_dir_phys${RESET}"
+echo -e "${TAB}${GRAY}phys -> $src_dir_phys${RESET}"
 ## logical
 src_dir_logi=$(dirname "${BASH_SOURCE}")
-echo -e "${TAB}${gray}logi -> $src_dir_logi${RESET}"
+echo -e "${TAB}${GRAY}logi -> $src_dir_logi${RESET}"
 
 # set sort order (C sorting is the most consistient)
 # must 'export' setting to take effect

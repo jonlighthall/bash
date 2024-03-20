@@ -59,9 +59,9 @@ src_dir_logi=$(dirname "$BASH_SOURCE")
 
 # print source path
 ## physical
-echo -e "${TAB}${gray}phys -> $src_dir_phys${RESET}"
+echo -e "${TAB}${GRAY}phys -> $src_dir_phys${RESET}"
 ## logical
-echo -e "${TAB}${gray}logi -> $src_dir_logi${RESET}"
+echo -e "${TAB}${GRAY}logi -> $src_dir_logi${RESET}"
 
 # load git utils
 fgit="${src_dir_phys}/lib_git.sh"
@@ -216,12 +216,8 @@ for repo in $list; do
     # check
     #------------------------------------------------------
     cd ${HOME}/$repo
-    echo -n "checking repository status... "
     check_repo
-    if [[ $RETVAL -eq 0 ]]; then
-        echo -e "${GOOD}OK${RESET} "
-    else
-        echo -e "${BAD}FAIL${RESET}\n${TAB}$repo not a Git repository"
+    if [[ $RETVAL -gt 0 ]]; then
         if [ ! -z ${loc_fail:+dummy} ]; then
             loc_fail+=$'\n'"$repo"
         else
@@ -239,7 +235,7 @@ for repo in $list; do
     RETVAL=$?
     set -e
     if [[ $RETVAL -ne 0 ]]; then
-        echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+        echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
         set_color
         git rev-parse --abbrev-ref @{upstream} 2>&1 | sed "s/^/${TAb}/"
         unset_color
@@ -272,7 +268,7 @@ for repo in $list; do
                 ((++n_match))
                 break
             else
-                echo -e "${gray}SKIP${RESET}"
+                echo -e "${GRAY}SKIP${RESET}"
                 continue 2
             fi
         done
@@ -393,7 +389,7 @@ for repo in $list; do
             ((++n_fetch))
             break
         else
-            echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+            echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
             echo "failed to fetch remote"
             if [[ $RETVAL == 137 ]]; then
                 if [ $nsec -gt $fetch_max ]; then
@@ -497,7 +493,7 @@ for repo in $list; do
 
             echo -en "${GIT_HIGHLIGHT} pull ${RESET} "
             if [[ $RETVAL != 0 ]]; then
-                echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+                echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                 if [[ $RETVAL == 1 ]]; then
                     itab
                     echo -e "${TAB}merge conflicts found!"
@@ -572,7 +568,7 @@ for repo in $list; do
                         RETVAL2=$?
                         echo -en "${TAB}${GRH}force_pull${RESET}: "
                         if [[ $RETVAL != 0 ]]; then
-                            echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL3${RESET}"
+                            echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL3${RESET}"
                             exit || return
                         else
                             echo -e "${GOOD}OK${RESET}"
@@ -680,7 +676,7 @@ for repo in $list; do
 
             echo -en "${GIT_HIGHLIGHT} push ${RESET} "
             if [[ $RETVAL != 0 ]]; then
-                echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+                echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                 if [[ $RETVAL == 137 ]]; then
                     nsec=$((nsec * 2))
                     echo "${TAB}increasing push timeout to ${nsec}"
