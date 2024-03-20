@@ -64,7 +64,6 @@ echo "starting directory = ${start_dir}"
 export host_bad=''
 export host_OK=''
 
-
 # load git utils
 fgit="${src_dir_phys}/lib_git.sh"
 if [ -e "$fgit" ]; then
@@ -85,7 +84,7 @@ if [[ "$-" == *e* ]]; then
     set +e
 fi
 remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
-reset_shell $old_opts
+reset_shell ${old_opts-''}
 if [ -z ${remote_tracking_branch+default} ]; then
     echo "${TAB}no remote tracking branch set for current branch"
 else
@@ -474,6 +473,18 @@ fi
 
 # rebase and merge oustanding local commits
 cbar "${BOLD}rebasing temporary branch...${RESET}"
+set_color
+echo "${bin_name}: git checkout ${branch_temp}"
+echo "${bin_name}: git rebase ${local_branch}"
+echo "${bin_name}: git checkout ${local_branch}"
+echo "${bin_name}: git merge ${branch_temp}"
+echo "${bin_name}: git branch -d ${branch_temp}"
+echo "${bin_name}: git push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${bin_name}: git stash pop"
+echo "${bin_name}: git reset HEAD"
+echo "${bin_name}: git branch -u ${remote_tracking_branch}"
+unset_color
+
 if [ -z ${branch_temp+default} ]; then
     N_temp=0
 else
@@ -492,6 +503,16 @@ if [ $N_temp -gt 0 ]; then
 
     # merge
     cbar "${BOLD}merging local changes...${RESET}"
+    set_color
+    echo "${bin_name}: git checkout ${local_branch}"
+    echo "${bin_name}: git merge ${branch_temp}"
+    echo "${bin_name}: git branch -d ${branch_temp}"
+    echo "${bin_name}: git push --set-upstream ${pull_repo} ${pull_refspec}"
+    echo "${bin_name}: git stash pop"
+    echo "${bin_name}: git reset HEAD"
+    echo "${bin_name}: git branch -u ${remote_tracking_branch}"
+    unset_color
+
     git checkout ${local_branch}
     git merge ${branch_temp}
     git branch -d ${branch_temp}
@@ -501,6 +522,12 @@ fi
 
 # push local commits
 cbar "${BOLD}pushing local changes...${RESET}"
+set_color
+echo "${bin_name}: git push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${bin_name}: git stash pop"
+echo "${bin_name}: git reset HEAD"
+echo "${bin_name}: git branch -u ${remote_tracking_branch}"
+unset_color
 N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${fTAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
@@ -515,6 +542,11 @@ fi
 
 # get back to where you were....
 cbar "${BOLD}applying stash...${RESET}"
+set_color
+echo "${bin_name}: git stash pop"
+echo "${bin_name}: git reset HEAD"
+echo "${bin_name}: git branch -u ${remote_tracking_branch}"
+unset_color
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo "there are $N_stash entries in stash"
