@@ -41,7 +41,7 @@ echo -n "checking repository status... "
 git rev-parse --is-inside-work-tree &>/dev/null
 RETVAL=$?
 if [[ $RETVAL -eq 0 ]]; then
-    echo -e "${GOOD}OK${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+    echo -e "${GOOD}OK${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
 else
     echo "${TAB}$repo not a Git repository"
     exit 1
