@@ -255,7 +255,6 @@ for repo in $list; do
                         continue
                     fi
                 done
-                continue
             fi
 
             # add to list
@@ -296,12 +295,13 @@ for repo in $list; do
                 fi
             fi
 
+            DEBUG=1
             # check remote host name against list of checked hosts
             decho "checking $upstream_host against list of checked hosts"
             if [ ! -z ${host_OK:+dummy} ]; then
                 for OK_host in ${host_OK}; do
                     if [[ "$upstream_host" == "$OK_host" ]]; then
-                        decho "$upstream_host matches $OK_host"
+                        decho -e "$upstream_host matches ${GOOD}$OK_host${RESET}"
                         host_stat=$(echo -e "${GOOD}OK${RESET}")
                         break
                     fi
@@ -311,10 +311,10 @@ for repo in $list; do
             if [ ! -z ${host_bad:+dummy} ]; then
                 for bad_host in ${host_bad}; do
                     if [[ "$upstream_host" == "$bad_host" ]]; then
-                        decho "$upstream_host matches $bad_host"
-                        fetch_fail+="$repo ($upstream_repo)"
+                        decho -e "$upstream_host matches ${BAD}$bad_host${GOOD}"
+                        fetch_fail+="$repo ($upstream_repo) "
                         host_stat=$(echo -e "${BAD}FAIL${RESET}")
-                        break
+                        continue 2
                     fi
                 done
             fi
@@ -815,7 +815,7 @@ echo -n "fetch failures: "
 if [ -z "$fetch_fail" ]; then
     echo "none"
 else
-    echo -e "${GRH}$fetch_fail${RESET}"
+    echo -e "${BAD}$fetch_fail${RESET}"
 fi
 
 # pull
