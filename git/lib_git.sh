@@ -28,7 +28,7 @@ function check_git() {
             return 1
         fi
     fi
-    decho "${TAB}v${git_ver}"
+    decho "${TAB}git v${git_ver}"
     return 0
 }
 
@@ -181,8 +181,28 @@ function check_repos() {
             # default to checking host
             local do_connect=true
             host_stat=$(echo -e "${YELLOW}CHECK${RESET}")
-            decho "do_connect = $do_connect"
+            decho "${TAB}do_connect = $do_connect"
             itab
+
+            # check against argument
+            if [ $# -gt 0 ]; then
+                for arg in $@; do
+                    decho -en "${TAB}checking $remote_url against argument \x1b[36m$arg\x1b[m... "
+                    if [[ $remote_url =~ $arg ]]; then
+                        decho -e "${GOOD}OK${RESET}"
+                        url_stat=$(echo -e "${GOOD}OK${RESET}")
+                        break
+                    else
+                        decho -e "${gray}SKIP${RESET}"
+                        url_stat=$(echo -e "${GRAY}SKIP${RESET}")
+                        do_connect=false
+                        continue 2
+                    fi
+                done
+            else
+                url_stat=''
+            fi
+
             # check remote host name against list of checked hosts
             if [ ! -z ${host_OK:+dummy} ] || [ ! -z ${host_bad:+dummy} ]; then
                 decho "${TAB}checking $remote_host against list of checked hosts..."
@@ -214,11 +234,11 @@ function check_repos() {
         fi # SSH
 
         (
-            echo    "${TAB}url+ ${remote_url}"
+            echo    "${TAB}url+ ${remote_url} ${url_stat}"
             echo -e "${TAB}host+ ${remote_host} ${host_stat}"
             echo -e "${TAB}proto+ ${remote_pro}"
         ) | column -t -s+ -o : -R 1
-        decho "do_connect = $do_connect"
+        decho "${TAB}do_connect = $do_connect"
         dtab
         # check connection before proceeding
         set -ET
