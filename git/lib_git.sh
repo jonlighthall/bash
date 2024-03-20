@@ -32,6 +32,26 @@ function check_git() {
     return 0
 }
 
+function check_repo() {
+    local DEBUG=1
+    check_git
+    echo -n "${TAB}checking repository status... "
+    old_opts=$(echo "$-")
+    # exit on errors must be turned off; otherwise shell will exit when not inside a repository
+    set +e
+    git rev-parse --is-inside-work-tree &>/dev/null
+    RETVAL=$?
+    reset_shell $old_opts
+    if [[ $RETVAL -eq 0 ]]; then
+        echo -e "${GOOD}OK${RESET} "
+        return 0
+    else
+        echo -e "${BAD}FAIL${RESET} "        
+        #echo "${TAB}not a Git repository"
+        return 1
+    fi    
+}
+
 function print_remotes() {
     local DEBUG=1
     rtab
