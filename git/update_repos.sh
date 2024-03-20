@@ -245,14 +245,14 @@ for repo in $list; do
             # check against argument
             if [ $# -gt 0 ]; then
                 for arg in $@; do
-                    echo -en "matching argument \x1b[36m$arg\x1b[m... "
+                    echo -en "checking argument \x1b[36m$arg\x1b[m... "
                     if [[ $upstream_url =~ $arg ]]; then
                         echo -e "${GOOD}OK${RESET}"
                         ((++n_match))
                         break
                     else
                         echo -e "${gray}SKIP${RESET}"
-                        continue
+                        continue 2
                     fi
                 done
             fi
@@ -268,7 +268,7 @@ for repo in $list; do
                 cbar "${BOLD}check remotes...${RESET}"
             fi
 
-            check_repos
+            check_repos $@
 
             # parse remote
             upstream_refspec=${remote_tracking_branch#*/}
@@ -312,7 +312,7 @@ for repo in $list; do
                 for bad_host in ${host_bad}; do
                     if [[ "$upstream_host" == "$bad_host" ]]; then
                         decho -e "$upstream_host matches ${BAD}$bad_host${GOOD}"
-                        fetch_fail+="$repo ($upstream_repo) "
+                        fetch_fail+="$repo ($upstream_repo) "$'\n'
                         host_stat=$(echo -e "${BAD}FAIL${RESET}")
                         continue 2
                     fi
@@ -700,7 +700,7 @@ for repo in $list; do
                 stash_list+=$(printf '%2d %s' $N_stash $repo)
             fi
         else
-            echo "${TAB}$repo not a Git repository"
+            echo -e "${BAD}FAIL${RESET}\n${TAB}$repo not a Git repository"
             if [ ! -z ${loc_fail:+dummy} ]; then
                 loc_fail+=$'\n'"$repo"
             else
@@ -743,6 +743,7 @@ else
     echo
 fi
 
+rtab
 # print good hosts
 if [ $DEBUG -ge 0 ]; then
     echo -n "${TAB}    good hosts: "
@@ -815,7 +816,9 @@ echo -n "fetch failures: "
 if [ -z "$fetch_fail" ]; then
     echo "none"
 else
-    echo -e "${BAD}$fetch_fail${RESET}"
+    echo -ne "${BAD}"
+    echo "${fetch_fail}" | sed "1! s/^/${list_indent}/;$d"
+    echo -ne "${RESET}"
 fi
 
 # pull
