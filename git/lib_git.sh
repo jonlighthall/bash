@@ -1,6 +1,6 @@
 #!/bin/bash -u
 #
-# git/check_repos.sh
+# git/check_remotes.sh
 #
 # METHOD -
 #
@@ -52,13 +52,11 @@ function print_remotes() {
         echo "${TAB}remotes found: ${n_remotes}"
         local -i i=0
         for remote_name in ${r_names}; do
-            if [ "${n_remotes}" -gt 1 ]; then
-                ((++i))
-                echo -n "${TAB}${fTAB}$i) "
-                itab
-            fi
+            ((++i))
+            itab
+            echo "${TAB}$i) $remote_name"
+
             # get URL
-            echo "$remote_name"
             local remote_url
             if [ $git_ver_maj -lt 2 ]; then
                 remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
@@ -73,7 +71,7 @@ function print_remotes() {
     fi
 }
 
-function check_repos() {
+function check_remotes() {
     # get starting time in nanoseconds
     local -i start_time=$(date +%s%N)
 
