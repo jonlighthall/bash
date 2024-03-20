@@ -14,19 +14,22 @@ function check_git() {
     if [ -z "${check_git:+dummy}" ]; then
         echo -n "${TAB}Checking Git... "
         if command -v git &>/dev/null; then
-            echo -e "${GOOD}OK${RESET} Git is defined"
+            echo -en "${GOOD}OK${RESET}: ${GRAY}"
             # parse Git version
             export git_ver=$(git --version | awk '{print $3}')
             export git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
             export git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
             export git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
             export check_git=false
+            echo -e "v${git_ver}${NORMAL}"
+            return 0
         else
             echo -e "${BAD}FAIL${RESET} Git not defined"
             return 1
         fi
     fi
-    echo "git v${git_ver}"
+    decho "${TAB}v${git_ver}"
+    return 0
 }
 
 function print_remotes() {
