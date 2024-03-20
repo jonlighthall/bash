@@ -54,24 +54,16 @@ else
     set -e
 fi
 
-# print run type and source name
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
-src_name=$(readlink -f $BASH_SOURCE)
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
-fi
+print_source
 
-# get source path
-## physical (canonical)
-src_dir_phys=$(dirname "$src_name")
-## logical (links)
-src_dir_logi=$(dirname "$BASH_SOURCE")
+# save and print starting directory
+start_dir=$PWD
+echo "starting directory = ${start_dir}"
 
-# print source path
-## physical
-echo -e "${TAB}${gray}phys -> $src_dir_phys${RESET}"
-## logical
-echo -e "${TAB}${gray}logi -> $src_dir_logi${RESET}"
+# reset SSH status list
+export host_bad=''
+export host_OK=''
+
 
 # load git utils
 fgit="${src_dir_phys}/lib_git.sh"
@@ -79,46 +71,21 @@ if [ -e "$fgit" ]; then
     source "$fgit"
 fi
 
-# save and print starting directory
-start_dir=$PWD
-echo "starting directory = ${start_dir}"
-
-# check if Git is defined
-if [ -z "${check_git:+dummy}" ]; then
-    echo -n "${TAB}Checking Git... "
-    if command -v git &>/dev/null; then
-        echo -e "${GOOD}OK${RESET} Git is defined"
-        # get Git version
-        git --version | sed "s/^/${fTAB}/"
-        git_ver=$(git --version | awk '{print $3}')
-        git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-        git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-        git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-        export check_git=false
-    else
-        echo -e "${BAD}FAIL${RESET} Git not defined"
-        if (return 0 2>/dev/null); then
-            return 1
-        else
-            exit 1
-        fi
-    fi
-fi
-
-# reset SSH status list
-export host_bad=''
-export host_OK=''
-
 # check remotes
 cbar "${BOLD}check remotes...${RESET}"
 check_remotes
 
 # parse remote tracking branch and local branch
 cbar "${BOLD}parse current settings...${RESET}"
+
+# set shell options
 if [[ "$-" == *e* ]]; then
+    # exit on errors must be turned off; otherwise shell will exit when not inside a repository
+    old_opts=$(echo "$-")
     set +e
 fi
 remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
+reset_shell $old_opts
 if [ -z ${remote_tracking_branch+default} ]; then
     echo "${TAB}no remote tracking branch set for current branch"
 else
