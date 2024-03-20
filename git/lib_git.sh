@@ -11,23 +11,24 @@
 
 function check_git() {
     # check if Git is defined
+    ddecho -n "${TAB}checking Git... "
     if [ -z "${check_git:+dummy}" ]; then
-        echo -n "${TAB}Checking Git... "
         if command -v git &>/dev/null; then
-            echo -en "${GOOD}OK${RESET}: ${GRAY}"
+            ddecho -en "${GOOD}OK${RESET} "
             # parse Git version
             export git_ver=$(git --version | awk '{print $3}')
             export git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
             export git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
             export git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
             export check_git=false
-            echo -e "v${git_ver}${NORMAL}"
+            decho -e "${GRAY}v${git_ver}${NORMAL}"
             return 0
         else
-            echo -e "${BAD}FAIL${RESET} Git not defined"
+            ddecho -e "${BAD}FAIL${RESET} Git not defined"
             return 1
         fi
     fi
+    ddecho -e "already checked "
     decho "${TAB}git v${git_ver}"
     return 0
 }
@@ -55,17 +56,9 @@ function check_repo() {
 function print_remotes() {
     local DEBUG=1
     rtab
-    check_git
-    echo -n "${TAB}checking repository status... "
-    old_opts=$(echo "$-")
-    # exit on errors must be turned off; otherwise shell will exit when not inside a repository
-    set +e
-    git rev-parse --is-inside-work-tree &>/dev/null
+    check_repo
     RETVAL=$?
-    reset_shell $old_opts
     if [[ $RETVAL -eq 0 ]]; then
-        echo -e "${GOOD}OK${RESET} "        
-
         # get number of remotes
         local -i n_remotes=$(git remote | wc -l)
         local r_names=$(git remote)
@@ -85,9 +78,6 @@ function print_remotes() {
             fi
             dtab
         done
-    else
-        echo "not a Git repository"
-        return 0
     fi
 }
 
@@ -433,5 +423,3 @@ function check_mod() {
         mod_files+=$(echo "${list_mod}" | sed "s;^;${repo}/;")
     fi
 }
-
-check_git
