@@ -295,7 +295,6 @@ for repo in $list; do
                 fi
             fi
 
-            DEBUG=1
             # check remote host name against list of checked hosts
             decho "checking $upstream_host against list of checked hosts"
             if [ ! -z ${host_OK:+dummy} ]; then
