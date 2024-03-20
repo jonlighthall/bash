@@ -15,13 +15,13 @@ do
 	echo -n "${thisTAB}$var "
 	# check if variable is set
     if [ -z ${!var+dummy} ]; then
-		echo -e "${yellow}unset${NORMAL}"
+		echo -e "${YELLOW}unset${RESET}"
 		continue
 	fi
 
 	#print variable value
 	val=${!var}
-	echo -en "${GOOD}set${NORMAL} to ${space}${val}${NORMAL}"
+	echo -en "${GOOD}set${RESET} to ${space}${val}${RESET}"
 
 	# print variable length
 	i=${#val}

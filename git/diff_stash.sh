@@ -22,7 +22,7 @@ fi
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
     set +e
-    trap 'echo -en "${yellow}RETURN${NORMAL}: ${BASH_SOURCE##*/} "' RETURN
+    trap 'echo -en "${YELLOW}RETURN${RESET}: ${BASH_SOURCE##*/} "' RETURN
 else
     RUN_TYPE="executing"
     # exit on errors
@@ -31,17 +31,17 @@ else
     # print time at exit
     trap print_exit EXIT
 fi
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
+echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
 fi
 
 echo -n "checking repository status... "
 git rev-parse --is-inside-work-tree &>/dev/null
 RETVAL=$?
 if [[ $RETVAL -eq 0 ]]; then
-    echo -e "${GOOD}OK${NORMAL} ${gray}RETVAL=$RETVAL${NORMAL}"
+    echo -e "${GOOD}OK${RESET} ${gray}RETVAL=$RETVAL${RESET}"
 else
     echo "${TAB}$repo not a Git repository"
     exit 1
@@ -55,12 +55,12 @@ echo "repository name is $repo"
 
 # parse remote
 echo
-cbar "${BOLD}parse remote tracking branch...${NORMAL}"
+cbar "${BOLD}parse remote tracking branch...${RESET}"
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "${TAB}no remote tracking branch set for current branch"
 else
     remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "${TAB}remote tracking branch: ${blue}${remote_tracking_branch}${NORMAL}"
+    echo -e "${TAB}remote tracking branch: ${BLUE}${remote_tracking_branch}${RESET}"
     remote_name=${remote_tracking_branch%%/*}
     echo "${TAB}remote name: .......... $remote_name"
     remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
@@ -73,12 +73,12 @@ else
     echo "${TAB}remote branch: $branch_remote"
 
     branch_local=$(git branch | grep \* | sed 's/^\* //')
-    echo -e "${TAB} local branch: ${green}${branch_local}${NORMAL}"
+    echo -e "${TAB} local branch: ${GREEN}${branch_local}${RESET}"
     echo
 fi
 
 # check remotes
-cbar "${BOLD}parsing remotes...${NORMAL}"
+cbar "${BOLD}parsing remotes...${RESET}"
 r_names=$(git remote)
 if [ "${n_remotes}" -gt 1 ]; then
     echo "remotes found: ${n_remotes}"
@@ -97,7 +97,7 @@ for remote_name in ${r_names}; do
     else
         rhost=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
         if [[ "${remote_pro}" == "http"* ]]; then
-            remote_pro=${GRH}${remote_pro}${NORMAL}
+            remote_pro=${GRH}${remote_pro}${RESET}
             remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
             echo "  repo: ${remote_repo}"
             remote_ssh="git@${rhost}:${remote_repo}"
@@ -114,7 +114,7 @@ done
 
 # check for stash entries
 echo
-cbar "${BOLD}parsing stash...${NORMAL}"
+cbar "${BOLD}parsing stash...${RESET}"
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo -e "$repo has $N_stash entries in stash"

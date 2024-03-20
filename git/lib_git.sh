@@ -87,7 +87,10 @@ function check_repos() {
     fi
 
     # set debug level
-    local -i DEBUG=${DEBUG:=0} # default value if DEBUG is unset or null
+    # automaticly set default value if DEBUG is unset or null
+    local -i DEBUG=${DEBUG:=0}
+    # manually set
+    #DEBUG=0
 
     # load formatting and functions
     local fpretty=${HOME}/config/.bashrc_pretty
@@ -143,7 +146,7 @@ function check_repos() {
             itab
         fi
         # get URL
-        echo "$remote_name"
+        echo -e "\x1b[0;36m$remote_name\x1b[0m"
         local remote_url
         if [ $git_ver_maj -lt 2 ]; then
             remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
@@ -167,8 +170,8 @@ function check_repos() {
                 echo "  repo: ${remote_repo}"
                 # change remote to SSH
                 remote_ssh="git@${remote_host}:${remote_repo}"
-                echo " change URL to ${remote_ssh}..."
-                echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
+                echo -e "${YELLOW} change URL to ${remote_ssh}..."
+                echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}${RESET}"
                 git remote set-url ${remote_name} ${remote_ssh}
             else
                 remote_pro="local"
@@ -274,6 +277,7 @@ function check_repos() {
             fi # retval 0
         else
             decho "skipping connection check..."
+            dtab 
             continue
         fi # do check
 
