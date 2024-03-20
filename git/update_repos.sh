@@ -29,7 +29,7 @@ DEBUG=${DEBUG:-0}
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
- #   set_traps
+    #   set_traps
 fi
 
 decho "DEBUG = $DEBUG"
@@ -200,512 +200,6 @@ for repo in $list; do
     if [ -e ${HOME}/$repo ]; then
         echo -e "${GOOD}OK${RESET}"
         ((++n_found))
-        cd ${HOME}/$repo
-        echo -n "checking repository status... "
-        unset_traps
-        git rev-parse --is-inside-work-tree &>/dev/null
-        RETVAL=$?
-        set_traps
-        if [[ $RETVAL -eq 0 ]]; then
-            echo -e "${GOOD}OK${RESET} "
-            ((++n_git))
-            # parse remote
-            unset_traps
-
-            echo -n "checking remote tracking branch... "
-            set +e
-            git rev-parse --abbrev-ref @{upstream} &>/dev/null
-            RETVAL=$?
-            set -e
-            if [[ $RETVAL -ne 0 ]]; then
-                echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
-                set_color
-                git rev-parse --abbrev-ref @{upstream} 2>&1 | sed "s/^/${TAb}/"
-                unset_color
-                echo "${TAB}no remote tracking branch set for current branch"
-                decho "skipping..."
-                upstream_fail+=( "${repo}" )
-                check_mod                
-                continue
-            fi            
-            set_traps
-#            set -e
-            remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
-            echo "$remote_tracking_branch"
-            
-            upstream_repo=${remote_tracking_branch%%/*}
-            if [ $git_ver_maj -lt 2 ]; then
-                upstream_url=$(git remote -v | grep ${upstream_repo} | awk '{print $2}' | uniq)
-            else
-                upstream_url=$(git remote get-url ${upstream_repo})
-            fi
-            # add remote to list
-            echo "${upstream_url}" >>${list_remote}
-            
-            # check against argument
-            if [ $# -gt 0 ]; then
-                for arg in $@; do
-                    echo -en "checking argument \x1b[36m$arg\x1b[m... "
-                    if [[ $upstream_url =~ $arg ]]; then
-                        echo -e "${GOOD}OK${RESET}"
-                        ((++n_match))
-                        break
-                    else
-                        echo -e "${gray}SKIP${RESET}"
-                        continue 2
-                    fi
-                done
-            fi
-
-            # add to list
-            if [ ! -z ${git_OK:+dummy} ]; then
-                git_OK+=$'\n'
-            fi
-            git_OK+=${upstream_url}
-
-            # check remotes
-            if [ $DEBUG -ge 0 ]; then
-                cbar "${BOLD}check remotes...${RESET}"
-            fi
-
-            check_remotes $@
-
-            # parse remote
-            upstream_refspec=${remote_tracking_branch#*/}
-            # print remote parsing
-            if [ $DEBUG -gt 0 ]; then
-                cbar "${BOLD}parse remote tracking branch...${RESET}"
-                (
-                    echo -e "${TAB}remote tracking branch+ ${BLUE}${remote_tracking_branch}${RESET}"
-                    echo "${TAB}${fTAB}remote name+ $upstream_repo"
-                    echo "${TAB}${fTAB}remote refspec+ $upstream_refspec"
-                ) | column -t -s+ -o : -R 1
-
-            fi
-
-            # parse protocol
-            upstream_pro=$(echo ${upstream_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-            if [[ "${upstream_pro}" == "git" ]]; then
-                upstream_pro="SSH"
-                upstream_host=$(echo ${upstream_url} | sed 's/\(^[^:]*\):.*$/\1/')
-            else
-                upstream_host=$(echo ${upstream_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
-                if [[ ! "${upstream_pro}" == "http"* ]]; then
-                    upstream_pro="local"
-                fi
-            fi
-
-            # check remote host name against list of checked hosts
-            decho "checking $upstream_host against list of checked hosts"
-            if [ ! -z ${host_OK:+dummy} ]; then
-                for OK_host in ${host_OK}; do
-                    if [[ "$upstream_host" == "$OK_host" ]]; then
-                        decho -e "$upstream_host matches ${GOOD}$OK_host${RESET}"
-                        host_stat=$(echo -e "${GOOD}OK${RESET}")
-                        break
-                    fi
-                done
-            fi
-
-            if [ ! -z ${host_bad:+dummy} ]; then
-                for bad_host in ${host_bad}; do
-                    if [[ "$upstream_host" == "$bad_host" ]]; then
-                        decho -e "$upstream_host matches ${BAD}$bad_host${GOOD}"
-                        fetch_fail+="$repo ($upstream_repo) "$'\n'
-                        host_stat=$(echo -e "${BAD}FAIL${RESET}")
-                        continue 2
-                    fi
-                done
-            fi
-
-            # print host parsing
-            if [ $DEBUG -gt 0 ]; then
-                cbar "${BOLD}parse remote host...${RESET}"
-                (
-                    echo "${TAB}upsream url+ ${upstream_url}"
-                    echo -e "${TAB}${fTAB} host+ $upstream_host ${host_stat}"
-                    echo -e "${TAB}${fTAB}proto+ ${upstream_pro}"
-                ) | column -t -s+ -o : -R 1
-            fi
-
-            if [[ "$host_stat" =~ *"FAIL"* ]]; then
-                decho "skipping fetch..."
-                exit_on_fail
-                continue
-            else
-                decho "proceeding with fetch..."
-            fi
-
-            #------------------------------------------------------
-            # fetch
-            #------------------------------------------------------
-            decho "updating..."
-            # specify number of seconds before kill
-            nsec=3
-            if [ $fetch_max -gt $nsec ]; then
-                nsec=$fetch_max
-            fi
-            to="${to_base} ${nsec}s "
-            # concat commands
-            cmd_base="git fetch"
-            if [ $DEBUG -gt 0 ]; then
-                cmd_base+=" --verbose"
-            else
-                cmd_base+=" --quiet"
-            fi
-            cmd="${to}${cmd_base}"
-            RETVAL=137
-            n_loops=0
-            while [ $n_loops -lt 5 ]; do
-                ((++n_loops))
-                if [ $n_loops -gt 1 ]; then
-                    echo "${TAB}FETCH attempt $n_loops..."
-                fi
-                t_start=$(date +%s%N)
-                do_cmd ${cmd}
-                RETVAL=$?
-                t_end=$(date +%s%N)
-                dt_fetch=$((${t_end} - ${t_start}))
-                echo -en "${GIT_HIGHLIGHT} fetch ${RESET} "
-                if [[ $RETVAL == 0 ]]; then
-                    echo -e "${GOOD}OK${RESET}"
-                    ((++n_fetch))
-                    break
-                else
-                    echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
-                    echo "failed to fetch remote"
-                    if [[ $RETVAL == 137 ]]; then
-                        if [ $nsec -gt $fetch_max ]; then
-                            fetch_max=$nsec
-                            echo "${TAB}increasing fetch_max to $fetch_max"
-                        fi
-                        nsec=$((nsec * 2))
-                        echo "${TAB}increasing fetch timeout to ${nsec}"
-                        to="${to_base} ${nsec}s "
-                        cmd="${to}${cmd_base} --verbose --all"
-                    fi
-                fi
-            done
-
-            # update maximum fetch time
-            if [[ ${dt_fetch} -gt ${t_fetch_max} ]]; then
-                t_fetch_max=${dt_fetch}
-                # print maximum fetch time (in ns)
-                echo "${TAB}${fTAB}new maximum fetch time"
-                echo "${TAB}${fTAB}   raw time: $t_fetch_max ns"
-                declare -i nd=${#t_fetch_max}
-
-                # define number of "decimals" for ns timestamp
-                declare -i nd_max=9
-
-                # pad timestamp with leading zeros
-                if [ $nd -lt $nd_max ]; then
-                    fmt="%0${nd_max}d"
-                    declare time0=$(printf "$fmt" ${t_fetch_max})
-                    echo "${TAB}${fTAB}zero-padded: $time0"
-                    declare -i nd=${#time0}
-                    if [ $nd -eq ${nd_max} ]; then
-                        echo "${TAB}${fTAB}change in length"
-                        echo "${TAB}${fTAB}${nd} numbers long"
-                    else
-                        echo "${TAB}${fTAB}no change"
-                        exit 1
-                    fi
-                else
-                    declare -i time0=t_fetch_max
-                fi
-
-                # format timestamp in s
-                if [ $nd -gt $nd_max ]; then
-                    ni=$(($nd - $nd_max))
-                    ddeci=${time0:0:$ni}.${time0:$ni}
-                else
-                    ddeci="0.${time0}"
-                fi
-                echo "${TAB}${fTAB}decimalized: $ddeci "
-
-                # round timestamp to nearest second
-                fmt="%.0f"
-                deci=$(printf "$fmt" ${ddeci})
-                echo "${TAB}${fTAB}integerized: $deci "
-                if [ $deci -gt $fetch_max ]; then
-                    fetch_max=$deci
-                fi
-                echo "     fetch_max: $fetch_max"
-            fi
-            if [ $RETVAL -ne 0 ]; then
-                fetch_fail+="$repo "
-                echo -e "\E[32m> \E[0mWSL may need to be restarted"
-                exit_on_fail
-                echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
-                read -e -i "shutdown_wsl" -p $'\e[0;32m$\e[0m ' -t 10 && eval $REPLY
-            fi
-
-            #------------------------------------------------------
-            # pull
-            #------------------------------------------------------
-            decho -n "leading remote commits: "
-            N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
-            if [ ${N_remote} -eq 0 ]; then
-                decho "none"
-            else
-                decho "${N_remote}"
-
-                echo "pulling... "
-                cmd_base="git pull --all --progress --tags --verbose" #--prune"
-                if [ $git_ver_maj -ge 2 ]; then
-                    cmd_base+=" --ff-only --ipv4"
-                fi
-                # specify number of seconds before kill
-                nsec=4
-                to="${to_base} ${nsec}s "
-                # concat commands
-                cmd="${to}${cmd_base}"
-                RETVAL=137
-                n_loops=0
-                while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
-                    ((++n_loops))
-                    if [ $n_loops -gt 1 ]; then
-                        echo "${TAB}PULL attempt $n_loops..."
-                    fi
-                    t_start=$(date +%s%N)
-                    do_cmd ${cmd}
-                    RETVAL=$?
-                    t_end=$(date +%s%N)
-                    dt_pull=$((${t_end} - ${t_start}))
-
-                    echo -en "${GIT_HIGHLIGHT} pull ${RESET} "
-                    if [[ $RETVAL != 0 ]]; then
-                        echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
-                        if [[ $RETVAL == 1 ]]; then
-                            itab
-                            echo -e "${TAB}merge conflicts found!"
-                            itab
-                            if [ $(git diff --name-only --diff-filter=M | wc -l) -gt 0 ]; then
-                                echo -en "${TAB}modified files found, "
-                                if [ $(git diff -w --diff-filter=M | wc -l) -gt 0 ]; then
-                                    echo "modifications are non-trivial: "
-                                    git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[31m&\x1b[m/"
-                                    dtab 2
-                                    check_mod                
-                                    exit_on_fail
-                                else
-                                    echo "modifications are trivial: "
-                                    git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[33m&\x1b[m/"
-
-                                    echo "${TAB}checking out modified files..."
-                                    git diff --name-only --diff-filter=M | xargs -L 1 git checkout
-                                    
-                                    # reset RETVAL to stay in loop
-                                    RETVAL=137
-                                    dtab 2
-                                    continue                                    
-                                fi
-                            else
-                                echo -e "${TAB}no modified files found"
-                            fi
-
-                            if [ $(git diff --name-only --diff-filter=U | wc -l) -gt 0 ]; then
-                                echo -e "${TAB}unmerged files found"
-                                git diff --name-only --diff-filter=U | sed "s/^/${fTAB}/"
-                                dtab
-                                exit_on_fail
-                            else
-                                echo -e "${TAB}no unmerged files found"
-                            fi
-
-                            if [ $(git ls-files -v | grep ^[[:lower:]] | awk '{print $2}' | wc -l) -gt 0 ]; then
-                                echo -e "${TAB}ignored files found"
-                                unchanged=$(git ls-files -v | grep ^[[:lower:]] | awk '{print $2}')
-                                echo "$unchanged" | sed "s/^/${fTAB}/"
-                                for file in $unchanged; do
-                                    git update-index --verbose --no-assume-unchanged $file
-                                done
-                                do_update=true
-                                git stash -m "adding assume-unchanged files to stash"
-                                echo "n_loops = $n_loops"
-                                # reset RETVAL to stay in loop
-                                RETVAL=137
-                                dtab
-                                continue
-                            else
-                                echo -e "${TAB}no untracked files found"
-                            fi
-                            dtab
-                        fi
-
-                        # increase time
-                        if [[ $RETVAL == 137 ]]; then
-                            nsec=$((nsec * 2))
-                            echo "${TAB}increasing pull timeout to ${nsec}"
-                            to="${to_base} ${nsec}s "
-                            cmd="${to}${cmd_base}"
-                        fi
-                        # force pull
-                        if [[ $RETVAL == 128 ]]; then
-                            cbar "${TAB}${GRH}should I force pull!? ${RESET}"
-                            echo -e "${TAB}source directory = $src_dir_logi"
-                            prog=${src_dir_logi}/force_pull
-                            if [ -f ${prog} ]; then
-                                bash ${prog}
-                                RETVAL2=$?
-                                echo -en "${TAB}${GRH}force_pull${RESET}: "
-                                if [[ $RETVAL != 0 ]]; then
-                                    echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL3${RESET}"
-                                    exit || return
-                                else
-                                    echo -e "${GOOD}OK${RESET}"
-                                    ((++n_fpull))
-                                fi
-                            fi
-                        fi
-                    else
-                        echo -e "${GOOD}OK${RESET}"
-                        ((++n_pull))
-                        if [ ! -z ${pull_OK:+dummy} ]; then
-                            pull_OK+=$'\n'"$repo"
-                        else
-                            pull_OK+="$repo"
-                        fi
-
-                    fi
-                done
-
-                # check if assume-unchanged files were stashed
-                if [ -z ${do_update+dummy} ]; then
-                    decho "do_update is unset"
-                else
-                    decho "do_update is set"
-                    if [[ ${do_update} == true ]]; then
-                        decho "do_update is true"
-                        echo "applying stash for assume-unchanged files..."
-                        set_color
-                        git stash pop
-                        unset_color
-                        unset do_update
-                        echo "updating index for assume-unchanged files..."
-                        set_color
-                        for file in $unchanged; do
-                            git update-index --verbose --assume-unchanged $file
-                        done
-                        unset_color
-                    else
-                        echo "$do_update is not true"
-                        echo "$do_update = $do_update"
-                        exit 1
-                    fi
-                    dtab
-                fi
-
-                # check if maximum pull time increased
-                if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
-                    t_pull_max=${dt_pull}
-                fi
-
-                # check if pull was successful
-                if [[ $RETVAL != 0 ]]; then
-                    # add to failure list
-                    pull_fail+="$repo "
-                    exit_on_fail
-                else
-                    # update links after pull
-                    prog=make_links.sh
-                    echo -ne "${TAB}${prog}... \x1b[0m"
-                    if [ -f ${prog} ]; then
-                        if [[ ! (("$(hostname -f)" == *"navy.mil") && ($repo =~ "private")) ]]; then
-                            echo "found"
-                            bash ${prog}
-                        else
-                            echo "skip"
-                        fi
-                    else
-                        echo "not found"
-                    fi
-                fi
-            fi
-
-            #------------------------------------------------------
-            # push
-            #------------------------------------------------------
-            decho -n "trailing local commits: "
-            N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
-            if [ ${N_local} -eq 0 ]; then
-                decho "none"
-            else
-                decho "${N_local}"
-
-                echo "pushing... "
-                cmd_base="git push --progress --verbose"
-                if [ $git_ver_maj -ge 2 ]; then
-                    cmd_base+=" --ipv4"
-                fi
-                # specify number of seconds before kill
-                nsec=2
-                to="${to_base} ${nsec}s "
-                # concat commands
-                cmd="${to}${cmd_base}"
-                RETVAL=137
-                n_loops=0
-                while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
-                    ((++n_loops))
-                    if [ $n_loops -gt 1 ]; then
-                        echo "${TAB}PUSH attempt $n_loops..."
-                    fi
-                    t_start=$(date +%s%N)
-                    do_cmd ${cmd}
-                    RETVAL=$?
-                    t_end=$(date +%s%N)
-                    dt_push=$((${t_end} - ${t_start}))
-
-                    echo -en "${GIT_HIGHLIGHT} push ${RESET} "
-                    if [[ $RETVAL != 0 ]]; then
-                        echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
-                        if [[ $RETVAL == 137 ]]; then
-                            nsec=$((nsec * 2))
-                            echo "${TAB}increasing push timeout to ${nsec}"
-                            to="${to_base} ${nsec}s "
-                            cmd="${to}${cmd_base}"
-                        fi
-                    else
-                        echo -e "${GOOD}OK${RESET}"
-                        ((++n_push))
-                        if [ ! -z ${push_OK:+dummy} ]; then
-                            push_OK+=$'\n'"$repo"
-                        else
-                            push_OK+="$repo"
-                        fi
-
-                    fi
-                done
-                if [[ ${dt_push} -gt ${t_push_max} ]]; then
-                    t_push_max=${dt_push}
-                fi
-                if [[ $RETVAL != 0 ]]; then
-                    # add to failure list
-                    push_fail+="$repo "
-                    exit_on_fail
-                fi
-            fi
-
-            check_mod
-
-            # check for stash entries
-            N_stash=$(git stash list | wc -l)
-            if [ $N_stash -gt 0 ]; then
-                echo -e "$repo has $N_stash entries in stash"
-                if [ ! -z ${stash_list:+dummy} ]; then
-                    stash_list+=$'\n'
-                fi
-                stash_list+=$(printf '%2d %s' $N_stash $repo)
-            fi
-        else
-            echo -e "${BAD}FAIL${RESET}\n${TAB}$repo not a Git repository"
-            if [ ! -z ${loc_fail:+dummy} ]; then
-                loc_fail+=$'\n'"$repo"
-            else
-                loc_fail+="$repo"
-            fi
-        fi
     else
         echo "not found"
         if [ ! -z ${loc_fail:+dummy} ]; then
@@ -716,6 +210,514 @@ for repo in $list; do
         unset_traps
         bash test_file ${HOME}/$repo
         set_traps
+        continue
+    fi
+    #------------------------------------------------------
+    # check
+    #------------------------------------------------------
+    cd ${HOME}/$repo
+    echo -n "checking repository status... "
+    check_repo
+    if [[ $RETVAL -eq 0 ]]; then
+        echo -e "${GOOD}OK${RESET} "
+    else
+        echo -e "${BAD}FAIL${RESET}\n${TAB}$repo not a Git repository"
+        if [ ! -z ${loc_fail:+dummy} ]; then
+            loc_fail+=$'\n'"$repo"
+        else
+            loc_fail+="$repo"
+        fi
+        continue
+    fi
+    
+    # parse remote
+    unset_traps
+
+    echo -n "checking remote tracking branch... "
+    set +e
+    git rev-parse --abbrev-ref @{upstream} &>/dev/null
+    RETVAL=$?
+    set -e
+    if [[ $RETVAL -ne 0 ]]; then
+        echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+        set_color
+        git rev-parse --abbrev-ref @{upstream} 2>&1 | sed "s/^/${TAb}/"
+        unset_color
+        echo "${TAB}no remote tracking branch set for current branch"
+        decho "skipping..."
+        upstream_fail+=( "${repo}" )
+        check_mod                
+        continue
+    fi            
+    set_traps
+    #            set -e
+    remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
+    echo "$remote_tracking_branch"
+    
+    upstream_repo=${remote_tracking_branch%%/*}
+    if [ $git_ver_maj -lt 2 ]; then
+        upstream_url=$(git remote -v | grep ${upstream_repo} | awk '{print $2}' | uniq)
+    else
+        upstream_url=$(git remote get-url ${upstream_repo})
+    fi
+    # add remote to list
+    echo "${upstream_url}" >>${list_remote}
+    
+    # check against argument
+    if [ $# -gt 0 ]; then
+        for arg in $@; do
+            echo -en "checking argument \x1b[36m$arg\x1b[m... "
+            if [[ $upstream_url =~ $arg ]]; then
+                echo -e "${GOOD}OK${RESET}"
+                ((++n_match))
+                break
+            else
+                echo -e "${gray}SKIP${RESET}"
+                continue 2
+            fi
+        done
+    fi
+
+    # add to list
+    if [ ! -z ${git_OK:+dummy} ]; then
+        git_OK+=$'\n'
+    fi
+    git_OK+=${upstream_url}
+
+    # check remotes
+    if [ $DEBUG -ge 0 ]; then
+        cbar "${BOLD}check remotes...${RESET}"
+    fi
+
+    check_remotes $@
+
+    # parse remote
+    upstream_refspec=${remote_tracking_branch#*/}
+    # print remote parsing
+    if [ $DEBUG -gt 0 ]; then
+        cbar "${BOLD}parse remote tracking branch...${RESET}"
+        (
+            echo -e "${TAB}remote tracking branch+ ${BLUE}${remote_tracking_branch}${RESET}"
+            echo "${TAB}${fTAB}remote name+ $upstream_repo"
+            echo "${TAB}${fTAB}remote refspec+ $upstream_refspec"
+        ) | column -t -s+ -o : -R 1
+
+    fi
+
+    # parse protocol
+    upstream_pro=$(echo ${upstream_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+    if [[ "${upstream_pro}" == "git" ]]; then
+        upstream_pro="SSH"
+        upstream_host=$(echo ${upstream_url} | sed 's/\(^[^:]*\):.*$/\1/')
+    else
+        upstream_host=$(echo ${upstream_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
+        if [[ ! "${upstream_pro}" == "http"* ]]; then
+            upstream_pro="local"
+        fi
+    fi
+
+    # check remote host name against list of checked hosts
+    decho "checking $upstream_host against list of checked hosts"
+    if [ ! -z ${host_OK:+dummy} ]; then
+        for OK_host in ${host_OK}; do
+            if [[ "$upstream_host" == "$OK_host" ]]; then
+                decho -e "$upstream_host matches ${GOOD}$OK_host${RESET}"
+                host_stat=$(echo -e "${GOOD}OK${RESET}")
+                break
+            fi
+        done
+    fi
+
+    if [ ! -z ${host_bad:+dummy} ]; then
+        for bad_host in ${host_bad}; do
+            if [[ "$upstream_host" == "$bad_host" ]]; then
+                decho -e "$upstream_host matches ${BAD}$bad_host${GOOD}"
+                fetch_fail+="$repo ($upstream_repo) "$'\n'
+                host_stat=$(echo -e "${BAD}FAIL${RESET}")
+                continue 2
+            fi
+        done
+    fi
+
+    # print host parsing
+    if [ $DEBUG -gt 0 ]; then
+        cbar "${BOLD}parse remote host...${RESET}"
+        (
+            echo "${TAB}upsream url+ ${upstream_url}"
+            echo -e "${TAB}${fTAB} host+ $upstream_host ${host_stat}"
+            echo -e "${TAB}${fTAB}proto+ ${upstream_pro}"
+        ) | column -t -s+ -o : -R 1
+    fi
+
+    if [[ "$host_stat" =~ *"FAIL"* ]]; then
+        decho "skipping fetch..."
+        exit_on_fail
+        continue
+    else
+        decho "proceeding with fetch..."
+    fi
+
+    #------------------------------------------------------
+    # fetch
+    #------------------------------------------------------
+    decho "updating..."
+    # specify number of seconds before kill
+    nsec=3
+    if [ $fetch_max -gt $nsec ]; then
+        nsec=$fetch_max
+    fi
+    to="${to_base} ${nsec}s "
+    # concat commands
+    cmd_base="git fetch"
+    if [ $DEBUG -gt 0 ]; then
+        cmd_base+=" --verbose"
+    else
+        cmd_base+=" --quiet"
+    fi
+    cmd="${to}${cmd_base}"
+    RETVAL=137
+    n_loops=0
+    while [ $n_loops -lt 5 ]; do
+        ((++n_loops))
+        if [ $n_loops -gt 1 ]; then
+            echo "${TAB}FETCH attempt $n_loops..."
+        fi
+        t_start=$(date +%s%N)
+        do_cmd ${cmd}
+        RETVAL=$?
+        t_end=$(date +%s%N)
+        dt_fetch=$((${t_end} - ${t_start}))
+        echo -en "${GIT_HIGHLIGHT} fetch ${RESET} "
+        if [[ $RETVAL == 0 ]]; then
+            echo -e "${GOOD}OK${RESET}"
+            ((++n_fetch))
+            break
+        else
+            echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+            echo "failed to fetch remote"
+            if [[ $RETVAL == 137 ]]; then
+                if [ $nsec -gt $fetch_max ]; then
+                    fetch_max=$nsec
+                    echo "${TAB}increasing fetch_max to $fetch_max"
+                fi
+                nsec=$((nsec * 2))
+                echo "${TAB}increasing fetch timeout to ${nsec}"
+                to="${to_base} ${nsec}s "
+                cmd="${to}${cmd_base} --verbose --all"
+            fi
+        fi
+    done
+
+    # update maximum fetch time
+    if [[ ${dt_fetch} -gt ${t_fetch_max} ]]; then
+        t_fetch_max=${dt_fetch}
+        # print maximum fetch time (in ns)
+        echo "${TAB}${fTAB}new maximum fetch time"
+        echo "${TAB}${fTAB}   raw time: $t_fetch_max ns"
+        declare -i nd=${#t_fetch_max}
+
+        # define number of "decimals" for ns timestamp
+        declare -i nd_max=9
+
+        # pad timestamp with leading zeros
+        if [ $nd -lt $nd_max ]; then
+            fmt="%0${nd_max}d"
+            declare time0=$(printf "$fmt" ${t_fetch_max})
+            echo "${TAB}${fTAB}zero-padded: $time0"
+            declare -i nd=${#time0}
+            if [ $nd -eq ${nd_max} ]; then
+                echo "${TAB}${fTAB}change in length"
+                echo "${TAB}${fTAB}${nd} numbers long"
+            else
+                echo "${TAB}${fTAB}no change"
+                exit 1
+            fi
+        else
+            declare -i time0=t_fetch_max
+        fi
+
+        # format timestamp in s
+        if [ $nd -gt $nd_max ]; then
+            ni=$(($nd - $nd_max))
+            ddeci=${time0:0:$ni}.${time0:$ni}
+        else
+            ddeci="0.${time0}"
+        fi
+        echo "${TAB}${fTAB}decimalized: $ddeci "
+
+        # round timestamp to nearest second
+        fmt="%.0f"
+        deci=$(printf "$fmt" ${ddeci})
+        echo "${TAB}${fTAB}integerized: $deci "
+        if [ $deci -gt $fetch_max ]; then
+            fetch_max=$deci
+        fi
+        echo "     fetch_max: $fetch_max"
+    fi
+    if [ $RETVAL -ne 0 ]; then
+        fetch_fail+="$repo "
+        echo -e "\E[32m> \E[0mWSL may need to be restarted"
+        exit_on_fail
+        echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
+        read -e -i "shutdown_wsl" -p $'\e[0;32m$\e[0m ' -t 10 && eval $REPLY
+    fi
+
+    #------------------------------------------------------
+    # pull
+    #------------------------------------------------------
+    decho -n "leading remote commits: "
+    N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
+    if [ ${N_remote} -eq 0 ]; then
+        decho "none"
+    else
+        decho "${N_remote}"
+
+        echo "pulling... "
+        cmd_base="git pull --all --progress --tags --verbose" #--prune"
+        if [ $git_ver_maj -ge 2 ]; then
+            cmd_base+=" --ff-only --ipv4"
+        fi
+        # specify number of seconds before kill
+        nsec=4
+        to="${to_base} ${nsec}s "
+        # concat commands
+        cmd="${to}${cmd_base}"
+        RETVAL=137
+        n_loops=0
+        while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
+            ((++n_loops))
+            if [ $n_loops -gt 1 ]; then
+                echo "${TAB}PULL attempt $n_loops..."
+            fi
+            t_start=$(date +%s%N)
+            do_cmd ${cmd}
+            RETVAL=$?
+            t_end=$(date +%s%N)
+            dt_pull=$((${t_end} - ${t_start}))
+
+            echo -en "${GIT_HIGHLIGHT} pull ${RESET} "
+            if [[ $RETVAL != 0 ]]; then
+                echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+                if [[ $RETVAL == 1 ]]; then
+                    itab
+                    echo -e "${TAB}merge conflicts found!"
+                    itab
+                    if [ $(git diff --name-only --diff-filter=M | wc -l) -gt 0 ]; then
+                        echo -en "${TAB}modified files found, "
+                        if [ $(git diff -w --diff-filter=M | wc -l) -gt 0 ]; then
+                            echo "modifications are non-trivial: "
+                            git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[31m&\x1b[m/"
+                            dtab 2
+                            check_mod                
+                            exit_on_fail
+                        else
+                            echo "modifications are trivial: "
+                            git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[33m&\x1b[m/"
+
+                            echo "${TAB}checking out modified files..."
+                            git diff --name-only --diff-filter=M | xargs -L 1 git checkout
+                            
+                            # reset RETVAL to stay in loop
+                            RETVAL=137
+                            dtab 2
+                            continue                                    
+                        fi
+                    else
+                        echo -e "${TAB}no modified files found"
+                    fi
+
+                    if [ $(git diff --name-only --diff-filter=U | wc -l) -gt 0 ]; then
+                        echo -e "${TAB}unmerged files found"
+                        git diff --name-only --diff-filter=U | sed "s/^/${fTAB}/"
+                        dtab
+                        exit_on_fail
+                    else
+                        echo -e "${TAB}no unmerged files found"
+                    fi
+
+                    if [ $(git ls-files -v | grep ^[[:lower:]] | awk '{print $2}' | wc -l) -gt 0 ]; then
+                        echo -e "${TAB}ignored files found"
+                        unchanged=$(git ls-files -v | grep ^[[:lower:]] | awk '{print $2}')
+                        echo "$unchanged" | sed "s/^/${fTAB}/"
+                        for file in $unchanged; do
+                            git update-index --verbose --no-assume-unchanged $file
+                        done
+                        do_update=true
+                        git stash -m "adding assume-unchanged files to stash"
+                        echo "n_loops = $n_loops"
+                        # reset RETVAL to stay in loop
+                        RETVAL=137
+                        dtab
+                        continue
+                    else
+                        echo -e "${TAB}no untracked files found"
+                    fi
+                    dtab
+                fi
+
+                # increase time
+                if [[ $RETVAL == 137 ]]; then
+                    nsec=$((nsec * 2))
+                    echo "${TAB}increasing pull timeout to ${nsec}"
+                    to="${to_base} ${nsec}s "
+                    cmd="${to}${cmd_base}"
+                fi
+                # force pull
+                if [[ $RETVAL == 128 ]]; then
+                    cbar "${TAB}${GRH}should I force pull!? ${RESET}"
+                    echo -e "${TAB}source directory = $src_dir_logi"
+                    prog=${src_dir_logi}/force_pull
+                    if [ -f ${prog} ]; then
+                        bash ${prog}
+                        RETVAL2=$?
+                        echo -en "${TAB}${GRH}force_pull${RESET}: "
+                        if [[ $RETVAL != 0 ]]; then
+                            echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL3${RESET}"
+                            exit || return
+                        else
+                            echo -e "${GOOD}OK${RESET}"
+                            ((++n_fpull))
+                        fi
+                    fi
+                fi
+            else
+                echo -e "${GOOD}OK${RESET}"
+                ((++n_pull))
+                if [ ! -z ${pull_OK:+dummy} ]; then
+                    pull_OK+=$'\n'"$repo"
+                else
+                    pull_OK+="$repo"
+                fi
+
+            fi
+        done
+
+        # check if assume-unchanged files were stashed
+        if [ -z ${do_update+dummy} ]; then
+            decho "do_update is unset"
+        else
+            decho "do_update is set"
+            if [[ ${do_update} == true ]]; then
+                decho "do_update is true"
+                echo "applying stash for assume-unchanged files..."
+                set_color
+                git stash pop
+                unset_color
+                unset do_update
+                echo "updating index for assume-unchanged files..."
+                set_color
+                for file in $unchanged; do
+                    git update-index --verbose --assume-unchanged $file
+                done
+                unset_color
+            else
+                echo "$do_update is not true"
+                echo "$do_update = $do_update"
+                exit 1
+            fi
+            dtab
+        fi
+
+        # check if maximum pull time increased
+        if [[ ${dt_pull} -gt ${t_pull_max} ]]; then
+            t_pull_max=${dt_pull}
+        fi
+
+        # check if pull was successful
+        if [[ $RETVAL != 0 ]]; then
+            # add to failure list
+            pull_fail+="$repo "
+            exit_on_fail
+        else
+            # update links after pull
+            prog=make_links.sh
+            echo -ne "${TAB}${prog}... \x1b[0m"
+            if [ -f ${prog} ]; then
+                if [[ ! (("$(hostname -f)" == *"navy.mil") && ($repo =~ "private")) ]]; then
+                    echo "found"
+                    bash ${prog}
+                else
+                    echo "skip"
+                fi
+            else
+                echo "not found"
+            fi
+        fi
+    fi
+
+    #------------------------------------------------------
+    # push
+    #------------------------------------------------------
+    decho -n "trailing local commits: "
+    N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
+    if [ ${N_local} -eq 0 ]; then
+        decho "none"
+    else
+        decho "${N_local}"
+
+        echo "pushing... "
+        cmd_base="git push --progress --verbose"
+        if [ $git_ver_maj -ge 2 ]; then
+            cmd_base+=" --ipv4"
+        fi
+        # specify number of seconds before kill
+        nsec=2
+        to="${to_base} ${nsec}s "
+        # concat commands
+        cmd="${to}${cmd_base}"
+        RETVAL=137
+        n_loops=0
+        while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
+            ((++n_loops))
+            if [ $n_loops -gt 1 ]; then
+                echo "${TAB}PUSH attempt $n_loops..."
+            fi
+            t_start=$(date +%s%N)
+            do_cmd ${cmd}
+            RETVAL=$?
+            t_end=$(date +%s%N)
+            dt_push=$((${t_end} - ${t_start}))
+
+            echo -en "${GIT_HIGHLIGHT} push ${RESET} "
+            if [[ $RETVAL != 0 ]]; then
+                echo -e "${BAD}FAIL${RESET} ${gray}RETVAL=$RETVAL${RESET}"
+                if [[ $RETVAL == 137 ]]; then
+                    nsec=$((nsec * 2))
+                    echo "${TAB}increasing push timeout to ${nsec}"
+                    to="${to_base} ${nsec}s "
+                    cmd="${to}${cmd_base}"
+                fi
+            else
+                echo -e "${GOOD}OK${RESET}"
+                ((++n_push))
+                if [ ! -z ${push_OK:+dummy} ]; then
+                    push_OK+=$'\n'"$repo"
+                else
+                    push_OK+="$repo"
+                fi
+
+            fi
+        done
+        if [[ ${dt_push} -gt ${t_push_max} ]]; then
+            t_push_max=${dt_push}
+        fi
+        if [[ $RETVAL != 0 ]]; then
+            # add to failure list
+            push_fail+="$repo "
+            exit_on_fail
+        fi
+    fi
+
+    check_mod
+
+    # check for stash entries
+    N_stash=$(git stash list | wc -l)
+    if [ $N_stash -gt 0 ]; then
+        echo -e "$repo has $N_stash entries in stash"
+        if [ ! -z ${stash_list:+dummy} ]; then
+            stash_list+=$'\n'
+        fi
+        stash_list+=$(printf '%2d %s' $N_stash $repo)
     fi
 done
 

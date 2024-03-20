@@ -16,11 +16,11 @@ function check_git() {
         if command -v git &>/dev/null; then
             ddecho -en "${GOOD}OK${RESET} "
             # parse Git version
-            export git_ver=$(git --version | awk '{print $3}')
-            export git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-            export git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-            export git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-            export check_git=false
+            local -grx git_ver=$(git --version | awk '{print $3}')
+            local -girx git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+            local -girx git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+            local -girx git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
+            local -gx check_git=false
             decho -e "${GRAY}v${git_ver}${NORMAL}"
             return 0
         else
@@ -41,7 +41,7 @@ function check_repo() {
     # exit on errors must be turned off; otherwise shell will exit when not inside a repository
     set +e
     git rev-parse --is-inside-work-tree &>/dev/null
-    RETVAL=$?
+    local -i RETVAL=$?
     reset_shell $old_opts
     if [[ $RETVAL -eq 0 ]]; then
         echo -e "${GOOD}OK${RESET} "
@@ -57,7 +57,7 @@ function print_remotes() {
     local DEBUG=1
     rtab
     check_repo
-    RETVAL=$?
+    local -i RETVAL=$?
     if [[ $RETVAL -eq 0 ]]; then
         # get number of remotes
         local -i n_remotes=$(git remote | wc -l)
