@@ -115,6 +115,9 @@ check_repos
 
 # parse remote tracking branch and local branch
 cbar "${BOLD}parse current settings...${RESET}"
+if [[ "$-" == *e* ]]; then
+    set +e
+fi
 remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
 if [ -z ${remote_tracking_branch+default} ]; then
     echo "${TAB}no remote tracking branch set for current branch"
@@ -497,7 +500,7 @@ fi
 cbar "${BOLD}pulling remote changes...${RESET}"
 if [ $N_remote -gt 0 ]; then
     echo -e "${TAB}${fTAB}${YELLOW}remote branch is $N_remote commits ahead of local${RESET}"
-    git pull --ff-only
+    git pull --ff-only ${pull_repo} ${pull_refspec}
 else
     echo -e "${TAB}${fTAB}no need to pull"
 fi
@@ -538,7 +541,7 @@ if [ $N_local -gt 0 ]; then
     itab
     git --no-pager log ${pull_branch}..HEAD | sed "s/^/${TAB}/"
     dtab
-    git push
+    git push --set-upstream ${pull_repo} ${pull_refspec}
 else
     echo -e "${TAB}${fTAB}no need to push"
 fi
@@ -566,8 +569,10 @@ if [ $N_stash -gt 0 ]; then
 else
     echo "${fTAB}no stash entries"
 fi
-echo "resetting upstream remote tracking branch..."
-git branch -u "${remote_tracking_branch}"
+if [ ! -z ${remote_tracking_branch} ]; then
+    echo "resetting upstream remote tracking branch..."
+    git branch -u "${remote_tracking_branch}"
+fi
 
 cbar "${BOLD}you're done!${RESET}"
 

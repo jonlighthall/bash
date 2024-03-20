@@ -277,7 +277,7 @@ for repo in $list; do
             if [ $DEBUG -gt 0 ]; then
                 cbar "${BOLD}parse remote tracking branch...${RESET}"
                 (
-                    echo -e "${TAB}remote tracking branch+ ${blue}${remote_tracking_branch}${RESET}"
+                    echo -e "${TAB}remote tracking branch+ ${BLUE}${remote_tracking_branch}${RESET}"
                     echo "${TAB}${fTAB}remote name+ $upstream_repo"
                     echo "${TAB}${fTAB}remote refspec+ $upstream_refspec"
                 ) | column -t -s+ -o : -R 1
@@ -776,7 +776,7 @@ echo -n "     not found: "
 if [ -z "$loc_fail" ]; then
     echo "none"
 else
-    echo -ne "${red}"
+    echo -ne "${BAD}"
     echo "${loc_fail}" | head -n 1
     echo "${loc_fail}" | tail -n +2 | sed "s/^/${list_indent}/"
     echo -ne "${RESET}"
@@ -789,7 +789,7 @@ fi
 
 # parse upstream branch
 if [ ${#upstream_fail[@]} -gt 0 ]; then
-    echo -en "   no upstream: ${yellow}"
+    echo -en "   no upstream: ${YELLOW}"
     (
         for repo in ${upstream_fail[@]}; do 
             echo "${repo}"
@@ -825,7 +825,7 @@ if [ ${n_pull} -eq 0 ]; then
 else
     echo "${n_pull}"
 
-    echo -ne "${green}"
+    echo -ne "${GREEN}"
     echo "${pull_OK}" | sed "s/^/${list_indent}/"
     echo -ne "${RESET}"
 
@@ -848,7 +848,7 @@ echo -n "   force pulls: "
 if [ $n_fpull -eq 0 ]; then
     echo "none"
 else
-    echo -e "${yellow}$n_fpull${RESET}"
+    echo -e "${YELLOW}$n_fpull${RESET}"
 fi
 
 # push
@@ -858,7 +858,7 @@ if [ $n_push -eq 0 ]; then
 else
     echo "${n_push}"
 
-    echo -ne "${green}"
+    echo -ne "${GREEN}"
     echo "${push_OK}" | sed "s/^/${list_indent}/"
     echo -ne "${RESET}"
 
@@ -882,7 +882,7 @@ if [ -z "$mod_repos" ]; then
     echo "none"
 else
     echo "$mod_repos"
-    echo -e "${yellow}$mod_files${RESET}" | sed "s/^/${list_indent}/"
+    echo -e "${YELLOW}$mod_files${RESET}" | sed "s/^/${list_indent}/"
 fi
 
 # stash

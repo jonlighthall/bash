@@ -1,10 +1,10 @@
 #!/bin/bash -u
 #
-# mv_date.sh - Rename input file to include modification date.
+# cp_date.sh - Copy input file renamed to include modification date.
 #
-# Adapted from grep_matching.sh
+# Adapted from mv_date.sh
 #
-# Apr 2023 JCL
+# Mar 2024 JCL
 
 function get_mod_date() {
 echo "${FUNCNAME}"
@@ -94,7 +94,7 @@ else
 	if [ -L "$1" ]; then
 		in_file=$1
 		echo "${in_file} is a broken link!"
-		mdate=$(stat -c '%y' "${in_file}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
+		mdate=$(stat -c '%y' ${in_file} | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
 		out_file=$1_${mdate}
 	else		
 		echo "${TAB}exiting..."
@@ -119,4 +119,4 @@ declare out_file
 get_mod_date "${in_file}" out_file
 
 # now move file
-mv -nv "${in_file}" "${out_file}"
+cp -pv "${in_file}" "${out_file}"

@@ -20,12 +20,12 @@ else
     RUN_TYPE="executing"
     # exit on errors
     set -eE
-    trap 'echo -e "${BAD}ERROR${NORMAL}: exiting ${BASH_SOURCE##*/}..."' ERR
+    trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${NORMAL}..."
+echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
 src_name=$(readlink -f $BASH_SOURCE)
 if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${NORMAL} -> $src_name"
+    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
 fi
 
 # set sort order (C sorting is the most consistient)
@@ -60,7 +60,7 @@ list_del=''
 for cred_in in $list_in; do
     echo -n "${cred_in}... "
     if [ -f ${cred_in} ]; then
-        echo -e "is a regular ${UL}file${NORMAL}"
+        echo -e "is a regular ${UL}file${RESET}"
         list_out+="${cred_in} "
         if [ ! ${cred_in} -ef ${cred_ref} ]; then
             echo "${cred_in} is not the same as ${cred_ref}"
@@ -69,7 +69,7 @@ for cred_in in $list_in; do
             echo "${cred_ref} and ${cred_in} are the same file"
         fi
     else
-        echo -e "${BAD}${UL}does not exist${NORMAL}"
+        echo -e "${BAD}${UL}does not exist${RESET}"
     fi
 done
 echo "list out = ${list_out}"
@@ -101,11 +101,11 @@ echo "done"
 echo -n "${TAB}sorting lines... "
 sort -u ${cred_out} -o ${cred_out}
 echo "done"
-echo -e "${TAB}\E[1;31msorted $L lines in $SECONDS seconds${NORMAL}"
+echo -e "${TAB}\E[1;31msorted $L lines in $SECONDS seconds${RESET}"
 
 # print number of differences
 N=$(diff --suppress-common-lines -yiEbwB ${cred_bak} ${cred_out} | wc -l)
-echo -e "${TAB}\E[1;31mnumber of differences = $N${NORMAL}"
+echo -e "${TAB}\E[1;31mnumber of differences = $N${RESET}"
 
 cp -Lpv ${cred_out} ${cred_ref}
 
@@ -134,5 +134,5 @@ echo -en "$(date +"%a %b %d %-l:%M %p %Z") ${BASH_SOURCE##*/} "
 if command -v sec2elap &>/dev/null; then
     bash sec2elap ${SECONDS}
 else
-    echo "elapsed time is ${white}${SECONDS} sec${NORMAL}"
+    echo "elapsed time is ${white}${SECONDS} sec${RESET}"
 fi
