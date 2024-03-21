@@ -217,6 +217,7 @@ for repo in $list; do
     #------------------------------------------------------
     cd ${HOME}/$repo
     check_repo
+    RETVAL=$?
     if [[ $RETVAL -gt 0 ]]; then
         if [ ! -z ${loc_fail:+dummy} ]; then
             loc_fail+=$'\n'"$repo"
@@ -237,7 +238,7 @@ for repo in $list; do
     if [[ $RETVAL -ne 0 ]]; then
         echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
         set_color
-        git rev-parse --abbrev-ref @{upstream} 2>&1 | sed "s/^/${TAb}/"
+        git rev-parse --abbrev-ref @{upstream} 2>&1 | sed "s/^/${TAB}/"
         unset_color
         echo "${TAB}no remote tracking branch set for current branch"
         decho "skipping..."
