@@ -628,9 +628,12 @@ for repo in $list; do
             # update links after pull
             prog=make_links.sh
             echo -ne "${TAB}${prog}... \x1b[0m"
-            if [ -f ${prog} ]; then
+            if [ -f ${prog} ] || [ -f "bin/${prog}" ]; then
                 if [[ ! (("$(hostname -f)" == *"navy.mil") && ($repo =~ "private")) ]]; then
                     echo "found"
+                    if [ -f "bin/${prog}" ]; then
+                        prog=bin/${prog}
+                    fi
                     bash ${prog}
                 else
                     echo "skip"
