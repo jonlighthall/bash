@@ -238,7 +238,7 @@ function check_remotes() {
             echo    "${TAB}url+ ${remote_url} ${url_stat}"
             echo -e "${TAB}host+ ${remote_host} ${host_stat}"
             echo -e "${TAB}proto+ ${remote_pro}"
-        ) | column -t -s+ 
+        ) | column -t -s+ -o : -R 1
         decho "${TAB}do_connect = $do_connect"
         dtab
         # check connection before proceeding
@@ -380,23 +380,25 @@ function unset_color() {
 
 function do_cmd() {
     cmd=$(echo $@)
-    itab
-    # get color index
-    local -i idx
-    dbg2idx 3 idx
-    # set color
-    echo -ne "${dcolor[$idx]}"
     # define temp file
     temp_file=temp
     # unbuffer command output and save to file    
     stdbuf -i0 -o0 -e0 $cmd &>$temp_file
     RETVAL=$?
     # colorize and indent command output
-    cat temp | sed "/|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/g;s/\r$/\n${TAB}/g"
-    unset_color
-    dtab
-    # delete temp file
     if [ -f ${temp_file} ]; then
+        itab
+        # get color index
+        local -i idx
+        dbg2idx 3 idx
+        # set color
+        echo -ne "${dcolor[$idx]}"
+        # print output
+        cat $temp_file | sed "/|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/g"
+        # reset formatting
+        unset_color
+        dtab
+        # delete temp file
         rm ${temp_file}
     fi
     return $RETVAL
