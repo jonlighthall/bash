@@ -387,7 +387,7 @@ function do_cmd() {
     # set color
     echo -ne "${dcolor[$idx]}"
     # unbuffer then colorize and indent command output
-    stdbuf -i0 -o0 -e0 $cmd 2>&1 | sed "/|/s/^/${dcolor[$idx +1]}/; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/"
+    stdbuf -i0 -o0 -e0 $cmd 2>&1 | sed "/|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/g"
     RETVAL=$?
     unset_color
     dtab
