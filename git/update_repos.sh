@@ -232,12 +232,16 @@ for repo in $list; do
     fi
     
     # parse remote
-    unset_traps
-
     echo -n "${TAB}checking remote tracking branch... "
-    set +e
+    # set shell options
+    if [[ "$-" == *e* ]]; then
+        # exit on errors must be turned off; otherwise shell will exit no remote branch found
+        old_opts=$(echo "$-")
+        set +e
+    fi
     git rev-parse --abbrev-ref @{upstream} &>/dev/null
     RETVAL=$?
+    reset_shell ${old_opts-''}    
     if [[ $RETVAL -ne 0 ]]; then
         echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
         do_cmd git rev-parse --abbrev-ref @{upstream}
@@ -247,8 +251,6 @@ for repo in $list; do
         check_mod                
         continue
     fi            
-    set -e
-    set_traps
     remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
     echo "$remote_tracking_branch"
     
