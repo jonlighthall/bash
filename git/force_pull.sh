@@ -30,15 +30,6 @@
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
 
-# set tab
-called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]]; then
-    TAB=''
-    : ${fTAB:='   '}
-else
-    TAB+=${TAB+${fTAB:='   '}}
-fi
-
 # set debug level
 declare -i DEBUG=0
 
@@ -46,7 +37,6 @@ declare -i DEBUG=0
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-    set_traps
 fi
 
 # determine if script is being sourced or executed and add conditional behavior
@@ -57,6 +47,7 @@ else
     RUN_TYPE="executing"
     # exit on errors
     set -e
+    set_traps
 fi
 
 print_source
@@ -81,28 +72,38 @@ check_remotes
 
 # parse remote tracking branch and local branch
 cbar "${BOLD}parse current settings...${RESET}"
-
+# parse remote
+echo -n "${TAB}checking remote tracking branch... "
 # set shell options
 if [[ "$-" == *e* ]]; then
-    # exit on errors must be turned off; otherwise shell will exit when not inside a repository
+    # exit on errors must be turned off; otherwise shell will exit no remote branch found
     old_opts=$(echo "$-")
     set +e
 fi
-remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
+unset_traps
+git rev-parse --abbrev-ref @{upstream} &>/dev/null
+RETVAL=$?
 reset_shell ${old_opts-''}
-if [ -z ${remote_tracking_branch+default} ]; then
+if [[ $RETVAL -ne 0 ]]; then
+    echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+    do_cmd git rev-parse --abbrev-ref @{upstream}
+    set_traps
     echo "${TAB}no remote tracking branch set for current branch"
 else
-    echo -e "${TAB}remote tracking branch: ${BLUE}${remote_tracking_branch}${RESET}"
+    set_traps
+    remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
     upstream_repo=${remote_tracking_branch%%/*}
-    echo "${TAB}${fTAB}remote name: ....... $upstream_repo"
-
     # parse branches
     upstream_refspec=${remote_tracking_branch#*/}
-    echo "${TAB}${fTAB}remote refspec: .... $upstream_refspec"
+    (
+        echo -e "remote tracking branch+${BLUE}${remote_tracking_branch}${RESET}"
+        echo "remote name+$upstream_repo"
+        echo "remote refspec+$upstream_refspec"
+        echo -e "local branch+${GREEN}${local_branch}${RESET}"
+    ) | column -t -s+ -o ": " -R1 | sed "s/^//"
 fi
+dtab 
 local_branch=$(git branch | grep \* | sed 's/^\* //')
-echo -e "${TAB}${fTAB}local branch: ...... ${GREEN}${local_branch}${RESET}"
 
 # parse arguments
 cbar "${BOLD}parse arguments...${RESET}"
@@ -122,8 +123,14 @@ if [ $# -ge 1 ]; then
     fi
 else
     echo "${TAB}no remote specified"
-    echo "${TAB}${fTAB}using $upstream_repo"
-    pull_repo=${upstream_repo}
+    if [ -z ${upstream_repo+dummy} ]; then
+        echo "${TAB}no remote tracking branch set for current branch"
+        echo "${TAB}exiting..."
+        exit
+    else
+        echo "${TAB}${fTAB}using $upstream_repo"
+        pull_repo=${upstream_repo}
+    fi
 fi
 if [ $# -ge 2 ]; then
     echo "${TAB}reference specified"
@@ -159,7 +166,6 @@ cbar "${BOLD}checking remote host...${RESET}"
 
 # print remote parsing
 pull_url=$(git remote get-url ${pull_repo})
-echo "${TAB}remote url: ${pull_url}"
 
 # parse protocol
 pull_pro=$(echo ${pull_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
@@ -174,8 +180,11 @@ else
         pull_pro="local"
     fi
 fi
-echo "${TAB}${fTAB} host: $pull_host"
-echo -e "${TAB}${fTAB}proto: ${pull_pro}"
+(
+    echo "remote url+ ${pull_url}"
+    echo "host+ $pull_host"
+    echo -e "proto+ ${pull_pro}"
+) | column -t -s+ -o ":" -R1 | sed "s/^/${TAB}/"
 
 # check remote host name against list of checked hosts
 if [ ! -z ${host_bad:+dummy} ]; then
