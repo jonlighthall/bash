@@ -72,6 +72,8 @@ check_remotes
 
 # parse remote tracking branch and local branch
 cbar "${BOLD}parse current settings...${RESET}"
+# parse local
+local_branch=$(git branch | grep \* | sed 's/^\* //')
 # parse remote
 echo -n "${TAB}checking remote tracking branch... "
 # set shell options
@@ -95,6 +97,7 @@ else
     upstream_repo=${remote_tracking_branch%%/*}
     # parse branches
     upstream_refspec=${remote_tracking_branch#*/}
+    echo
     (
         echo -e "remote tracking branch+${BLUE}${remote_tracking_branch}${RESET}"
         echo "remote name+$upstream_repo"
@@ -103,7 +106,6 @@ else
     ) | column -t -s+ -o ": " -R1 | sed "s/^//"
 fi
 dtab 
-local_branch=$(git branch | grep \* | sed 's/^\* //')
 
 # parse arguments
 cbar "${BOLD}parse arguments...${RESET}"
@@ -207,7 +209,7 @@ if [ ! -z ${host_bad:+dummy} ]; then
         fi
     done
 else
-    echo "list of bad hosts empty"
+    decho "list of bad hosts empty"
 fi
 
 cbar "${BOLD}comparing branches...${RESET}"
@@ -216,7 +218,7 @@ if [ ! -z ${remote_tracking_branch} ]; then
 
     if [ "$pull_branch" == "$remote_tracking_branch" ]; then
         echo "match"
-        echo "${TAB}${fTAB}${pull_branch}"
+        echo -e "${TAB}${fTAB}${BLUE}${pull_branch}${RESET}"
     else
         echo "do not match"
         echo "${TAB}${fTAB}${pull_branch}"
@@ -248,7 +250,7 @@ fi
 echo -n "local branch and remote branch name... "
 if [ "$local_branch" == "$pull_refspec" ]; then
     echo "match"
-    echo "${TAB}${fTAB}${local_branch}"
+    echo -e "${TAB}${fTAB}${GREEN}${local_branch}${RESET}"
 else
     echo "do not match"
     echo "${TAB}${fTAB}${local_branch}"
@@ -259,11 +261,7 @@ cbar "${BOLD}comparing local branch ${GREEN}$local_branch${RESET} with remote br
 
 # before starting, fetch remote
 echo "${TAB}fetching ${pull_repo}..."
-itab
-echo -ne "\e[38;5;11m"
-git fetch --verbose ${pull_repo} ${pull_refspec} 2>&1 | sed "s/^/${TAB}/"
-echo -ne "\e[0m"
-dtab
+do_cmd git fetch --verbose ${pull_repo} ${pull_refspec}
 
 echo "comparing repositories based on commit hash..."
 echo -n "${fTAB}leading remote commits: "
@@ -417,16 +415,17 @@ if [ -z "$(git diff)" ]; then
     echo -e "${TAB}${fTAB}no differences to stash"
     b_stash=false
 else
-    echo "prepare to stash..."
-    git reset HEAD
-    git status
+    echo "resetting HEAD..."
+    do_cmd git reset HEAD
+    echo "status:"
+    do_cmd git status
     echo "stashing..."
     if [ $git_ver_maj -lt 2 ]; then
         # old command
-        git stash
+        do_cmd git stash
     else
         # modern command
-        git stash -u
+        do_cmd git stash -u
     fi
     b_stash=true
 fi
@@ -442,7 +441,12 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     branch_temp=${local_branch}.temp
     echo "generating temporary branch..."
     i=0
-    set +e
+    # set shell options
+    if [[ "$-" == *e* ]]; then
+        # exit on errors must be turned off; otherwise shell will exit no remote branch found
+        old_opts=$(echo "$-")
+        set +e
+    fi
     while [[ ! -z $(git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep ${branch_temp}) ]]; do
         echo "${TAB}${fTAB}${branch_temp} exists"
         ((++i))
@@ -450,8 +454,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     done
     echo "${TAB}${fTAB}found unused branch name ${branch_temp}"
     if (! return 0 2>/dev/null); then
-        echo "${TAB}${fTAB}resetting exit on error"
-        set -eE
+        reset_shell ${old_opts-''}
     fi
     git branch ${branch_temp}
 else
@@ -498,9 +501,7 @@ if [ $N_temp -gt 0 ]; then
     echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
 
     # rebase
-    trap '
-set_color
-echo "hello"
+    trap 'set_color
 echo "${bin_name} TODO: git checkout ${branch_temp}"
 echo "${bin_name} TODO: git rebase ${local_branch}"
 echo "${bin_name} TODO: git checkout ${local_branch}"
@@ -514,8 +515,7 @@ unset_color
 print_exit $?' EXIT
 
     git checkout ${branch_temp}
-    trap '
-set_color
+    trap 'set_color
 echo "${bin_name} TODO: git rebase ${local_branch}"
 echo "${bin_name} TODO: git checkout ${local_branch}"
 echo "${bin_name} TODO: git merge ${branch_temp}"
@@ -534,8 +534,7 @@ print_exit $?' EXIT
 
     # merge
     cbar "${BOLD}merging local changes...${RESET}"
-    trap '
-set_color
+    trap 'set_color
 echo "${bin_name} TODO: git checkout ${local_branch}"
 echo "${bin_name} TODO: git merge ${branch_temp}"
 echo "${bin_name} TODO: git branch -d ${branch_temp}"
@@ -546,8 +545,7 @@ echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
     git checkout ${local_branch}
-    trap '
-set_color
+    trap 'set_color
 echo "${bin_name} TODO: git merge ${branch_temp}"
 echo "${bin_name} TODO: git branch -d ${branch_temp}"
 echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
@@ -557,8 +555,7 @@ echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT    
     git merge ${branch_temp}
-    trap '
-set_color
+    trap 'set_color
 echo "${bin_name} TODO: git branch -d ${branch_temp}"
 echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
 echo "${bin_name} TODO: git stash pop"
@@ -580,8 +577,7 @@ if [ $N_local -gt 0 ]; then
     itab
     git --no-pager log ${pull_branch}..HEAD | sed "s/^/${TAB}/"
     dtab
-    trap '
-set_color
+    trap 'set_color
 echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
 echo "${bin_name} TODO: git stash pop"
 echo "${bin_name} TODO: git reset HEAD"
@@ -599,29 +595,33 @@ N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo "there are $N_stash entries in stash"
     if $b_stash; then
-        trap '
-set_color
+        trap 'set_color
 echo "${bin_name} TODO: git stash pop"
 echo "${bin_name} TODO: git reset HEAD"
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-        set +e
-        git stash pop
-        echo "${TAB}${fTAB}resetting exit on error"
-        set -e
+        if [[ "$-" == *e* ]]; then
+            # exit on errors must be turned off; otherwise shell will exit no remote branch found
+            old_opts=$(echo "$-")
+            set +e
+        fi
+        unset_traps
+        do_cmd git stash pop
+        set_traps
+        reset_shell ${old_opts-''}
         echo -ne "stash made... "
         if [ -z "$(git diff)" ]; then
             echo -e "${GREEN}no changes${RESET}"
         else
             echo -e "${YELLOW}changes!${RESET}"
-            trap '
-set_color
+            dtab
+            trap 'set_color
 echo "${bin_name} TODO: git reset HEAD"
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-            git reset HEAD
+            do_cmd git reset HEAD
         fi
     else
         echo "${fTAB}...but none are from this operation"
@@ -631,22 +631,20 @@ else
 fi
 if [ ! -z ${remote_tracking_branch} ]; then
     echo "resetting upstream remote tracking branch..."
-    trap '
-set_color
+    trap 'set_color
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-
     if [ $git_ver_maj -lt 2 ]; then
         # old command       
         git branch --set-upstream "${remote_tracking_branch}"
     else
         # modern command
-        git branch -u ${remote_tracking_branch}
+        do_cmd git branch -u ${remote_tracking_branch}
     fi
 fi
-
 cbar "${BOLD}you're done!${RESET}"
+clear_traps
 set_traps
 # add exit code for parent script
 exit 0
