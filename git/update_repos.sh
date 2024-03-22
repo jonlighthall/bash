@@ -234,11 +234,10 @@ for repo in $list; do
     # parse remote
     unset_traps
 
-    echo -n "checking remote tracking branch... "
+    echo -n "${TAB}checking remote tracking branch... "
     set +e
     git rev-parse --abbrev-ref @{upstream} &>/dev/null
     RETVAL=$?
-
     if [[ $RETVAL -ne 0 ]]; then
         echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
         do_cmd git rev-parse --abbrev-ref @{upstream}
@@ -265,7 +264,7 @@ for repo in $list; do
     # check against argument
     if [ $# -gt 0 ]; then
         for arg in $@; do
-            echo -en "checking argument \x1b[36m$arg\x1b[m... "
+            echo -en "${TAB}checking argument \x1b[36m$arg\x1b[m... "
             if [[ $upstream_url =~ $arg ]]; then
                 echo -e "${GOOD}OK${RESET}"
                 ((++n_match))
