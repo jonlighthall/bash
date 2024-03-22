@@ -597,10 +597,10 @@ echo "${bin_name} TODO: git reset HEAD"
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-        set +eE
+        set +e
         git stash pop
         echo "${TAB}${fTAB}resetting exit on error"
-        set -eE
+        set -e
         echo -ne "stash made... "
         if [ -z "$(git diff)" ]; then
             echo -e "${GREEN}no changes${RESET}"
@@ -622,17 +622,22 @@ else
 fi
 if [ ! -z ${remote_tracking_branch} ]; then
     echo "resetting upstream remote tracking branch..."
-            trap '
+    trap '
 set_color
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    git branch --set-upstream "${remote_tracking_branch}"
+
+    if [ $git_ver_maj -lt 2 ]; then
+        # old command       
+        git branch --set-upstream "${remote_tracking_branch}"
+    else
+        # modern command
+        git branch -u ${remote_tracking_branch}
+    fi
 fi
 
 cbar "${BOLD}you're done!${RESET}"
-
-print_elap
-
+set_traps
 # add exit code for parent script
 exit 0
