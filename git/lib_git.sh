@@ -381,8 +381,13 @@ function unset_color() {
 function do_cmd() {
     cmd=$(echo $@)
     itab
-    set_color
-    stdbuf -i0 -o0 -e0 $cmd 2>&1 | sed "s/^/${TAB}/"
+    # get color index
+    local -i idx
+    dbg2idx 3 idx
+    # set color
+    echo -ne "${dcolor[$idx]}"
+    # unbuffer then colorize and indent command output
+    stdbuf -i0 -o0 -e0 $cmd 2>&1 | sed "/|/s/^/${dcolor[$idx +1]}/; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/"
     RETVAL=$?
     unset_color
     dtab
