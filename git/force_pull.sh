@@ -478,17 +478,6 @@ fi
 
 # rebase and merge oustanding local commits
 cbar "${BOLD}rebasing temporary branch...${RESET}"
-set_color
-echo "${bin_name}: git checkout ${branch_temp}"
-echo "${bin_name}: git rebase ${local_branch}"
-echo "${bin_name}: git checkout ${local_branch}"
-echo "${bin_name}: git merge ${branch_temp}"
-echo "${bin_name}: git branch -d ${branch_temp}"
-echo "${bin_name}: git push --set-upstream ${pull_repo} ${pull_refspec}"
-echo "${bin_name}: git stash pop"
-echo "${bin_name}: git reset HEAD"
-echo "${bin_name}: git branch -u ${remote_tracking_branch}"
-unset_color
 
 if [ -z ${branch_temp+default} ]; then
     N_temp=0
@@ -500,7 +489,35 @@ if [ $N_temp -gt 0 ]; then
     echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
 
     # rebase
+    trap '
+set_color
+echo "hello"
+echo "${bin_name} TODO: git checkout ${branch_temp}"
+echo "${bin_name} TODO: git rebase ${local_branch}"
+echo "${bin_name} TODO: git checkout ${local_branch}"
+echo "${bin_name} TODO: git merge ${branch_temp}"
+echo "${bin_name} TODO: git branch -d ${branch_temp}"
+echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${bin_name} TODO: git stash pop"
+echo "${bin_name} TODO: git reset HEAD"
+echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+unset_color
+print_exit $?' EXIT
+
     git checkout ${branch_temp}
+    trap '
+set_color
+echo "${bin_name} TODO: git rebase ${local_branch}"
+echo "${bin_name} TODO: git checkout ${local_branch}"
+echo "${bin_name} TODO: git merge ${branch_temp}"
+echo "${bin_name} TODO: git branch -d ${branch_temp}"
+echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${bin_name} TODO: git stash pop"
+echo "${bin_name} TODO: git reset HEAD"
+echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+unset_color
+print_exit $?' EXIT
+
     git rebase ${local_branch}
     echo "${TAB}after rebase:"
     N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
@@ -508,18 +525,38 @@ if [ $N_temp -gt 0 ]; then
 
     # merge
     cbar "${BOLD}merging local changes...${RESET}"
-    set_color
-    echo "${bin_name}: git checkout ${local_branch}"
-    echo "${bin_name}: git merge ${branch_temp}"
-    echo "${bin_name}: git branch -d ${branch_temp}"
-    echo "${bin_name}: git push --set-upstream ${pull_repo} ${pull_refspec}"
-    echo "${bin_name}: git stash pop"
-    echo "${bin_name}: git reset HEAD"
-    echo "${bin_name}: git branch -u ${remote_tracking_branch}"
-    unset_color
-
+    trap '
+set_color
+echo "${bin_name} TODO: git checkout ${local_branch}"
+echo "${bin_name} TODO: git merge ${branch_temp}"
+echo "${bin_name} TODO: git branch -d ${branch_temp}"
+echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${bin_name} TODO: git stash pop"
+echo "${bin_name} TODO: git reset HEAD"
+echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+unset_color
+print_exit $?' EXIT
     git checkout ${local_branch}
+    trap '
+set_color
+echo "${bin_name} TODO: git merge ${branch_temp}"
+echo "${bin_name} TODO: git branch -d ${branch_temp}"
+echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${bin_name} TODO: git stash pop"
+echo "${bin_name} TODO: git reset HEAD"
+echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+unset_color
+print_exit $?' EXIT    
     git merge ${branch_temp}
+    trap '
+set_color
+echo "${bin_name} TODO: git branch -d ${branch_temp}"
+echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${bin_name} TODO: git stash pop"
+echo "${bin_name} TODO: git reset HEAD"
+echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+unset_color
+print_exit $?' EXIT
     git branch -d ${branch_temp}
 else
     echo -e "${TAB}${fTAB}no need to merge"
@@ -527,12 +564,6 @@ fi
 
 # push local commits
 cbar "${BOLD}pushing local changes...${RESET}"
-set_color
-echo "${bin_name}: git push --set-upstream ${pull_repo} ${pull_refspec}"
-echo "${bin_name}: git stash pop"
-echo "${bin_name}: git reset HEAD"
-echo "${bin_name}: git branch -u ${remote_tracking_branch}"
-unset_color
 N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${fTAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
@@ -540,6 +571,14 @@ if [ $N_local -gt 0 ]; then
     itab
     git --no-pager log ${pull_branch}..HEAD | sed "s/^/${TAB}/"
     dtab
+    trap '
+set_color
+echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${bin_name} TODO: git stash pop"
+echo "${bin_name} TODO: git reset HEAD"
+echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+unset_color
+print_exit $?' EXIT
     git push --set-upstream ${pull_repo} ${pull_refspec}
 else
     echo -e "${TAB}${fTAB}no need to push"
@@ -547,15 +586,17 @@ fi
 
 # get back to where you were....
 cbar "${BOLD}applying stash...${RESET}"
-set_color
-echo "${bin_name}: git stash pop"
-echo "${bin_name}: git reset HEAD"
-echo "${bin_name}: git branch -u ${remote_tracking_branch}"
-unset_color
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo "there are $N_stash entries in stash"
     if $b_stash; then
+        trap '
+set_color
+echo "${bin_name} TODO: git stash pop"
+echo "${bin_name} TODO: git reset HEAD"
+echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+unset_color
+print_exit $?' EXIT
         set +eE
         git stash pop
         echo "${TAB}${fTAB}resetting exit on error"
@@ -565,6 +606,12 @@ if [ $N_stash -gt 0 ]; then
             echo -e "${GREEN}no changes${RESET}"
         else
             echo -e "${YELLOW}changes!${RESET}"
+            trap '
+set_color
+echo "${bin_name} TODO: git reset HEAD"
+echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+unset_color
+print_exit $?' EXIT
             git reset HEAD
         fi
     else
@@ -575,6 +622,11 @@ else
 fi
 if [ ! -z ${remote_tracking_branch} ]; then
     echo "resetting upstream remote tracking branch..."
+            trap '
+set_color
+echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+unset_color
+print_exit $?' EXIT
     git branch --set-upstream "${remote_tracking_branch}"
 fi
 
