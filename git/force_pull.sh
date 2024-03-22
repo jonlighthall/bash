@@ -575,7 +575,7 @@ else
 fi
 if [ ! -z ${remote_tracking_branch} ]; then
     echo "resetting upstream remote tracking branch..."
-    git branch -u "${remote_tracking_branch}"
+    git branch --set-upstream "${remote_tracking_branch}"
 fi
 
 cbar "${BOLD}you're done!${RESET}"
