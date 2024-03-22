@@ -242,7 +242,7 @@ function check_remotes() {
         (
             echo    "${TAB}url+ ${remote_url} ${url_stat}"
             echo -e "${TAB}host+ ${remote_host} ${host_stat}"
-            echo -e "${TAB}proto+ ${remote_pro}"
+            decho -e "${TAB}proto+ ${remote_pro}"
         ) | column -t -s+ -o : -R 1
         decho "${TAB}do_connect = $do_connect"
         dtab
@@ -393,7 +393,8 @@ function do_cmd() {
     stdbuf -i0 -o0 -e0 $cmd &>$temp_file
     RETVAL=$?
     # colorize and indent command output
-    if [ -f ${temp_file} ]; then
+    if [ -s ${temp_file} ]; then
+        start_new_line
         itab
         # get color index
         local -i idx
