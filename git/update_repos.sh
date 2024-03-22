@@ -24,13 +24,13 @@ DEBUG=${DEBUG:-0}
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-# exit on errors
+    # exit on errors
     set -e     
     #   set_traps
 else
-# ignore undefined variables
+    # ignore undefined variables
     set +u 
-# do not exit on errors
+    # do not exit on errors
     set +e
 fi
 
@@ -285,7 +285,7 @@ for repo in $list; do
     git_OK+=${upstream_url}
 
     # check remotes
-    if [ $DEBUG -ge 0 ]; then
+    if [ $DEBUG -gt 0 ]; then
         cbar "${BOLD}check remotes...${RESET}"
     fi
 
@@ -360,7 +360,7 @@ for repo in $list; do
     #------------------------------------------------------
     # fetch
     #------------------------------------------------------
-    decho "updating..."
+    echo -n "fetching... "
     # specify number of seconds before kill
     nsec=3
     if [ $fetch_max -gt $nsec ]; then
@@ -380,21 +380,33 @@ for repo in $list; do
     while [ $n_loops -lt 5 ]; do
         ((++n_loops))
         if [ $n_loops -gt 1 ]; then
-            echo "${TAB}FETCH attempt $n_loops..."
+            echo -n "${TAB}FETCH attempt $n_loops..."
         fi
+        declare -i x1
+        declare -i y1
+        get_curpos x1 y1        
         t_start=$(date +%s%N)
-        do_cmd ${cmd}
-        RETVAL=$?
+        do_cmd ${cmd}        
+        RETVAL=$?        
         t_end=$(date +%s%N)
+        declare -i x2
+        declare -i y2
+        get_curpos x2 y2
+        # check if cursor moved
+        if [ $x1 = $x2 ] && [ $y1 == $y2 ]; then
+            :
+        else
+            echo -e "${GIT_HIGHLIGHT} fetch ${RESET} "
+        fi       
         dt_fetch=$((${t_end} - ${t_start}))
-        echo -en "${GIT_HIGHLIGHT} fetch ${RESET} "
         if [[ $RETVAL == 0 ]]; then
             echo -e "${GOOD}OK${RESET}"
             ((++n_fetch))
             break
         else
             echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
-            echo "failed to fetch remote"
+            itab
+            echo "${TAB}failed to fetch remote"
             if [[ $RETVAL == 137 ]]; then
                 if [ $nsec -gt $fetch_max ]; then
                     fetch_max=$nsec
@@ -405,6 +417,7 @@ for repo in $list; do
                 to="${to_base} ${nsec}s "
                 cmd="${to}${cmd_base} --verbose --all"
             fi
+            dtab
         fi
     done
 
@@ -412,8 +425,8 @@ for repo in $list; do
     if [[ ${dt_fetch} -gt ${t_fetch_max} ]]; then
         t_fetch_max=${dt_fetch}
         # print maximum fetch time (in ns)
-        echo "${TAB}${fTAB}new maximum fetch time"
-        echo "${TAB}${fTAB}   raw time: $t_fetch_max ns"
+        decho "${TAB}${fTAB}new maximum fetch time"
+        decho "${TAB}${fTAB}   raw time: $t_fetch_max ns"
         declare -i nd=${#t_fetch_max}
 
         # define number of "decimals" for ns timestamp
@@ -423,13 +436,13 @@ for repo in $list; do
         if [ $nd -lt $nd_max ]; then
             fmt="%0${nd_max}d"
             declare time0=$(printf "$fmt" ${t_fetch_max})
-            echo "${TAB}${fTAB}zero-padded: $time0"
+            ddecho "${TAB}${fTAB}zero-padded: $time0"
             declare -i nd=${#time0}
             if [ $nd -eq ${nd_max} ]; then
-                echo "${TAB}${fTAB}change in length"
-                echo "${TAB}${fTAB}${nd} numbers long"
+                ddecho "${TAB}${fTAB}change in length"
+                ddecho "${TAB}${fTAB}${nd} numbers long"
             else
-                echo "${TAB}${fTAB}no change"
+                ddecho "${TAB}${fTAB}no change"
                 exit 1
             fi
         else
@@ -443,16 +456,16 @@ for repo in $list; do
         else
             ddeci="0.${time0}"
         fi
-        echo "${TAB}${fTAB}decimalized: $ddeci "
+        decho "${TAB}${fTAB}decimalized: $ddeci "
 
         # round timestamp to nearest second
         fmt="%.0f"
         deci=$(printf "$fmt" ${ddeci})
-        echo "${TAB}${fTAB}integerized: $deci "
+        decho "${TAB}${fTAB}integerized: $deci "
         if [ $deci -gt $fetch_max ]; then
             fetch_max=$deci
         fi
-        echo "     fetch_max: $fetch_max"
+        decho "     fetch_max: $fetch_max"
     fi
     if [ $RETVAL -ne 0 ]; then
         fetch_fail+="$repo "
@@ -469,6 +482,7 @@ for repo in $list; do
     N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
     if [ ${N_remote} -eq 0 ]; then
         decho "none"
+        decho "${fTAB}no need to pull"
     else
         decho "${N_remote}"
 
@@ -651,6 +665,7 @@ for repo in $list; do
     N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
     if [ ${N_local} -eq 0 ]; then
         decho "none"
+        decho "${fTAB}no need to push"
     else
         decho "${N_local}"
 
