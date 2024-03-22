@@ -10,17 +10,19 @@
 # Apr 2023 JCL
 
 function check_git() {
+    # set default debug
+    local DEBUG=${DEBUG:-0}
     # check if Git is defined
     ddecho -n "${TAB}checking Git... "
     if [ -z "${check_git:+dummy}" ]; then
         if command -v git &>/dev/null; then
             ddecho -en "${GOOD}OK${RESET} "
             # parse Git version
-            local -grx git_ver=$(git --version | awk '{print $3}')
-            local -girx git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
-            local -girx git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
-            local -girx git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-            local -gx check_git=false
+            export git_ver=$(git --version | awk '{print $3}')
+            export git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
+            export git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
+            export git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
+            export check_git=false           
             decho -e "${GRAY}v${git_ver}${NORMAL}"
             return 0
         else
@@ -34,7 +36,8 @@ function check_git() {
 }
 
 function check_repo() {
-    local DEBUG=1
+    # set default debug
+    local DEBUG=${DEBUG:-1}
     check_git
     echo -n "${TAB}checking repository status... "
     old_opts=$(echo "$-")
@@ -235,7 +238,7 @@ function check_remotes() {
             echo    "${TAB}url+ ${remote_url} ${url_stat}"
             echo -e "${TAB}host+ ${remote_host} ${host_stat}"
             echo -e "${TAB}proto+ ${remote_pro}"
-        ) | column -t -s+ -o : -R 1
+        ) | column -t -s+ 
         decho "${TAB}do_connect = $do_connect"
         dtab
         # check connection before proceeding
@@ -379,7 +382,7 @@ function do_cmd() {
     cmd=$(echo $@)
     itab
     set_color
-    $cmd 2> >(sed "s/.*/${TAB}&/")
+    stdbuf -i0 -o0 -e0 $cmd 2>&1 | sed "s/^/${TAB}/"
     RETVAL=$?
     unset_color
     dtab
