@@ -224,7 +224,7 @@ if [ ! -z ${remote_tracking_branch} ]; then
         echo "${TAB}${fTAB}${pull_branch}"
         echo "${TAB}${fTAB}${remote_tracking_branch}"
         echo "setting upstream remote tracking branch..."
-        git branch -u ${pull_branch}
+        do_cmd git branch -u ${pull_branch}
 
         echo -n "remotes... "
         if [ "$pull_repo" == "$upstream_repo" ]; then
@@ -456,7 +456,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     if (! return 0 2>/dev/null); then
         reset_shell ${old_opts-''}
     fi
-    git branch ${branch_temp}
+    do_cmd git branch ${branch_temp}
 else
     echo -e "${TAB}${fTAB}no local commits to copy"
 fi
@@ -468,7 +468,7 @@ if [ $N_remote -gt 0 ]; then
         echo "${TAB}${fTAB}no need to reset"
     else
         echo "${TAB}resetting HEAD to $hash_remote..."
-        git reset --hard $hash_remote | sed "s/^/${TAB}/"
+        do_cmd git reset --hard $hash_remote
         N_remote_old=$N_remote
         N_remote=$(git rev-list HEAD..${pull_branch} | wc -l)
         if [ $N_remote -ne $N_remote_old ]; then
@@ -483,7 +483,7 @@ fi
 cbar "${BOLD}pulling remote changes...${RESET}"
 if [ $N_remote -gt 0 ]; then
     echo -e "${TAB}${fTAB}${YELLOW}remote branch is $N_remote commits ahead of local${RESET}"
-    git pull --ff-only ${pull_repo} ${pull_refspec}
+    do_cmd git pull --ff-only ${pull_repo} ${pull_refspec}
 else
     echo -e "${TAB}${fTAB}no need to pull"
 fi
@@ -514,7 +514,7 @@ echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
 
-    git checkout ${branch_temp}
+    do_cmd git checkout ${branch_temp}
     trap 'set_color
 echo "${bin_name} TODO: git rebase ${local_branch}"
 echo "${bin_name} TODO: git checkout ${local_branch}"
@@ -527,7 +527,7 @@ echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
 
-    git rebase ${local_branch}
+    do_cmd git rebase ${local_branch}
     echo "${TAB}after rebase:"
     N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
     echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
@@ -544,7 +544,7 @@ echo "${bin_name} TODO: git reset HEAD"
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    git checkout ${local_branch}
+    do_cmd git checkout ${local_branch}
     trap 'set_color
 echo "${bin_name} TODO: git merge ${branch_temp}"
 echo "${bin_name} TODO: git branch -d ${branch_temp}"
@@ -554,7 +554,7 @@ echo "${bin_name} TODO: git reset HEAD"
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT    
-    git merge ${branch_temp}
+    do_cmd git merge ${branch_temp}
     trap 'set_color
 echo "${bin_name} TODO: git branch -d ${branch_temp}"
 echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
@@ -563,7 +563,7 @@ echo "${bin_name} TODO: git reset HEAD"
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    git branch -d ${branch_temp}
+    do_cmd git branch -d ${branch_temp}
 else
     echo -e "${TAB}${fTAB}no need to merge"
 fi
