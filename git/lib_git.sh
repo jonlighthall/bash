@@ -10,8 +10,11 @@
 # Apr 2023 JCL
 
 function check_git() {
-    # set default debug
+    # substitute default debug if unset or null
     local DEBUG=${DEBUG:-0}
+    # manually set
+    #local -i DEBUG=1
+
     # check if Git is defined
     ddecho -n "${TAB}checking Git... "
     if [ -z "${check_git:+dummy}" ]; then
@@ -36,8 +39,10 @@ function check_git() {
 }
 
 function check_repo() {
-    # set default debug
-    local DEBUG=${DEBUG:-1}
+    # substitute default debug if unset or null
+    local DEBUG=${DEBUG:-0}
+    # manually set
+    #local -i DEBUG=1
     check_git
     echo -n "${TAB}checking repository status... "
     old_opts=$(echo "$-")
@@ -101,7 +106,7 @@ function check_remotes() {
     # automaticly set default value if DEBUG is unset or null
     local -i DEBUG=${DEBUG:=0}
     # manually set
-    #DEBUG=0
+    #local -i DEBUG=1
 
     # load formatting and functions
     local fpretty=${HOME}/config/.bashrc_pretty
@@ -337,7 +342,9 @@ function check_remotes() {
 
     decho "done"
     # add return code for parent script
-    trap 'print_return $?; trap - RETURN' RETURN
+    if [ $DEBUG -gt 0 ]; then
+        trap 'print_return $?; trap - RETURN' RETURN
+    fi
     return 0
 }
 
