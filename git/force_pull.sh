@@ -326,7 +326,7 @@ while [ -z ${hash_local} ]; do
 
     echo -n "${TAB}local subject and time hashes... "
     if [ "$hash_local" == "$hash_local_s" ]; then
-        echo "match"
+        echo -e "${GOOD}match${RESET}"
     else
         echo "do not match"
         echo "${TAB}subj = $hash_local_s"
@@ -572,7 +572,7 @@ fi
 cbar "${BOLD}pushing local changes...${RESET}"
 N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
-    echo -e "${TAB}${fTAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
+    echo -e "${TAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
     echo "${TAB}${fTAB}list of commits: "
     itab
     git --no-pager log ${pull_branch}..HEAD | sed "s/^/${TAB}/"
@@ -584,7 +584,8 @@ echo "${bin_name} TODO: git reset HEAD"
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    git push --set-upstream ${pull_repo} ${pull_refspec}
+    echo "pushing..."
+    do_cmd git push --set-upstream ${pull_repo} ${pull_refspec}
 else
     echo -e "${TAB}${fTAB}no need to push"
 fi
