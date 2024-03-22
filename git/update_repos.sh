@@ -1,13 +1,8 @@
-#!/bin/bash -u
+#!/bin/bash -eu
 #
 # update_repos.sh - push and pull a specified list of git repositories and print summaries
 #
 # Apr 2022 JCL
-
-# ignore undefined variables
-set +u 
-# exit on errors
-set -e 
 
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
@@ -29,7 +24,14 @@ DEBUG=${DEBUG:-0}
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
+# exit on errors
+    set -e     
     #   set_traps
+else
+# ignore undefined variables
+    set +u 
+# do not exit on errors
+    set +e
 fi
 
 decho "DEBUG = $DEBUG"
@@ -190,6 +192,8 @@ declare -r to_base="${to_base0}"
 # beautify settings
 GIT_HIGHLIGHT='\E[7m'
 
+check_git
+
 for repo in $list; do
     start_new_line
     hline 70
@@ -234,20 +238,18 @@ for repo in $list; do
     set +e
     git rev-parse --abbrev-ref @{upstream} &>/dev/null
     RETVAL=$?
-    set -e
+
     if [[ $RETVAL -ne 0 ]]; then
         echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
-        set_color
-        git rev-parse --abbrev-ref @{upstream} 2>&1 | sed "s/^/${TAB}/"
-        unset_color
+        do_cmd git rev-parse --abbrev-ref @{upstream}
         echo "${TAB}no remote tracking branch set for current branch"
         decho "skipping..."
         upstream_fail+=( "${repo}" )
         check_mod                
         continue
     fi            
+    set -e
     set_traps
-    #            set -e
     remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
     echo "$remote_tracking_branch"
     
@@ -597,16 +599,12 @@ for repo in $list; do
             if [[ ${do_update} == true ]]; then
                 decho "do_update is true"
                 echo "applying stash for assume-unchanged files..."
-                set_color
-                git stash pop
-                unset_color
+                do_cmd git stash pop
                 unset do_update
                 echo "updating index for assume-unchanged files..."
-                set_color
                 for file in $unchanged; do
-                    git update-index --verbose --assume-unchanged $file
+                    do_cmd git update-index --verbose --assume-unchanged $file
                 done
-                unset_color
             else
                 echo "$do_update is not true"
                 echo "$do_update = $do_update"
