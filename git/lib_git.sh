@@ -386,11 +386,19 @@ function do_cmd() {
     dbg2idx 3 idx
     # set color
     echo -ne "${dcolor[$idx]}"
-    # unbuffer then colorize and indent command output
-    stdbuf -i0 -o0 -e0 $cmd 2>&1 | sed "/|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/g"
+    # define temp file
+    temp_file=temp
+    # unbuffer command output and save to file    
+    stdbuf -i0 -o0 -e0 $cmd &>$temp_file
     RETVAL=$?
+    # colorize and indent command output
+    cat temp | sed "/|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/g;s/\r$/\n${TAB}/g"
     unset_color
     dtab
+    # delete temp file
+    if [ -f ${temp_file} ]; then
+        rm ${temp_file}
+    fi
     return $RETVAL
 }
 
