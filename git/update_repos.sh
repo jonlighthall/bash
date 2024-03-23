@@ -396,7 +396,7 @@ for repo in $list; do
         if [ $x1 = $x2 ] && [ $y1 == $y2 ]; then
             :
         else
-            echo -e "${GIT_HIGHLIGHT} fetch ${RESET} "
+            echo -ne "${GIT_HIGHLIGHT} fetch ${RESET} "
         fi       
         dt_fetch=$((${t_end} - ${t_start}))
         if [[ $RETVAL == 0 ]]; then
