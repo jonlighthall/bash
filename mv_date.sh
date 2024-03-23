@@ -12,7 +12,8 @@
 # -----------------------------------------------------------------------------------------------
 
 function get_mod_date() {
-    echo "${FUNCNAME}: $(readlink -f ${BASH_SOURCE})"
+    trap 'print_return $?' RETURN
+    echo -e "${INVERT}function: ${FUNCNAME}${RESET}"
     if [ $# -lt 2 ]; then
 	      echo "Please provide an input file"
 	      return 1
@@ -22,7 +23,7 @@ function get_mod_date() {
     local -r in_file="$(readlink -f "$1")"
     echo "argument 1: $1"
 
-    local -n outfile=$2
+    local -n output=$2
     echo "argument 2: $2"
     
     TAB+=${fTAB:='   '}
@@ -63,33 +64,33 @@ function get_mod_date() {
         
 	      # set default output file name to match input
 	      out_base="${in_base}"
-	      out_file="${in_dir}/${out_base}${ext}"
+	      output="${in_dir}/${out_base}${ext}"
 
 	      # check if input and output are the same file
-	      echo -e "output file ${out_file} is ..."
-	      while [ "${in_file}" -ef "${out_file}" ]; do
+	      echo -e "output file ${output} is ..."
+	      while [ "${in_file}" -ef "${output}" ]; do
 		        echo "${TAB}the same file as input file ${in_file}"
 		        echo -n "${TAB}renaming output... "
 		        # NB: don't rename any existing files; change the ouput file name to something unique
-		        out_file=${in_dir}/${out_base}_$(date -r "${out_file}" +'%Y-%m-%d-t%H%M%S')${ext}
-		        echo ${out_file}
+		        output=${in_dir}/${out_base}_$(date -r "${output}" +'%Y-%m-%d-t%H%M%S')${ext}
+		        echo ${output}
 	      done
 	      echo "${TAB}uniquely named"
 
 	      # check if output exists
-	      echo "output file ${out_file}... "
-	      if [ -f "${out_file}" ]; then
+	      echo "output file ${output}... "
+	      if [ -f "${output}" ]; then
 		        echo "${TAB}exists"
 		        echo -n "${TAB}waiting for new time stamp... "
-		        while [ -f "${out_file}" ]; do
+		        while [ -f "${output}" ]; do
 			          # NB: don't rename any existing files; change the ouput file name to something
 			          # unique
-			          out_file=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
+			          output=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
 		        done
 		        echo "done"
 		        echo "${TAB}unique file name found"
-		        out_file=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
-		        echo "output file ${out_file}"
+		        output=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
+		        echo "output file ${output}"
 	      else
 		        echo "${TAB}does not exist (uniquely named)"
 	      fi
@@ -100,13 +101,23 @@ function get_mod_date() {
 		        in_file=$1
 		        echo "${in_file} is a broken link!"
 		        mdate=$(stat -c '%y' "${in_file}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
-		        out_file=$1_${mdate}
+		        output=$1_${mdate}
 	      else		
 		        echo "${TAB}exiting..."
 		        exit 1
 	      fi
     fi
 }
+
+# set debug level
+declare -i DEBUG=0
+
+# load formatting and functions
+fpretty=${HOME}/config/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+print_source
 
 # check for input
 if [ $# -eq 0 ]; then
