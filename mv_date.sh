@@ -24,13 +24,13 @@ function get_mod_date() {
     fi
 
     # print arguments
-    decho "${TAB}number of arguments = $#"
+    ddecho "${TAB}number of arguments = $#"
     itab
     local -r in_file="$(readlink -f "$1")"
-    decho "${TAB}argument 1: $1"
+    ddecho "${TAB}argument 1: $1"
 
     local -n output=$2
-    decho "${TAB}argument 2: $2"
+    ddecho "${TAB}argument 2: $2"
     dtab
     
 	  # parse input
@@ -58,14 +58,14 @@ function get_mod_date() {
         
         # print summary
         (
-            decho "input dir: $in_dir"
-	          decho "input file: $in_fname"
-	          decho "base name: $in_base"
-	          decho -n "ext name: ${ext}"
+            ddecho "input dir: $in_dir"
+	          ddecho "input file: $in_fname"
+	          ddecho "base name: $in_base"
+	          ddecho -n "ext name: ${ext}"
 	          if [ ${#ext} -eq 0 ]; then
-		            decho -e "${GRAY}EMPTY${RESET}"
+		            ddecho -e "${GRAY}EMPTY${RESET}"
 	          else
-		            echo
+		            ddecho
 	          fi
         ) | column -t -s: -o ":" -R1 | sed "s/^/${TAB}/"
         
@@ -101,7 +101,6 @@ function get_mod_date() {
 		        done
 		        ddecho "done"
 		        ddecho "${TAB}unique file name found"
-		        output=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
 		        echo "${TAB}output file ${output}"
 	      else
 		        echo -e "${GOOD}does not exist${RESET} (uniquely named)"
@@ -142,12 +141,12 @@ if [ $# -eq 0 ]; then
 	  echo "Please provide an input file"
 	  exit 1
 fi
-decho "${TAB}number of arguments = $#"
+ddecho "${TAB}number of arguments = $#"
 
 # set file names
 in_file=$(readlink -f $1)
 itab
-decho "${TAB}argument 1: $1"
+ddecho "${TAB}argument 1: $1"
 dtab
 echo "${TAB}getting modifcation date..."
 declare out_file
@@ -157,5 +156,6 @@ get_mod_date "${in_file}" out_file
 echo "${TAB}moving file..."
 itab
 echo -n "${TAB}"
-dtab
 mv -nv "${in_file}" "${out_file}"
+dtab 2
+trap 'print_exit' EXIT
