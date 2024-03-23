@@ -1,20 +1,25 @@
-#!/bin/bash -u
+#!/bin/bash -eu
+# -----------------------------------------------------------------------------------------------
 #
-# mv_date.sh - Rename input file to include modification date.
+# mv_date.sh
+#
+# Purpose: Rename input file to include modification date.
 #
 # Adapted from grep_matching.sh
 #
 # Apr 2023 JCL
+#
+# -----------------------------------------------------------------------------------------------
 
 function get_mod_date() {
-echo "${FUNCNAME}"
-    if [ $# -lt 2 ]; then
+echo "${FUNCNAME}: $(readlink -f ${BASH_SOURCE})"
+if [ $# -lt 2 ]; then
 	echo "Please provide an input file"
 	return 1
 fi
 echo "number of arguments = $#"
 
-local -r in_file=$(readlink -f $1)
+local -r in_file="$(readlink -f "$1")"
 echo "argument 1: $1"
 
 local -n outfile=$2
@@ -27,9 +32,9 @@ if [ -L "${in_file}" ] || [ -f "${in_file}" ] || [ -d "${in_file}" ]; then
 
 	# parse input
   # directory name
-  in_dir=$(dirname "${in_file}")
+  in_dir="$(dirname "${in_file}")"
   # base name
-	in_fname=$(basename "${in_file}")
+	in_fname="$(basename "${in_file}")"
   # file name
 	in_base="${in_fname%.*}"
   # extension
@@ -39,7 +44,7 @@ if [ -L "${in_file}" ] || [ -f "${in_file}" ] || [ -d "${in_file}" ]; then
 		ext=""
 	fi
   # redefine if hidden file
-  if [ -z ${in_base} ] && [[ "${in_fname::1}" == "." ]]; then
+  if [ -z "${in_base}" ] && [[ "${in_fname::1}" == "." ]]; then
       in_base="${ext}"
       ext=''
   fi
