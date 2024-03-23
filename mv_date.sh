@@ -12,29 +12,32 @@
 # -----------------------------------------------------------------------------------------------
 
 function get_mod_date() {
-    trap 'print_return $?;dtab' RETURN
     itab
-    echo -e "${TAB}${INVERT}function: ${FUNCNAME}${RESET}"
+    # set trap and print function name
+    if [ $DEBUG -gt 0 ]; then
+        trap 'print_return $?;dtab' RETURN
+        echo -e "${TAB}${INVERT}function: ${FUNCNAME}${RESET}"
+    fi
     if [ $# -lt 2 ]; then
 	      echo "${TAB}Please provide an input file"
 	      return 1
     fi
-    echo "${TAB}number of arguments = $#"
 
+    # print arguments
+    decho "${TAB}number of arguments = $#"
     itab
     local -r in_file="$(readlink -f "$1")"
-    echo "${TAB}argument 1: $1"
+    decho "${TAB}argument 1: $1"
 
     local -n output=$2
-    echo "${TAB}argument 2: $2"
+    decho "${TAB}argument 2: $2"
     dtab
     
+	  # parse input
     echo -n "${TAB}input path: ${in_file}... "
     # check if input exists
     if [ -L "${in_file}" ] || [ -f "${in_file}" ] || [ -d "${in_file}" ]; then
 	      echo -e "${GOOD}exists${RESET}"
-	      # parse input
-
         # directory name
         in_dir="$(dirname "${in_file}")"
         # base name
@@ -71,10 +74,10 @@ function get_mod_date() {
 	      output="${in_dir}/${out_base}${ext}"
 
 	      # check if input and output are the same file
-	      echo -e "${TAB}output file ${output} is..."
+	      decho -e "${TAB}output file ${output} is..."
         itab
 	      while [ "${in_file}" -ef "${output}" ]; do
-		        echo -e "${TAB}${YELLOW}the same file${RESET} as input file ${in_file}"
+		        decho -e "${TAB}${YELLOW}the same file${RESET} as input file ${in_file}"
 		        echo -n "${TAB}renaming output... "
 		        # NB: don't rename any existing files; change the ouput file name to something unique
 		        output=${in_dir}/${out_base}_$(date -r "${output}" +'%Y-%m-%d-t%H%M%S')${ext}
@@ -84,11 +87,13 @@ function get_mod_date() {
         dtab
 
 	      # check if output exists
-	      echo "${TAB}output file ${output}... "
+	      decho -n "${TAB} output file ${output}... "
         itab
 	      if [ -f "${output}" ]; then
-		        echo -e "${TAB}${BAD}exists${RESET}"
+		        decho -e "${BAD}exists${RESET}"
 		        ddecho -n "${TAB}waiting for new time stamp... "
+            # append the cuurent timestamp to the file name and wait to find a file that doesn't
+            # exist
 		        while [ -f "${output}" ]; do
 			          # NB: don't rename any existing files; change the ouput file name to something
 			          # unique
@@ -99,13 +104,14 @@ function get_mod_date() {
 		        output=${in_dir}/${out_base}_$(date +'%Y-%m-%d-t%H%M%S')${ext}
 		        echo "${TAB}output file ${output}"
 	      else
-		        echo -e "${TAB}${GOOD}does not exist${RESET} (uniquely named)"
+		        echo -e "${GOOD}does not exist${RESET} (uniquely named)"
 	      fi
         dtab
     else
 	      echo "is not valid"
         itab
 	      test_file "$1" | sed "s/^/${TAB}/"
+        # extract date from broken link
 	      if [ -L "$1" ]; then
 		        in_file=$1
 		        echo "${in_file} is a broken link!"
@@ -122,7 +128,7 @@ function get_mod_date() {
 }
 
 # set debug level
-declare -i DEBUG=1
+declare -i DEBUG=${DEBUG:-0}
 
 # load formatting and functions
 fpretty=${HOME}/config/.bashrc_pretty
