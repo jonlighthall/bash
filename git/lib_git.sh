@@ -402,7 +402,7 @@ function do_cmd() {
         # set color
         echo -ne "${dcolor[$idx]}"
         # print output
-        cat $temp_file | sed "/|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/g"
+        cat $temp_file | sed "/|/s/^/${dcolor[$idx +1]}/g; /[^%]*|/s/+/${GOOD}&${dcolor[$idx]}/g; /[^%]*|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/g"
         # reset formatting
         unset_color
         dtab
