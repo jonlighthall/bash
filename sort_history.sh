@@ -8,15 +8,6 @@
 # get starting time in nanoseconds
 start_time=$(date +%s%N)
 
-# set tab
-called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-	  TAB=''
-	  : ${fTAB:='   '}
-else
-	  TAB+=${TAB+${fTAB:='   '}}
-fi
-
 # load formatting and functions
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
@@ -34,24 +25,7 @@ else
 fi
 
 # print run type and source name
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
-src_name=$(readlink -f $BASH_SOURCE)
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-	  echo -e "${TAB}${VALID}link${RESET} -> $src_name"
-fi
-
-# print source path
-## physical
-src_dir_phys=$(dirname "${src_name}")
-echo -e "${TAB}${GRAY}phys -> $src_dir_phys${RESET}"
-## logical
-src_dir_logi=$(dirname "${BASH_SOURCE}")
-echo -e "${TAB}${GRAY}logi -> $src_dir_logi${RESET}"
-
-# set sort order (C sorting is the most consistient)
-# must 'export' setting to take effect
-set_loc=C
-export LC_COLLATE=$set_loc
+print_source
 
 # define random marker functions
 function find_marker() {
@@ -69,8 +43,6 @@ function add_marker() {
     marker+=$(printf '%b' $(printf '\\%03o' ${N_dec}))
 }
 
-TS_MARKER=''
-
 function gen_marker() {
     echo "${TAB}generating unique marker for $1..."
     marker=''
@@ -84,6 +56,13 @@ function gen_marker() {
     done
     echo -e "${TAB}${fTAB}marker = ${marker}\tnot found"
 }
+
+# set sort order (C sorting is the most consistient)
+# must 'export' setting to take effect
+set_loc=C
+export LC_COLLATE=$set_loc
+
+TS_MARKER=''
 
 #-----------------#
 # DON'T BE CLEVER #
