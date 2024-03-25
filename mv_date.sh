@@ -34,7 +34,7 @@ function get_mod_date() {
     dtab
     
 	  # parse input
-    echo -n "${TAB}input path: ${in_file}... "
+    echo -n "${TAB}input path: ${in_file##*/}... "
     # check if input exists
     if [ -L "${in_file}" ] || [ -f "${in_file}" ] || [ -d "${in_file}" ]; then
 	      echo -e "${GOOD}exists${RESET}"
@@ -81,13 +81,13 @@ function get_mod_date() {
 		        echo -n "${TAB}renaming output... "
 		        # NB: don't rename any existing files; change the ouput file name to something unique
 		        output=${in_dir}/${out_base}_$(date -r "${output}" +'%Y-%m-%d-t%H%M%S')${ext}
-		        echo ${output}
+		        echo ${output##*/}
 	      done
 	      ddecho "${TAB}named differently than input"
         dtab
 
 	      # check if output exists
-	      decho -n "${TAB} output file ${output}... "
+	      echo -n "${TAB}output file: ${output##*/}... "
         itab
 	      if [ -f "${output}" ]; then
 		        decho -e "${BAD}exists${RESET}"
@@ -101,7 +101,7 @@ function get_mod_date() {
 		        done
 		        ddecho "done"
 		        ddecho "${TAB}unique file name found"
-		        echo "${TAB}output file ${output}"
+		        echo "${TAB}output file ${output##*/}"
 	      else
 		        echo -e "${GOOD}does not exist${RESET} (uniquely named)"
 	      fi
