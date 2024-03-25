@@ -46,24 +46,7 @@ else
     echo "    user SSH config settings MAY not be loaded??"
 fi
 
-# print run type and source name
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
-src_name=$(readlink -f $BASH_SOURCE)
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
-fi
-
-# get source path
-## physical (canonical)
-src_dir_phys=$(dirname "$src_name")
-## logical (links)
-src_dir_logi=$(dirname "$BASH_SOURCE")
-
-# print source path
-## physical
-echo -e "${TAB}${GRAY}phys -> $src_dir_phys${RESET}"
-## logical
-echo -e "${TAB}${GRAY}logi -> $src_dir_logi${RESET}"
+print_source
 
 # load git utils
 fgit="${src_dir_phys}/lib_git.sh"
