@@ -14,20 +14,20 @@ else
 	# check arguments
 	for arg in "$@"; do
 		echo -n "$arg "
-		if [ -L $arg ]; then
+		if [ -L "${arg}" ]; then
 			echo -n "is a "
-			if [ -e $arg ]; then
+			if [ -e "${arg}" ]; then
 				echo -e -n "${VALID}valid${RESET}"
 			else
 				echo -e -n "${BROKEN}broken${RESET}"
 			fi
 			echo -e " ${UL}link${RESET}"
-		elif [ -e $arg ]; then
+		elif [ -e "${arg}" ]; then
 			echo -n "exists and "
-			if [ -f $arg ]; then
+			if [ -f "${arg}" ]; then
 				echo -e "is a regular ${UL}file${RESET}"
 			else
-				if [ -d $arg ]; then
+				if [ -d "${arg}" ]; then
 					echo -e "is a ${DIR}${UL}directory${RESET}"
 					exit 1
 				else
