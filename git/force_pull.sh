@@ -646,6 +646,5 @@ print_exit $?' EXIT
 fi
 cbar "${BOLD}you're done!${RESET}"
 clear_traps
-set_traps
 # add exit code for parent script
 exit 0
