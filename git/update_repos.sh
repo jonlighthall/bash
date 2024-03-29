@@ -487,7 +487,7 @@ for repo in $list; do
                 echo "${TAB}PULL attempt $n_loops..."
             fi
             t_start=$(date +%s%N)
-            do_cmd ${cmd}
+            do_cmd_safe ${cmd}
             RETVAL=$?
             t_end=$(date +%s%N)
             dt_pull=$((${t_end} - ${t_start}))

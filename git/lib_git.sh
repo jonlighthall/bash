@@ -412,6 +412,52 @@ function do_cmd() {
     return $RETVAL
 }
 
+function do_cmd_safe() {
+    cmd=$(echo $@)
+
+    echo "${TAB}running command $cmd... "
+
+    
+    if [[ "$-" == *e* ]]; then
+        echo "${TAB}setting shell options..."    
+        old_opts=$(echo "$-")
+        # exit on errors must be turned off; otherwise shell will exit...
+        set +e
+    fi
+
+    unset_traps
+
+    # define temp file
+    temp_file=temp
+
+    # unbuffer command output and save to file    
+    stdbuf -i0 -o0 -e0 $cmd &>$temp_file
+    local -i RETVAL=$?
+    reset_shell $old_opts
+    set_traps
+    # colorize and indent command output
+    if [ -s ${temp_file} ]; then
+        start_new_line
+        itab
+        # get color index
+        local -i idx
+        dbg2idx 3 idx
+        # set color
+        echo -ne "${dcolor[$idx]}"
+        # print output
+        cat $temp_file | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/g"
+        # reset formatting
+        unset_color
+        dtab
+        # delete temp file
+        rm ${temp_file}
+    fi
+    return $RETVAL
+}
+
+
+
+
 function exit_on_fail() {
     echo -e "       ${YELLOW}\x1b[7m${BASH_SOURCE[1]##*/} failed\x1b[0m"
     local do_exit=true
