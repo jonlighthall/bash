@@ -385,13 +385,13 @@ function unset_color() {
     echo -ne "\e[0m"
 }
 
+# format command output
 function do_cmd() {
     # save command as variable
     cmd=$(echo $@)
     # format output
     start_new_line
     itab
-
     
     # get color index
     local -i idx
@@ -402,7 +402,7 @@ function do_cmd() {
     if command -v unbuffer >/dev/null; then
         # set shell options
         set -o pipefail        
-        # unbuffer command output
+        # print unbuffered command output
         unbuffer $cmd | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed -u "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"  
         local -i RETVAL=$?
 
@@ -410,6 +410,7 @@ function do_cmd() {
         set +o pipefail
     else
         dtab
+        # print buffered command output
         do_cmd0 $cmd
     fi
     
@@ -419,7 +420,10 @@ function do_cmd() {
     return $RETVAL
 }
 
-function do_cmd0() {
+# format buffered command ouput
+# save ouput to file, print file, delete file
+function do_cmd0() {    
+    local -i DEBUG=1
     cmd=$(echo $@)
     # define temp file
     temp_file=temp
@@ -428,13 +432,17 @@ function do_cmd0() {
     RETVAL=$?
     # colorize and indent command output
     if [ -s ${temp_file} ]; then
-        start_new_line
-        itab
         # get color index
         local -i idx
         dbg2idx 3 idx
         # set color
         echo -ne "${dcolor[$idx]}"
+
+        # format output
+        start_new_line
+        itab
+        decho -e "${TAB}${IT}buffer:${NORMAL}"
+
         # print output
         \cat $temp_file | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"
         
@@ -448,6 +456,7 @@ function do_cmd0() {
 }
 
 function do_cmd_safe() {
+    local -i DEBUG=1
     # save command as variable
     cmd=$(echo $@)
     # format output
@@ -468,6 +477,7 @@ function do_cmd_safe() {
     dtab
     do_cmd $cmd
 
+    itab
     reset_shell $old_opts
     reset_traps
     
