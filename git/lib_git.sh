@@ -265,7 +265,7 @@ function check_remotes() {
                 fi
             fi
             RETVAL=$?
-            set_traps
+            reset_traps
             if [[ $RETVAL == 0 ]]; then
                 echo -e "${TAB}${fTAB}${GOOD}OK${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                 # add to list
@@ -402,7 +402,8 @@ function do_cmd() {
         # set color
         echo -ne "${dcolor[$idx]}"
         # print output
-        cat $temp_file | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/g"
+        \cat $temp_file | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"
+        
         # reset formatting
         unset_color
         dtab
@@ -416,7 +417,6 @@ function do_cmd_safe() {
     cmd=$(echo $@)
 
     echo "${TAB}running command $cmd... "
-
     
     if [[ "$-" == *e* ]]; then
         echo "${TAB}setting shell options..."    
@@ -434,7 +434,7 @@ function do_cmd_safe() {
     stdbuf -i0 -o0 -e0 $cmd &>$temp_file
     local -i RETVAL=$?
     reset_shell $old_opts
-    set_traps
+    reset_traps
     # colorize and indent command output
     if [ -s ${temp_file} ]; then
         start_new_line
@@ -454,9 +454,6 @@ function do_cmd_safe() {
     fi
     return $RETVAL
 }
-
-
-
 
 function exit_on_fail() {
     echo -e "       ${YELLOW}\x1b[7m${BASH_SOURCE[1]##*/} failed\x1b[0m"
