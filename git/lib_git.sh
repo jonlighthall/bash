@@ -386,6 +386,30 @@ function unset_color() {
 }
 
 function do_cmd() {
+    # save command as variable
+    cmd=$(echo $@)
+    # start new line and indent
+    start_new_line
+    itab
+    # get color index
+    local -i idx
+    dbg2idx 3 idx
+    # set color
+    echo -ne "${dcolor[$idx]}"
+    
+    set -o pipefail
+    # unbuffer command output and save to file    
+    unbuffer $cmd | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"  
+    RETVAL=$?
+    set +o pipefail    
+    
+    # reset formatting
+    unset_color
+    dtab    
+    return $RETVAL
+}
+
+function do_cmd0() {
     cmd=$(echo $@)
     # define temp file
     temp_file=temp
@@ -456,9 +480,12 @@ function do_cmd_safe() {
 }
 
 function exit_on_fail() {
-    echo -e "       ${YELLOW}\x1b[7m${BASH_SOURCE[1]##*/} failed\x1b[0m"
+    echo -e "${TAB}${YELLOW}\x1b[7m${BASH_SOURCE[1]##*/} failed\x1b[0m"
+    # set behavior
     local do_exit=true
     if [[ $do_exit == true ]]; then
+        print_stack
+        set_traps
         exit 1 || return 1
     else
         return 0
@@ -470,8 +497,10 @@ function check_mod() {
     local list_mod=$(git diff --name-only --diff-filter=M)
     if [[ ! -z "${list_mod}" ]]; then
         # print file list
-        echo -e "modified: ${YELLOW}"
-        echo "${list_mod}" | sed "s/^/${fTAB}/"
+        echo -e "${TAB}modified: ${YELLOW}"
+        itab
+        echo "${list_mod}" | sed "s/^/${TAB}/"
+        dtab
         echo -en "${RESET}"
         # add repo to list
         mod_repos+="$repo "
