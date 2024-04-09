@@ -254,14 +254,14 @@ function check_remotes() {
 
             ssh_cmd_base="ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 -T ${remote_host}"
             if [[ "${remote_host}" == *"navy.mil" ]]; then
-                $ssh_cmd_base -o LogLevel=error 2> >(sed $'s,.*,\e[31m&\e[m,' >&2) 1> >(sed $'s,.*,\e[32m&\e[m,' >&1)
+                $ssh_cmd_base -o LogLevel=error 2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2) 1> >(sed -u $'s,.*,\e[32m&\e[m,' >&1)
             else
                 if [[ ${remote_host} =~ "github.com" ]]; then
                     set +e
-                    $ssh_cmd_base -o LogLevel=info 2> >(sed $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,' >&2)
+                    $ssh_cmd_base -o LogLevel=info 2> >(sed -u $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,' >&2)
                     set -e
                 else
-                    $ssh_cmd_base -o LogLevel=info 2> >(sed $'s,.*,\e[31m&\e[m,' >&2)
+                    $ssh_cmd_base -o LogLevel=info 2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2)
                 fi
             fi
             RETVAL=$?
@@ -402,7 +402,7 @@ function do_cmd() {
     echo -ne "${dcolor[$idx]}"
 
     # unbuffer command output and save to file    
-    unbuffer $cmd | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"  
+    unbuffer $cmd | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed -u "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"  
     local -i RETVAL=$?
 
     # reset shell options
@@ -467,7 +467,7 @@ function do_cmd_safe() {
     echo -ne "${dcolor[$idx]}"
     
     # unbuffer command output 
-    unbuffer $cmd | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"
+    unbuffer $cmd | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed -u "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"
     local -i RETVAL=$?
 
     # reset shell options
