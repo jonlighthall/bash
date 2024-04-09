@@ -392,8 +392,6 @@ function do_cmd() {
     start_new_line
     itab
 
-    # set shell options
-    set -o pipefail
     
     # get color index
     local -i idx
@@ -401,12 +399,19 @@ function do_cmd() {
     # set color
     echo -ne "${dcolor[$idx]}"
 
-    # unbuffer command output and save to file    
-    unbuffer $cmd | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed -u "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"  
-    local -i RETVAL=$?
+    if command -v unbuffer >/dev/null; then
+        # set shell options
+        set -o pipefail        
+        # unbuffer command output
+        unbuffer $cmd | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed -u "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"  
+        local -i RETVAL=$?
 
-    # reset shell options
-    set +o pipefail    
+        # reset shell options
+        set +o pipefail
+    else
+        dtab
+        do_cmd0 $cmd
+    fi
     
     # reset formatting
     unset_color
@@ -453,74 +458,22 @@ function do_cmd_safe() {
     # set shell options
     unset_traps
     if [[ "$-" == *e* ]]; then
-        echo "${TAB}setting shell options..."    
+        echo -n "${TAB}setting shell options..."    
         old_opts=$(echo "$-")
         # exit on errors must be turned off; otherwise shell will exit...
         set +e
+        echo "done"
     fi
-    set -o pipefail    
 
-    # get color index
-    local -i idx
-    dbg2idx 3 idx
-    # set color
-    echo -ne "${dcolor[$idx]}"
-    
-    # unbuffer command output 
-    unbuffer $cmd | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed -u "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"
-    local -i RETVAL=$?
+    dtab
+    do_cmd $cmd
 
-    # reset shell options
-    set +o pipefail    
     reset_shell $old_opts
     reset_traps
     
     # reset formatting
     unset_color
-    dtab
 
-    return $RETVAL
-}
-
-function do_cmd_safe0() {
-    cmd=$(echo $@)
-
-    echo "${TAB}running command $cmd... "
-    
-    if [[ "$-" == *e* ]]; then
-        echo "${TAB}setting shell options..."    
-        old_opts=$(echo "$-")
-        # exit on errors must be turned off; otherwise shell will exit...
-        set +e
-    fi
-
-    unset_traps
-
-    # define temp file
-    temp_file=temp
-
-    # unbuffer command output and save to file    
-    stdbuf -i0 -o0 -e0 $cmd &>$temp_file
-    local -i RETVAL=$?
-    reset_shell $old_opts
-    reset_traps
-    # colorize and indent command output
-    if [ -s ${temp_file} ]; then
-        start_new_line
-        itab
-        # get color index
-        local -i idx
-        dbg2idx 3 idx
-        # set color
-        echo -ne "${dcolor[$idx]}"
-        # print output
-        cat $temp_file | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g; s/^/${TAB}${dcolor[$idx]}/g"
-        # reset formatting
-        unset_color
-        dtab
-        # delete temp file
-        rm ${temp_file}
-    fi
     return $RETVAL
 }
 
