@@ -4,3 +4,6 @@
 
 # Git
 *.~*~
+
+#Markdown list
+ls2md.md
