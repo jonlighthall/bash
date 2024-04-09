@@ -388,19 +388,24 @@ function unset_color() {
 function do_cmd() {
     # save command as variable
     cmd=$(echo $@)
-    # start new line and indent
+    # format output
     start_new_line
     itab
+
+    # set shell options
+    set -o pipefail
+    
     # get color index
     local -i idx
     dbg2idx 3 idx
     # set color
     echo -ne "${dcolor[$idx]}"
-    
-    set -o pipefail
+
     # unbuffer command output and save to file    
     unbuffer $cmd | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"  
-    RETVAL=$?
+    local -i RETVAL=$?
+
+    # reset shell options
     set +o pipefail    
     
     # reset formatting
@@ -438,6 +443,46 @@ function do_cmd0() {
 }
 
 function do_cmd_safe() {
+    # save command as variable
+    cmd=$(echo $@)
+    # format output
+    start_new_line
+    itab
+    echo "${TAB}running command $cmd... " 
+
+    # set shell options
+    unset_traps
+    if [[ "$-" == *e* ]]; then
+        echo "${TAB}setting shell options..."    
+        old_opts=$(echo "$-")
+        # exit on errors must be turned off; otherwise shell will exit...
+        set +e
+    fi
+    set -o pipefail    
+
+    # get color index
+    local -i idx
+    dbg2idx 3 idx
+    # set color
+    echo -ne "${dcolor[$idx]}"
+    
+    # unbuffer command output 
+    unbuffer $cmd | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"
+    local -i RETVAL=$?
+
+    # reset shell options
+    set +o pipefail    
+    reset_shell $old_opts
+    reset_traps
+    
+    # reset formatting
+    unset_color
+    dtab
+
+    return $RETVAL
+}
+
+function do_cmd_safe0() {
     cmd=$(echo $@)
 
     echo "${TAB}running command $cmd... "
