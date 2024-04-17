@@ -4,27 +4,21 @@
 #
 # Oct 2020 JCL
 
-# set tab
-:${TAB:=''}
-
 # load formatting
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+    source $fpretty    
     set_traps
+    rtab
 fi
 
-# print source name at start
+# determine if script is being sourced or executed
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
 fi
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
-src_name=$(readlink -f $BASH_SOURCE)
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
-fi
+print_source
 
 # update
 bar "update..."
