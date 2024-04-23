@@ -390,7 +390,9 @@ function do_cmd() {
     # save command as variable
     cmd=$(echo $@)
     # format output
-    start_new_line
+    if [ ${DEBUG:-0} -gt 0 ]; then
+        start_new_line
+    fi
     itab
     
     # get color index
