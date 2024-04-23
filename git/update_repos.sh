@@ -7,25 +7,10 @@
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
 
-# set tab
-called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]]; then
-    TAB=''
-    : ${fTAB:='   '}
-else
-    TAB+=${TAB+${fTAB:='   '}}
-fi
-
-# set debug level
-# substitue default value if DEBUG is unset or null
-DEBUG=${DEBUG:-0}
-
 # load formatting and functions
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-    # exit on errors
-    set -e     
     #   set_traps
 else
     # ignore undefined variables
@@ -34,13 +19,27 @@ else
     set +e
 fi
 
+# set debug level
+# substitue default value if DEBUG is unset or null
+DEBUG=${DEBUG:-0}
 decho "DEBUG = $DEBUG"
+
+# set tab
+called_by=$(ps -o comm= $PPID)
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]]; then
+    rtab
+else
+    itab
+fi
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
 else
     RUN_TYPE="executing"
+    # exit on errors
+    set -e
+    
     # print note
     echo "NB: ${BASH_SOURCE##*/} has not been sourced"
     echo "    user SSH config settings MAY not be loaded??"
