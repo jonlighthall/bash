@@ -57,6 +57,26 @@ function gen_marker() {
     echo -e "${TAB}${fTAB}marker = ${marker}\tnot found"
 }
 
+function print_markers() {
+    # print bad list
+    echo "${TAB}bad list:"
+    echo -n "${TAB}${fTAB}"
+    for i in ${bad_list}; do
+        printf "\\$(printf %03o "$i")"
+    done
+    echo
+
+    # print good list
+    echo "${TAB}good list:"
+    echo -n "${TAB}${fTAB}"
+    for ((j = $m_start; j <= $m_end; j++)); do
+        if [[ ! $bad_list =~ ${j} ]]; then
+            printf "\\$(printf %03o "$j")"
+        fi
+    done
+    echo
+}
+
 # set sort order (C sorting is the most consistient)
 # must 'export' setting to take effect
 set_loc=C
@@ -75,24 +95,6 @@ m_span=$(($m_end - $m_start + 1))
 
 # specify forbidden characters
 bad_list=$(echo {58..64} {91..96})
-
-# print bad list
-echo "${TAB}bad list:"
-echo -n "${TAB}${fTAB}"
-for i in ${bad_list}; do
-    printf "\\$(printf %03o "$i")"
-done
-echo
-
-# print good list
-echo "${TAB}good list:"
-echo -n "${TAB}${fTAB}"
-for ((j = $m_start; j <= $m_end; j++)); do
-    if [[ ! $bad_list =~ ${j} ]]; then
-        printf "\\$(printf %03o "$j")"
-    fi
-done
-echo
 
 # specify default history file
 hist_name=.bash_history
@@ -284,6 +286,9 @@ echo "${TAB}output file name is ${hist_out}"
 echo -n "${TAB}concatenate files... "
 cat ${list_out} >${hist_out}
 echo "done"
+
+# print good/bad markers
+print_markers
 
 for hist_edit in ${hist_bak} ${hist_out}; do
     # get file length
