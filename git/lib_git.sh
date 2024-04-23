@@ -400,10 +400,13 @@ function do_cmd() {
     echo -ne "${dcolor[$idx]}"
 
     if command -v unbuffer >/dev/null; then
+        echo "${TAB}printing unbuffered command ouput..."
         # set shell options
         set -o pipefail        
         # print unbuffered command output
-        unbuffer $cmd | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed -u "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"  
+        unbuffer $cmd \
+            | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" \
+            | sed -u "/^[^%|]*|/s/^/${dcolor[$idx+1]}/g; s/$/${dcolor[$idx]}/; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g" 
         local -i RETVAL=$?
 
         # reset shell options
@@ -412,6 +415,7 @@ function do_cmd() {
         dtab
         # print buffered command output
         do_cmd0 $cmd
+        local -i RETVAL=$?
     fi
     
     # reset formatting
@@ -423,10 +427,11 @@ function do_cmd() {
 # format buffered command ouput
 # save ouput to file, print file, delete file
 function do_cmd0() {    
-    local -i DEBUG=1
+    local -i DEBUG=2
     cmd=$(echo $@)
     # define temp file
     temp_file=temp
+    echo "${TAB}redirecting command ouput to $temp_file..."
     # unbuffer command output and save to file    
     stdbuf -i0 -o0 -e0 $cmd &>$temp_file
     RETVAL=$?
@@ -444,7 +449,7 @@ function do_cmd0() {
         decho -e "${TAB}${IT}buffer:${NORMAL}"
 
         # print output
-        \cat $temp_file | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g"
+        \cat $temp_file | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g" | sed "s/^/${dcolor[$idx]}/"
         
         # reset formatting
         unset_color
@@ -476,7 +481,8 @@ function do_cmd_safe() {
 
     dtab
     do_cmd $cmd
-
+    RETVAL=$?
+    
     itab
     reset_shell $old_opts
     reset_traps
