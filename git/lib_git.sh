@@ -390,9 +390,6 @@ function do_cmd() {
     # save command as variable
     cmd=$(echo $@)
     # format output
-    if [ ${DEBUG:-0} -gt 0 ]; then
-        start_new_line
-    fi
     itab
     
     # get color index
@@ -407,6 +404,7 @@ function do_cmd() {
         set -o pipefail        
         # print unbuffered command output
         unbuffer $cmd \
+            | sed -u '1 s/[A-Z]/\n&/' \
             | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" \
             | sed -u "/^[^%|]*|/s/^/${dcolor[$idx+1]}/g; s/$/${dcolor[$idx]}/; /|/s/+/${GOOD}&/g; /|/s/-/${BAD}&/g; /modified:/s/^.*$/${BAD}&/g; /^\s*M\s/s/^.*$/${BAD}&/g" 
         local -i RETVAL=$?
