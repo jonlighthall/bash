@@ -400,13 +400,13 @@ function do_cmd() {
     echo -ne "${dcolor[$idx]}"
 
     if command -v unbuffer >/dev/null; then
-        echo "${TAB}printing unbuffered command ouput..."
+        decho "${TAB}printing unbuffered command ouput..."
         # set shell options
         set -o pipefail        
         # print unbuffered command output
         unbuffer $cmd \
             | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" \
-            | sed -u "/^[^%|]*|/s/^/${dcolor[$idx+1]}/g; s/$/${dcolor[$idx]}/; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g" 
+            | sed -u "/^[^%|]*|/s/^/${dcolor[$idx+1]}/g; s/$/${dcolor[$idx]}/; /|/s/+/${GOOD}&/g; /|/s/-/${BAD}&/g; /modified:/s/^.*$/${BAD}&/g; /^\s*M\s/s/^.*$/${BAD}&/g" 
         local -i RETVAL=$?
 
         # reset shell options
@@ -431,7 +431,7 @@ function do_cmd0() {
     cmd=$(echo $@)
     # define temp file
     temp_file=temp
-    echo "${TAB}redirecting command ouput to $temp_file..."
+    decho "${TAB}redirecting command ouput to $temp_file..."
     # unbuffer command output and save to file    
     stdbuf -i0 -o0 -e0 $cmd &>$temp_file
     RETVAL=$?
@@ -449,7 +449,10 @@ function do_cmd0() {
         decho -e "${TAB}${IT}buffer:${NORMAL}"
 
         # print output
-        \cat $temp_file | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" | sed "/^[^%|]*|/s/^/${dcolor[$idx +1]}/g; /|/s/+/${GOOD}&${dcolor[$idx]}/g; /|/s/-/${BAD}&${dcolor[$idx]}/g; /modified:/s/^.*$/${BAD}&${dcolor[$idx]}/g; /^\s*M\s/s/^.*$/${BAD}&${dcolor[$idx]}/g" | sed "s/^/${dcolor[$idx]}/"
+        \cat $temp_file \
+            | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" \
+            | sed "/^[^%|]*|/s/^/${dcolor[$idx+1]}/g; /|/s/+/${GOOD}&/g; /|/s/-/${BAD}&/g; /modified:/s/^.*$/${BAD}&/g; /^\s*M\s/s/^.*$/${BAD}&/g" \
+            | sed "s/$/${dcolor[$idx]}/"
         
         # reset formatting
         unset_color
@@ -467,7 +470,7 @@ function do_cmd_safe() {
     # format output
     start_new_line
     itab
-    echo "${TAB}running command $cmd... " 
+    decho "${TAB}running command $cmd... " 
 
     # set shell options
     unset_traps
