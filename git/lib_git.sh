@@ -391,6 +391,10 @@ function do_cmd() {
     cmd=$(echo $@)
     # format output
     itab
+    if [ $DEBUG -gt 0 ]; then
+        start_new_line
+    fi
+    decho "${TAB}running command $cmd... " 
     
     # get color index
     local -i idx
@@ -399,7 +403,7 @@ function do_cmd() {
     echo -ne "${dcolor[$idx]}"
 
     if command -v unbuffer >/dev/null; then
-        decho "${TAB}printing unbuffered command ouput..."
+        ddecho "${TAB}printing unbuffered command ouput..."
         # set shell options
         set -o pipefail        
         # print unbuffered command output
@@ -412,10 +416,11 @@ function do_cmd() {
         # reset shell options
         set +o pipefail
     else
-        dtab
+        ddecho "${TAB}printing buffered command ouput..."
         # print buffered command output
-        do_cmd0 $cmd
+        do_cmd_stdbuf $cmd
         local -i RETVAL=$?
+        dtab
     fi
     
     # reset formatting
@@ -426,11 +431,13 @@ function do_cmd() {
 
 # format buffered command ouput
 # save ouput to file, print file, delete file
-function do_cmd0() {    
-    local -i DEBUG=1
+function do_cmd_stdbuf() {    
     cmd=$(echo $@)
     # define temp file
     temp_file=temp
+    if [ $DEBUG -gt 0 ]; then
+        start_new_line
+    fi
     ddecho "${TAB}redirecting command ouput to $temp_file..."
     # unbuffer command output and save to file    
     stdbuf -i0 -o0 -e0 $cmd &>$temp_file
@@ -445,7 +452,6 @@ function do_cmd0() {
 
         # format output
         start_new_line
-        itab
         decho -e "${TAB}${IT}buffer:${NORMAL}"
 
         # print output
@@ -456,10 +462,15 @@ function do_cmd0() {
         
         # reset formatting
         unset_color
+    else
+        itab
+        ddecho "${TAB}${temp_file} empty"
         dtab
-        # delete temp file
-        rm ${temp_file}
     fi
+    # delete temp file
+    if [ -f ${temp_file} ]; then
+        rm ${temp_file}
+    fi    
     return $RETVAL
 }
 
@@ -493,6 +504,52 @@ function do_cmd_safe() {
     # reset formatting
     unset_color
 
+    return $RETVAL
+}
+
+# format command output
+function do_cmd_script() {
+    local -i DEBUG=2
+    # save command as variable
+    cmd=$(echo $@)
+    # format output
+    itab
+    if [ $DEBUG -gt 0 ]; then
+        start_new_line
+    fi
+    decho "${TAB}running command $cmd... " 
+    
+    # get color index
+    local -i idx
+    dbg2idx 3 idx
+    # set color
+    echo -ne "${dcolor[$idx]}"
+    echo "here"
+    if command -v script >/dev/null; then
+        ddecho "${TAB}printing command ouput typescript..."
+        # set shell options
+        set -o pipefail
+        # print unbuffered command output
+        script -eq -c "$cmd" \
+            | sed "s/\r$//g;s/.*\r//g" \
+            | sed 's/^[[:space:]].*//g' \
+            | sed "s/^/${TAB}${dcolor[$idx]}/"
+        $cmd
+        local -i RETVAL=$?
+        echo "there"
+        # reset shell options
+        set +o pipefail
+    else
+        ddecho "${TAB}printing unformatted ouput..."
+        dtab
+        # print buffered command output
+        $cmd
+        local -i RETVAL=$?
+    fi
+    
+    # reset formatting
+    unset_color
+    dtab    
     return $RETVAL
 }
 
