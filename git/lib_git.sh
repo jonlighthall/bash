@@ -509,7 +509,7 @@ function do_cmd_safe() {
 
 # format command output
 function do_cmd_script() {
-    local -i DEBUG=2
+    local -i DEBUG=0
     # save command as variable
     cmd=$(echo $@)
     # format output

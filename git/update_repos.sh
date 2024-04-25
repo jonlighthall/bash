@@ -708,14 +708,27 @@ for repo in $list; do
     # check for stash entries
     N_stash=$(git stash list | wc -l)
     if [ $N_stash -gt 0 ]; then
-        echo -e "$repo has $N_stash entries in stash"
+        # get color index
+        declare -i idx
+        dbg2idx 4 idx
+        # set color
+        echo -ne "${dcolor[$idx]}"        
+        echo -e "$repo has $N_stash entries in stash${RESET}"
         if [ ! -z ${stash_list:+dummy} ]; then
             stash_list+=$'\n'
         fi
         stash_list+=$(printf '%2d %s' $N_stash $repo)
     fi
-    echo "clean up..."
+    echo "cleaning up..."
     do_cmd_script git gc
+    RETVAL=$?
+    echo -en "${GIT_HIGHLIGHT} gc ${RESET} "
+    if [[ $RETVAL != 0 ]]; then
+        echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+    else
+        echo -e "${GOOD}OK${RESET}"
+    fi
+
 done
 
 cbar "done updating repositories"
@@ -891,7 +904,13 @@ echo -n " stash entries: "
 if [ -z "$stash_list" ]; then
     echo "none"
 else
+        # get color index
+        declare  -i idx
+        dbg2idx 4 idx
+        # set color
+        echo -ne "${dcolor[$idx]}"           
     stash_list=$(echo "${stash_list}" | sort -n)
     echo "${stash_list}" | head -n 1
     echo "${stash_list}" | tail -n +2 | sed "s/^/${list_indent}/"
+    echo -ne "${RESET}"           
 fi
