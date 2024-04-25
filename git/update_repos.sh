@@ -584,7 +584,6 @@ for repo in $list; do
                 else
                     pull_OK+="$repo"
                 fi
-
             fi
         done
 
@@ -715,6 +714,8 @@ for repo in $list; do
         fi
         stash_list+=$(printf '%2d %s' $N_stash $repo)
     fi
+    echo "clean up..."
+    do_cmd_script git gc
 done
 
 cbar "done updating repositories"
