@@ -416,9 +416,15 @@ function do_cmd() {
         # reset shell options
         set +o pipefail
     else
-        ddecho "${TAB}printing buffered command ouput..."
-        # print buffered command output
-        do_cmd_stdbuf $cmd
+        if command -v script >/dev/null; then
+            ddecho "${TAB}printing command ouput typescript..."
+            # print typescript command ouput
+            do_cmd_script $cmd
+        else        
+            ddecho "${TAB}printing buffered command ouput..."
+            # print buffered command output
+            do_cmd_stdbuf $cmd
+        fi
         local -i RETVAL=$?
         dtab
     fi
@@ -521,7 +527,7 @@ function do_cmd_script() {
     
     # get color index
     local -i idx
-    dbg2idx 3 idx
+    dbg2idx 5 idx
     # set color
     echo -ne "${dcolor[$idx]}"
     if command -v script >/dev/null; then
@@ -530,9 +536,9 @@ function do_cmd_script() {
         set -o pipefail
         # print unbuffered command output
         script -eq -c "$cmd" \
-            | sed "s/\r$//g;s/.*\r//g" \
+            | sed "s/\r.*//g;s/.*\r//g" \
             | sed 's/^[[:space:]].*//g' \
-            | sed "s/^/${TAB}${dcolor[$idx]}/"
+            | sed "/^$/d;s/^/${TAB}${dcolor[$idx]}/"
         local -i RETVAL=$?
         # reset shell options
         set +o pipefail
