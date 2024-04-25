@@ -427,11 +427,11 @@ function do_cmd() {
 # format buffered command ouput
 # save ouput to file, print file, delete file
 function do_cmd0() {    
-    local -i DEBUG=2
+    local -i DEBUG=1
     cmd=$(echo $@)
     # define temp file
     temp_file=temp
-    decho "${TAB}redirecting command ouput to $temp_file..."
+    ddecho "${TAB}redirecting command ouput to $temp_file..."
     # unbuffer command output and save to file    
     stdbuf -i0 -o0 -e0 $cmd &>$temp_file
     RETVAL=$?
@@ -452,7 +452,7 @@ function do_cmd0() {
         \cat $temp_file \
             | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" \
             | sed "/^[^%|]*|/s/^/${dcolor[$idx+1]}/g; /|/s/+/${GOOD}&/g; /|/s/-/${BAD}&/g; /modified:/s/^.*$/${BAD}&/g; /^\s*M\s/s/^.*$/${BAD}&/g" \
-            | sed "s/$/${dcolor[$idx]}/"
+            | sed "s/^/${dcolor[$idx]}/"
         
         # reset formatting
         unset_color
