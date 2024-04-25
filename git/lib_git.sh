@@ -524,7 +524,6 @@ function do_cmd_script() {
     dbg2idx 3 idx
     # set color
     echo -ne "${dcolor[$idx]}"
-    echo "here"
     if command -v script >/dev/null; then
         ddecho "${TAB}printing command ouput typescript..."
         # set shell options
@@ -534,9 +533,7 @@ function do_cmd_script() {
             | sed "s/\r$//g;s/.*\r//g" \
             | sed 's/^[[:space:]].*//g' \
             | sed "s/^/${TAB}${dcolor[$idx]}/"
-        $cmd
         local -i RETVAL=$?
-        echo "there"
         # reset shell options
         set +o pipefail
     else
