@@ -420,12 +420,14 @@ function do_cmd() {
             ddecho "${TAB}printing command ouput typescript..."
             # print typescript command ouput
             do_cmd_script $cmd
+            local -i RETVAL=$?
+            rm typescript
         else        
             ddecho "${TAB}printing buffered command ouput..."
             # print buffered command output
             do_cmd_stdbuf $cmd
+            local -i RETVAL=$?
         fi
-        local -i RETVAL=$?
         dtab
     fi
     
