@@ -11,7 +11,6 @@ declare -i start_time=$(date +%s%N)
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-    #   set_traps
 else
     # ignore undefined variables
     set +u 
@@ -195,7 +194,7 @@ for repo in $list; do
         fi
         unset_traps
         bash test_file ${HOME}/$repo
-        set_traps
+        reset_traps
         continue
     fi
     #------------------------------------------------------
