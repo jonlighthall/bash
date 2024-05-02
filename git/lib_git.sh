@@ -246,26 +246,34 @@ function check_remotes() {
         ) | column -t -s+ -o : -R 1
         decho "${TAB}do_connect = $do_connect"
         dtab
-        # check connection before proceeding
-        set -ET
-        unset_traps
+        # check connection before proceeding       
         if [ ${do_connect} = 'true' ]; then
             echo -n "${TAB}${fTAB}checking connection... "
 
             ssh_cmd_base="ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 -T ${remote_host}"
             if [[ "${remote_host}" == *"navy.mil" ]]; then
                 $ssh_cmd_base -o LogLevel=error 2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2) 1> >(sed -u $'s,.*,\e[32m&\e[m,' >&1)
+                RETVAL=$?
             else
                 if [[ ${remote_host} =~ "github.com" ]]; then
-                    set +e
+                    # set shell options
+                    unset_traps
+                    if [[ "$-" == *e* ]]; then
+                        echo -n "${TAB}setting shell options..."    
+                        old_opts=$(echo "$-")
+                        # exit on errors must be turned off; otherwise shell will exit...
+                        set +e
+                        echo "done"
+                    fi
                     $ssh_cmd_base -o LogLevel=info 2> >(sed -u $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,' >&2)
-                    set -e
+                    RETVAL=$?
+                    reset_shell $old_opts
+                    reset_traps                   
                 else
                     $ssh_cmd_base -o LogLevel=info 2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2)
+                    RETVAL=$?
                 fi
             fi
-            RETVAL=$?
-            reset_traps
             if [[ $RETVAL == 0 ]]; then
                 echo -e "${TAB}${fTAB}${GOOD}OK${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                 # add to list
