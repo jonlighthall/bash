@@ -428,14 +428,12 @@ function do_cmd() {
             ddecho "${TAB}printing command ouput typescript..."
             # print typescript command ouput
             do_cmd_script $cmd
-            local -i RETVAL=$?
-            rm typescript
         else        
             ddecho "${TAB}printing buffered command ouput..."
             # print buffered command output
             do_cmd_stdbuf $cmd
-            local -i RETVAL=$?
         fi
+        local -i RETVAL=$?
         dtab
     fi
     
@@ -468,7 +466,7 @@ function do_cmd_stdbuf() {
 
         # format output
         start_new_line
-        decho -e "${TAB}${IT}buffer:${NORMAL}"
+        ddecho -e "${TAB}${IT}buffer:${NORMAL}"
 
         # print output
         \cat $temp_file \
@@ -497,7 +495,7 @@ function do_cmd_safe() {
     # format output
     start_new_line
     itab
-    decho "${TAB}running command $cmd... " 
+    decho "${TAB}SAFE: running command $cmd... " 
 
     # set shell options
     unset_traps
@@ -533,7 +531,7 @@ function do_cmd_script() {
     if [ $DEBUG -gt 0 ]; then
         start_new_line
     fi
-    decho "${TAB}running command $cmd... " 
+    decho "${TAB}SCRIPT: running command $cmd... " 
     
     # get color index
     local -i idx
@@ -552,6 +550,7 @@ function do_cmd_script() {
         local -i RETVAL=$?
         # reset shell options
         set +o pipefail
+        rm typescript
     else
         ddecho "${TAB}printing unformatted ouput..."
         dtab
