@@ -719,8 +719,10 @@ for repo in $list; do
         stash_list+=$(printf '%2d %s' $N_stash $repo)
     fi
     echo "cleaning up..."
-    do_cmd_script git gc
+    unset_traps
+    do_cmd git gc
     RETVAL=$?
+    reset_traps
     echo -en "${GIT_HIGHLIGHT} gc ${RESET} "
     if [[ $RETVAL != 0 ]]; then
         echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
