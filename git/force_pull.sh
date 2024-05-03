@@ -54,7 +54,7 @@ print_source
 
 # save and print starting directory
 start_dir=$PWD
-echo "starting directory = ${start_dir}"
+echo "${TAB}starting directory = ${start_dir}"
 
 # reset SSH status list
 export host_bad=''
@@ -447,6 +447,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
         old_opts=$(echo "$-")
         set +e
     fi
+    unset_traps
     while [[ ! -z $(git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep ${branch_temp}) ]]; do
         echo "${TAB}${fTAB}${branch_temp} exists"
         ((++i))
@@ -456,6 +457,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     if (! return 0 2>/dev/null); then
         reset_shell ${old_opts-''}
     fi
+    reset_traps
     do_cmd git branch ${branch_temp}
 else
     echo -e "${TAB}${fTAB}no local commits to copy"

@@ -146,13 +146,15 @@ function check_remotes() {
     # get number of remotes
     local -i n_remotes=$(git remote | wc -l)
     local r_names=$(git remote)
-    echo "remotes found: ${n_remotes}"
+    echo "${TAB}remotes found: ${n_remotes}"
     local -i i=0
     for remote_name in ${r_names}; do
         if [ "${n_remotes}" -gt 1 ]; then
             ((++i))
             echo -n "${TAB}${fTAB}$i) "
             itab
+        else
+            echo -n "${TAB}"
         fi
         # get URL
         echo -en "\x1b[0;36m$remote_name\x1b[0m "

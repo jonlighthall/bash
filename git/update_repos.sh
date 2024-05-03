@@ -574,8 +574,8 @@ for repo in $list; do
                         bash ${prog}
                         RETVAL2=$?
                         echo -en "${TAB}${GRH}force_pull${RESET}: "
-                        if [[ $RETVAL != 0 ]]; then
-                            echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL3${RESET}"
+                        if [[ ${RETVAL2:-0} != 0 ]]; then
+                            echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL2${RESET}"
                             exit || return
                         else
                             echo -e "${GOOD}OK${RESET}"
