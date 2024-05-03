@@ -201,8 +201,10 @@ for repo in $list; do
     # check
     #------------------------------------------------------
     cd ${HOME}/$repo
+    unset_traps
     check_repo
     RETVAL=$?
+    reset_traps
     if [[ $RETVAL -gt 0 ]]; then
         if [ ! -z ${loc_fail:+dummy} ]; then
             loc_fail+=$'\n'"$repo"
@@ -220,9 +222,11 @@ for repo in $list; do
         old_opts=$(echo "$-")
         set +e
     fi
+    unset_traps
     git rev-parse --abbrev-ref @{upstream} &>/dev/null
     RETVAL=$?
-    reset_shell ${old_opts-''}    
+    reset_shell ${old_opts-''}
+    reset_traps
     if [[ $RETVAL -ne 0 ]]; then
         echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
         do_cmd git rev-parse --abbrev-ref @{upstream}
@@ -726,10 +730,11 @@ for repo in $list; do
     echo -en "${GIT_HIGHLIGHT} gc ${RESET} "
     if [[ $RETVAL != 0 ]]; then
         echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+        exit_on_fail
+        continue
     else
         echo -e "${GOOD}OK${RESET}"
     fi
-
 done
 
 cbar "done updating repositories"

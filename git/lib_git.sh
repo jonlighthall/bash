@@ -45,12 +45,15 @@ function check_repo() {
     #local -i DEBUG=1
     check_git
     echo -n "${TAB}checking repository status... "
-    old_opts=$(echo "$-")
-    # exit on errors must be turned off; otherwise shell will exit when not inside a repository
-    set +e
+    # set shell options
+    if [[ "$-" == *e* ]]; then
+        # exit on errors must be turned off; otherwise shell will exit no remote branch found
+        old_opts=$(echo "$-")
+        set +e
+    fi
     git rev-parse --is-inside-work-tree &>/dev/null
     local -i RETVAL=$?
-    reset_shell $old_opts
+    reset_shell ${old_opts-''}
     if [[ $RETVAL -eq 0 ]]; then
         echo -e "${GOOD}OK${RESET} "
         return 0
@@ -395,11 +398,12 @@ function unset_color() {
 
 # format command output
 function do_cmd() {
+    local -i DEBUG=0
     # save command as variable
     cmd=$(echo $@)
     # format output
-    itab
     if [ $DEBUG -gt 0 ]; then
+        itab
         start_new_line
     fi
     decho "${TAB}running command $cmd... " 
@@ -434,12 +438,16 @@ function do_cmd() {
             do_cmd_stdbuf $cmd
         fi
         local -i RETVAL=$?
-        dtab
+        if [ $DEBUG -gt 0 ]; then
+            dtab
+        fi
     fi
     
     # reset formatting
     unset_color
-    dtab    
+    if [ $DEBUG -gt 0 ]; then
+        dtab
+    fi
     return $RETVAL
 }
 
@@ -542,11 +550,16 @@ function do_cmd_script() {
         ddecho "${TAB}printing command ouput typescript..."
         # set shell options
         set -o pipefail
-        # print unbuffered command output
+        # print unbuffered command output <- only if "sed -u" is used!
+        if true; then
+            script -eq -c "$cmd" \
+                | sed -u 's/$\r/\n\r/g'
+        else
         script -eq -c "$cmd" \
             | sed "s/\r.*//g;s/.*\r//g" \
             | sed 's/^[[:space:]].*//g' \
             | sed "/^$/d;s/^/${TAB}${dcolor[$idx]}/"
+        fi
         local -i RETVAL=$?
         # reset shell options
         set +o pipefail
