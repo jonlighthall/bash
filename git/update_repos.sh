@@ -722,38 +722,42 @@ for repo in $list; do
         fi
         stash_list+=$(printf '%2d %s' $N_stash $repo)
     fi
-    echo -n "cleaning up... "
-    unset_traps
-    cmd="git gc"
-    declare -i x1
-    declare -i y1
-    get_curpos x1 y1
-    #DEBUG=1
-    if [ $DEBUG -gt 0 ]; then
-        echo
-        # show command buffer
-        do_cmd "${cmd}"
-    else
-        ${cmd} -q
-    fi
-    RETVAL=$?
-    #DEBUG=0
-    reset_traps
-    declare -i x2
-    declare -i y2
-    get_curpos x2 y2
-    # check if cursor moved
-    if [ $x1 = $x2 ] && [ $y1 == $y2 ]; then
-        :
-    else
-        echo -en "${GIT_HIGHLIGHT} gc ${RESET} "
-    fi       
-    if [[ $RETVAL != 0 ]]; then
-        echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
-        exit_on_fail
-        continue
-    else
-        echo -e "${GOOD}OK${RESET}"
+
+    # to speed things up, only clean if repo has changed
+    if [ ${N_remote} -gt 0 ] || [ ${N_local} -gt 0 ]; then 
+        echo -n "cleaning up... "
+        unset_traps
+        cmd="git gc"
+        declare -i x1
+        declare -i y1
+        get_curpos x1 y1
+        #DEBUG=1
+        if [ $DEBUG -gt 0 ]; then
+            echo
+            # show command buffer
+            do_cmd "${cmd}"
+        else
+            ${cmd} -q
+        fi
+        RETVAL=$?
+        #DEBUG=0
+        reset_traps
+        declare -i x2
+        declare -i y2
+        get_curpos x2 y2
+        # check if cursor moved
+        if [ $x1 = $x2 ] && [ $y1 == $y2 ]; then
+            :
+        else
+            echo -en "${GIT_HIGHLIGHT} gc ${RESET} "
+        fi       
+        if [[ $RETVAL != 0 ]]; then
+            echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+            exit_on_fail
+            continue
+        else
+            echo -e "${GOOD}OK${RESET}"
+        fi
     fi
 done
 
