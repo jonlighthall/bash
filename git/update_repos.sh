@@ -248,19 +248,23 @@ for repo in $list; do
     # add remote to list
     echo "${upstream_url}" >>${list_remote}
     
-    # check against argument
+    # check against argument    
     if [ $# -gt 0 ]; then
         for arg in $@; do
             echo -en "${TAB}checking argument \x1b[36m$arg\x1b[m... "
             if [[ $upstream_url =~ $arg ]]; then
                 echo -e "${GOOD}OK${RESET}"
                 ((++n_match))
+                do_skip=false
                 break
             else
                 echo -e "${GRAY}SKIP${RESET}"
-                continue 2
+                do_skip=true
             fi
         done
+        if [ ${do_skip} = 'true' ]; then
+            continue
+        fi
     fi
 
     # add to list

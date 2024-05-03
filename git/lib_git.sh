@@ -193,23 +193,25 @@ function check_remotes() {
             itab
             decho -en "\n${TAB}do_connect = $do_connect"
 
-            DEBUG=1
             # check against argument
             if [ $# -gt 0 ]; then
+                decho -en "\n"
                 for arg in $@; do
-                    decho -en "\n${TAB}checking $remote_url against argument \x1b[36m$arg\x1b[m... "
+                    decho -en "${TAB}checking $remote_url against argument \x1b[36m$arg\x1b[m... "
                     if [[ $remote_url =~ $arg ]]; then
                         echo -e "${GOOD}OK${RESET}"
                         url_stat=$(echo -e "${GOOD}OK${RESET}")
                         break
                     else
                         echo -e "${GRAY}SKIP${RESET}"
-                        dtab 2
                         url_stat=$(echo -e "${GRAY}SKIP${RESET}")
                         do_connect=false
-                        continue 2
                     fi
                 done
+                if [ ${do_connect} = 'false' ]; then
+                    dtab 2
+                    continue
+                fi
             else
                 url_stat=''
             fi
@@ -243,6 +245,10 @@ function check_remotes() {
             do_connect=false
             host_stat=$(echo -e "${GRAY}CHECK${RESET}")
         fi # SSH
+
+        if [ $DEBUG = 0 ]; then
+            echo
+        fi
 
         (
             echo    "${TAB}url+ ${remote_url} ${url_stat}"
@@ -558,10 +564,10 @@ function do_cmd_script() {
             script -eq -c "$cmd" \
                 | sed -u 's/$\r/\n\r/g'
         else
-        script -eq -c "$cmd" \
-            | sed "s/\r.*//g;s/.*\r//g" \
-            | sed 's/^[[:space:]].*//g' \
-            | sed "/^$/d;s/^/${TAB}${dcolor[$idx]}/"
+            script -eq -c "$cmd" \
+                | sed "s/\r.*//g;s/.*\r//g" \
+                | sed 's/^[[:space:]].*//g' \
+                | sed "/^$/d;s/^/${TAB}${dcolor[$idx]}/"
         fi
         local -i RETVAL=$?
         # reset shell options
