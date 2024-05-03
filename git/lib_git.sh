@@ -155,7 +155,7 @@ function check_remotes() {
             itab
         fi
         # get URL
-        echo -e "\x1b[0;36m$remote_name\x1b[0m"
+        echo -en "\x1b[0;36m$remote_name\x1b[0m "
         local remote_url
         if [ $git_ver_maj -lt 2 ]; then
             remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
@@ -190,19 +190,21 @@ function check_remotes() {
             # default to checking host
             local do_connect=true
             host_stat=$(echo -e "${YELLOW}CHECK${RESET}")
-            decho "${TAB}do_connect = $do_connect"
             itab
+            decho -en "\n${TAB}do_connect = $do_connect"
 
+            DEBUG=1
             # check against argument
             if [ $# -gt 0 ]; then
                 for arg in $@; do
-                    decho -en "${TAB}checking $remote_url against argument \x1b[36m$arg\x1b[m... "
+                    decho -en "\n${TAB}checking $remote_url against argument \x1b[36m$arg\x1b[m... "
                     if [[ $remote_url =~ $arg ]]; then
-                        decho -e "${GOOD}OK${RESET}"
+                        echo -e "${GOOD}OK${RESET}"
                         url_stat=$(echo -e "${GOOD}OK${RESET}")
                         break
                     else
-                        decho -e "${GRAY}SKIP${RESET}"
+                        echo -e "${GRAY}SKIP${RESET}"
+                        dtab 2
                         url_stat=$(echo -e "${GRAY}SKIP${RESET}")
                         do_connect=false
                         continue 2
@@ -248,10 +250,10 @@ function check_remotes() {
             decho -e "${TAB}proto+ ${remote_pro}"
         ) | column -t -s+ -o : -R 1
         decho "${TAB}do_connect = $do_connect"
-        dtab
+
         # check connection before proceeding       
         if [ ${do_connect} = 'true' ]; then
-            echo -n "${TAB}${fTAB}checking connection... "
+            echo -n "${TAB}checking connection... "
 
             ssh_cmd_base="ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 -T ${remote_host}"
             if [[ "${remote_host}" == *"navy.mil" ]]; then
@@ -278,7 +280,7 @@ function check_remotes() {
                 fi
             fi
             if [[ $RETVAL == 0 ]]; then
-                echo -e "${TAB}${fTAB}${GOOD}OK${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+                echo -e "${TAB}${GOOD}OK${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                 # add to list
                 if [ ! -z ${host_OK:+dummy} ]; then
                     host_OK+=$'\n'
@@ -286,9 +288,9 @@ function check_remotes() {
                 host_OK+=${remote_host}
             else
                 if [[ $RETVAL == 1 ]]; then
-                    echo -e "${TAB}${fTAB}${YELLOW}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+                    echo -e "${TAB}${YELLOW}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                     if [[ $remote_host =~ "github.com" ]]; then
-                        decho "host is github"
+                        decho "${TAB}host is github"
                         # Github will return 1 if everything is working
                         # add to list
                         if [ ! -z ${host_OK:+dummy} ]; then
@@ -296,7 +298,7 @@ function check_remotes() {
                         fi
                         host_OK+=${remote_host}
                     else
-                        decho "host is not github"
+                        decho "${TAB}host is not github"
                         # add to list
                         if [ ! -z ${host_bad:+dummy} ]; then
                             host_bad+=$'\n'
@@ -304,7 +306,7 @@ function check_remotes() {
                         host_bad+=${remote_host}
                     fi
                 else
-                    echo -e "${TAB}${fTAB}${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+                    echo -e "${TAB}${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                     # add to list
                     if [ ! -z ${host_bad:+dummy} ]; then
                         host_bad+=$'\n'
@@ -313,10 +315,11 @@ function check_remotes() {
                 fi # retval 1
             fi # retval 0
         else
-            decho "skipping connection check..."
-            dtab 
+            decho "${TAB}skipping connection check..."
+            dtab 2
             continue
         fi # do check
+        dtab
 
         if [ "${n_remotes}" -gt 1 ]; then
             dtab
@@ -351,7 +354,7 @@ function check_remotes() {
     export host_OK
     export host_bad
 
-    decho "done"
+    decho "${TAB}done"
     # add return code for parent script
     if [ $DEBUG -gt 0 ]; then
         trap 'print_return $?; trap - RETURN' RETURN
