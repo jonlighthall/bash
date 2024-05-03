@@ -722,12 +722,32 @@ for repo in $list; do
         fi
         stash_list+=$(printf '%2d %s' $N_stash $repo)
     fi
-    echo "cleaning up..."
+    echo -n "cleaning up... "
     unset_traps
-    do_cmd git gc
+    cmd="git gc"
+    declare -i x1
+    declare -i y1
+    get_curpos x1 y1
+    #DEBUG=1
+    if [ $DEBUG -gt 0 ]; then
+        echo
+        # show command buffer
+        do_cmd "${cmd}"
+    else
+        ${cmd} -q
+    fi
     RETVAL=$?
+    #DEBUG=0
     reset_traps
-    echo -en "${GIT_HIGHLIGHT} gc ${RESET} "
+    declare -i x2
+    declare -i y2
+    get_curpos x2 y2
+    # check if cursor moved
+    if [ $x1 = $x2 ] && [ $y1 == $y2 ]; then
+        :
+    else
+        echo -en "${GIT_HIGHLIGHT} gc ${RESET} "
+    fi       
     if [[ $RETVAL != 0 ]]; then
         echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
         exit_on_fail
@@ -910,11 +930,11 @@ echo -n " stash entries: "
 if [ -z "$stash_list" ]; then
     echo "none"
 else
-        # get color index
-        declare  -i idx
-        dbg2idx 4 idx
-        # set color
-        echo -ne "${dcolor[$idx]}"           
+    # get color index
+    declare  -i idx
+    dbg2idx 4 idx
+    # set color
+    echo -ne "${dcolor[$idx]}"           
     stash_list=$(echo "${stash_list}" | sort -n)
     echo "${stash_list}" | head -n 1
     echo "${stash_list}" | tail -n +2 | sed "s/^/${list_indent}/"
