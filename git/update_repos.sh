@@ -21,7 +21,7 @@ fi
 # set debug level
 # substitue default value if DEBUG is unset or null
 DEBUG=${DEBUG:-0}
-decho "DEBUG = $DEBUG"
+print_debug
 
 # set tab
 called_by=$(ps -o comm= $PPID)
