@@ -4,19 +4,18 @@
 #
 # Jul 2023 JCL
 
-# set tab
-called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-	TAB=''
-	: ${fTAB:='   '}
-else
-	TAB+=${TAB+${fTAB:='   '}}
-fi
-
 # load formatting and functions
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
 	source $fpretty
+fi
+
+# set tab
+called_by=$(ps -o comm= $PPID)
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
+    set_tab
+else
+    itab
 fi
 
 # print source name at start
@@ -25,11 +24,7 @@ if (return 0 2>/dev/null); then
 else
 	RUN_TYPE="executing"
 fi
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
-src_name=$(readlink -f $BASH_SOURCE)
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-	echo -e "${TAB}${VALID}link${RESET} -> $src_name"
-fi
+print_source
 
 # define colors
 TRUE='\E[1;32mtrue\E[0m'
@@ -51,7 +46,7 @@ clear -x
 if (return 0 2>/dev/null); then
 	echo "script is sourced"
 else
-	echo "CAUTION: script has not been sourced. Results may not reflect current shell."
+	echo -e "${GRH}CAUTION: script has not been sourced. Results may not reflect current shell.${RESET}"
 fi
 
 # parse inputs
