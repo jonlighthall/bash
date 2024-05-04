@@ -247,7 +247,7 @@ function check_remotes() {
         fi # SSH
 
         if [ $DEBUG = 0 ]; then
-            echo
+            : # echo
         fi
 
         (
@@ -278,7 +278,7 @@ function check_remotes() {
                     fi
                     $ssh_cmd_base -o LogLevel=info 2> >(sed -u $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,' >&2)
                     RETVAL=$?
-                    reset_shell $old_opts
+                    reset_shell ${old_opts-''}
                     reset_traps                   
                 else
                     $ssh_cmd_base -o LogLevel=info 2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2)
@@ -529,7 +529,7 @@ function do_cmd_safe() {
     RETVAL=$?
     
     itab
-    reset_shell $old_opts
+    reset_shell ${old_opts-''}
     reset_traps
     
     # reset formatting
@@ -560,6 +560,7 @@ function do_cmd_script() {
         # set shell options
         set -o pipefail
         # print unbuffered command output <- only if "sed -u" is used!
+
         if true; then
             script -eq -c "$cmd" \
                 | sed -u 's/$\r/\n\r/g'
