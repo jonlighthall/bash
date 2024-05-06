@@ -648,5 +648,6 @@ print_exit $?' EXIT
 fi
 cbar "${BOLD}you're done!${RESET}"
 clear_traps
+echo "exiting ${BASHSOURCE##*/} with code zero... "
 # add exit code for parent script
 exit 0
