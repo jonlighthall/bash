@@ -833,8 +833,8 @@ if [ $n_match -gt 0 ]; then
     echo "       matched: ${n_match} ($1)"
 fi
 
-# parse upstream branch
-if [ ${#upstream_fail[@]} -gt 0 ]; then
+# check if upstream fail is still unset
+if [ -n "${upstream_fail+dummy}" ]; then
     echo -en "   no upstream: ${YELLOW}"
     (
         for repo in ${upstream_fail[@]}; do 
