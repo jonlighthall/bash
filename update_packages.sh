@@ -39,4 +39,5 @@ sudo apt clean
 
 # check for distro update
 bar "release upgrade..."
+trap -- ERR
 sudo do-release-upgrade
