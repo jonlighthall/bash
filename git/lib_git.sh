@@ -157,7 +157,7 @@ function check_remotes() {
             echo -n "${TAB}"
         fi
         # get URL
-        echo -en "\x1b[0;36m$remote_name\x1b[0m "
+        echo -en "${PSBR}${remote_name}${RESET} "
         local remote_url
         if [ $git_ver_maj -lt 2 ]; then
             remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
@@ -199,7 +199,7 @@ function check_remotes() {
             if [ $# -gt 0 ]; then
                 decho -en "\n"
                 for arg in $@; do
-                    decho -en "${TAB}checking $remote_url against argument \x1b[36m$arg\x1b[m... "
+                    decho -en "${TAB}checking $remote_url against argument ${ARG}${ARG}${RESET}... "
                     if [[ $remote_url =~ $arg ]]; then
                         echo -e "${GOOD}OK${RESET}"
                         url_stat=$(echo -e "${GOOD}OK${RESET}")
