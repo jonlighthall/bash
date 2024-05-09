@@ -25,11 +25,13 @@ print_source
 # update
 bar "update..."
 sudo apt update
+print_time
 
 # upgrade
 bar "upgrade and fix missing..."
 sudo apt --fix-broken install -y
 sudo apt upgrade -y --fix-missing
+print_time
 
 # cleanup
 bar "autoremove and purge..."
@@ -38,6 +40,7 @@ bar "autoclean..."
 sudo apt autoclean
 bar "clean..."
 sudo apt clean
+print_time
 
 # check for distro update
 bar "release upgrade..."
