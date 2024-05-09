@@ -26,6 +26,7 @@ sudo apt update
 
 # upgrade
 bar "upgrade and fix missing..."
+sudo apt --fix-broken install -y
 sudo apt upgrade -y --fix-missing
 
 # cleanup
