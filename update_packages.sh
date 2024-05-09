@@ -4,6 +4,8 @@
 #
 # Oct 2020 JCL
 
+declare -i start_time=$(date +%s%N)
+
 # load formatting
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
