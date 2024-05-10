@@ -413,8 +413,8 @@ function do_cmd() {
     # save command as variable
     cmd=$(echo $@)
     # format output
+    itab
     if [ $DEBUG -gt 0 ]; then
-        itab
         start_new_line
     fi
     decho "${TAB}running command $cmd... " 
@@ -425,7 +425,7 @@ function do_cmd() {
     # set color
     echo -ne "${dcolor[$idx]}"
 
-    if command -v unbuffer >/dev/null; then
+    if false; then #command -v unbuffer >/dev/null; then
         ddecho "${TAB}printing unbuffered command ouput..."
         # set shell options
         set -o pipefail        
@@ -442,16 +442,16 @@ function do_cmd() {
         if command -v script >/dev/null; then
             ddecho "${TAB}printing command ouput typescript..."
             # print typescript command ouput
+            dtab
             do_cmd_script $cmd
         else        
             ddecho "${TAB}printing buffered command ouput..."
             # print buffered command output
+            dtab
             do_cmd_stdbuf $cmd
         fi
         local -i RETVAL=$?
-        if [ $DEBUG -gt 0 ]; then
-            dtab
-        fi
+        dtab
     fi
     
     # reset formatting
@@ -472,6 +472,7 @@ function do_cmd_stdbuf() {
         start_new_line
     fi
     ddecho "${TAB}redirecting command ouput to $temp_file..."
+    echo "stdbuf"
     # unbuffer command output and save to file    
     stdbuf -i0 -o0 -e0 $cmd &>$temp_file
     RETVAL=$?
@@ -563,7 +564,7 @@ function do_cmd_script() {
         set -o pipefail
         # print unbuffered command output <- only if "sed -u" is used!
 
-        if true; then
+        if false; then
             script -eq -c "$cmd" \
                 | sed -u 's/$\r/\n\r/g'
         else
@@ -578,6 +579,7 @@ function do_cmd_script() {
         rm typescript
     else
         ddecho "${TAB}printing unformatted ouput..."
+        echo "no wrapper"
         dtab
         # print buffered command output
         $cmd
@@ -590,13 +592,18 @@ function do_cmd_script() {
     return $RETVAL
 }
 
+# optionally override traps
 function exit_on_fail() {
     echo -e "${TAB}${YELLOW}\x1b[7m${BASH_SOURCE[1]##*/} failed\x1b[0m"
     # set behavior
     local do_exit=true
     if [[ $do_exit == true ]]; then
+        echo "$FUNCNAME is true"
+        itab
         print_stack
         set_traps
+        dtab
+        echo "exiting..."
         exit 1 || return 1
     else
         return 0
