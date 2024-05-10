@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash -u
 # -----------------------------------------------------------------------------------------------
 #
 # mv_date.sh
@@ -112,10 +112,10 @@ function get_mod_date() {
 	      test_file "$1" | sed "s/^/${TAB}/"
         # extract date from broken link
 	      if [ -L "$1" ]; then
-		        in_file=$1
-		        echo "${in_file} is a broken link!"
-		        mdate=$(stat -c '%y' "${in_file}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
-		        output=$1_${mdate}
+		        link_name=$1
+		        decho "${TAB}${link_name} is a broken link!"
+		        mdate=$(stat -c '%y' "${link_name}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
+		        output=${link_name}_${mdate}
 	      else		
             dtab 
 		        echo -e "${TAB}${BAD}exiting...${RESET}"
@@ -142,11 +142,23 @@ if [ $# -eq 0 ]; then
 	  exit 1
 fi
 ddecho "${TAB}number of arguments = $#"
-
-# set file names
-in_file=$(readlink -f $1)
 itab
 ddecho "${TAB}argument 1: $1"
+
+# if argument is a broken link, an error is produced
+set +e
+# set file names
+in_file=$(readlink -f $1)
+RETVAL=$?
+decho -n "${TAB}link "
+if [ $RETVAL -eq 0 ]; then
+    decho -e "${GOOD}OK${RESET}"
+else
+    decho -e "${BAD}FAILED${RESET}"
+    in_file=$(readlink -mv $1)
+    decho "${TAB} ${in_file}"
+    in_file=$1
+fi
 dtab
 echo "${TAB}getting modifcation date..."
 declare out_file
