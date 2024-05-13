@@ -3,17 +3,25 @@ hello() {
     echo "world"
 }
 
+# load formatting and functions
+fpretty=${HOME}/config/.bashrc_pretty
+if [ -e $fpretty ]; then
+	  source $fpretty
+fi
+
 for func in hello bar hline potato
 do
-    echo "testing if $func is a function"
+    echo "${TAB}testing if $func is a function"
+    itab
     if [ "$(type -t $func)" != function ]; then
-	echo "$func not a function"
-	eval "$func() {
+	      echo "${TAB}$func not a function"
+        echo "${TAB}redefining $func as a no-op function"        
+	      eval "$func() {
 	    :
 	}"
     else
-	echo "$func is a function:"
-	$func
+	      echo "${TAB}$func is a function:"
+	      $func
     fi
-
+    dtab
 done
