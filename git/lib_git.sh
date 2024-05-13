@@ -429,7 +429,7 @@ function do_cmd() {
 
     # the ideal solution is to use unbuffer
     # check if unbuffer is defined
-    if false; then #command -v unbuffer >/dev/null; then
+    if command -v unbuffer >/dev/null; then
         ddecho "${TAB}printing unbuffered command ouput..."
         # set shell options
         set -o pipefail        
@@ -441,10 +441,10 @@ function do_cmd() {
         local -i RETVAL=$?
 
         # reset shell options
-        set +o pipefail
+        set +o pipefail        
     else
         # check if script is defined
-        if false; then #command -v script >/dev/null; then
+        if command -v script >/dev/null; then
             ddecho "${TAB}printing command ouput typescript..."
             # print typescript command ouput
             dtab
@@ -456,8 +456,8 @@ function do_cmd() {
             do_cmd_stdbuf $cmd
         fi
         local -i RETVAL=$?
-        dtab
     fi
+    dtab
     
     # reset formatting
     unset_color
@@ -535,6 +535,8 @@ function do_cmd_stdbuf() {
     cmd=$(echo $@)
     # define temp file
     temp_file=temp
+    # format output
+    itab    
     if [ $DEBUG -gt 0 ]; then
         start_new_line
     fi
@@ -556,12 +558,15 @@ function do_cmd_stdbuf() {
 
         # print output
         \cat $temp_file \
-            | sed "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" \
-            | sed "/^[^%|]*|/s/^/${dcolor[$idx+1]}/g; /|/s/+/${GOOD}&/g; /|/s/-/${BAD}&/g; /modified:/s/^.*$/${BAD}&/g; /^\s*M\s/s/^.*$/${BAD}&/g" \
-            | sed "s/^/${dcolor[$idx]}/"
+            | sed -u '1 s/[A-Z]/\n&/' \
+            | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" \
+            | sed -u "/^[^%|]*|/s/^/${dcolor[$idx+1]}/g; s/$/${dcolor[$idx]}/; /|/s/+/${GOOD}&/g; /|/s/-/${BAD}&/g; /modified:/s/^.*$/${BAD}&/g; /^\s*M\s/s/^.*$/${BAD}&/g"  
         
         # reset formatting
         unset_color
+        if [ $DEBUG -gt 0 ]; then
+            dtab
+        fi
     else
         itab
         ddecho "${TAB}${temp_file} empty"
