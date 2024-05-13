@@ -408,6 +408,8 @@ function unset_color() {
 }
 
 # format command output
+# handling is included for a variety of commands
+# conditionally calls do_cmd_script, and do_cmd_stdbuf
 function do_cmd() {
     local -i DEBUG=0
     # save command as variable
@@ -425,6 +427,8 @@ function do_cmd() {
     # set color
     echo -ne "${dcolor[$idx]}"
 
+    # the ideal solution is to use unbuffer
+    # check if unbuffer is defined
     if false; then #command -v unbuffer >/dev/null; then
         ddecho "${TAB}printing unbuffered command ouput..."
         # set shell options
@@ -439,12 +443,13 @@ function do_cmd() {
         # reset shell options
         set +o pipefail
     else
+        # check if script is defined
         if false; then #command -v script >/dev/null; then
             ddecho "${TAB}printing command ouput typescript..."
             # print typescript command ouput
             dtab
             do_cmd_script $cmd
-        else        
+        else            
             ddecho "${TAB}printing buffered command ouput..."
             # print buffered command output
             dtab
@@ -462,8 +467,70 @@ function do_cmd() {
     return $RETVAL
 }
 
+# format command output using typescript
+# developed for use with the command "git gc"
+# output of "git gc" is written to stderr, but not to the terminal (tty)
+# script captures all output in a pseudo-terminal (pty)
+function do_cmd_script() {
+    local -i DEBUG=0
+    # save command as variable
+    cmd=$(echo $@)
+    # format output
+    itab
+    if [ $DEBUG -gt 0 ]; then
+        start_new_line
+    fi
+    decho "${TAB}SCRIPT: running command $cmd... " 
+    
+    # get color index
+    local -i idx
+    dbg2idx 5 idx
+    # set color
+    echo -ne "${dcolor[$idx]}"
+    # check if typescript is defined
+    if command -v script >/dev/null; then
+        ddecho "${TAB}printing command ouput typescript..."
+        # set shell options
+        set -o pipefail
+        # print command output
+        if false; then
+            # command output is unbuffered only if "sed -u" is used!
+            # however, this interfers with formatting the output
+            script -eq -c "$cmd" \
+                | sed -u 's/$\r/\n\r/g'
+        else
+            script -eq -c "$cmd" \
+                | sed "s/\r.*//g;s/.*\r//g" \
+                | sed 's/^[[:space:]].*//g' \
+                | sed "/^$/d;s/^/${TAB}${dcolor[$idx]}/" \
+                | sed '1 s/^/\n/' 
+        fi
+        local -i RETVAL=$?
+        # reset shell options
+        set +o pipefail
+        # remove temporary file
+        local fname=typescript
+        if [ -f $fname ]; then
+            rm typescript
+        fi
+    else
+        ddecho "${TAB}printing unformatted ouput..."
+        echo "no wrapper"
+        dtab
+        # print buffered command output
+        $cmd
+        local -i RETVAL=$?
+    fi
+    
+    # reset formatting
+    unset_color
+    dtab    
+    return $RETVAL
+}
+
 # format buffered command ouput
 # save ouput to file, print file, delete file
+# developed for use when unbuffer and script are unavailable
 function do_cmd_stdbuf() {    
     cmd=$(echo $@)
     # define temp file
@@ -507,6 +574,7 @@ function do_cmd_stdbuf() {
     return $RETVAL
 }
 
+# run command after adjusting shell options and un-setting traps
 function do_cmd_safe() {
     local -i DEBUG=0
     # save command as variable
@@ -542,66 +610,13 @@ function do_cmd_safe() {
     return $RETVAL
 }
 
-# format command output
-function do_cmd_script() {
-    local -i DEBUG=0
-    # save command as variable
-    cmd=$(echo $@)
-    # format output
-    itab
-    if [ $DEBUG -gt 0 ]; then
-        start_new_line
-    fi
-    decho "${TAB}SCRIPT: running command $cmd... " 
-    
-    # get color index
-    local -i idx
-    dbg2idx 5 idx
-    # set color
-    echo -ne "${dcolor[$idx]}"
-    if command -v script >/dev/null; then
-        ddecho "${TAB}printing command ouput typescript..."
-        # set shell options
-        set -o pipefail
-        # print unbuffered command output <- only if "sed -u" is used!
-
-        if false; then
-            script -eq -c "$cmd" \
-                | sed -u 's/$\r/\n\r/g'
-        else
-            script -eq -c "$cmd" \
-                | sed "s/\r.*//g;s/.*\r//g" \
-                | sed 's/^[[:space:]].*//g' \
-                | sed "/^$/d;s/^/${TAB}${dcolor[$idx]}/" \
-                | sed '1 s/^/\n/' 
-        fi
-        local -i RETVAL=$?
-        # reset shell options
-        set +o pipefail
-        local fname=typescript
-        if [ -f $fname ]; then
-            rm typescript
-        fi
-    else
-        ddecho "${TAB}printing unformatted ouput..."
-        echo "no wrapper"
-        dtab
-        # print buffered command output
-        $cmd
-        local -i RETVAL=$?
-    fi
-    
-    # reset formatting
-    unset_color
-    dtab    
-    return $RETVAL
-}
-
 # optionally override traps
 function exit_on_fail() {
     echo -e "${TAB}${YELLOW}\x1b[7m${BASH_SOURCE[1]##*/} failed\x1b[0m"
+    # -----------------
     # set behavior
     local do_exit=true
+    # -----------------
     if [[ $do_exit == true ]]; then
         echo "$FUNCNAME is true"
         itab
