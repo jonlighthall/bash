@@ -349,7 +349,7 @@ for repo in $list; do
     #------------------------------------------------------
     # fetch
     #------------------------------------------------------
-    echo -n "fetching... "
+    echo -n "${TAB}fetching... "
     # specify number of seconds before kill
     nsec=3
     if [ $fetch_max -gt $nsec ]; then
@@ -475,7 +475,7 @@ for repo in $list; do
     else
         decho "${N_remote}"
 
-        echo -n "pulling... "
+        echo -n "${TAB}pulling... "
         cmd_base="git pull --all --progress --tags --verbose" #--prune"
         if [ $git_ver_maj -ge 2 ]; then
             cmd_base+=" --ff-only --ipv4"
@@ -645,6 +645,7 @@ for repo in $list; do
             fi
         fi
     fi
+    dtab
 
     #------------------------------------------------------
     # push
@@ -657,7 +658,7 @@ for repo in $list; do
     else
         decho "${N_local}"
 
-        echo -n "pushing... "
+        echo -n "${TAB}pushing... "
         cmd_base="git push --progress --verbose"
         if [ $git_ver_maj -ge 2 ]; then
             cmd_base+=" --ipv4"
@@ -729,7 +730,7 @@ for repo in $list; do
 
     # to speed things up, only clean if repo has changed
     if [ ${N_remote} -gt 0 ] || [ ${N_local} -gt 0 ]; then 
-        echo -n "cleaning up... "
+        echo -n "${TAB}cleaning up... "
         unset_traps
         cmd="git gc"
         declare -i x1
