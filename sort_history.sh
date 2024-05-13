@@ -426,13 +426,17 @@ dtab
 #sed '$!N; /^\(.*\)\n\1$/!P; D' ${hist_out}
 #perl -0777 -pe 's/(.+\R.+\R)\1/$1/g' ${hist_out}
 
-uniq ${hist_out} > ${hist_uni}
-echo "done"
+# select if remove repeated only
+if true; then
+    uniq ${hist_out} > ${hist_uni}
+else
+    awk '!a[$0]++' ${hist_out} > ${hist_uni}
+fi
 
 # save markers
 N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_uni} | wc -l)
 echo -e "${TAB}\E[1;31mnumber of differences = $N${RESET}"
-echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_out}
+echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_uni}
 
 cp -Lpv ${hist_uni} ${hist_ref}
 
@@ -446,7 +450,7 @@ if [[ ! -z ${list_del} ]]; then
 fi
 
 # print time at exit
-print_elap
+print_exit
 
 if [ $N -gt 0 ]; then
     # show diff commands
