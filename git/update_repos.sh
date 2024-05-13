@@ -23,6 +23,9 @@ fi
 DEBUG=${DEBUG:-0}
 print_debug
 
+# number of commits threshold for git operations
+declare -i GIT_OP_THRESH=-1
+
 # set tab
 called_by=$(ps -o comm= $PPID)
 if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]]; then
@@ -469,7 +472,7 @@ for repo in $list; do
     #------------------------------------------------------
     decho -n "leading remote commits: "
     N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
-    if [ ${N_remote} -eq 0 ]; then
+    if [ ${N_remote} -le ${GIT_OP_THRESH} ]; then
         decho "none"
         decho "${fTAB}no need to pull"
     else
@@ -652,7 +655,7 @@ for repo in $list; do
     #------------------------------------------------------
     decho -n "trailing local commits: "
     N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
-    if [ ${N_local} -eq 0 ]; then
+    if [ ${N_local} -le ${GIT_OP_THRESH} ]; then
         decho "none"
         decho "${fTAB}no need to push"
     else
@@ -713,6 +716,7 @@ for repo in $list; do
 
     check_mod
 
+    echo -n "stash... "
     # check for stash entries
     N_stash=$(git stash list | wc -l)
     if [ $N_stash -gt 0 ]; then
@@ -726,10 +730,12 @@ for repo in $list; do
             stash_list+=$'\n'
         fi
         stash_list+=$(printf '%2d %s' $N_stash $repo)
+    else
+        echo "empty"
     fi
 
     # to speed things up, only clean if repo has changed
-    if [ ${N_remote} -gt 0 ] || [ ${N_local} -gt 0 ]; then 
+    if [ ${N_remote} -gt ${GIT_OP_THRESH} ] || [ ${N_local} -gt ${GIT_OP_THRESH} ]; then 
         echo -n "${TAB}cleaning up... "
         unset_traps
         cmd="git gc"
