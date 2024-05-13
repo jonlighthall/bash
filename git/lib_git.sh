@@ -576,7 +576,10 @@ function do_cmd_script() {
         local -i RETVAL=$?
         # reset shell options
         set +o pipefail
-        rm typescript
+        local fname=typescript
+        if [ -f $fname ]; then
+            rm typescript
+        fi
     else
         ddecho "${TAB}printing unformatted ouput..."
         echo "no wrapper"
