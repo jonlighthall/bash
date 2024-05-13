@@ -439,7 +439,7 @@ function do_cmd() {
         # reset shell options
         set +o pipefail
     else
-        if command -v script >/dev/null; then
+        if false; then #command -v script >/dev/null; then
             ddecho "${TAB}printing command ouput typescript..."
             # print typescript command ouput
             dtab
@@ -472,7 +472,6 @@ function do_cmd_stdbuf() {
         start_new_line
     fi
     ddecho "${TAB}redirecting command ouput to $temp_file..."
-    echo "stdbuf"
     # unbuffer command output and save to file    
     stdbuf -i0 -o0 -e0 $cmd &>$temp_file
     RETVAL=$?
@@ -509,12 +508,14 @@ function do_cmd_stdbuf() {
 }
 
 function do_cmd_safe() {
-    local -i DEBUG=1
+    local -i DEBUG=0
     # save command as variable
     cmd=$(echo $@)
     # format output
-    start_new_line
     itab
+    if [ $DEBUG -gt 0 ]; then
+        start_new_line
+    fi
     decho "${TAB}SAFE: running command $cmd... " 
 
     # set shell options
@@ -571,7 +572,8 @@ function do_cmd_script() {
             script -eq -c "$cmd" \
                 | sed "s/\r.*//g;s/.*\r//g" \
                 | sed 's/^[[:space:]].*//g' \
-                | sed "/^$/d;s/^/${TAB}${dcolor[$idx]}/"
+                | sed "/^$/d;s/^/${TAB}${dcolor[$idx]}/" \
+                | sed '1 s/^/\n/' 
         fi
         local -i RETVAL=$?
         # reset shell options
