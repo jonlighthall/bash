@@ -495,7 +495,7 @@ for repo in $list; do
         while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
             ((++n_loops))
             if [ $n_loops -gt 1 ]; then
-                echo "${TAB}PULL attempt $n_loops..."
+                echo -n "${TAB}PULL attempt $n_loops..."
             fi
             t_start=$(date +%s%N)
             do_cmd_safe ${cmd}
@@ -678,7 +678,7 @@ for repo in $list; do
         while [ $RETVAL -eq 137 ] && [ $n_loops -lt 5 ]; do
             ((++n_loops))
             if [ $n_loops -gt 1 ]; then
-                echo "${TAB}PUSH attempt $n_loops..."
+                echo -n "${TAB}PUSH attempt $n_loops..."
             fi
             t_start=$(date +%s%N)
             do_cmd ${cmd}
