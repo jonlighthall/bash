@@ -105,9 +105,9 @@ unset list_in
 set -e
 
 # check save directory
-if [ -d "${save_dir}" ]; then
-	  echo "save dir ${save_dir} found"
+check_target ${save_dir}
 
+if true; then 
     # if the save directory exists, history should be saved there
     hist_save=${save_dir}/${hist_name}
     
@@ -151,55 +151,17 @@ if [ -d "${save_dir}" ]; then
         # check if the original file exits
         if [ -f ${hist_ref} ]; then
 		        echo -e "is a regular ${UL}file${RESET}"
-            #hist_temp1=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
-            #list_in+=( "${hist_temp1}" )
-            #mv -nv "${hist_ref}" "${hist_temp1}"
-
-            # check if the target exists
-            echo -n "intended link name file ${hist_save} "
-            if [ -f ${hist_save} ]; then
-                echo "exits"                
-                hist_temp2=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_save} +'%Y-%m-%d-t%H%M%S')
-                echo "$hist_temp2"
-                if [ -e "${hist_temp2}" ]; then
-                    echo "backup already exists"
-                else
-                    echo "does not exist"
-                fi
-
-                
-                list_in+=( "${hist_temp2}" )
-                # move the existing file out of the way
-                echo "move link name"
-                mv -nv ${hist_save} ${hist_temp2}                
-            else
-                echo "does not exit"
-            fi
 
             # move and re-link
-            echo "move link"
-            mv -nv "${hist_ref}" "${hist_save}"
-            echo "link target to link"
-            ln -sv "${hist_save}" "${hist_ref}"
+            echo "linking ${hist_save} to ${hist_ref}"
+            do_link "${hist_save}" "${hist_ref}"
         else
 		        echo -e "${YELLOW}is not a file or link${RESET}"
 		        exit 1
 	      fi
-        
     fi
 
     hist_bak=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
-    
-else
-	  echo "save dir ${save_dir} NOT found"
-
-    if [ -f ${hist_ref} ]; then
-		    echo -e "is a regular ${UL}file${RESET}"
-        hist_bak=${hist_ref}_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
-    else
-		    echo -e "${YELLOW}is not a file or link${RESET}"
-		    exit 1
-	  fi
 fi
 
 echo " backup file is $hist_bak"
@@ -210,7 +172,7 @@ cp -pv $hist_ref ${hist_bak} | sed "s/^/${TAB}${fTAB}/"
 # set list of files to check
 list_in+=( "${hist_ref}" )
 echo "${#list_in[@]} files in list"
-echo "${list_in[@]}"
+echo "${TAB}${list_in[@]}"
 
 if [ $# -gt 0 ]; then
     echo "${TAB}list of arguments:"
@@ -220,8 +182,7 @@ if [ $# -gt 0 ]; then
     done
 fi
 
-echo "${#list_in[@]} files in list"
-echo "${list_in[@]}"
+dtab
 if [ ${#list_in[@]} -gt 0 ]; then
     echo "${TAB}list of files (input):"
     for file in ${list_in[@]}; do
@@ -233,7 +194,8 @@ fi
 echo "${TAB}checking file list..."
 list_out=''
 list_del=''
-set +eE
+set +e
+unset_traps
 for hist_in in ${list_in[@]}; do
     echo -n "${TAB}${fTAB}${hist_in}... "
     if [ -f ${hist_in} ]; then
