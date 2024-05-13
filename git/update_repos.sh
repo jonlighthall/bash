@@ -24,7 +24,9 @@ DEBUG=${DEBUG:-0}
 print_debug
 
 # number of commits threshold for git operations
-declare -i GIT_OP_THRESH=-1
+# set to 0 for normal operation
+# set to -1 to pull, push, and gc on every repo
+declare -i GIT_OP_THRESH=0
 
 # set tab
 called_by=$(ps -o comm= $PPID)
