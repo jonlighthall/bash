@@ -862,7 +862,9 @@ if [ -z "$fetch_fail" ]; then
     echo "none"
 else
     echo -ne "${BAD}"
-    echo "${fetch_fail}" | sed "1! s/^/${list_indent}/;$d"
+    echo "${fetch_fail}" \
+        | sed "/^[[:space:]]*$/d" \
+        | sed "1! s/^/${list_indent}/"
     echo -ne "${RESET}"
 fi
 
