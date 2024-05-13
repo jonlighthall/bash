@@ -1,24 +1,33 @@
 #!/bin/bash -u
 
-# start timer
+# get starting time in nanoseconds
 start_time=$(date +%s%N)
 
-# set tab
-called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-    TAB=''
-    : ${fTAB:='	'}
-else
-    TAB+=${TAB+${fTAB:='	'}}
-fi
-
-# load formatting
+# load formatting and functions
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
+else
+    # ignore undefined variables
+    set +u 
+    # do not exit on errors
+    set +e
 fi
 
-# print source name at start
+# set debug level
+# substitue default value if DEBUG is unset or null
+DEBUG=${DEBUG:-0}
+print_debug
+
+# set tab
+called_by=$(ps -o comm= $PPID)
+if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]]; then
+    rtab
+else
+    itab
+fi
+
+# determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
     set +e
@@ -31,21 +40,15 @@ else
     # print time at exit
     trap print_exit EXIT
 fi
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
-src_name=$(readlink -f $BASH_SOURCE)
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
+print_source
+
+# load git utils
+fgit="${src_dir_phys}/lib_git.sh"
+if [ -e "$fgit" ]; then
+    source "$fgit"
 fi
 
-echo -n "checking repository status... "
-git rev-parse --is-inside-work-tree &>/dev/null
-RETVAL=$?
-if [[ $RETVAL -eq 0 ]]; then
-    echo -e "${GOOD}OK${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
-else
-    echo "${TAB}$repo not a Git repository"
-    exit 1
-fi
+check_repo
 
 # get repo name
 repo_dir=$(git rev-parse --show-toplevel)
@@ -77,40 +80,7 @@ else
     echo
 fi
 
-# check remotes
-cbar "${BOLD}parsing remotes...${RESET}"
-r_names=$(git remote)
-if [ "${n_remotes}" -gt 1 ]; then
-    echo "remotes found: ${n_remotes}"
-else
-    echo -n "remote: "
-fi
-for remote_name in ${r_names}; do
-    echo
-    echo "${TAB}$remote_name"
-    remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
-    echo "${fTAB}url: ${remote_url}"
-    remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-    if [[ "${remote_pro}" == "git" ]]; then
-        remote_pro="SSH"
-        rhost=$(echo ${remote_url} | sed 's/\(^[^:]*\):.*$/\1/')
-    else
-        rhost=$(echo ${remote_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
-        if [[ "${remote_pro}" == "http"* ]]; then
-            remote_pro=${GRH}${remote_pro}${RESET}
-            remote_repo=$(echo ${remote_url} | sed 's,^[a-z]*://[^/]*/\(.*\),\1,')
-            echo "  repo: ${remote_repo}"
-            remote_ssh="git@${rhost}:${remote_repo}"
-            echo " change URL to ${remote_ssh}..."
-            echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}"
-            git remote set-url ${remote_name} ${remote_ssh}
-        else
-            remote_pro="local"
-        fi
-    fi
-    echo "  host: $rhost"
-    echo -e " proto: ${remote_pro}"
-done
+#check_remotes
 
 # check for stash entries
 echo
@@ -124,18 +94,67 @@ if [ $N_stash -gt 0 ]; then
         stash="stash@{$n}"
         echo "${stash}"
         git log -1 ${stash}
+        #continue
 
-        unset n_min
-        unset hash_min
+        stash_files="$(git diff --name-only ${stash}^ ${stash})"
 
-        for hash in $(git rev-list HEAD); do
-            echo -n "$hash: "
-            n_diff=$(git diff $hash $stash | wc -l)
-            if [ -z $n_diff ]; then
-                echo $n_diff
-            fi
+        echo "stashed files: "
+        echo "${stash_files}" | sed "s/^/   /"
+
+        for fname in $stash_files; do
+
+            echo "$fname"
+
+            unset n_min
+            unset hash_min
+            declare -i i_count=0
+
+            for hash in $(git rev-list ${stash}^); do
+                echo -n "$hash: "
+
+                #                git diff --stat ${hash} ${stash} -- $fname
+
+                #               git diff --numstat ${hash} ${stash} -- $fname
+                add=$(git diff --numstat ${hash} ${stash} -- $fname | awk '{print $1}' )
+                sub=$(git diff --numstat ${hash} ${stash} -- $fname | awk '{print $2}' )
+
+                declare -i tot=$(($add+$sub))
+                
+                echo $tot
+
+                if [ $tot -eq 0 ]; then
+                    break
+                fi
+
+                if [ -z ${n_min+dummy} ]; then
+                    n_min=$tot
+                    hash_min=$hash
+                    continue
+                fi
+
+                if [ ${tot} -lt ${n_min} ]; then
+                    n_min=$tot
+                    hash_min=$hash
+                    echo "new min"
+                else
+                    ((++i_count))
+                    if [ $i_count -gt 5 ]; then
+                        break
+                    fi
+
+                fi
+
+            done
+
+            echo
+
+            
         done
+
+        
     done
+else
+    echo "no stash entries found"
 fi
 
 echo
