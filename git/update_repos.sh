@@ -475,7 +475,7 @@ for repo in $list; do
     else
         decho "${N_remote}"
 
-        echo "pulling... "
+        echo -n "pulling... "
         cmd_base="git pull --all --progress --tags --verbose" #--prune"
         if [ $git_ver_maj -ge 2 ]; then
             cmd_base+=" --ff-only --ipv4"
@@ -657,7 +657,7 @@ for repo in $list; do
     else
         decho "${N_local}"
 
-        echo "pushing... "
+        echo -n "pushing... "
         cmd_base="git push --progress --verbose"
         if [ $git_ver_maj -ge 2 ]; then
             cmd_base+=" --ipv4"
@@ -741,7 +741,7 @@ for repo in $list; do
             # show command buffer
             do_cmd "${cmd}"
         else
-            ${cmd} -q
+            do_cmd ${cmd} -q
         fi
         RETVAL=$?
         #DEBUG=0
