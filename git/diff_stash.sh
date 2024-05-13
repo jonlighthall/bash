@@ -98,6 +98,14 @@ if [ $N_stash -gt 0 ]; then
 
         stash_files="$(git diff --name-only ${stash}^ ${stash})"
 
+        if [ -z ${stash_files} ]; then
+            echo "stash@{$n} has no diff"
+            git stash drop stash@{$n}
+            continue
+            
+        fi
+        
+
         echo "stashed files: "
         echo "${stash_files}" | sed "s/^/   /"
 
