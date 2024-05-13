@@ -414,12 +414,27 @@ echo "done"
 #(?!^.*".*'+.*".*$)(?!^.*`.*'+.*`.*$)^[^\n']*'[^\n']*$ quotes and graves
 #(?!^.*".*'+.*".*$)(?!^.*`.*'+.*`.*$)^[^\n']*(?<!\\)'[^\n']*$
 
+# remove repeated lines
+echo "${TAB}remvoed duplicate consecutive lines... "
+
+itab
+# set output file name
+hist_uni=${hist_ref}_uniq
+list_del+="${hist_uni} "
+echo "${TAB}output file name is ${hist_uni}"
+dtab
+#sed '$!N; /^\(.*\)\n\1$/!P; D' ${hist_out}
+#perl -0777 -pe 's/(.+\R.+\R)\1/$1/g' ${hist_out}
+
+uniq ${hist_out} > ${hist_uni}
+echo "done"
+
 # save markers
-N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_out} | wc -l)
+N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_uni} | wc -l)
 echo -e "${TAB}\E[1;31mnumber of differences = $N${RESET}"
 echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_out}
 
-cp -Lpv ${hist_out} ${hist_ref}
+cp -Lpv ${hist_uni} ${hist_ref}
 
 echo "list del = ${list_del}"
 
@@ -433,15 +448,19 @@ fi
 # print time at exit
 print_elap
 
-echo -e "\nto compare changes"
-echo "${TAB}${fTAB}diffy ${hist_bak} ${hist_ref}"
-default=$(echo "emacs -nw --eval '(ediff-files ""${hist_bak}"" ""${hist_ref}"")'")
-echo "${TAB}${fTAB}"${default}
+if [ $N -gt 0 ]; then
+    # show diff commands
+    echo -e "\nto compare changes"
+    echo "${TAB}${fTAB}diffy ${hist_bak} ${hist_ref}"
+    default=$(echo "emacs -nw --eval '(ediff-files ""${hist_bak}"" ""${hist_ref}"")'")
+    echo "${TAB}${fTAB}"${default}
 
-if command -v diffy &>/dev/null; then
-    diffy ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
+    # show diff
+    if command -v diffy &>/dev/null; then
+        diffy ${hist_bak} ${hist_ref} | sed '/<$/d' | head -n 20
+    fi
+
+    # type emacs ediff command
+    echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
+    read -e -i "emacs -nw --eval '(ediff-files \"${hist_bak}\" \"${hist_ref}\")'" -p $'\e[0;32m$\e[0m ' && eval "$REPLY"
 fi
-
-echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
-read -e -i "emacs -nw --eval '(ediff-files \"${hist_bak}\" \"${hist_ref}\")'" -p $'\e[0;32m$\e[0m ' && eval "$REPLY"
-
