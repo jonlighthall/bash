@@ -270,7 +270,7 @@ fi
 cbar "${BOLD}comparing local branch ${GREEN}$local_branch${RESET} with remote branch ${BLUE}$pull_branch${RESET}"
 
 # before starting, fetch remote
-echo "${TAB}fetching ${pull_repo}..."
+echo -n "${TAB}fetching ${pull_repo}..."
 do_cmd git fetch --verbose ${pull_repo} ${pull_refspec}
 
 echo "comparing repositories based on commit hash..."
@@ -425,11 +425,11 @@ if [ -z "$(git diff)" ]; then
     echo -e "${TAB}${fTAB}no differences to stash"
     b_stash=false
 else
-    echo "resetting HEAD..."
+    echo -n "resetting HEAD..."
     do_cmd git reset HEAD
-    echo "status:"
+    echo -n "status:"
     do_cmd git status
-    echo "stashing..."
+    echo -n "stashing..."
     if [ $git_ver_maj -lt 2 ]; then
         # old command
         do_cmd git stash
@@ -596,7 +596,7 @@ echo "${bin_name} TODO: git reset HEAD"
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    echo "pushing..."
+    echo -n "pushing..."
     do_cmd git push --set-upstream ${pull_repo} ${pull_refspec}
 else
     echo -e "${TAB}${fTAB}no need to push"
@@ -606,7 +606,7 @@ fi
 cbar "${BOLD}applying stash...${RESET}"
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
-    echo "${TAB}there are $N_stash entries in stash"
+    echo -n "${TAB}there are $N_stash entries in stash"
     if $b_stash; then
         trap 'set_color
 echo "${bin_name} TODO: git stash pop"
@@ -625,9 +625,9 @@ print_exit $?' EXIT
         reset_shell ${old_opts-''}
         echo -ne "stash made... "
         if [ -z "$(git diff)" ]; then
-            echo -e "${GREEN}no changes${RESET}"
+            echo -en "${GREEN}no changes${RESET}"
         else
-            echo -e "${YELLOW}changes!${RESET}"
+            echo -en "${YELLOW}changes!${RESET}"
             dtab
             trap 'set_color
 echo "${bin_name} TODO: git reset HEAD"
@@ -643,7 +643,7 @@ else
     echo "${fTAB}no stash entries"
 fi
 if [ ! -z ${remote_tracking_branch} ]; then
-    echo "resetting upstream remote tracking branch..."
+    echo -n "resetting upstream remote tracking branch..."
     trap 'set_color
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
