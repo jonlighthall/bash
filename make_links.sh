@@ -69,6 +69,7 @@ for my_link in \
     log \
     onedrive/fix_bad_extensions \
     onedrive/unfix_bad_extensions \
+    onedrive/unsync_repo \
     rmbin \
     sort/sort_history \
     sort/sort_hosts \
