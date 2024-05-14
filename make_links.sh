@@ -55,12 +55,16 @@ bar 38 "------ Start Linking Repo Files ------"
 # list of files to be linked
 ext=.sh
 for my_link in \
+    add_path \
     bell \
     clean_mac \
-    file_age \
-    find_matching \
-    find_matching_and_move \
-    find_missing_and_empty \
+    datetime/cp_date \
+    datetime/file_age \
+    datetime/mv_date \
+    datetime/sec2elap \
+    find/find_matching \
+    find/find_matching_and_move \
+    find/find_missing_and_empty \
     git/filter/filter-repo-author \
     git/force_pull \
     git/gita \
@@ -68,20 +72,17 @@ for my_link in \
     git/undel_repo \
     git/update_repos \
     log \
-    mv_date \
     onedrive/fix_bad_extensions \
     onedrive/unfix_bad_extensions \
     rmbin \
-    sec2elap \
-    sort_history \
-    sort_hosts \
+    sort/sort_history \
+    sort/sort_hosts \
     test/get_wttr \
     test/test_file \
     test/test_ls_color \
     untar \
     update_packages \
     whatsup \
-    add_path \
     xtest; do
 
     # define target (source)
