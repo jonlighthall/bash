@@ -202,7 +202,7 @@ for repo in $list; do
         echo -e "${GOOD}OK${RESET}"
         ((++n_found))
     else
-        echo -e "${BAD}FAIL${RESET} not found"
+        echo -e "${BAD}FAIL${RESET}"
         if [ ! -z ${loc_fail:+dummy} ]; then
             loc_fail+=$'\n'"$repo"
         else
