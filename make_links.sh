@@ -8,8 +8,6 @@ fpretty=${HOME}/config/.bashrc_pretty
 if [ -e "$fpretty" ]; then
     source "$fpretty"
     set_traps
-    # reset tab
-    rtab
 fi
 
 # determine if script is being sourced or executed
@@ -29,7 +27,7 @@ target_dir="${HOME}/utils/${proj_name}"
 link_dir=$HOME/bin
 
 # check directories
-echo -n "target directory ${target_dir}... "
+echo -n "${TAB}target directory ${target_dir}... "
 if [ -d "$target_dir" ]; then
     echo "exists"
 else
@@ -37,7 +35,7 @@ else
     exit 1
 fi
 
-echo -n "link directory ${link_dir}... "
+echo -n "${TAB}link directory ${link_dir}... "
 if [ -d "$link_dir" ]; then
     echo "exists"
 else
@@ -97,11 +95,11 @@ do
     decho "linking $target to $link..."
     do_link_exe "$target" "$link"
 done
-bar 38 "--------- Done Making Links ----------"
+cbar "Done Making Links"
 
 # save and print starting directory
 start_dir=$PWD
-echo "starting directory = ${start_dir}"
+echo "${TAB}starting directory = ${start_dir}"
 cd $target_dir
 git update-index --skip-worktree git/url.txt
-cd $start_dir
+cd "$start_dir"
