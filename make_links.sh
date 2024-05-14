@@ -61,7 +61,7 @@ for my_link in \
     find_matching \
     find_matching_and_move \
     find_missing_and_empty \
-    git/filter-repo-author \
+    git/filter/filter-repo-author \
     git/force_pull \
     git/gita \
     git/pull_all_branches \
@@ -76,8 +76,8 @@ for my_link in \
     sort_history \
     sort_hosts \
     test/get_wttr \
+    test/test_file \
     test/test_ls_color \
-    test_file \
     untar \
     update_packages \
     whatsup \
