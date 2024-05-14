@@ -20,12 +20,7 @@ else
     # exit on errors
     set -e
 fi
-# print source name at start
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
-src_name=$(readlink -f "$BASH_SOURCE")
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
-fi
+print_source
 
 # set target and link directories
 src_dir_logi=$(dirname "$src_name")
@@ -50,7 +45,7 @@ else
     mkdir -pv "$link_dir"
 fi
 
-bar 38 "------ Start Linking Repo Files ------"
+cbar "Start Linking Repo Files"
 
 # list of files to be linked
 ext=.sh
@@ -83,8 +78,9 @@ for my_link in \
     untar \
     update_packages \
     whatsup \
-    xtest; do
+    xtest \
 
+do
     # define target (source)
     target=${target_dir}/${my_link}${ext}
 
