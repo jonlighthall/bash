@@ -31,12 +31,14 @@
 declare -i start_time=$(date +%s%N)
 
 # set debug level
-declare -i DEBUG=0
+# substitue default value if DEBUG is unset or null
+declare -i DEBUG=${DEBUG:-0}
 
 # load formatting and functions
-fpretty=${HOME}/config/.bashrc_pretty
-if [ -e $fpretty ]; then
-    source $fpretty
+fpretty="${HOME}/config/.bashrc_pretty"
+if [ -e "${fpretty}" ]; then
+    source "${fpretty}"
+    print_debug
 fi
 
 # determine if script is being sourced or executed and add conditional behavior
@@ -49,22 +51,30 @@ else
     set -e
     set_traps
 fi
-
 print_source
 
 # save and print starting directory
 start_dir=$PWD
 echo "${TAB}starting directory = ${start_dir}"
 
+# load git utils
+for library in git cmd; do
+    # use the canonical (physical) source directory for reference; this is important if sourcing
+    # this file directly from shell
+    fname="${src_dir_phys}/lib_${library}.sh"
+    if [ -e "${fname}" ]; then
+        if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
+            echo "${TAB}loading $(basename ${fname})"
+        fi
+        source "${fname}"
+    else
+        echo "${fname} not found"
+    fi
+done
+
 # reset SSH status list
 export host_bad=''
 export host_OK=''
-
-# load git utils
-fgit="${src_dir_phys}/lib_git.sh"
-if [ -e "$fgit" ]; then
-    source "$fgit"
-fi
 
 # check remotes
 cbar "${BOLD}check remotes...${RESET}"
@@ -596,7 +606,7 @@ fi
 cbar "${BOLD}applying stash...${RESET}"
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
-    echo "there are $N_stash entries in stash"
+    echo "${TAB}there are $N_stash entries in stash"
     if $b_stash; then
         trap 'set_color
 echo "${bin_name} TODO: git stash pop"

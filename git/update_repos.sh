@@ -1,27 +1,30 @@
 #!/bin/bash -eu
+# -----------------------------------------------------------------------------------------------
 #
 # update_repos.sh - push and pull a specified list of git repositories and print summaries
 #
 # Apr 2022 JCL
+#
+# -----------------------------------------------------------------------------------------------
 
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
 
+# set debug level
+# substitue default value if DEBUG is unset or null
+declare -i DEBUG=${DEBUG:-0}
+
 # load formatting and functions
-fpretty=${HOME}/config/.bashrc_pretty
-if [ -e $fpretty ]; then
-    source $fpretty
+fpretty="${HOME}/config/.bashrc_pretty"
+if [ -e "${fpretty}" ]; then
+    source "${fpretty}"
+    print_debug
 else
     # ignore undefined variables
     set +u 
     # do not exit on errors
     set +e
 fi
-
-# set debug level
-# substitue default value if DEBUG is unset or null
-DEBUG=${DEBUG:-0}
-print_debug
 
 # number of commits threshold for git operations
 # set to 0 for normal operation
@@ -48,18 +51,26 @@ else
     echo "NB: ${BASH_SOURCE##*/} has not been sourced"
     echo "    user SSH config settings MAY not be loaded??"
 fi
-
 print_source
-
-# load git utils
-fgit="${src_dir_phys}/lib_git.sh"
-if [ -e "$fgit" ]; then
-    source "$fgit"
-fi
 
 # save and print starting directory
 start_dir=$PWD
-echo "starting directory = ${start_dir}"
+echo "${TAB}starting directory = ${start_dir}"
+
+# load git utils
+for library in git cmd; do
+    # use the canonical (physical) source directory for reference; this is important if sourcing
+    # this file directly from shell
+    fname="${src_dir_phys}/lib_${library}.sh"
+    if [ -e "${fname}" ]; then
+        if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
+            echo "${TAB}loading $(basename ${fname})"
+        fi
+        source "${fname}"
+    else
+        echo "${fname} not found"
+    fi
+done
 
 # list repository paths, relative to home
 # settings
@@ -191,7 +202,7 @@ for repo in $list; do
         echo -e "${GOOD}OK${RESET}"
         ((++n_found))
     else
-        echo "not found"
+        echo -e "${BAD}FAIL${RESET} not found"
         if [ ! -z ${loc_fail:+dummy} ]; then
             loc_fail+=$'\n'"$repo"
         else

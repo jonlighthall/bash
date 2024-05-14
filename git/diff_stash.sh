@@ -1,12 +1,12 @@
 #!/bin/bash -u
 
 # get starting time in nanoseconds
-start_time=$(date +%s%N)
+declare -i start_time=$(date +%s%N)
 
 # load formatting and functions
-fpretty=${HOME}/config/.bashrc_pretty
-if [ -e $fpretty ]; then
-    source $fpretty
+fpretty="${HOME}/config/.bashrc_pretty"
+if [ -e "${fpretty}" ]; then
+    source "${fpretty}"
 else
     # ignore undefined variables
     set +u 
@@ -43,10 +43,19 @@ fi
 print_source
 
 # load git utils
-fgit="${src_dir_phys}/lib_git.sh"
-if [ -e "$fgit" ]; then
-    source "$fgit"
-fi
+for library in git cmd; do
+    # use the canonical (physical) source directory for reference; this is important if sourcing
+    # this file directly from shell
+    fname="${src_dir_phys}/lib_${library}.sh"
+    if [ -e "${fname}" ]; then
+        if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
+            echo "${TAB}loading $(basename ${fname})"
+        fi
+        source "${fname}"
+    else
+        echo "${fname} not found"
+    fi
+done
 
 check_repo
 
@@ -77,7 +86,6 @@ else
 
     branch_local=$(git branch | grep \* | sed 's/^\* //')
     echo -e "${TAB} local branch: ${GREEN}${branch_local}${RESET}"
-    echo
 fi
 
 #check_remotes
