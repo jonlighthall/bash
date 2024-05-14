@@ -3,8 +3,8 @@
 # get starting time in nanoseconds
 start_time=$(date +%s%N)
 
-# load formatting
-fpretty=${HOME}/config/.bashrc_pretty
+# load bash utilities
+fpretty="${HOME}/config/.bashrc_pretty"
 if [ -e "$fpretty" ]; then
     source "$fpretty"
     set_traps
@@ -20,31 +20,20 @@ else
 fi
 print_source
 
+# save and print starting directory
+start_dir=$PWD
+echo "${TAB}starting directory = ${start_dir}"
+
 # set target and link directories
-src_dir_logi=$(dirname "$src_name")
-proj_name=$(basename "$src_dir_logi")
+proj_name=$(basename "$src_dir_phys")
 target_dir="${HOME}/utils/${proj_name}"
 link_dir=$HOME/bin
 
 # check directories
-echo -n "${TAB}target directory ${target_dir}... "
-if [ -d "$target_dir" ]; then
-    echo "exists"
-else
-    echo -e "${BAD}does not exist${RESET}"
-    exit 1
-fi
-
-echo -n "${TAB}link directory ${link_dir}... "
-if [ -d "$link_dir" ]; then
-    echo "exists"
-else
-    echo "does not exist"
-    mkdir -pv "$link_dir"
-fi
+check_target "${target_dir}"
+do_make_dir "${link_dir}"
 
 cbar "Start Linking Repo Files"
-
 # list of files to be linked
 ext=.sh
 for my_link in \
@@ -82,24 +71,22 @@ for my_link in \
 do
     # define target (source)
     target=${target_dir}/${my_link}${ext}
-
-    # define link (destination)
+    # define link name (destination)
     sub_dir=$(dirname "$my_link")
     if [ ! $sub_dir = "." ]; then
         # strip target subdirectory from link name
         my_link=$(basename "$my_link")
     fi
     link=${link_dir}/${my_link}
-
     # create link
-    decho "linking $target to $link..."
-    do_link_exe "$target" "$link"
+    do_link_exe "${target}" "${link}"
 done
-cbar "Done Making Links"
+cbar "Done Linking Repo Files"
 
-# save and print starting directory
-start_dir=$PWD
-echo "${TAB}starting directory = ${start_dir}"
 cd $target_dir
+
+# update index
 git update-index --skip-worktree git/url.txt
+
+# return to starting directory
 cd "$start_dir"
