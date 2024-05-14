@@ -65,8 +65,9 @@ function check_repo() {
 }
 
 function print_remotes() {
+    # set debug level
     local DEBUG=1
-    rtab
+    # set tab
     check_repo
     local -i RETVAL=$?
     if [[ $RETVAL -eq 0 ]]; then
@@ -76,10 +77,15 @@ function print_remotes() {
         echo "${TAB}remotes found: ${n_remotes}"
         local -i i=0
         for remote_name in ${r_names}; do
-            ((++i))
-            itab
-            echo "${TAB}$i) $remote_name"
-
+            if [ "${n_remotes}" -gt 1 ]; then
+                ((++i))
+                echo -n "${TAB}${fTAB}$i) "
+                itab
+            else
+                echo -n "${TAB}"
+            fi
+            echo -e "${PSBR}${remote_name}${RESET} "
+            
             # get URL
             local remote_url
             if [ $git_ver_maj -lt 2 ]; then
@@ -118,26 +124,31 @@ function check_remotes() {
         set_traps
     fi
 
+    if [ $DEBUG -gt 0 ]; then
+        print_hosts
+    fi
+
+    
     # show good hosts
-    decho -n "existing good hosts: "
+    decho -n "good hosts: "
     if [ -z "${host_OK:+dummy}" ]; then
         decho "none"
         export host_OK=''
     else
         host_OK=$(echo "${host_OK}" | sort -n)
         decho
-        decho -e "${GOOD}${host_OK}${RESET}" | sed "$ ! s/^/${fTAB}/"
+        decho -e "${GOOD}${host_OK}${RESET}" | sed "$ s/^/${fTAB}/"
     fi
 
     # show bad hosts
-    decho -n "existing  bad hosts: "
+    decho -n " bad hosts: "
     if [ -z "${host_bad:+dummy}" ]; then
         decho "none"
         export host_bad=''
     else
         host_bad=$(echo "${host_bad}" | sort -n)
         decho
-        decho -e "${BAD}${host_bad}${RESET}" | sed "$ ! s/^/${fTAB}/"
+        decho -e "${BAD}${host_bad}${RESET}" | sed "$ s/^/${fTAB}/"
     fi
 
     # check if git is defined and get version number
@@ -156,8 +167,9 @@ function check_remotes() {
         else
             echo -n "${TAB}"
         fi
-        # get URL
         echo -en "${PSBR}${remote_name}${RESET} "
+
+        # get URL
         local remote_url
         if [ $git_ver_maj -lt 2 ]; then
             remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
@@ -193,7 +205,7 @@ function check_remotes() {
             local do_connect=true
             host_stat=$(echo -e "${YELLOW}CHECK${RESET}")
             itab
-            decho -en "\n${TAB}do_connect = $do_connect"
+            decho -e "\n${TAB}do_connect = $do_connect"
 
             # check against argument
             if [ $# -gt 0 ]; then
@@ -337,37 +349,42 @@ function check_remotes() {
     unset remote_pro
     unset remote_host
 
-    # print good hosts
     if [ $DEBUG -gt 0 ]; then
-        echo -n "${TAB}good hosts: "
-        if [ -z "${host_OK:+dummy}" ]; then
-            echo "none"
-        else
-            host_OK=$(echo "${host_OK}" | sort -n)
-            echo
-            echo -e "${GOOD}${host_OK}${RESET}" | sed "s/^/${fTAB}/"
-        fi
-
-        # print bad hosts
-        echo -n "${TAB} bad hosts: "
-        if [ -z "$host_bad" ]; then
-            echo "none"
-        else
-            host_bad=$(echo "${host_bad}" | sort -n)
-            echo
-            echo -e "${BAD}${host_bad}${RESET}" | sed "s/^/${fTAB}/"
-        fi
+        print_hosts
     fi
 
     export host_OK
     export host_bad
 
-    decho "${TAB}done"
     # add return code for parent script
     if [ $DEBUG -gt 0 ]; then
         trap 'print_return $?; trap - RETURN' RETURN
     fi
     return 0
+}
+
+function print_hosts() {
+    # print good hosts
+    echo "${TAB}good hosts: "
+    itab
+    if [ -z "${host_OK:+dummy}" ]; then
+        echo "${TAB}none"
+    else
+        host_OK=$(echo "${host_OK}" | sort -n)
+        echo -e "${GOOD}${host_OK}${RESET}" | sed "s/^/${TAB}/"
+    fi
+    dtab
+
+    # print bad hosts
+    echo "${TAB} bad hosts: "
+    itab
+    if [ -z "${host_bad:+dummy}" ]; then
+        echo "${TAB}none"
+    else
+        host_bad=$(echo "${host_bad}" | sort -n)
+        echo -e "${BAD}${host_bad}${RESET}" | sed "s/^/${TAB}/"
+    fi
+    dtab
 }
 
 function check_mod() {
