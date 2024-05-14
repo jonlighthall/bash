@@ -18,6 +18,15 @@ function do_cmd() {
     # set color
     echo -ne "${dcolor[$idx]}"
 
+    local -i x1c
+    get_curpos x1c
+    decho -n "$x1c"
+    if [ $x1c -gt 1 ]; then
+        local cr='\n'
+    else
+        local cr=''
+    fi
+
     # the ideal solution is to use unbuffer
     # check if unbuffer is defined
     if command -v unbuffer >/dev/null; then
@@ -26,9 +35,9 @@ function do_cmd() {
         set -o pipefail        
         # print unbuffered command output
         unbuffer $cmd \
-            | sed -u '1 s/[A-Z]/\n&/' \
             | sed -u "s/\r$//g;s/.*\r/${TAB}/g;s/^/${TAB}/" \
-            | sed -u "/^[^%|]*|/s/^/${dcolor[$idx+1]}/g; s/$/${dcolor[$idx]}/; /|/s/+/${GOOD}&/g; /|/s/-/${BAD}&/g; /modified:/s/^.*$/${BAD}&/g; /^\s*M\s/s/^.*$/${BAD}&/g" 
+            | sed -u "/^[^%|]*|/s/^/${dcolor[$idx+1]}/g; s/$/${dcolor[$idx]}/; /|/s/+/${GOOD}&/g; /|/s/-/${BAD}&/g; /modified:/s/^.*$/${BAD}&/g; /^\s*M\s/s/^.*$/${BAD}&/g" \
+            | sed -u "1 s/^[\s]*[^\s]/${cr}&/"
         local -i RETVAL=$?
 
         # reset shell options

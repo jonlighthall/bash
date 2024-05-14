@@ -80,42 +80,8 @@ export host_OK=''
 cbar "${BOLD}check remotes...${RESET}"
 check_remotes
 
-# parse remote tracking branch and local branch
-cbar "${BOLD}parse current settings...${RESET}"
-# parse local
-local_branch=$(git branch | grep \* | sed 's/^\* //')
-# parse remote
-echo -n "${TAB}checking remote tracking branch... "
-# set shell options
-if [[ "$-" == *e* ]]; then
-    # exit on errors must be turned off; otherwise shell will exit no remote branch found
-    old_opts=$(echo "$-")
-    set +e
-fi
-unset_traps
-git rev-parse --abbrev-ref @{upstream} &>/dev/null
-RETVAL=$?
-reset_shell ${old_opts-''}
-if [[ $RETVAL -ne 0 ]]; then
-    echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
-    do_cmd git rev-parse --abbrev-ref @{upstream}
-    set_traps
-    echo "${TAB}no remote tracking branch set for current branch"
-else
-    set_traps
-    remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
-    upstream_repo=${remote_tracking_branch%%/*}
-    # parse branches
-    upstream_refspec=${remote_tracking_branch#*/}
-    echo
-    (
-        echo -e "remote tracking branch+${BLUE}${remote_tracking_branch}${RESET}"
-        echo "remote name+$upstream_repo"
-        echo "remote refspec+$upstream_refspec"
-        echo -e "local branch+${GREEN}${local_branch}${RESET}"
-    ) | column -t -s+ -o ": " -R1 | sed "s/^//"
-fi
-dtab 
+parse_remote_tracking_branch
+dtab
 
 # parse arguments
 cbar "${BOLD}parse arguments...${RESET}"
@@ -270,7 +236,7 @@ fi
 cbar "${BOLD}comparing local branch ${GREEN}$local_branch${RESET} with remote branch ${BLUE}$pull_branch${RESET}"
 
 # before starting, fetch remote
-echo -n "${TAB}fetching ${pull_repo}..."
+echo "${TAB}fetching ${pull_repo}..."
 do_cmd git fetch --verbose ${pull_repo} ${pull_refspec}
 
 echo "comparing repositories based on commit hash..."
@@ -425,11 +391,11 @@ if [ -z "$(git diff)" ]; then
     echo -e "${TAB}${fTAB}no differences to stash"
     b_stash=false
 else
-    echo -n "resetting HEAD..."
+    echo "resetting HEAD..."
     do_cmd git reset HEAD
-    echo -n "status:"
+    echo "status:"
     do_cmd git status
-    echo -n "stashing..."
+    echo "stashing..."
     if [ $git_ver_maj -lt 2 ]; then
         # old command
         do_cmd git stash
@@ -509,9 +475,12 @@ else
     echo "${TAB}before rebase:"
     N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
 fi
+
+# define name for traps
+bin_name=${BASH_SOURCE##/*}
+
 if [ $N_temp -gt 0 ]; then
     echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
-
     # rebase
     trap 'set_color
 echo "${bin_name} TODO: git checkout ${branch_temp}"
@@ -565,7 +534,7 @@ echo "${bin_name} TODO: git stash pop"
 echo "${bin_name} TODO: git reset HEAD"
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
-print_exit $?' EXIT    
+print_exit $?' EXIT
     do_cmd git merge ${branch_temp}
     trap 'set_color
 echo "${bin_name} TODO: git branch -d ${branch_temp}"
@@ -596,7 +565,7 @@ echo "${bin_name} TODO: git reset HEAD"
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    echo -n "pushing..."
+    echo "pushing..."
     do_cmd git push --set-upstream ${pull_repo} ${pull_refspec}
 else
     echo -e "${TAB}${fTAB}no need to push"
@@ -606,7 +575,7 @@ fi
 cbar "${BOLD}applying stash...${RESET}"
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
-    echo -n "${TAB}there are $N_stash entries in stash"
+    echo "${TAB}there are $N_stash entries in stash"
     if $b_stash; then
         trap 'set_color
 echo "${bin_name} TODO: git stash pop"
@@ -621,13 +590,13 @@ print_exit $?' EXIT
         fi
         unset_traps
         do_cmd git stash pop
-        set_traps
+        reset_traps
         reset_shell ${old_opts-''}
         echo -ne "stash made... "
         if [ -z "$(git diff)" ]; then
-            echo -en "${GREEN}no changes${RESET}"
+            echo -e "${GREEN}no changes${RESET}"
         else
-            echo -en "${YELLOW}changes!${RESET}"
+            echo -e "${YELLOW}changes!${RESET}"
             dtab
             trap 'set_color
 echo "${bin_name} TODO: git reset HEAD"
@@ -642,8 +611,10 @@ print_exit $?' EXIT
 else
     echo "${fTAB}no stash entries"
 fi
+
+cbar "${BOLD}resetting...${RESET}"
 if [ ! -z ${remote_tracking_branch} ]; then
-    echo -n "resetting upstream remote tracking branch..."
+    echo "resetting upstream remote tracking branch..."
     trap 'set_color
 echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
@@ -659,5 +630,6 @@ fi
 cbar "${BOLD}you're done!${RESET}"
 clear_traps
 echo "exiting ${BASH_SOURCE##*/} with code zero... "
+trap 'print_exit $?' EXIT
 # add exit code for parent script
 exit 0

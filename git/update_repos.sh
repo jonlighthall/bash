@@ -744,7 +744,7 @@ for repo in $list; do
         fi
         stash_list+=$(printf '%2d %s' $N_stash $repo)
     else
-        echo "empty"
+        echo -e "${GOOD}OK${RESET}"
     fi
 
     # to speed things up, only clean if repo has changed

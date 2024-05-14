@@ -124,31 +124,9 @@ function check_remotes() {
         set_traps
     fi
 
+    # print list of hosts that have already been checked
     if [ $DEBUG -gt 0 ]; then
         print_hosts
-    fi
-
-    
-    # show good hosts
-    decho -n "good hosts: "
-    if [ -z "${host_OK:+dummy}" ]; then
-        decho "none"
-        export host_OK=''
-    else
-        host_OK=$(echo "${host_OK}" | sort -n)
-        decho
-        decho -e "${GOOD}${host_OK}${RESET}" | sed "$ s/^/${fTAB}/"
-    fi
-
-    # show bad hosts
-    decho -n " bad hosts: "
-    if [ -z "${host_bad:+dummy}" ]; then
-        decho "none"
-        export host_bad=''
-    else
-        host_bad=$(echo "${host_bad}" | sort -n)
-        decho
-        decho -e "${BAD}${host_bad}${RESET}" | sed "$ s/^/${fTAB}/"
     fi
 
     # check if git is defined and get version number
@@ -156,7 +134,7 @@ function check_remotes() {
     
     # get number of remotes
     local -i n_remotes=$(git remote | wc -l)
-    local r_names=$(git remote)
+    export r_names=$(git remote)
     echo "${TAB}remotes found: ${n_remotes}"
     local -i i=0
     for remote_name in ${r_names}; do
@@ -356,6 +334,8 @@ function check_remotes() {
     export host_OK
     export host_bad
 
+    unset_traps
+
     # add return code for parent script
     if [ $DEBUG -gt 0 ]; then
         trap 'print_return $?; trap - RETURN' RETURN
@@ -405,4 +385,145 @@ function check_mod() {
         fi
         mod_files+=$(echo "${list_mod}" | sed "s;^;${repo}/;")
     fi
+}
+
+function print_branches() {
+    check_remotes
+    echo "remote tracking branches:"
+    git branch -vvr --color=always | grep -v '\->'
+    #    local branches=$(git branch -r | grep -v '\->')
+    #    echo $branches
+    for remote_name in ${r_names}; do
+        echo -e "${PSBR}${remote_name}${RESET} "
+        git branch -vvr --color=always -l ${remote_name}* | grep -v '\->' 
+    done
+}
+
+function parse_remote_tracking_branch() {
+    # parse remote tracking branch and local branch
+    cbar "${BOLD}parse current settings...${RESET}"
+    # parse local
+    local_branch=$(git branch | grep \* | sed 's/^\* //')
+    # parse remote
+    echo -n "${TAB}checking remote tracking branch... "
+    # set shell options
+    if [[ "$-" == *e* ]]; then
+        # exit on errors must be turned off; otherwise shell will exit no remote branch found
+        old_opts=$(echo "$-")
+        set +e
+    fi
+    unset_traps
+    git rev-parse --abbrev-ref @{upstream} &>/dev/null
+    RETVAL=$?
+    reset_shell ${old_opts-''}
+    if [[ $RETVAL -ne 0 ]]; then
+        echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+        do_cmd git rev-parse --abbrev-ref @{upstream}
+        reset_traps
+        echo "${TAB}no remote tracking branch set for current branch"
+    else
+        reset_traps
+        remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
+        upstream_repo=${remote_tracking_branch%%/*}
+        # parse branches
+        upstream_refspec=${remote_tracking_branch#*/}
+        if [ ${DEBUG:-0} -eq 0 ]; then
+            echo
+        fi
+        (
+            echo -e "remote tracking branch+${BLUE}${remote_tracking_branch}${RESET}"
+            echo "remote name+$upstream_repo"
+            echo "remote refspec+$upstream_refspec"
+            echo -e "local branch+${GREEN}${local_branch}${RESET}"
+        ) | column -t -s+ -o ": " -R1 | sed "s/^//"
+    fi
+}
+
+function track_all_branches() {
+    #    decho $@
+    
+    # load git utils
+    get_source
+    for library in git cmd; do
+        fname="${src_dir_phys}/lib_${library}.sh"
+        if [ -e "${fname}" ]; then
+            if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
+                echo "${TAB}loading $(basename "${fname}")"
+            fi
+            source "${fname}"
+        else
+            echo "${fname} not found"
+        fi
+    done
+
+    check_remotes
+    parse_remote_tracking_branch
+
+    # parse arguments
+    cbar "${BOLD}parse arguments...${RESET}"
+    if [ $# -ge 1 ]; then
+        echo "${TAB}remote specified"
+        unset remote_name
+        pull_repo=$1
+        echo -n "${TAB}${fTAB}remote name: ....... $pull_repo "
+        git remote | grep $pull_repo &>/dev/null
+        RETVAL=$?
+        if [[ $RETVAL == 0 ]]; then
+            echo -e "${GOOD}OK${RESET}"
+        else
+            echo -e "${BAD}FAIL${RESET}"
+            echo "$pull_repo not found"
+            return 1
+        fi
+    else
+        echo "${TAB}no remote specified"
+        if [ -z ${upstream_repo+dummy} ]; then
+            echo "${TAB}no remote tracking branch set for current branch"
+            echo "${TAB}exiting..."
+            return 1
+        else
+            echo "${TAB}${fTAB}using $upstream_repo"
+            pull_repo=${upstream_repo}
+        fi
+    fi
+
+    # before starting, fetch remote
+    echo -n "${TAB}fetching ${pull_repo}..."
+    do_cmd git fetch --verbose ${pull_repo}
+
+    # print remote branches
+    echo "remote tracking branches:"
+    git branch -vvr --color=always | grep -v '\->'
+    
+    echo "${pull_repo} branches:"
+    git branch -vvr --color=always -l ${pull_repo}* | grep -v '\->'
+
+    # get branches of pull repo
+    local pull_branches=$(git branch -rl ${pull_repo}* | grep -v '\->')
+    
+    for branch in ${pull_branches}; do
+        # define (local) branch name
+        branch_name=${branch#${pull_repo}/}
+        echo "${branch_name}:"
+        itab
+
+        # check if branch exists
+        if git branch | grep "${branch_name}" &>/dev/null; then
+            echo "${TAB}branch exists"
+            # check if branch is current branch
+            if git branch | grep "\* ${branch_name}" &>/dev/null; then
+                echo "${TAB}* current branch"
+            fi
+            # set existing branch to track remote branch
+            dtab
+            do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
+        else
+            echo "${TAB}branch does not exist"
+            # create local branch to track remote branch
+            dtab
+            do_cmd git branch "${branch_name}" --track "$branch"
+        fi
+    done
+
+    git branch -vv --color=always 
 }
