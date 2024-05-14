@@ -2,8 +2,16 @@
 # add_path.sh - prepends arguments to PATH. Add the directories passed to the
 # command as arguments to the start of the PATH environmental variable.
 #
+# Sep 2022 JCL
+
 # NB: remember to 'source' this script, don't just execute it
-#
+if ! (return 0 2>/dev/null); then
+    # exit on errors
+    set -e
+    # print note
+    echo -e "\x1b[31mNOTICE: this script must be soured to save changes to path!\x1b[m"
+fi
+
 # Path additions
 for ADDPATH in "$@"; do
     echo -n ${ADDPATH}

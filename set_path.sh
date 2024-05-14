@@ -21,10 +21,7 @@ for ADDPATH in ${path[@]}; do
 	  echo -en "   \x1b[33m${ADDPATH}\x1b[m... "
 	  # check if path exists
 	  if [ -d "${ADDPATH}" ]; then
-        if ! (return 0 2>/dev/null); then
-		        echo "found"
-            continue
-        fi
+		    echo "found"
 		    ABSPATH=$(readlink -f $ADDPATH)
 	  else
 		    echo "not found"
