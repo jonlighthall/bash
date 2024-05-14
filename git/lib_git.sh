@@ -249,7 +249,7 @@ function check_remotes() {
         fi # SSH
 
         if [ $DEBUG = 0 ]; then
-            : # echo
+            echo
         fi
 
         (
