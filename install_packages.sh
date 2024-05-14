@@ -29,10 +29,15 @@ bar "upgrade and fix missing..."
 sudo apt upgrade -y --fix-missing
 
 # install packages
+bar "install packages..."
 for PACK in dbus-x11 x11-apps xterm; do
-    bar "installing ${PACK}..."
+    echo "installing ${PACK}..."
     sudo apt install -y --fix-missing ${PACK}
 done
+
+# re-check
+bar "upgrade and fix missing..."
+sudo apt upgrade -y --fix-missing
 
 # cleanup
 bar "autoremove and purge..."
