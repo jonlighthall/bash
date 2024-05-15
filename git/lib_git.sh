@@ -388,7 +388,28 @@ function check_mod() {
 }
 
 function print_branches() {
+    # load git utils
+    get_source
+    for library in git cmd; do
+        fname="${src_dir_phys}/lib_${library}.sh"
+        if [ -e "${fname}" ]; then
+            if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
+                echo "${TAB}loading $(basename "${fname}")"
+            fi
+            source "${fname}"
+        else
+            echo "${fname} not found"
+        fi
+    done
+
+  # before starting, fetch remote
+    echo -n "${TAB}fetching ${pull_repo}..."
+    do_cmd git fetch --all --verbose ${pull_repo}
+
+    
+
     check_remotes
+    parse_remote_tracking_branch
     echo "remote tracking branches:"
     git branch -vvr --color=always | grep -v '\->'
     #    local branches=$(git branch -r | grep -v '\->')
@@ -440,9 +461,8 @@ function parse_remote_tracking_branch() {
 }
 
 function track_all_branches() {
-    #    decho $@
-    
     # load git utils
+#c    DEBUG=1
     get_source
     for library in git cmd; do
         fname="${src_dir_phys}/lib_${library}.sh"
@@ -500,6 +520,10 @@ function track_all_branches() {
 
     # get branches of pull repo
     local pull_branches=$(git branch -rl ${pull_repo}* | grep -v '\->')
+
+    # loop over branches
+    echo "${TAB} checking branches..."
+    itab
     
     for branch in ${pull_branches}; do
         # define (local) branch name
@@ -512,18 +536,27 @@ function track_all_branches() {
             echo "${TAB}branch exists"
             # check if branch is current branch
             if git branch | grep "\* ${branch_name}" &>/dev/null; then
-                echo "${TAB}* current branch"
+                echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
             fi
             # set existing branch to track remote branch
             dtab
             do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
         else
+            echo -en "${TAB}${GRH}"
+            hline 72
             echo "${TAB}branch does not exist"
             # create local branch to track remote branch
             dtab
             do_cmd git branch "${branch_name}" --track "$branch"
+            itab
+            echo -en "${TAB}${GRH}"
+            hline 72
+            echo -en "${RESET}"
+            dtab
         fi
     done
+    dtab
 
+    echo "${TAB} list of local branches:"
     git branch -vv --color=always 
 }
