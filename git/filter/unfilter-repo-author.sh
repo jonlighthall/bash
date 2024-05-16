@@ -46,7 +46,8 @@ git filter-repo $@ --partial --commit-callback '
     correct_name = b"Jon Lighthall"
 
     # list emails to replace
-    auth_list = [b"jlighthall@fsu.edu",b"jon.lighthall@gmail.com",b"lighthall@lsu.edu",b"jonlighthall@gmail.com"]
+    auth_list = [b"jon.lighthall@gmail.com",b"jonlighthall@gmail.com"]
+    auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
     auth_list.append(b"jonlighthall@users.noreply.github.com")
     auth_list.append(b"jon.lighthall@ygmail.com")
 
@@ -66,7 +67,6 @@ git filter-repo $@ --partial --commit-callback '
     # define correct email
     email_str="jonathan.lighthall@"+url.strip()
     email_bin=email_str.encode("ascii")	
-    auth_list.append(email_bin)
     correct_email = email_bin
 
     # conditionally replace author email and name
