@@ -51,7 +51,7 @@ git filter-repo $@ --partial --commit-callback '
     auth_list.append(b"jon.lighthall@ygmail.com")
 
     # load url from file
-    text_file = open(os.path.expanduser("~/utils/bash/git/url.txt"), "r")
+    text_file = open(os.path.expanduser("~/utils/bash/git/filter/url.txt"), "r")
     url = text_file.read()
     text_file.close()
 

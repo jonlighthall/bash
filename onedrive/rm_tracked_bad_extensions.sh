@@ -35,7 +35,7 @@ else
 			      # first, remove tracked files from the repository
 			      echo "${TAB}removing tracked binary files from the repository..."
             itab            
-            for fname in $(find ./ -type f -not -path "*$GITDIR/*" -not -path "*/.git/*" | perl -lne 'print if -B' ); do
+            for fname in $(find ./ -not -path "*$GITDIR/*" -not -path "*/.git/*" -type f | perl -lne 'print if -B' ); do
                 echo -n "${TAB}$fname... "
                 # check if the file is tracked
                 git ls-files --error-unmatch $fname 2>/dev/null
