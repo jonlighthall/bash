@@ -9,7 +9,6 @@ fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
 	  set_traps
-    itab
 fi
 
 # print source name at start
@@ -47,5 +46,3 @@ else
         exit 1
     fi
 fi
-
-dtab

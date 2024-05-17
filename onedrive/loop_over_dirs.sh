@@ -6,16 +6,21 @@
 #
 # Nov 2021 JCL
 
+# load formatting
+fpretty=${HOME}/config/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+	  set_traps
+fi
+
 if [ $# -eq 0 ]; then
 	  echo "Please provide a target directory"
 	  exit 1
 else
 	  if [[ -d $1 ]]; then
-		    echo "found $1"
-
+		    echo -n "found "
 		    cd $1
 		    echo $PWD
-
         parent_dir=$PWD
 
         for dir in */ ; do
