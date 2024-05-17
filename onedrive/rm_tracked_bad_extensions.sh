@@ -10,7 +10,6 @@
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-	  set_traps
 fi
 
 # define replacement seperator
@@ -38,13 +37,21 @@ else
             itab            
             for fname in $(find ./ -type f -not -path "*$GITDIR/*" -not -path "*/.git/*" | perl -lne 'print if -B' ); do
                 echo -n "${TAB}$fname... "
-                # check if the file is modified
-                if [ -z "$(git diff $fname)" ]; then
-                    echo -n "unmodified: "
-                    rm -v $fname
+                # check if the file is tracked
+                git ls-files --error-unmatch $fname 2>/dev/null
+                RETVAL=$?
+                if [ $RETVAL -eq 0 ]; then
+                    echo "tracked: "
+                    # check if the file is modified
+                    if [ -z "$(git diff $fname)" ]; then
+                        echo -n "unmodified: "
+                        rm -v $fname
+                    else
+                        echo "modified"
+                    fi
                 else
-                    echo "modified: "
-                fi                    
+                    echo "untracked"
+                fi
             done
             dtab
 
@@ -54,16 +61,29 @@ else
             for bad in bat bin cmd csh exe gz js ksh osx out prf ps ps1; do
                 echo "${TAB}.${bad}..."
                 itab
-                # check if the file is modified
+
                 for fname in $(find $1 -name "*.${bad}"); do
                     echo -n "${TAB}$fname... "
-                    if [ -z "$(git diff $fname)" ]; then
-                        echo -n "unmodified: "
-                        rm -v $fname
+                    
+                    # check if the file is tracked
+                    git ls-files --error-unmatch $fname 2>/dev/null
+                    RETVAL=$?
+                    if [ $RETVAL -eq 0 ]; then
+                        echo "tracked: "
+                        
+                        # check if the file is modified                    
+                        if [ -z "$(git diff $fname)" ]; then
+                            echo -n "unmodified: "
+                            rm -v $fname
+                        else
+                            echo -n "modified: "
+                            mv -nv "$fname" "$(echo $fname | sed "s/\.$bad/$sep$bad/")" 
+                        fi                    
                     else
-                        echo -n "modified: "
+                        echo -n "untracked: "
                         mv -nv "$fname" "$(echo $fname | sed "s/\.$bad/$sep$bad/")" 
-                    fi                    
+                    fi
+
                 done
                 dtab
             done
