@@ -34,10 +34,21 @@ else
     if [[ -d $1 ]]; then
         echo "found"
         itab
+        declare -i count_found=0
+        declare -i count_mv=0
+        declare -i count_mv_fail=0
         for bad in bat bin cmd csh exe gz js ksh osx out prf ps ps1; do
             echo "${TAB}replacing \"${sep}${bad}\" with \".$bad\"..."
             for fname in $(find $1 -name "*$sep$bad"); do
-                mv -nv "$fname" "$(echo $fname | sed "s/$sep$bad/.$bad/")" | sed "s/^/${TAB}${fTAB}/"
+                ((++count_found))
+                echo -n "${TAB}${fTAB}"
+                mv -nv "$fname" "$(echo $fname | sed "s/$sep$bad/.$bad/")"
+                if [ -f "$fname" ];then
+                    echo "rename $fname FAILED"
+                    ((++count_mv_fail))
+                else
+                    ((++count_mv))
+                fi
             done
         done
         dtab
@@ -46,3 +57,7 @@ else
         exit 1
     fi
 fi
+
+echo "Files found: $count_found"
+echo "Files renamed: $count_mv"
+echo "Files not renamed: $count_mv_fail"
