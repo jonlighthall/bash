@@ -11,6 +11,7 @@ fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
 	  set_traps
+    set -e
 fi
 
 if [ $# -eq 0 ]; then
@@ -19,18 +20,15 @@ if [ $# -eq 0 ]; then
 else
 	  if [[ -d $1 ]]; then
 		    echo -n "found "
-		    cd $1
-		    echo $PWD
-        parent_dir=$PWD
+		    cd "$1"
+		    echo "$PWD"
+        parent_dir="$PWD"
 
         for dir in */ ; do
-            cd $dir
-            echo $PWD
-
+            cd "$dir"
+            echo "$PWD"
             ~/utils/bash/onedrive/rm_tracked_bad_extensions.sh .
-
-            cd $parent_dir
-           
+            cd "$parent_dir"         
         done
 	  else
 		    echo "$1 is not found"
