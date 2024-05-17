@@ -4,41 +4,70 @@
 # Git repository will be removed from the repository. The .git directory will
 # not be searched.
 #
-# Nov 2021 JCL
+# May 2024 JCL
+
+# load formatting
+fpretty=${HOME}/config/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+	  set_traps
+fi
+
+# define replacement seperator
+sep=_._
 
 if [ $# -eq 0 ]; then
 	  echo "Please provide a target directory"
 	  exit 1
 else
 	  if [[ -d $1 ]]; then
-		    echo "found $1"
-
+		    echo -n "found "
 		    cd $1
 		    echo $PWD
-
+        itab
+        # check if PWD is a git repository
 		    if git rev-parse --git-dir &>/dev/null; then
 			      # This is a valid git repository
-			      echo "$1 is part of a Git repository"
+			      echo "${TAB}$PWD is part of a Git repository"
 			      GITDIR=$(git rev-parse --git-dir)
-			      echo "the .git folder is $GITDIR"
+			      echo "${TAB}the .git folder is $GITDIR"
+            dtab
 
 			      # first, remove tracked files from the repository
-			      echo "removing tracked binary files from the repository..."
-			      find ./ -type f -not -path "*$GITDIR/*" -not -path "*/.git/*" | perl -lne 'print if -B' | xargs -r rm -v
+			      echo "${TAB}removing tracked binary files from the repository..."
+            itab            
+            for fname in $(find ./ -type f -not -path "*$GITDIR/*" -not -path "*/.git/*" | perl -lne 'print if -B' ); do
+                echo -n "${TAB}$fname... "
+                # check if the file is modified
+                if [ -z "$(git diff $fname)" ]; then
+                    echo -n "unmodified: "
+                    rm -v $fname
+                else
+                    echo "modified: "
+                fi                    
+            done
+            dtab
 
+            # look for bad extensions
+            echo "${TAB}checking for files with bad extensions..."
+            itab
             for bad in bat bin cmd csh exe gz js ksh osx out prf ps ps1; do
-
+                echo "${TAB}.${bad}..."
+                itab
+                # check if the file is modified
                 for fname in $(find $1 -name "*.${bad}"); do
-                    echo -n "echo $fname... "
-                    if [ -z $(git diff $fname) ]; then
-                        echo "unmodified: delte"
+                    echo -n "${TAB}$fname... "
+                    if [ -z "$(git diff $fname)" ]; then
+                        echo -n "unmodified: "
                         rm -v $fname
                     else
-                        echo "modified: move"
+                        echo -n "modified: "
                         mv -nv "$fname" "$(echo $fname | sed "s/\.$bad/$sep$bad/")" 
                     fi                    
                 done
-            done            
+                dtab
+            done
+            dtab
 		    else
 			      # this is not a git repository
 			      echo "$1 is not part of a Git repsoity"
@@ -48,5 +77,3 @@ else
 		    exit 1
 	  fi
 fi
-# print time at exit
-echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
