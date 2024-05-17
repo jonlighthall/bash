@@ -35,7 +35,7 @@ else
     if [[ -d $1 ]]; then
         echo "found"
         itab
-        for bad in bat bin cmd csh exe gz js osx out prf ps; do
+        for bad in bat bin cmd csh exe gz js ksh osx out prf ps ps1; do
             echo "${TAB}replacing \"${sep}${bad}\" with \".$bad\"..."
             for fname in $(find $1 -name "*$sep$bad"); do
                 mv -nv "$fname" "$(echo $fname | sed "s/$sep$bad/.$bad/")" | sed "s/^/${TAB}${fTAB}/"
