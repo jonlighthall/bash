@@ -583,19 +583,28 @@ for repo in $list; do
                 fi
                 # force pull
                 if [[ $RETVAL == 128 ]]; then
-                    cbar "${TAB}${GRH}should I force pull!? ${RESET}"
+                    cbar "{GRH}force pull...${RESET}"
+                    echo -n "${TAB}leading remote commits: ${N_remote}"
+                    echo -n "${TAB}trailing local commits: "
+                    N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
+                    echo "${N_local}"
+                    if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
+                        echo -e "${fTAB}${YELLOW}local '${local_branch}' and remote '${pull_branch}' have diverged${RESET}"
+                    fi
                     echo -e "${TAB}source directory = $src_dir_logi"
                     prog=${src_dir_logi}/force_pull
                     if [ -f ${prog} ]; then
-                        bash ${prog}
+                        ${prog}
                         RETVAL2=$?
-                        echo -en "${TAB}${GRH}force_pull${RESET}: "
-                        if [[ ${RETVAL2:-0} != 0 ]]; then
+                        dtab
+                        echo -en "${GIT_HIGHLIGHT} force pull ${RESET} "
+                        if [[ ${RETVAL2} != 0 ]]; then
                             echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL2${RESET}"
-                            exit || return
+                            exit || return 1
                         else
                             echo -e "${GOOD}OK${RESET}"
                             ((++n_fpull))
+                            RETVAL=$RETVAL2
                         fi
                     fi
                 fi
