@@ -514,9 +514,9 @@ echo -e "${trap_head}reset HEAD"
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-
+    git config advice.skippedCherryPicks false
     do_cmd git rebase --empty=drop --no-keep-empty ${local_branch} -X ours
-    echo -e "${tAB}after rebase:"
+    echo -e "${TAB}after rebase:"
     N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
     echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
 
