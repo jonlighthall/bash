@@ -102,15 +102,6 @@ function check_remotes() {
     # get starting time in nanoseconds
     local -i start_time=$(date +%s%N)
 
-    # set tab
-    called_by=$(ps -o comm= $PPID)
-    if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]]; then
-        TAB=''
-        : ${fTAB:='   '}
-    else
-        itab
-    fi
-
     # set debug level
     # automaticly set default value if DEBUG is unset or null
     local -i DEBUG=${DEBUG:=0}
@@ -187,7 +178,7 @@ function check_remotes() {
 
             # check against argument
             if [ $# -gt 0 ]; then
-                decho -en "\n"
+#                decho -en "\n"
                 for arg in $@; do
                     decho -en "${TAB}checking $remote_url against argument ${ARG}${ARG}${RESET}... "
                     if [[ $remote_url =~ $arg ]]; then
@@ -239,7 +230,7 @@ function check_remotes() {
         fi # SSH
 
         if [ $DEBUG = 0 ]; then
-            echo
+            printf '\e[0;90;40m\u21b5\n\e[m'
         fi
 
         (
@@ -404,9 +395,7 @@ function print_branches() {
 
   # before starting, fetch remote
     echo -n "${TAB}fetching ${pull_repo}..."
-    do_cmd git fetch --all --verbose ${pull_repo}
-
-    
+    do_cmd git fetch --all --verbose ${pull_repo}    
 
     check_remotes
     parse_remote_tracking_branch
@@ -522,13 +511,13 @@ function track_all_branches() {
     local pull_branches=$(git branch -rl ${pull_repo}* | grep -v '\->')
 
     # loop over branches
-    echo "${TAB} checking branches..."
-    itab
+    echo "${TAB}checking branches..."
     
     for branch in ${pull_branches}; do
         # define (local) branch name
         branch_name=${branch#${pull_repo}/}
-        echo "${branch_name}:"
+        itab
+        echo -e "${TAB}${PSBR}${branch_name}${RESET} "
         itab
 
         # check if branch exists
@@ -539,7 +528,7 @@ function track_all_branches() {
                 echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
             fi
             # set existing branch to track remote branch
-            dtab
+#            dtab
             do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
         else
             echo -en "${TAB}${GRH}"
@@ -552,11 +541,12 @@ function track_all_branches() {
             echo -en "${TAB}${GRH}"
             hline 72
             echo -en "${RESET}"
-            dtab
+            #dtab
         fi
+        dtab
     done
-    dtab
 
-    echo "${TAB} list of local branches:"
+
+    echo "${TAB}list of local branches:"
     git branch -vv --color=always 
 }
