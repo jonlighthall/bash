@@ -474,6 +474,7 @@ if [ -z ${branch_temp+default} ]; then
 else
     echo "${TAB}before rebase:"
     N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
+    git config advice.skippedCherryPicks false
 fi
 
 # define name for traps
@@ -514,7 +515,6 @@ echo -e "${trap_head}reset HEAD"
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    git config advice.skippedCherryPicks false
     do_cmd git rebase --empty=drop --no-keep-empty ${local_branch} -X ours
     echo -e "${TAB}after rebase:"
     N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
@@ -561,7 +561,7 @@ cbar "${BOLD}pushing local changes...${RESET}"
 N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
-    echo -e "${tAB}${fTAB}list of commits: "
+    echo -e "${TAB}${fTAB}list of commits: "
     itab
     git --no-pager log ${pull_branch}..HEAD | sed "s/^/${TAB}/"
     dtab
@@ -582,7 +582,7 @@ fi
 cbar "${BOLD}applying stash...${RESET}"
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
-    echo -e "${tAB}there are $N_stash entries in stash"
+    echo -e "${TAB}there are $N_stash entries in stash"
     if $b_stash; then
         trap 'set_color; lecho;
 echo -e "${trap_head}stash pop"
