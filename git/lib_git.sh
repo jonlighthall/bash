@@ -498,7 +498,7 @@ function track_all_branches() {
 
     # before starting, fetch remote
     echo -n "${TAB}fetching ${pull_repo}..."
-    do_cmd git fetch --verbose ${pull_repo}
+    do_cmd git fetch --verbose --prune ${pull_repo}
 
     # print remote branches
     echo "remote tracking branches:"
