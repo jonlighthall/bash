@@ -477,7 +477,11 @@ else
 fi
 
 # define name for traps
-bin_name=${BASH_SOURCE##/*}
+bin_name=${BASH_SOURCE##*/}
+itab
+trap_head="${TAB}${bin_name} TODO: git "
+dtab
+
 # exit on errors to trigger exit traps
 set -e
 
@@ -486,28 +490,28 @@ if [ $N_temp -gt 0 ]; then
     echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp:-<temp>}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
     # rebase
     trap 'set_color
-echo "${bin_name} TODO: git checkout ${branch_temp:-<temp>}"
-echo "${bin_name} TODO: git rebase ${local_branch}"
-echo "${bin_name} TODO: git checkout ${local_branch}"
-echo "${bin_name} TODO: git merge ${branch_temp:-<temp>}"
-echo "${bin_name} TODO: git branch -d ${branch_temp-<temp>}"
-echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
-echo "${bin_name} TODO: git stash pop"
-echo "${bin_name} TODO: git reset HEAD"
-echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+echo "${trap_head}checkout ${branch_temp:-<temp>}"
+echo "${trap_head}rebase ${local_branch}"
+echo "${trap_head}checkout ${local_branch}"
+echo "${trap_head}merge ${branch_temp:-<temp>}"
+echo "${trap_head}branch -d ${branch_temp-<temp>}"
+echo "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${trap_head}stash pop"
+echo "${trap_head}reset HEAD"
+echo "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
 
     do_cmd git checkout ${branch_temp}
     trap 'set_color
-echo "${bin_name} TODO: git rebase ${local_branch}"
-echo "${bin_name} TODO: git checkout ${local_branch}"
-echo "${bin_name} TODO: git merge ${branch_temp}"
-echo "${bin_name} TODO: git branch -d ${branch_temp}"
-echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
-echo "${bin_name} TODO: git stash pop"
-echo "${bin_name} TODO: git reset HEAD"
-echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+echo "${trap_head}rebase ${local_branch}"
+echo "${trap_head}checkout ${local_branch}"
+echo "${trap_head}merge ${branch_temp}"
+echo "${trap_head}branch -d ${branch_temp}"
+echo "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${trap_head}stash pop"
+echo "${trap_head}reset HEAD"
+echo "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
 
@@ -519,32 +523,32 @@ print_exit $?' EXIT
     # merge
     cbar "${BOLD}merging local changes...${RESET}"
     trap 'set_color
-echo "${bin_name} TODO: git checkout ${local_branch}"
-echo "${bin_name} TODO: git merge ${branch_temp}"
-echo "${bin_name} TODO: git branch -d ${branch_temp}"
-echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
-echo "${bin_name} TODO: git stash pop"
-echo "${bin_name} TODO: git reset HEAD"
-echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+echo "${trap_head}checkout ${local_branch}"
+echo "${trap_head}merge ${branch_temp}"
+echo "${trap_head}branch -d ${branch_temp}"
+echo "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${trap_head}stash pop"
+echo "${trap_head}reset HEAD"
+echo "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
     do_cmd git checkout ${local_branch}
     trap 'set_color
-echo "${bin_name} TODO: git merge ${branch_temp}"
-echo "${bin_name} TODO: git branch -d ${branch_temp}"
-echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
-echo "${bin_name} TODO: git stash pop"
-echo "${bin_name} TODO: git reset HEAD"
-echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+echo "${trap_head}merge ${branch_temp}"
+echo "${trap_head}branch -d ${branch_temp}"
+echo "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${trap_head}stash pop"
+echo "${trap_head}reset HEAD"
+echo "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
     do_cmd git merge ${branch_temp}
     trap 'set_color
-echo "${bin_name} TODO: git branch -d ${branch_temp}"
-echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
-echo "${bin_name} TODO: git stash pop"
-echo "${bin_name} TODO: git reset HEAD"
-echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+echo "${trap_head}branch -d ${branch_temp}"
+echo "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${trap_head}stash pop"
+echo "${trap_head}reset HEAD"
+echo "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
     do_cmd git branch -d ${branch_temp}
@@ -562,10 +566,10 @@ if [ $N_local -gt 0 ]; then
     git --no-pager log ${pull_branch}..HEAD | sed "s/^/${TAB}/"
     dtab
     trap 'set_color
-echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
-echo "${bin_name} TODO: git stash pop"
-echo "${bin_name} TODO: git reset HEAD"
-echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+echo "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
+echo "${trap_head}stash pop"
+echo "${trap_head}reset HEAD"
+echo "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
     echo "pushing..."
@@ -581,9 +585,9 @@ if [ $N_stash -gt 0 ]; then
     echo "${TAB}there are $N_stash entries in stash"
     if $b_stash; then
         trap 'set_color
-echo "${bin_name} TODO: git stash pop"
-echo "${bin_name} TODO: git reset HEAD"
-echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+echo "${trap_head}stash pop"
+echo "${trap_head}reset HEAD"
+echo "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
         if [[ "$-" == *e* ]]; then
@@ -602,8 +606,8 @@ print_exit $?' EXIT
             echo -e "${YELLOW}changes!${RESET}"
             dtab
             trap 'set_color
-echo "${bin_name} TODO: git reset HEAD"
-echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+echo "${trap_head}reset HEAD"
+echo "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
             do_cmd git reset HEAD
@@ -619,7 +623,7 @@ cbar "${BOLD}resetting...${RESET}"
 if [ ! -z ${remote_tracking_branch} ]; then
     echo "resetting upstream remote tracking branch..."
     trap 'set_color
-echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
+echo "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
     if [ $git_ver_maj -lt 2 ]; then
