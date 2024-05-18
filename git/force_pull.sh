@@ -478,16 +478,19 @@ fi
 
 # define name for traps
 bin_name=${BASH_SOURCE##/*}
+# exit on errors to trigger exit traps
+set -e
 
+# check if the temporary branch is ahead of the local branch
 if [ $N_temp -gt 0 ]; then
-    echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
+    echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp:-<temp>}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
     # rebase
     trap 'set_color
-echo "${bin_name} TODO: git checkout ${branch_temp}"
+echo "${bin_name} TODO: git checkout ${branch_temp:-<temp>}"
 echo "${bin_name} TODO: git rebase ${local_branch}"
 echo "${bin_name} TODO: git checkout ${local_branch}"
-echo "${bin_name} TODO: git merge ${branch_temp}"
-echo "${bin_name} TODO: git branch -d ${branch_temp}"
+echo "${bin_name} TODO: git merge ${branch_temp:-<temp>}"
+echo "${bin_name} TODO: git branch -d ${branch_temp-<temp>}"
 echo "${bin_name} TODO: git push --set-upstream ${pull_repo} ${pull_refspec}"
 echo "${bin_name} TODO: git stash pop"
 echo "${bin_name} TODO: git reset HEAD"
@@ -508,7 +511,7 @@ echo "${bin_name} TODO: git branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
 
-    do_cmd git rebase ${local_branch}
+    do_cmd git rebase --empty=drop --no-keep-empty ${local_branch}
     echo "${TAB}after rebase:"
     N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
     echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
