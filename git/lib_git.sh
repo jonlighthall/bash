@@ -407,7 +407,7 @@ function check_mod() {
 function print_branches() {
     # load git utils
     get_source
-    for library in git cmd; do
+    for library in git; do
         fname="${src_dir_phys}/lib_${library}.sh"
         if [ -e "${fname}" ]; then
             if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
@@ -446,6 +446,14 @@ function parse_remote_tracking_branch() {
     fi
     check_repo
     local -i RETVAL=$?
+    reset_shell ${old_opts-''}
+    if [[ $RETVAL -eq 0 ]]; then
+        decho "${TAB}proceeding to check hosts"
+        set_traps
+    else
+        echo "${TAB}not a Git repository"
+        return 1
+    fi    
 
     # parse local
     local_branch=$(git branch | grep \* | sed 's/^\* //')
@@ -482,7 +490,7 @@ function track_all_branches() {
     # DEBUG=1
     get_source
     # load git utils
-    for library in git cmd; do
+    for library in git; do
         fname="${src_dir_phys}/lib_${library}.sh"
         if [ -e "${fname}" ]; then
             if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
@@ -495,6 +503,14 @@ function track_all_branches() {
     done
 
     check_remotes
+    local RETVAL=$?
+    reset_shell ${old_opts-''}
+    if [[ $RETVAL -eq 0 ]]; then
+        decho "${TAB}proceeding to check hosts"
+        set_traps
+    else
+        return 1
+    fi    
     parse_remote_tracking_branch
 
     # parse arguments
@@ -530,10 +546,10 @@ function track_all_branches() {
     do_cmd_stdbuf git fetch --verbose --prune ${pull_repo}
 
     # print remote branches
-    echo "remote tracking branches:"
+    echo "${TAB}remote tracking branches:"
     git branch -vvr --color=always | grep -v '\->'
     
-    echo "${pull_repo} branches:"
+    echo "${TAB}${pull_repo} branches:"
     git branch -vvr --color=always -l ${pull_repo}* | grep -v '\->'
 
     # get branches of pull repo
@@ -574,7 +590,7 @@ function track_all_branches() {
         fi
         dtab
     done
-
+    dtab
     echo "${TAB}list of local branches:"
     git branch -vv --color=always 
 }
