@@ -58,7 +58,7 @@ start_dir=$PWD
 echo "${TAB}starting directory = ${start_dir}"
 
 # load git utils
-for library in git cmd; do
+for library in git; do
     # use the canonical (physical) source directory for reference; this is important if sourcing
     # this file directly from shell
     fname="${src_dir_phys}/lib_${library}.sh"
