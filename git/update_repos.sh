@@ -583,14 +583,14 @@ for repo in $list; do
                 fi
                 # force pull
                 if [[ $RETVAL == 128 ]]; then
-                    cbar -e "{GRH}force pull...${RESET}"
+                    cbar "${GRH}force pull...${RESET}"
                     echo "${TAB}leading remote commits: ${N_remote}"
-                    echo "${TAB}trailing local commits: "
+                    echo -n "${TAB}trailing local commits: "
                     N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
                     echo "${N_local}"
                     if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
                         local_branch=$(git branch | grep \* | sed 's/^\* //')
-                        echo -e "${fTAB}${YELLOW}local '${local_branch}' and remote '${pull_branch}' have diverged${RESET}"
+                        echo -e "${fTAB}${YELLOW}local '${local_branch}' and remote '${remote_tracking_branch}' have diverged${RESET}"
                     fi
                     echo -e "${TAB}source directory = $src_dir_logi"
                     prog=${src_dir_logi}/force_pull
