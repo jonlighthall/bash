@@ -237,7 +237,7 @@ cbar "${BOLD}comparing local branch ${GREEN}$local_branch${RESET} with remote br
 
 # before starting, fetch remote
 echo -n "${TAB}fetching ${pull_repo}..."
-do_cmd git fetch --verbose ${pull_repo} ${pull_refspec}
+do_cmd_stdbuf git fetch --verbose ${pull_repo} ${pull_refspec}
 
 echo "comparing repositories based on commit hash..."
 echo -n "${fTAB}leading remote commits: "

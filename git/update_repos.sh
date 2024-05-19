@@ -391,7 +391,7 @@ for repo in $list; do
         declare -i y1
         get_curpos x1 y1        
         t_start=$(date +%s%N)
-        do_cmd ${cmd}        
+        do_cmd_stdbuf ${cmd}        
         RETVAL=$?        
         t_end=$(date +%s%N)
         declare -i x2
