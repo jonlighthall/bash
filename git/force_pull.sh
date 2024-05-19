@@ -249,12 +249,34 @@ N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 echo "${N_local}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    echo -e "${fTAB}${YELLOW}local '${local_branch}' and remote '${pull_branch}' have diverged${RESET}"
+    echo -e "${fTAB}${YELLOW}local branch '${local_branch}' and remote branch '${pull_branch}' have diverged${RESET}"
 fi
 
 if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then
     hash_local=$(git rev-parse HEAD)
     hash_remote=$(git rev-parse ${pull_branch})
+
+    N_hash_local=$(echo ${hash_local} | wc -l )
+    N_hash_remote=$(echo ${hash_remote} | wc -l )
+
+    echo -ne "${GRH}"
+    
+    if [ $N_hash_local -gt 1 ]; then
+        echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
+        itab
+        echo "$hash_local" | sed "s/^/${TAB}/"
+        dtab
+    fi
+
+    if [ $N_hash_remote -gt 1 ]; then
+        echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
+        itab
+        echo "$hash_remote" | sed "s/^/${TAB}/"
+        dtab
+    fi
+
+    echo -ne "{RESET}"
+    
 else
     echo "comparing repositories based on commit time..."
     # determine latest common local commit, based on commit time
@@ -268,26 +290,50 @@ else
         T_local=$(git log ${local_branch} --format="%at" -1)
 
         echo -n "remote commits commited after local HEAD:"
-        N_after=$(git rev-list ${pull_branch} --after=${T_local} | wc -l)
+        cond_after="${pull_branch} --after=${T_local}"        
+        N_after=$(git rev-list ${cond_after} | wc -l)
         if [ $N_after -eq 0 ]; then
             echo " none"
         else
             echo
-            git rev-list ${pull_branch} --after=${T_local} | sed "s/^/${fTAB}/"
-            echo -e "number of commits:\n${fTAB}${N_after}"
+            iHEAD=$(git rev-list ${cond_after} | tail -1)
+            hash_limit=10
+            itab
+            git rev-list ${cond_after} -n $hash_limit  | sed "s/^/${TAB}/"
+            
+            if [ $N_after -gt $hash_limit ]; then
+                N_skip=$(( $N_after - $hash_limit))
+                N_tail=$(($hash_limit/2))
+                if [ $N_skip -lt $N_tail ]; then
+                    N_tail=$N_skip
+                else
+                    echo "${TAB}..."
+                fi
+                git rev-list ${cond_after} | tail -${N_tail} | sed "s/^/${TAB}/"
+                echo -e "${TAB}${YELLOW}$(($N_skip-$N_tail)) commits not displayed${RESET}"
+            fi
+            dtab
+            echo -e "${TAB}number of commits:\n${TAB}${fTAB}${N_after}"
 
-            echo "list of commits: "
-            git --no-pager log ${pull_branch} --after=${T_local}
+            echo "${TAB}list of commits: "
+            hash_limit=3
+            git --no-pager log ${cond_after} -n $hash_limit
+            if [ $N_after -gt $hash_limit ]; then
+                echo
+                echo -e "${TAB}${YELLOW}$N_skip commits not displayed${RESET}"
+            fi
 
-            echo -ne "start by checking commit:\n${fTAB}"
-            git rev-list ${pull_branch} --after=${T_local} | tail -1
+            echo -ne "${TAB}start by checking commit:\n${TAB}${fTAB}"
+            git rev-list ${cond_after} | tail -1
 
-            iHEAD=$(git rev-list ${pull_branch} --after=${T_local} | tail -1)
             cbar "${BOLD}looping through remote commits...${RESET}"
         fi
     fi
     hash_local=''
 fi
+
+exit
+
 while [ -z ${hash_local} ]; do
     echo "${TAB}checking ${iHEAD}..."
     hash_remote=$(git rev-parse ${iHEAD})
@@ -357,7 +403,7 @@ if [ "$hash_local" == "$hash_remote" ]; then
     fi
 else
     echo "a different hash (diverged)"
-    echo " local: $hash_local"
+    echo " local: $hash_local" | sed "1 ! s/^/${TAB}/"
     echo "remote: $hash_remote"
     git log $hash_local -1
     git log $hash_remote -1
