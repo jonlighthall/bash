@@ -551,8 +551,6 @@ else
 fi
 dtab 2
 
-echo -e "func: ${ARG}$func${RESET}"; DEBUG=1; lecho | sed -u "s/called/exiting/"; exit
-
 # stash local changes
 cbar "${BOLD}stashing local changes...${RESET}"
 if [ -z "$(git diff)" ]; then
@@ -710,7 +708,7 @@ echo -e "${trap_head}reset HEAD"
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    do_cmd git merge ${branch_temp}
+    do_cmd git merge --ff-only ${branch_temp}
     trap 'set_color; lecho;
 echo -e "${trap_head}branch -d ${branch_temp}"
 echo -e "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
@@ -731,7 +729,7 @@ if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
     echo -e "${TAB}${fTAB}list of commits: "
     itab
-    git --no-pager log ${pull_branch}..HEAD | sed "s/^/${TAB}/"
+    git --no-pager log ${pull_branch}..HEAD -n ${hash_limit} | sed "s/^/${TAB}/"
     dtab
     trap 'set_color; lecho;
 echo -e "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
