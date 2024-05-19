@@ -406,7 +406,9 @@ while [ -z ${hash_local} ]; do
             echo "${TAB}time"
             echo "$hash_local" | sed "s/^/${TAB}${fTAB}/" 
             # select a function to choose the hash: head or tail
-            func=tail
+            # tail will select an older head and lead to a greater difference
+            # head will select the newer hash and lead to a smaller difference
+            func=head
             echo -e "${TAB}selecting with ${ARG}$func${RESET}"
             hash_local=$(echo "$hash_local" | ${func} -n 1)
             echo "$hash_local" | sed "s/^/${TAB}${fTAB}/"
@@ -418,9 +420,9 @@ while [ -z ${hash_local} ]; do
         echo "${TAB}time = $hash_local"
         echo "${TAB} using $hash_local"
     fi
-    lecho | sed "s/called/exiting/"; exit
     
     dtab
+    cbar "${BOLD}printing local commits...${RESET}"
     echo "${TAB}remote commit hash: ............ ${hash_remote}"
     echo -n "${TAB}corresponding local commit hash: "
     if [ ! -z ${hash_local} ]; then
@@ -428,19 +430,35 @@ while [ -z ${hash_local} ]; do
         echo "$hash_local"
         # determine local commits not found on remote
         echo -n "${TAB}trailing local commits: "
-        hash_start=$(git rev-list $hash_remote..HEAD | tail -n 1)
+        cond_local="$hash_remote..HEAD"
+        hash_start=$(git rev-list $cond_local | tail -n 1)
         if [ ! -z ${hash_start} ]; then
             echo
-            git rev-list $hash_remote..HEAD | sed "s/^/${TAB}/"
-            N_local=$(git rev-list $hash_remote..HEAD | wc -l)
+            itab
+            git rev-list $cond_local -n $hash_limit | sed "s/^/${TAB}/"
+            N_local=$(git rev-list $cond_local | wc -l)
+
+            if [ $N_local -gt $hash_limit ]; then
+                N_skip=$(( $N_local - $hash_limit))
+                N_tail=$(($hash_limit/2))
+                if [ $N_skip -lt $N_tail ]; then
+                    N_tail=$N_skip
+                else
+                    echo "${TAB}..."
+                fi
+                git rev-list ${cond_local} | tail -${N_tail} | sed "s/^/${TAB}/"
+                echo -e "${TAB}${YELLOW}$(($N_skip-$N_tail)) commits not displayed${RESET}"
+            fi
+            
             if [ $N_local -gt 1 ]; then
                 echo -ne "${TAB}\E[3Dor ${hash_start}^.."
-                hash_end=$(git rev-list $hash_remote..HEAD | head -n 1)
+                hash_end=$(git rev-list $cond_local | head -n 1)
                 echo ${hash_end}
             else
                 hash_end=$hash_start
             fi
             echo -e "${TAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
+            dtab
         else
             echo -e "${GREEN}none${RESET}"
             N_local=0
@@ -453,7 +471,7 @@ while [ -z ${hash_local} ]; do
 done
 dtab
 
-cbar "${BOLD}compare to merge base...${RESET}"
+cbar "${BOLD}printing remote commits...${RESET}"
 
 # compare local commit to remote commit
 echo -n "${TAB}corresponding remote commit: ... "
@@ -476,23 +494,38 @@ if [ "$hash_local" == "$hash_remote" ]; then
     dtab
 else
     echo "a different hash (diverged)"
-    echo " local: $hash_local" | sed "1 ! s/^/${TAB}/"
-    echo "remote: $hash_remote"
-    git log $hash_local -1
-    git log $hash_remote -1
+    echo "${TAB} local: $hash_local"
+    echo "${TAB}remote: $hash_remote"
+    git log $hash_local -1 --color=always | sed "s/^/${TAB}/"       
+    git log $hash_remote -1 --color=always | sed "s/^/${TAB}/"       
+    echo
 fi
 
 # determine remote commits not found locally
 echo -n "${TAB}leading remote commits: "
 itab
-hash_start_remote=$(git rev-list $hash_local..${pull_branch} | tail -n 1)
+cond_remote=$hash_local..${pull_branch}
+hash_start_remote=$(git rev-list $cond_remote | tail -n 1)
 if [ ! -z ${hash_start_remote} ]; then
     echo
-    git rev-list $hash_local..${pull_branch} | sed "s/^/${TAB}/"
-    N_remote=$(git rev-list $hash_local..${pull_branch} | wc -l)
+    git rev-list $cond_remote -n $hash_limit | sed "s/^/${TAB}/"
+    N_remote=$(git rev-list $cond_remote | wc -l)
+
+    if [ $N_remote -gt $hash_limit ]; then
+        N_skip=$(( $N_remote - $hash_limit))
+        N_tail=$(($hash_limit/2))
+        if [ $N_skip -lt $N_tail ]; then
+            N_tail=$N_skip
+        else
+            echo "${TAB}..."
+        fi
+        git rev-list ${cond_remote} | tail -${N_tail} | sed "s/^/${TAB}/"
+        echo -e "${TAB}${YELLOW}$(($N_skip-$N_tail)) commits not displayed${RESET}"
+    fi
+
     if [ $N_remote -gt 1 ]; then
         echo -ne "${TAB}\E[3Dor ${hash_start_remote}^.."
-        hash_end_remote=$(git rev-list $hash_local..${pull_branch} | head -n 1)
+        hash_end_remote=$(git rev-list $cond_remote | head -n 1)
         echo ${hash_end_remote}
     else
         hash_end_remote=$hash_start_remote
@@ -505,7 +538,7 @@ else
 fi
 dtab 2
 
-lecho | sed "s/called/exiting/"; exit
+echo -e "func: ${ARG}$func${RESET}"; DEBUG=1; lecho | sed -u "s/called/exiting/"; exit
 
 # stash local changes
 cbar "${BOLD}stashing local changes...${RESET}"
