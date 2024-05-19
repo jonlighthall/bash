@@ -298,7 +298,7 @@ while [ -z ${hash_local} ]; do
     echo "${TAB}remote commit time: .. $time_remote or $(date -d @${time_remote} +"%a %b %-d %Y at %-l:%M %p %Z")"
 
     hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
-    hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
+    hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}' | head -1)
 
     echo -n "${TAB}local subject and time hashes... "
     if [ "$hash_local" == "$hash_local_s" ]; then
@@ -340,7 +340,7 @@ while [ -z ${hash_local} ]; do
 done
 
 # compare local commit to remote commit
-echo -n "${TAB}corresponding remote commit: .... "
+echo -n "${TAB}corresponding remote commit: "
 echo $hash_remote
 TAB+=${fTAB:='   '}
 echo -n "${TAB}local commit has... "
