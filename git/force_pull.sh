@@ -302,7 +302,10 @@ else
             echo " none"
         else
             echo
-            hash_limit=10
+            # -----------------
+            # set display limit
+            hash_limit=5
+            # -----------------
             itab
             git rev-list ${cond_after} -n $hash_limit  | sed "s/^/${TAB}/"
             
@@ -351,8 +354,74 @@ while [ -z ${hash_local} ]; do
     echo "${TAB}remote commit subject: $subj_remote"
     echo "${TAB}remote commit time: .. $time_remote or $(date -d @${time_remote} +"%a %b %-d %Y at %-l:%M %p %Z")"
 
-    hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
-    hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}' | head -1)
+    # find corresponding local commit bassed on the remote commit subject
+    echo "finding corresponding local commit bassed on the remote commit subject..."
+    
+    echo "using log, grep, head, awk..."
+    git log --color=always | grep -B4 "$subj_remote" | sed "s/^/${TAB}/"
+    echo
+#    hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
+ #   echo "${TAB}local subject hash = $hash_local_s"
+
+  #  echo "with awk"
+   # git log --format="%C(auto)%h %at %s" --color=always | grep "${subj_remote}" | awk '{print $1}' | sed "s/^/${TAB}/"
+    hash_local_s=$(git log --format="%h %s" | grep "${subj_remote}" | awk '{print $1}')
+
+    N_hash_local_s=$(git log --format="%h %s" | grep "${subj_remote}" | awk '{print $1}' | wc -l)
+    
+    if [ $N_hash_local_s -gt 1 ]; then
+        echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
+        itab
+        git log --format="%C(auto)%h%d %at %ai %s" --color=always | grep "${subj_remote}" | sed "s/^/${TAB}/"
+        echo
+
+        dtab
+    else
+        echo "${TAB}local subject hash = $hash_local_s"
+    fi
+    
+    exit
+    
+    
+
+    
+    N_hash_local=$(echo ${hash_local} | wc -l )
+    
+    # find corresponding local commit bassed on the remote commit time
+    hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
+
+    git log --format="%C(auto)%h %d %at %ai %<|(-1,trunc)%s" --color=always | grep "${subj_remote}" | sed "s/^/${TAB}/"
+
+    N_hash_remote=$(echo ${hash_remote} | wc -l )
+
+    echo -ne "${GRH}"
+
+    echo "${TAB}time = $hash_remote $N_hash_remote"
+    echo "${TAB}subj = $hash_local_s $N_hash_local_s"
+    echo "${TAB}time = $hash_local $N_hash_local"
+
+    git log --format="%at %H " | grep "$time_remote" 
+    git log --format="%at %H " | grep "$time_remote" | awk '{print $2}'
+    git log --format="%at %H " | grep "$time_remote" | awk '{print $2}' | wc -l
+    
+    
+    if [ $N_hash_local -gt 1 ]; then
+        echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
+        itab
+        echo "$hash_local" | sed "s/^/${TAB}/"
+        dtab
+    fi
+
+
+
+    if [ $N_hash_remote -gt 1 ]; then
+        echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
+        itab
+        echo "$hash_remote" | sed "s/^/${TAB}/"
+        dtab
+    fi
+
+    echo -ne "${RESET}"
 
     echo -n "${TAB}local subject and time hashes... "
     if [ "$hash_local" == "$hash_local_s" ]; then
