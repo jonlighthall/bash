@@ -573,7 +573,16 @@ echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
     echo "pushing..."
-    do_cmd git push --set-upstream ${pull_repo} ${pull_refspec}
+
+    unset_traps
+    read -p "${TAB}Proceed with push? (y/n) " -n 1 -r 
+    reset_traps
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        do_cmd git push --set-upstream ${pull_repo} ${pull_refspec}
+    else
+        echo "${TAB}skipping push"
+    fi   
+
 else
     echo -e "${TAB}${fTAB}no need to push"
 fi
