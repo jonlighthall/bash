@@ -251,7 +251,7 @@ function check_remotes() {
             ssh_cmd_base="ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 -T ${remote_host}"
             if [[ "${remote_host}" == *"navy.mil" ]]; then
                 decho "${TAB}Navy host: ${remote_host}"
-                do_cmd $ssh_cmd_base -o LogLevel=verbose
+                do_cmd $ssh_cmd_base -o LogLevel=error
                 #2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2) 1> >(sed -u $'s,.*,\e[32m&\e[m,' >&1)
                 RETVAL=$?
             else

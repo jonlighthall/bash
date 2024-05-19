@@ -573,7 +573,7 @@ echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
     echo "pushing..."
-
+    itab
     unset_traps
     read -p "${TAB}Proceed with push? (y/n) " -n 1 -r 
     reset_traps
