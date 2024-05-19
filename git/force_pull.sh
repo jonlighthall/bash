@@ -252,7 +252,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     echo -e "${fTAB}${YELLOW}local branch '${local_branch}' and remote branch '${pull_branch}' have diverged${RESET}"
 fi
 
-if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then
+if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then    
     hash_local=$(git rev-parse HEAD)
     hash_remote=$(git rev-parse ${pull_branch})
 
@@ -289,9 +289,9 @@ else
         # print local and remote times
         itab
         (
-        echo "local timestamp+ ${T_local}"
-        echo "local time+ $(git log ${local_branch} --format="%ad" -1)"
-        echo "remote time+ $(git log ${pull_branch} --format="%ad" -1)"
+            echo "local timestamp+ ${T_local}"
+            echo "local time+ $(git log ${local_branch} --format="%ad" -1)"
+            echo "remote time+ $(git log ${pull_branch} --format="%ad" -1)"
         ) | column -t -s+ -o ":" -R1 | sed "s/^/${TAB}/"
         dtab
 
@@ -326,8 +326,8 @@ else
             echo "${TAB}list of commits: "
             itab
             git --no-pager log ${cond_after} -n $hash_limit --color=always | sed "s/^/${TAB}/"
+            echo
             if [ $N_after -gt $hash_limit ]; then
-                echo
                 echo -e "${TAB}${YELLOW}$N_skip commits not displayed${RESET}"
             fi
             dtab
@@ -354,87 +354,77 @@ while [ -z ${hash_local} ]; do
     echo "${TAB}remote commit subject: $subj_remote"
     echo "${TAB}remote commit time: .. $time_remote or $(date -d @${time_remote} +"%a %b %-d %Y at %-l:%M %p %Z")"
 
-    # find corresponding local commit bassed on the remote commit subject
-    echo "finding corresponding local commit bassed on the remote commit subject..."
-    
-    echo "using log, grep, head, awk..."
-    git log --color=always | grep -B4 "$subj_remote" | sed "s/^/${TAB}/"
-    echo
-#    hash_local_s=$(git log | grep -B4 "$subj_remote" | head -n 1 | awk '{print $2}')
- #   echo "${TAB}local subject hash = $hash_local_s"
-
-  #  echo "with awk"
-   # git log --format="%C(auto)%h %at %s" --color=always | grep "${subj_remote}" | awk '{print $1}' | sed "s/^/${TAB}/"
-    hash_local_s=$(git log --format="%h %s" | grep "${subj_remote}" | awk '{print $1}')
-
-    N_hash_local_s=$(git log --format="%h %s" | grep "${subj_remote}" | awk '{print $1}' | wc -l)
-    
-    if [ $N_hash_local_s -gt 1 ]; then
-        echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
-        itab
-        git log --format="%C(auto)%h%d %at %ai %s" --color=always | grep "${subj_remote}" | sed "s/^/${TAB}/"
+    # find corresponding local commit based on the remote commit subject
+    echo "${TAB}finding corresponding local commit based on the remote commit subject..."  
+    # display the corresponding commits
+    itab
+    if false; then
+        git log --color=always | grep -B4 "$subj_remote" | sed "s/^/${TAB}/"
         echo
-
-        dtab
-    else
-        echo "${TAB}local subject hash = $hash_local_s"
     fi
-    
-    exit
-    
-    
+    git log --format="%C(auto)%h%d %at %ai %s" --color=always | grep "${subj_remote}" | sed "s/^/${TAB}/"
 
+    # get the has of the corresponding commit
+    hash_local_s=$(git log --format="%H %s" | grep "${subj_remote}" | awk '{print $1}')
+    # check the number of corresponding commits
+    N_hash_local_s=$(git log --format="%h %s" | grep "${subj_remote}" | awk '{print $1}' | wc -l)
+
+    if [ $N_hash_local_s -gt 1 ]; then
+        echo -e "${TAB}${YELLOW}multiple matching entries found!${RESET}"
+    else
+        echo "${TAB}local subject hash: ....... $hash_local_s"
+    fi    
+    dtab
+
+    # find corresponding local commit based on the remote commit time
+    echo "${TAB}finding corresponding local commit based on the remote commit time..."
     
-    N_hash_local=$(echo ${hash_local} | wc -l )
-    
-    # find corresponding local commit bassed on the remote commit time
-    hash_local=$(git log --format="%at %H " | grep "$time_remote" | awk '{print $2}')
+    # get the has of the corresponding commit
+    hash_local=$(git log --format="%H %at" | grep "$time_remote" | awk '{print $1}')
+    N_hash_local=$(git log --format="%H %at" | grep "$time_remote" | awk '{print $1}' | wc -l)
 
-    git log --format="%C(auto)%h %d %at %ai %<|(-1,trunc)%s" --color=always | grep "${subj_remote}" | sed "s/^/${TAB}/"
-
-    N_hash_remote=$(echo ${hash_remote} | wc -l )
-
-    echo -ne "${GRH}"
-
-    echo "${TAB}time = $hash_remote $N_hash_remote"
-    echo "${TAB}subj = $hash_local_s $N_hash_local_s"
-    echo "${TAB}time = $hash_local $N_hash_local"
-
-    git log --format="%at %H " | grep "$time_remote" 
-    git log --format="%at %H " | grep "$time_remote" | awk '{print $2}'
-    git log --format="%at %H " | grep "$time_remote" | awk '{print $2}' | wc -l
-    
+    itab
+    # display the corresponding commits
+    git log --format="%C(auto)%h %d %at %ai %<|(-1,trunc)%s" --color=always | grep "${time_remote}" | sed "s/^/${TAB}/"       
     
     if [ $N_hash_local -gt 1 ]; then
-        echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
-        itab
-        echo "$hash_local" | sed "s/^/${TAB}/"
-        dtab
-    fi
-
-
-
-    if [ $N_hash_remote -gt 1 ]; then
-        echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
-        itab
-        echo "$hash_remote" | sed "s/^/${TAB}/"
-        dtab
-    fi
-
-    echo -ne "${RESET}"
+        echo -e "${TAB}${YELLOW}multiple matching entries found!${RESET}"
+    else
+        echo "${TAB}local time hash: ......... $hash_local"
+    fi    
+    dtab
 
     echo -n "${TAB}local subject and time hashes... "
     if [ "$hash_local" == "$hash_local_s" ]; then
         echo -e "${GOOD}match${RESET}"
+
+        if [ $N_hash_local -gt 1 ]; then
+            itab
+            echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
+            echo "${TAB}subject"
+            echo "$hash_local_s" | sed "s/^/${TAB}${fTAB}/"  
+            echo "${TAB}time"
+            echo "$hash_local" | sed "s/^/${TAB}${fTAB}/" 
+            # select a function to choose the hash: head or tail
+            func=tail
+            echo -e "${TAB}selecting with ${ARG}$func${RESET}"
+            hash_local=$(echo "$hash_local" | ${func} -n 1)
+            echo "$hash_local" | sed "s/^/${TAB}${fTAB}/"
+            dtab
+        fi     
     else
         echo "do not match"
         echo "${TAB}subj = $hash_local_s"
         echo "${TAB}time = $hash_local"
+        echo "${TAB} using $hash_local"
     fi
-    echo "${TAB}remote commit hash: ............. ${hash_remote}"
-    echo -n "${TAB}corresponding local commit hash:  "
+    lecho | sed "s/called/exiting/"; exit
+    
+    dtab
+    echo "${TAB}remote commit hash: ............ ${hash_remote}"
+    echo -n "${TAB}corresponding local commit hash: "
     if [ ! -z ${hash_local} ]; then
-        TAB+=${fTAB:='   '}
+        itab
         echo "$hash_local"
         # determine local commits not found on remote
         echo -n "${TAB}trailing local commits: "
@@ -458,30 +448,32 @@ while [ -z ${hash_local} ]; do
     else
         echo "not found"
     fi
-    TAB=${TAB%$fTAB}
+    dtab
     iHEAD="${iHEAD}~"
 done
+dtab
 
-exit
-
-
+cbar "${BOLD}compare to merge base...${RESET}"
 
 # compare local commit to remote commit
-echo -n "${TAB}corresponding remote commit: "
+echo -n "${TAB}corresponding remote commit: ... "
 echo $hash_remote
-TAB+=${fTAB:='   '}
+itab
 echo -n "${TAB}local commit has... "
 if [ "$hash_local" == "$hash_remote" ]; then
     echo "the same hash"
-    echo -n "${TAB}merge base: ............. "
+    dtab
+    echo -n "${TAB}merge base: .................... "
     git merge-base ${local_branch} ${pull_branch}
     hash_merge=$(git merge-base ${local_branch} ${pull_branch})
+    itab
     echo -n "${TAB}local commit has... "
     if [ $hash_local == $hash_merge ]; then
         echo "the same hash"
     else
         echo "a different hash"
     fi
+    dtab
 else
     echo "a different hash (diverged)"
     echo " local: $hash_local" | sed "1 ! s/^/${TAB}/"
@@ -492,6 +484,7 @@ fi
 
 # determine remote commits not found locally
 echo -n "${TAB}leading remote commits: "
+itab
 hash_start_remote=$(git rev-list $hash_local..${pull_branch} | tail -n 1)
 if [ ! -z ${hash_start_remote} ]; then
     echo
@@ -505,12 +498,14 @@ if [ ! -z ${hash_start_remote} ]; then
         hash_end_remote=$hash_start_remote
     fi
     echo -e "${TAB}${YELLOW}remote branch is $N_remote commits ahead of local${RESET}"
+    dtab
 else
     echo -e "none"
     N_remote=0
 fi
-TAB=${TAB%$fTAB}
-TAB=${TAB%$fTAB}
+dtab 2
+
+lecho | sed "s/called/exiting/"; exit
 
 # stash local changes
 cbar "${BOLD}stashing local changes...${RESET}"
