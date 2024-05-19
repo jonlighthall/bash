@@ -252,6 +252,11 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     echo -e "${fTAB}${YELLOW}local branch '${local_branch}' and remote branch '${pull_branch}' have diverged${RESET}"
 fi
 
+# -----------------
+# set display limit
+hash_limit=5
+# -----------------
+
 if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then    
     hash_local=$(git rev-parse HEAD)
     hash_remote=$(git rev-parse ${pull_branch})
@@ -302,10 +307,6 @@ else
             echo " none"
         else
             echo
-            # -----------------
-            # set display limit
-            hash_limit=5
-            # -----------------
             itab
             git rev-list ${cond_after} -n $hash_limit  | sed "s/^/${TAB}/"
             
@@ -339,10 +340,13 @@ else
 
             # define initial HEAD location
             iHEAD=$(git rev-list ${cond_after} | tail -1)
-            cbar "${BOLD}looping through remote commits...${RESET}"
         fi
     fi
     hash_local=''
+fi
+
+if [ -z ${hash_local} ]; then
+    cbar "${BOLD}looping through remote commits...${RESET}"
 fi
 
 while [ -z ${hash_local} ]; do
@@ -372,7 +376,12 @@ while [ -z ${hash_local} ]; do
     if [ $N_hash_local_s -gt 1 ]; then
         echo -e "${TAB}${YELLOW}multiple matching entries found!${RESET}"
     else
-        echo "${TAB}local subject hash: ....... $hash_local_s"
+        echo -n "${TAB}local subject hash: ....... "
+        if [ -z "$hash_local_s" ]; then
+            echo "none"
+        else
+            echo "$hash_local_s"
+        fi          
     fi    
     dtab
 
@@ -390,7 +399,13 @@ while [ -z ${hash_local} ]; do
     if [ $N_hash_local -gt 1 ]; then
         echo -e "${TAB}${YELLOW}multiple matching entries found!${RESET}"
     else
-        echo "${TAB}local time hash: ......... $hash_local"
+        echo -n "${TAB}local time hash: ......... "
+        if [ -z "$hash_local" ]; then
+            echo "none"
+        else
+            echo "$hash_local"
+        fi          
+
     fi    
     dtab
 
@@ -421,9 +436,7 @@ while [ -z ${hash_local} ]; do
         echo "${TAB} using $hash_local"
     fi
     
-    dtab
-    cbar "${BOLD}printing local commits...${RESET}"
-    echo "${TAB}remote commit hash: ............ ${hash_remote}"
+    echo "${TAB}remote commit hash: ......... ${hash_remote}"
     echo -n "${TAB}corresponding local commit hash: "
     if [ ! -z ${hash_local} ]; then
         itab
@@ -464,7 +477,7 @@ while [ -z ${hash_local} ]; do
             N_local=0
         fi
     else
-        echo "not found"
+        echo -e "${YELLOW}not found${RESET}"
     fi
     dtab
     iHEAD="${iHEAD}~"
