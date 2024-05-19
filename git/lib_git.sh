@@ -64,6 +64,26 @@ function check_repo() {
     fi    
 }
 
+function print_remote() {
+    if [ "${n_remotes}" -gt 1 ]; then
+        ((++i))
+        echo -n "${TAB}${fTAB}$i) "
+        itab
+    else
+        echo -n "${TAB}"
+    fi
+    echo -en "${PSBR}${remote_name}${RESET} "
+    
+    # get URL
+    export remote_url
+    if [ $git_ver_maj -lt 2 ]; then
+        remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
+    else
+        remote_url=$(git remote get-url ${remote_name})
+    fi
+
+}
+
 function print_remotes() {
     # set debug level
     local DEBUG=1
@@ -76,23 +96,9 @@ function print_remotes() {
         echo "${TAB}remotes found: ${n_remotes}"
         local -i i=0
         for remote_name in ${r_names}; do
-            if [ "${n_remotes}" -gt 1 ]; then
-                ((++i))
-                echo -n "${TAB}${fTAB}$i) "
-                itab
-            else
-                echo -n "${TAB}"
-            fi
-            echo -e "${PSBR}${remote_name}${RESET} "
-            
-            # get URL
-            local remote_url
-            if [ $git_ver_maj -lt 2 ]; then
-                remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
-            else
-                remote_url=$(git remote get-url ${remote_name})
-            fi
-            dtab
+            print_remote
+            echo
+            dtab          
         done
     fi
 }
@@ -121,9 +127,9 @@ function check_remotes() {
     check_repo
     local -i RETVAL=$?
     reset_shell ${old_opts-''}
-    set_traps
     if [[ $RETVAL -eq 0 ]]; then
         decho "${TAB}proceeding to check hosts"
+        set_traps
     else
         echo "${TAB}not a Git repository"
         return 1
@@ -140,23 +146,8 @@ function check_remotes() {
     echo "${TAB}remotes found: ${n_remotes}"
     local -i i=0
     for remote_name in ${r_names}; do
-        if [ "${n_remotes}" -gt 1 ]; then
-            ((++i))
-            echo -n "${TAB}${fTAB}$i) "
-            itab
-        else
-            echo -n "${TAB}"
-        fi
-        echo -en "${PSBR}${remote_name}${RESET} "
-
-        # get URL
-        local remote_url
-        if [ $git_ver_maj -lt 2 ]; then
-            remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
-        else
-            remote_url=$(git remote get-url ${remote_name})
-        fi
-
+        print_remote
+        
         # parse protocol
         local remote_pro
         local remote_host
@@ -241,7 +232,8 @@ function check_remotes() {
         fi # SSH
 
         if [ $DEBUG = 0 ]; then
-            printf '\e[0;90;40m\u21b5\n\e[m'
+            #printf '\e[0;90;40m\u21b5\n\e[m'
+            echo
         fi
 
         (
