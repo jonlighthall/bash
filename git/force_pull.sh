@@ -278,25 +278,30 @@ if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then
     echo -ne "{RESET}"
     
 else
-    echo "comparing repositories based on commit time..."
+    echo "${TAB}comparing repositories based on commit time..."
     # determine latest common local commit, based on commit time
     iHEAD=${pull_branch}
     if [ ${N_remote} -gt 0 ]; then
-        # print local and remote times
-        echo "${fTAB} local time is $(git log ${local_branch} --format="%ad" -1)"
-        echo "${fTAB}remote time is $(git log ${pull_branch} --format="%ad" -1)"
 
         # get local commit time
         T_local=$(git log ${local_branch} --format="%at" -1)
 
-        echo -n "remote commits commited after local HEAD:"
+        # print local and remote times
+        itab
+        (
+        echo "local timestamp+ ${T_local}"
+        echo "local time+ $(git log ${local_branch} --format="%ad" -1)"
+        echo "remote time+ $(git log ${pull_branch} --format="%ad" -1)"
+        ) | column -t -s+ -o ":" -R1 | sed "s/^/${TAB}/"
+        dtab
+
+        echo -n "${TAB}remote commits commited after local HEAD:"
         cond_after="${pull_branch} --after=${T_local}"        
         N_after=$(git rev-list ${cond_after} | wc -l)
         if [ $N_after -eq 0 ]; then
             echo " none"
         else
             echo
-            iHEAD=$(git rev-list ${cond_after} | tail -1)
             hash_limit=10
             itab
             git rev-list ${cond_after} -n $hash_limit  | sed "s/^/${TAB}/"
@@ -316,16 +321,19 @@ else
             echo -e "${TAB}number of commits:\n${TAB}${fTAB}${N_after}"
 
             echo "${TAB}list of commits: "
-            hash_limit=3
-            git --no-pager log ${cond_after} -n $hash_limit
+            itab
+            git --no-pager log ${cond_after} -n $hash_limit | sed "s/^/${TAB}/"
             if [ $N_after -gt $hash_limit ]; then
                 echo
                 echo -e "${TAB}${YELLOW}$N_skip commits not displayed${RESET}"
             fi
+            dtab
 
             echo -ne "${TAB}start by checking commit:\n${TAB}${fTAB}"
             git rev-list ${cond_after} | tail -1
 
+            # define initial HEAD location
+            iHEAD=$(git rev-list ${cond_after} | tail -1)
             cbar "${BOLD}looping through remote commits...${RESET}"
         fi
     fi
