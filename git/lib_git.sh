@@ -112,16 +112,28 @@ function check_remotes() {
     local fpretty=${HOME}/config/.bashrc_pretty
     if [ -e $fpretty ]; then
         source $fpretty
-        set_traps
     fi
 
+    if [[ "$-" == *e* ]]; then
+        # exit on errors must be turned off; otherwise shell will exit when not in a repo
+        old_opts=$(echo "$-")
+        set +e
+    fi    
+    check_repo
+    local -i RETVAL=$?
+    reset_shell ${old_opts-''}
+    set_traps
+    if [[ $RETVAL -eq 0 ]]; then
+        decho "${TAB}proceeding to check hosts"
+    else
+        echo "${TAB}not a Git repository"
+        return 1
+    fi    
+    
     # print list of hosts that have already been checked
     if [ $DEBUG -gt 0 ]; then
         print_hosts
     fi
-
-    # check if git is defined and get version number
-    check_git
     
     # get number of remotes
     local -i n_remotes=$(git remote | wc -l)
@@ -178,11 +190,11 @@ function check_remotes() {
 
             # check against argument
             if [ $# -gt 0 ]; then
-#                decho -en "\n"
+                # decho -en "\n"
                 for arg in $@; do
                     decho -en "${TAB}checking $remote_url against argument ${ARG}${ARG}${RESET}... "
                     if [[ $remote_url =~ $arg ]]; then
-                        echo -e "${GOOD}OK${RESET}"
+                        echo -en "${GOOD}OK${RESET}"
                         url_stat=$(echo -e "${GOOD}OK${RESET}")
                         break
                     else
@@ -243,15 +255,18 @@ function check_remotes() {
         # check connection before proceeding       
         if [ ${do_connect} = 'true' ]; then
             echo -n "${TAB}checking connection... "
+            unset_traps
 
             ssh_cmd_base="ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 -T ${remote_host}"
             if [[ "${remote_host}" == *"navy.mil" ]]; then
-                $ssh_cmd_base -o LogLevel=error 2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2) 1> >(sed -u $'s,.*,\e[32m&\e[m,' >&1)
+                decho "${TAB}Navy host: ${remote_host}"
+                do_cmd $ssh_cmd_base -o LogLevel=verbose
+                #2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2) 1> >(sed -u $'s,.*,\e[32m&\e[m,' >&1)
                 RETVAL=$?
             else
                 if [[ ${remote_host} =~ "github.com" ]]; then
+                    decho "${TAB}GitHub host: ${remote_host}"
                     # set shell options
-                    unset_traps
                     if [[ "$-" == *e* ]]; then
                         echo -n "${TAB}setting shell options..."    
                         old_opts=$(echo "$-")
@@ -259,17 +274,35 @@ function check_remotes() {
                         set +e
                         echo "done"
                     fi
-                    $ssh_cmd_base -o LogLevel=info 2> >(sed -u $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,' >&2)
+                    do_cmd $ssh_cmd_base -o LogLevel=info
+                    # 2> >(sed -u $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,' >&2)
                     RETVAL=$?
                     reset_shell ${old_opts-''}
-                    reset_traps                   
                 else
-                    $ssh_cmd_base -o LogLevel=info 2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2)
+                    decho "${TAB}host: ${remote_host}"
+                    do_cmd $ssh_cmd_base -o LogLevel=info
+                    #2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2)
                     RETVAL=$?
                 fi
             fi
+            reset_traps
+
+            # check cursor position
+            local -i x1c
+            get_curpos x1c
+            if [ $x1c -eq 1 ]; then
+                # beautify settings
+                GIT_HIGHLIGHT='\E[7m'
+                echo -en "${TAB}${fTAB}${GIT_HIGHLIGHT} auth ${RESET} "
+            fi
+
             if [[ $RETVAL == 0 ]]; then
-                echo -e "${TAB}${GOOD}OK${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+                echo -en "${GOOD}OK${RESET} "
+                if [ $x1c -eq 1 ]; then
+                    echo -e "${GRAY}RETVAL=$RETVAL${RESET}"
+                else
+                    echo
+                fi  
                 # add to list
                 if [ ! -z ${host_OK:+dummy} ]; then
                     host_OK+=$'\n'
@@ -277,9 +310,10 @@ function check_remotes() {
                 host_OK+=${remote_host}
             else
                 if [[ $RETVAL == 1 ]]; then
-                    echo -e "${TAB}${YELLOW}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+                    echo -e "${YELLOW}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+                    #dtab
                     if [[ $remote_host =~ "github.com" ]]; then
-                        decho "${TAB}host is github"
+                        decho "${TAB}GitHub host: ${remote_host}"
                         # Github will return 1 if everything is working
                         # add to list
                         if [ ! -z ${host_OK:+dummy} ]; then
@@ -287,7 +321,7 @@ function check_remotes() {
                         fi
                         host_OK+=${remote_host}
                     else
-                        decho "${TAB}host is not github"
+                        decho "${TAB}host: ${remote_host}"
                         # add to list
                         if [ ! -z ${host_bad:+dummy} ]; then
                             host_bad+=$'\n'
@@ -295,7 +329,7 @@ function check_remotes() {
                         host_bad+=${remote_host}
                     fi
                 else
-                    echo -e "${TAB}${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+                    echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                     # add to list
                     if [ ! -z ${host_bad:+dummy} ]; then
                         host_bad+=$'\n'
@@ -393,7 +427,7 @@ function print_branches() {
         fi
     done
 
-  # before starting, fetch remote
+    # before starting, fetch remote
     echo -n "${TAB}fetching ${pull_repo}..."
     do_cmd_stdbuf git fetch --all --verbose ${pull_repo}    
 
@@ -450,9 +484,9 @@ function parse_remote_tracking_branch() {
 }
 
 function track_all_branches() {
-    # load git utils
-#c    DEBUG=1
+    # DEBUG=1
     get_source
+    # load git utils
     for library in git cmd; do
         fname="${src_dir_phys}/lib_${library}.sh"
         if [ -e "${fname}" ]; then
@@ -528,7 +562,7 @@ function track_all_branches() {
                 echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
             fi
             # set existing branch to track remote branch
-#            dtab
+            # dtab
             do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
         else
             echo -en "${TAB}${GRH}"
@@ -545,7 +579,6 @@ function track_all_branches() {
         fi
         dtab
     done
-
 
     echo "${TAB}list of local branches:"
     git branch -vv --color=always 
