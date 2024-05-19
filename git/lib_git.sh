@@ -67,7 +67,6 @@ function check_repo() {
 function print_remotes() {
     # set debug level
     local DEBUG=1
-    # set tab
     check_repo
     local -i RETVAL=$?
     if [[ $RETVAL -eq 0 ]]; then
@@ -393,6 +392,7 @@ function print_hosts() {
 }
 
 function check_mod() {
+    check_repo
     # check for modified files
     local list_mod=$(git diff --name-only --diff-filter=M)
     if [[ ! -z "${list_mod}" ]]; then
@@ -446,16 +446,19 @@ function print_branches() {
 function parse_remote_tracking_branch() {
     # parse remote tracking branch and local branch
     cbar "${BOLD}parse current settings...${RESET}"
-    # parse local
-    local_branch=$(git branch | grep \* | sed 's/^\* //')
-    # parse remote
-    echo -n "${TAB}checking remote tracking branch... "
     # set shell options
     if [[ "$-" == *e* ]]; then
         # exit on errors must be turned off; otherwise shell will exit no remote branch found
         old_opts=$(echo "$-")
         set +e
     fi
+    check_repo
+    local -i RETVAL=$?
+
+    # parse local
+    local_branch=$(git branch | grep \* | sed 's/^\* //')
+    # parse remote
+    echo -n "${TAB}checking remote tracking branch... "
     unset_traps
     git rev-parse --abbrev-ref @{upstream} &>/dev/null
     RETVAL=$?
