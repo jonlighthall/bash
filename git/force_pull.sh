@@ -322,15 +322,17 @@ else
 
             echo "${TAB}list of commits: "
             itab
-            git --no-pager log ${cond_after} -n $hash_limit | sed "s/^/${TAB}/"
+            git --no-pager log ${cond_after} -n $hash_limit --color=always | sed "s/^/${TAB}/"
             if [ $N_after -gt $hash_limit ]; then
                 echo
                 echo -e "${TAB}${YELLOW}$N_skip commits not displayed${RESET}"
             fi
             dtab
 
-            echo -ne "${TAB}start by checking commit:\n${TAB}${fTAB}"
-            git rev-list ${cond_after} | tail -1
+            echo -e "${TAB}start by checking commit:"
+            itab
+            git --no-pager log ${cond_after} -n 1 --color=always | sed "s/^/${TAB}/"
+            dtab
 
             # define initial HEAD location
             iHEAD=$(git rev-list ${cond_after} | tail -1)
@@ -339,8 +341,6 @@ else
     fi
     hash_local=''
 fi
-
-exit
 
 while [ -z ${hash_local} ]; do
     echo "${TAB}checking ${iHEAD}..."
@@ -392,6 +392,10 @@ while [ -z ${hash_local} ]; do
     TAB=${TAB%$fTAB}
     iHEAD="${iHEAD}~"
 done
+
+exit
+
+
 
 # compare local commit to remote commit
 echo -n "${TAB}corresponding remote commit: "
