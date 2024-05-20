@@ -12,11 +12,7 @@ else
     set -eE
     trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
-src_name=$(readlink -f $BASH_SOURCE)
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
-fi
+print_source
 
 # parse remote
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
@@ -45,11 +41,12 @@ git filter-repo $@ --partial --commit-callback '
 
     # list emails to replace
     auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
+    auth_list.append(b"lighthall@elwood.physics.fsu.edu")  
     auth_list.append(b"jonlighthall@users.noreply.github.com")
     auth_list.append(b"jon.lighthall@ygmail.com")
 
     # load url from file
-    text_file = open(os.path.expanduser("~/utils/bash/git/url.txt"), "r")
+    text_file = open(os.path.expanduser("~/utils/bash/git/filter/url.txt"), "r")
     url = text_file.read()
     text_file.close()
 
@@ -78,6 +75,8 @@ git filter-repo $@ --partial --commit-callback '
         if commit.tagger_name != correct_name:
             commit.tagger_name = correct_name
 '
+
+dtab
 
 # print time at exit
 echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"

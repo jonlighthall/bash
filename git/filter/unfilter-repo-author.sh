@@ -47,7 +47,8 @@ git filter-repo $@ --partial --commit-callback '
 
     # list emails to replace
     auth_list = [b"jon.lighthall@gmail.com",b"jonlighthall@gmail.com"]
-    auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
+    auth_list.append(b"jlighthall@fsu.edu",b"lighthall@lsu.edu")
+    auth_list.append(b"lighthall@elwood.physics.fsu.edu")   
     auth_list.append(b"jonlighthall@users.noreply.github.com")
     auth_list.append(b"jon.lighthall@ygmail.com")
 
