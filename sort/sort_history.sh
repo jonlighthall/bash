@@ -377,6 +377,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
         "pwd"
         "up"
         "update_repos"
+        "x"
     )
 
     for igno in "${ignore_list[@]}"; do
