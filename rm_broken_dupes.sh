@@ -31,18 +31,15 @@ else
                 og_fname=$(echo ${arg} | sed 's/_[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-t[0-9]\{6\}//')
                 echo -n "${TAB}${og_fname}..."
 
+                itab
                 if [ -e "${og_fname}" ]; then
                     echo "exists"
-                    itab
                     echo "${TAB}deleting $arg..."
-                    echo -n ${TAB}
-                    rm -v ${arg}
-                    dtab
+                    rm -v ${arg} | sed "s/^/${TAB}/"
                 else
                     echo "not found"
                 fi
-
-                
+                dtab
 			      fi
 		    fi
 	  done

@@ -37,7 +37,6 @@ else
                 else
                     echo "not found"
                 fi
-                
                 echo "${TAB}deleting $arg..."
                 rm -v ${arg} | sed "s/^/${TAB}/"
                 dtab                
