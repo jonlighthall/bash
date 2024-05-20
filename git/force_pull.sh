@@ -240,13 +240,10 @@ echo -n "${TAB}fetching ${pull_repo}..."
 do_cmd_stdbuf git fetch --verbose ${pull_repo} ${pull_refspec}
 
 echo "comparing repositories based on commit hash..."
-echo -n "${fTAB}leading remote commits: "
-N_remote=$(git rev-list HEAD..${pull_branch} | wc -l)
-echo "${N_remote}"
-
-echo -n "${fTAB}trailing local commits: "
 N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
-echo "${N_local}"
+echo -e "${fTAB} local:  ${YELLOW}ahead $N_local${RESET}"
+N_remote=$(git rev-list HEAD..${pull_branch} | wc -l)
+echo -e "${fTAB}remote: ${YELLOW}behind $N_remote${RESET}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     echo -e "${fTAB}${YELLOW}local branch '${local_branch}' and remote branch '${pull_branch}' have diverged${RESET}"
@@ -261,10 +258,10 @@ if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then
     hash_local=$(git rev-parse HEAD)
     hash_remote=$(git rev-parse ${pull_branch})
 else
-    echo "${TAB}comparing repositories based on commit time..."
-    # determine latest common local commit, based on commit time
     iHEAD=${pull_branch}
     if [ ${N_remote} -gt 0 ]; then
+        # determine latest common local commit, based on commit time
+        echo "${TAB}comparing repositories based on commit time..."
 
         # get local commit time
         T_local=$(git log ${local_branch} --format="%at" -1)
@@ -354,7 +351,7 @@ while [ -z ${hash_local} ]; do
     if [ $N_hash_local_s -gt 1 ]; then
         echo -e "${TAB}${YELLOW}multiple matching entries found!${RESET}"
     else
-        echo -n "${TAB}local subject hash: ....... "
+        echo -n "${TAB}local subject hash: ......... "
         if [ -z "$hash_local_s" ]; then
             echo "none"
         else
@@ -377,7 +374,7 @@ while [ -z ${hash_local} ]; do
     if [ $N_hash_local -gt 1 ]; then
         echo -e "${TAB}${YELLOW}multiple matching entries found!${RESET}"
     else
-        echo -n "${TAB}local time hash: ......... "
+        echo -n "${TAB}local time hash: ............ "
         if [ -z "$hash_local" ]; then
             echo "none"
         else
@@ -414,13 +411,13 @@ while [ -z ${hash_local} ]; do
         echo "${TAB} using $hash_local"
     fi
     
-    echo "${TAB}remote commit hash: ......... ${hash_remote}"
+    echo "${TAB}remote commit hash: ............ ${hash_remote}"
     echo -n "${TAB}corresponding local commit hash: "
     if [ ! -z ${hash_local} ]; then
         itab
         echo "$hash_local"
         # determine local commits not found on remote
-        echo -n "${TAB}trailing local commits: "
+        echo -n "${TAB}leading local commits: "
         cond_local="$hash_remote..HEAD"
         hash_start=$(git rev-list $cond_local | tail -n 1)
         if [ ! -z ${hash_start} ]; then
@@ -448,23 +445,23 @@ while [ -z ${hash_local} ]; do
             else
                 hash_end=$hash_start
             fi
+            dtab 2
             echo -e "${TAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
-            dtab
         else
             echo -e "${GREEN}none${RESET}"
             N_local=0
         fi
     else
         echo -e "${YELLOW}not found${RESET}"
+        dtab            
     fi
-    dtab
     iHEAD="${iHEAD}~"
 done
+
 dtab
-
-cbar "${BOLD}printing remote commits...${RESET}"
-
+echo "${TAB}remote commit found"
 # compare local commit to remote commit
+itab
 echo -n "${TAB}corresponding remote commit: ... "
 echo $hash_remote
 itab
@@ -493,14 +490,16 @@ else
 fi
 
 # determine remote commits not found locally
-echo -n "${TAB}leading remote commits: "
+echo -en "${TAB}${YELLOW}remote branch is "
 itab
 cond_remote=$hash_local..${pull_branch}
 hash_start_remote=$(git rev-list $cond_remote | tail -n 1)
 if [ ! -z ${hash_start_remote} ]; then
-    echo
-    git rev-list $cond_remote -n $hash_limit | sed "s/^/${TAB}/"
     N_remote=$(git rev-list $cond_remote | wc -l)
+    echo -e "${N_remote} commits behind local branch${RESET}"
+    echo -e "trailing remote commits:"
+    itab
+    git rev-list $cond_remote -n $hash_limit | sed "s/^/${TAB}/"
 
     if [ $N_remote -gt $hash_limit ]; then
         N_skip=$(( $N_remote - $hash_limit))
@@ -521,11 +520,14 @@ if [ ! -z ${hash_start_remote} ]; then
     else
         hash_end_remote=$hash_start_remote
     fi
-    echo -e "${TAB}${YELLOW}remote branch is $N_remote commits ahead of local${RESET}"
     dtab
 else
-    echo -e "none"
     N_remote=0
+    echo -en "${N_remote} commit"
+    if [ $N_remote -ne 1 ]; then
+        echo -en "s"
+    fi
+    echo "behind local branch${RESET}"
 fi
 dtab 2
 
@@ -550,12 +552,8 @@ else
     b_stash=true
 fi
 
-# copy leading commits to new branch
+# copy trailing commits to new branch
 cbar "${BOLD}copying local commits to temporary branch...${RESET}"
-echo "${TAB}before reset:"
-git branch -v --color=always | sed '/^*/!d'
-echo -e "${fTAB} local:  ${YELLOW}ahead $N_local${RESET}"
-echo -e "${fTAB}remote: ${YELLOW}behind $N_remote${RESET}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     branch_temp=${local_branch}.temp
@@ -580,7 +578,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     reset_traps
     do_cmd git branch ${branch_temp}
 else
-    echo -e "${TAB}${fTAB}no local commits to copy"
+    echo -e "${TAB}${fTAB}no need for temporary branch"
 fi
 
 # initiate HEAD
@@ -589,6 +587,11 @@ if [ $N_remote -gt 0 ]; then
     if [ $N_local -eq 0 ]; then
         echo "${TAB}${fTAB}no need to reset"
     else
+        echo "${TAB}before reset:"
+        git branch -v --color=always | sed '/^*/!d'
+        echo -e "${fTAB} local:  ${YELLOW}ahead $N_local${RESET}"
+        echo -e "${fTAB}remote: ${YELLOW}behind $N_remote${RESET}"        
+        
         echo "${TAB}resetting HEAD to $hash_remote..."
         do_cmd git reset --hard $hash_remote
         N_remote_old=$N_remote
@@ -705,7 +708,7 @@ cbar "${BOLD}pushing local changes...${RESET}"
 N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
-    echo -e "${TAB}${fTAB}list of commits: "
+    echo -e "${TAB}list of commits: "
     itab
     git --no-pager log ${pull_branch}..HEAD -n ${hash_limit} --color=always | sed "s/^/${TAB}/"
     echo
@@ -743,7 +746,10 @@ print_exit $?' EXIT
             exit
         fi      
     else
+        echo
         echo "${TAB}skipping push"
+        echo -e "${TAB}${YELLOW}$N_local commits not pushed${RESET}"
+        dtab
     fi   
 
 else
