@@ -260,28 +260,6 @@ hash_limit=5
 if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then    
     hash_local=$(git rev-parse HEAD)
     hash_remote=$(git rev-parse ${pull_branch})
-
-    N_hash_local=$(echo ${hash_local} | wc -l )
-    N_hash_remote=$(echo ${hash_remote} | wc -l )
-
-    echo -ne "${GRH}"
-    
-    if [ $N_hash_local -gt 1 ]; then
-        echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
-        itab
-        echo "$hash_local" | sed "s/^/${TAB}/"
-        dtab
-    fi
-
-    if [ $N_hash_remote -gt 1 ]; then
-        echo -e "${TAB}${YELLOW}multiple matching entries found:${RESET}"
-        itab
-        echo "$hash_remote" | sed "s/^/${TAB}/"
-        dtab
-    fi
-
-    echo -ne "{RESET}"
-    
 else
     echo "${TAB}comparing repositories based on commit time..."
     # determine latest common local commit, based on commit time
@@ -750,10 +728,12 @@ print_exit $?' EXIT
     read -p "${TAB}Proceed with push? (y/n) " -n 1 -r 
     reset_traps
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        #do_cmd git push --set-upstream ${pull_repo} ${pull_refspec}
-#        do_cmd_stdbuf git branch -u ${remote_tracking_branch}
-
-        do_cmd_stdbuf git push $upstream_repo HEAD:$upstream_refspec
+        echo "pushing ${GREEN}$local_branch${RESET} to ${BLUE}$pull_branch${RESET}"
+        if [ "${branch_local}" == "${pull_refspec}" ]; then
+            do_cmd_stdbuf git push --verbose --set-upstream ${pull_repo} ${pull_refspec}
+        else
+            do_cmd_stdbuf git push --verbose $pull_repo HEAD:$pull_refspec
+        fi
         RETVAL=$?
         echo -ne "${TAB}${INVERT} push ${RESET} "
         if [[ $RETVAL == 0 ]]; then
