@@ -3,9 +3,6 @@
 # get starting time in nanoseconds
 start_time=$(date +%s%N)
 
-# set tab
-TAB=${TAB:=''}
-
 # load formatting
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
@@ -23,12 +20,7 @@ else
     set -eE
 fi
 
-# print source name at start
-echo "${TAB}${RUN_TYPE} $BASH_SOURCE..."
-src_name=$(readlink -f $BASH_SOURCE)
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
-fi
+print_source
 
 # define trap
 trap 'print_int; echo " breaking..."; break;' INT

@@ -1,9 +1,3 @@
-# set tab
-if [ ! -z $TAB ]; then
-    fTAB="   "
-    TAB+=$fTAB
-fi
-
 # load formatting
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then

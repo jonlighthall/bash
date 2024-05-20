@@ -31,14 +31,6 @@ fi
 # set to -1 to pull, push, and gc on every repo
 declare -i GIT_OP_THRESH=0
 
-# set tab
-called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]]; then
-    rtab
-else
-    itab
-fi
-
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"

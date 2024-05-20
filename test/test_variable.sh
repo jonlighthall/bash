@@ -10,14 +10,6 @@ if [ -e $fpretty ]; then
 	source $fpretty
 fi
 
-# set tab
-called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ]; then
-    set_tab
-else
-    itab
-fi
-
 # print source name at start
 if (return 0 2>/dev/null); then
 	RUN_TYPE="sourcing"

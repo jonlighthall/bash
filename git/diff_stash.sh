@@ -19,14 +19,6 @@ fi
 DEBUG=${DEBUG:-0}
 print_debug
 
-# set tab
-called_by=$(ps -o comm= $PPID)
-if [ "${called_by}" = "bash" ] || [ "${called_by}" = "SessionLeader" ] || [[ "${called_by}" == "Relay"* ]]; then
-    rtab
-else
-    itab
-fi
-
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
     RUN_TYPE="sourcing"
