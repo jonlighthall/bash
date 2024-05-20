@@ -731,8 +731,8 @@ print_exit $?' EXIT
     read -p "${TAB}Proceed with push? (y/n) " -n 1 -r 
     reset_traps
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "pushing ${GREEN}$local_branch${RESET} to ${BLUE}$pull_branch${RESET}"
-        if [ "${branch_local}" == "${pull_refspec}" ]; then
+        echo -e "pushing ${GREEN}$local_branch${RESET} to ${BLUE}$pull_branch${RESET}"
+        if [ "${local_branch}" == "${pull_refspec}" ]; then
             do_cmd_stdbuf git push --verbose --set-upstream ${pull_repo} ${pull_refspec}
         else
             do_cmd_stdbuf git push --verbose $pull_repo HEAD:$pull_refspec
