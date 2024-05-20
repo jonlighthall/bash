@@ -86,7 +86,7 @@ cbar "Done Linking Repo Files"
 cd $target_dir
 
 # update index
-git update-index --skip-worktree git/url.txt
+git update-index --skip-worktree git/filter/url.txt
 
 # return to starting directory
 cd "$start_dir"
