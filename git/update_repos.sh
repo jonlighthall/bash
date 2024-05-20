@@ -775,7 +775,7 @@ for repo in $list; do
     if [ ${N_remote} -gt ${GIT_OP_THRESH} ] || [ ${N_local} -gt ${GIT_OP_THRESH} ]; then
         echo -n "${TAB}cleaning up... "
         unset_traps
-        cmd="git gc"
+        cmd="git gc --prune=now"
         declare -i x1
         declare -i y1
         get_curpos x1 y1
