@@ -450,6 +450,7 @@ while [ -z ${hash_local} ]; do
         else
             echo -e "${GREEN}none${RESET}"
             N_local=0
+            dtab
         fi
     else
         echo -e "${YELLOW}not found${RESET}"
@@ -497,8 +498,7 @@ hash_start_remote=$(git rev-list $cond_remote | tail -n 1)
 if [ ! -z ${hash_start_remote} ]; then
     N_remote=$(git rev-list $cond_remote | wc -l)
     echo -e "${N_remote} commits behind local branch${RESET}"
-    echo -e "trailing remote commits:"
-    itab
+    echo -e "${TAB}trailing remote commits:"
     git rev-list $cond_remote -n $hash_limit | sed "s/^/${TAB}/"
 
     if [ $N_remote -gt $hash_limit ]; then
@@ -517,6 +517,7 @@ if [ ! -z ${hash_start_remote} ]; then
         echo -ne "${TAB}\E[3Dor ${hash_start_remote}^.."
         hash_end_remote=$(git rev-list $cond_remote | head -n 1)
         echo ${hash_end_remote}
+        dtab
     else
         hash_end_remote=$hash_start_remote
     fi
