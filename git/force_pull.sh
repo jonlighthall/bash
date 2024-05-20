@@ -814,7 +814,7 @@ print_exit $?' EXIT
 fi
 cbar "${BOLD}you're done!${RESET}"
 clear_traps
-echo "exiting ${BASH_SOURCE##*/} with code zero... "
+decho "exiting ${BASH_SOURCE##*/} with code zero... "
 trap 'print_exit $?' EXIT
 # add exit code for parent script
 exit 0
