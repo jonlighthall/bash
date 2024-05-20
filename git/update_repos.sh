@@ -21,7 +21,7 @@ if [ -e "${fpretty}" ]; then
     print_debug
 else
     # ignore undefined variables
-    set +u 
+    set +u
     # do not exit on errors
     set +e
 fi
@@ -38,7 +38,7 @@ else
     RUN_TYPE="executing"
     # exit on errors
     set -e
-    
+
     # print note
     echo "NB: ${BASH_SOURCE##*/} has not been sourced"
     echo "    user SSH config settings MAY not be loaded??"
@@ -230,7 +230,7 @@ for repo in $list; do
 
     # increment git counter
     ((++n_git))
-    
+
     # parse remote
     echo -n "${TAB}checking remote tracking branch... "
     # set shell options
@@ -250,12 +250,12 @@ for repo in $list; do
         echo "${TAB}no remote tracking branch set for current branch"
         decho "skipping..."
         upstream_fail+=( "${repo}" )
-        check_mod                
+        check_mod
         continue
-    fi            
+    fi
     remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
     echo "$remote_tracking_branch"
-    
+
     upstream_repo=${remote_tracking_branch%%/*}
     if [ $git_ver_maj -lt 2 ]; then
         upstream_url=$(git remote -v | grep ${upstream_repo} | awk '{print $2}' | uniq)
@@ -264,8 +264,8 @@ for repo in $list; do
     fi
     # add remote to list
     echo "${upstream_url}" >>${list_remote}
-    
-    # check against argument    
+
+    # check against argument
     if [ $# -gt 0 ]; then
         for arg in $@; do
             echo -en "${TAB}checking argument \x1b[36m$arg\x1b[m... "
@@ -391,10 +391,10 @@ for repo in $list; do
         fi
         declare -i x1
         declare -i y1
-        get_curpos x1 y1        
+        get_curpos x1 y1
         t_start=$(date +%s%N)
-        do_cmd_stdbuf ${cmd}        
-        RETVAL=$?        
+        do_cmd_stdbuf ${cmd}
+        RETVAL=$?
         t_end=$(date +%s%N)
         declare -i x2
         declare -i y2
@@ -404,7 +404,7 @@ for repo in $list; do
             :
         else
             echo -ne "${GIT_HIGHLIGHT} fetch ${RESET} "
-        fi       
+        fi
         dt_fetch=$((${t_end} - ${t_start}))
         if [[ $RETVAL == 0 ]]; then
             echo -e "${GOOD}OK${RESET}"
@@ -529,7 +529,7 @@ for repo in $list; do
                             echo "modifications are non-trivial: "
                             git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[31m&\x1b[m/"
                             dtab 2
-                            check_mod                
+                            check_mod
                             exit_on_fail
                         else
                             echo "modifications are trivial: "
@@ -537,11 +537,11 @@ for repo in $list; do
 
                             echo "${TAB}checking out modified files..."
                             git diff --name-only --diff-filter=M | xargs -L 1 git checkout
-                            
+
                             # reset RETVAL to stay in loop
                             RETVAL=137
                             dtab 2
-                            continue                                    
+                            continue
                         fi
                     else
                         echo -e "${TAB}no modified files found"
@@ -666,6 +666,17 @@ for repo in $list; do
                         prog=bin/${prog}
                     fi
                     bash ${prog}
+                    
+                    # print make_links status
+                    RETVAL3=$?
+                    dtab
+                    echo -en "${GIT_HIGHLIGHT} make links ${RESET} "
+                    if [ ${RETVAL3} -eq 0 ]; then
+                        echo -e "${GOOD}OK${RESET}"
+                    else
+                        echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL3${RESET}"
+                    fi
+
                 else
                     echo "skip"
                 fi
@@ -750,7 +761,7 @@ for repo in $list; do
         declare -i idx
         dbg2idx 4 idx
         # set color
-        echo -ne "${dcolor[$idx]}"        
+        echo -ne "${dcolor[$idx]}"
         echo -e "$repo has $N_stash entries in stash${RESET}"
         if [ ! -z ${stash_list:+dummy} ]; then
             stash_list+=$'\n'
@@ -761,7 +772,7 @@ for repo in $list; do
     fi
 
     # to speed things up, only clean if repo has changed
-    if [ ${N_remote} -gt ${GIT_OP_THRESH} ] || [ ${N_local} -gt ${GIT_OP_THRESH} ]; then 
+    if [ ${N_remote} -gt ${GIT_OP_THRESH} ] || [ ${N_local} -gt ${GIT_OP_THRESH} ]; then
         echo -n "${TAB}cleaning up... "
         unset_traps
         cmd="git gc"
@@ -787,7 +798,7 @@ for repo in $list; do
             :
         else
             echo -en "${GIT_HIGHLIGHT} gc ${RESET} "
-        fi       
+        fi
         if [[ $RETVAL != 0 ]]; then
             echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
             exit_on_fail
@@ -870,7 +881,7 @@ fi
 if [ -n "${upstream_fail+dummy}" ]; then
     echo -en "   no upstream: ${YELLOW}"
     (
-        for repo in ${upstream_fail[@]}; do 
+        for repo in ${upstream_fail[@]}; do
             echo "${repo}"
         done
     ) | sed "1! {s/^/${list_indent}/}"
@@ -895,7 +906,7 @@ if [ -z "$fetch_fail" ]; then
     echo "none"
 else
     echo -ne "${BAD}"
-    echo "$n_fetch_fail"    
+    echo "$n_fetch_fail"
     echo "${fetch_fail}" \
         | sed "/^[[:space:]]*$/d" \
         | sed "s/^/${list_indent}/"
@@ -982,11 +993,11 @@ else
     declare  -i idx
     dbg2idx 4 idx
     # set color
-    echo -ne "${dcolor[$idx]}"           
+    echo -ne "${dcolor[$idx]}"
     stash_list=$(echo "${stash_list}" | sort -n)
     echo "${stash_list}" | head -n 1
     echo "${stash_list}" | tail -n +2 | sed "s/^/${list_indent}/"
-    echo -ne "${RESET}"           
+    echo -ne "${RESET}"
 fi
 
 set_exit
