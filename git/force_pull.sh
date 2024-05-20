@@ -683,7 +683,7 @@ print_exit $?' EXIT
     do_cmd git rebase --empty=drop --no-keep-empty ${local_branch} -X ours
     echo -e "${TAB}after rebase:"
     N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
-    echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commit"
+    echo -en "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commit"
     if [ $N_local -ne 1 ]; then
         echo -en "s"
     fi
