@@ -126,6 +126,7 @@ fi
 
 # declare counting variables
 declare -i n_fetch=0
+declare -i n_fetch_fail=0
 declare -i n_found=0
 declare -i n_fpull=0
 declare -i n_git=0
@@ -151,6 +152,7 @@ git_OK=''
 fetch_OK=''
 pull_OK=''
 push_OK=''
+declare -a fpull_init=''
 
 # list modifications
 mod_repos=''
@@ -329,6 +331,7 @@ for repo in $list; do
         for bad_host in ${host_bad}; do
             if [[ "$upstream_host" == "$bad_host" ]]; then
                 decho -e "$upstream_host matches ${BAD}$bad_host${GOOD}"
+                ((++n_fetch_fail))
                 fetch_fail+="$repo ($upstream_repo) "$'\n'
                 host_stat=$(echo -e "${BAD}FAIL${RESET}")
                 continue 2
@@ -597,6 +600,7 @@ for repo in $list; do
                         else
                             echo -e "${GOOD}OK${RESET}"
                             ((++n_fpull))
+                            fpull_init+=( "$repo" )
                             RETVAL=$RETVAL2
                         fi
                     fi
@@ -884,9 +888,10 @@ if [ -z "$fetch_fail" ]; then
     echo "none"
 else
     echo -ne "${BAD}"
+    echo "$n_fetch_fail"    
     echo "${fetch_fail}" \
         | sed "/^[[:space:]]*$/d" \
-        | sed "1! s/^/${list_indent}/"
+        | sed "s/^/${list_indent}/"
     echo -ne "${RESET}"
 fi
 
@@ -920,7 +925,11 @@ echo -n "   force pulls: "
 if [ $n_fpull -eq 0 ]; then
     echo "none"
 else
-    echo -e "${YELLOW}$n_fpull${RESET}"
+    echo -e "${YELLOW}$n_fpull"
+    for rep in ${fpull_init[@]}; do
+        echo "${list_indent}${rep}"
+    done
+    echo -en "${RESET}"
 fi
 
 # push
@@ -972,3 +981,5 @@ else
     echo "${stash_list}" | tail -n +2 | sed "s/^/${list_indent}/"
     echo -ne "${RESET}"           
 fi
+
+set_traps
