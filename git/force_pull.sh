@@ -446,7 +446,11 @@ while [ -z ${hash_local} ]; do
                 hash_end=$hash_start
             fi
             dtab 2
-            echo -e "${TAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
+            echo -en "${TAB}${YELLOW}local branch is $N_local commit"
+            if [ $N_local -ne 1 ]; then
+                echo -en "s"
+            fi
+            echo -e " ahead of remote${RESET}"
         else
             echo -e "${GREEN}none${RESET}"
             N_local=0
@@ -497,7 +501,11 @@ cond_remote=$hash_local..${pull_branch}
 hash_start_remote=$(git rev-list $cond_remote | tail -n 1)
 if [ ! -z ${hash_start_remote} ]; then
     N_remote=$(git rev-list $cond_remote | wc -l)
-    echo -e "${N_remote} commits behind local branch${RESET}"
+    echo -en "${N_remote} commit"
+    if [ $N_remote -ne 1 ]; then
+        echo -en "s"
+    fi
+    echo -e " behind local branch${RESET}"    
     itab
     echo -e "${TAB}trailing remote commits:"
     itab
@@ -530,7 +538,7 @@ else
     if [ $N_remote -ne 1 ]; then
         echo -en "s"
     fi
-    echo -e "behind local branch${RESET}"
+    echo -e " behind local branch${RESET}"
 fi
 dtab 2
 
@@ -610,7 +618,11 @@ fi
 # pull remote commits
 cbar "${BOLD}pulling remote changes...${RESET}"
 if [ $N_remote -gt 0 ]; then
-    echo -e "${TAB}${fTAB}${YELLOW}remote branch is $N_remote commits ahead of local${RESET}"
+    echo -en "${TAB}${fTAB}${YELLOW}remote branch is $N_remote commit"
+    if [ $N_local -ne 1 ]; then
+        echo -en "s"
+    fi
+    echo -e " behind remote${RESET}"
     do_cmd git pull --ff-only ${pull_repo} ${pull_refspec}
 else
     echo -e "${TAB}${fTAB}no need to pull"
@@ -638,7 +650,11 @@ set -e
 
 # check if the temporary branch is ahead of the local branch
 if [ $N_temp -gt 0 ]; then
-    echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp:-<temp>}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
+    echo -en "${TAB}${fTAB}${YELLOW}branch '${branch_temp:-<temp>}' is ${N_temp} commit"
+    if [ $N_local -ne 1 ]; then
+        echo -en "s"
+    fi
+    echo -e " ahead of '${local_branch}'${RESET}"
     # rebase
     trap 'set_color; lecho;
 echo -e "${trap_head}checkout ${branch_temp:-<temp>}"
@@ -668,7 +684,11 @@ print_exit $?' EXIT
     do_cmd git rebase --empty=drop --no-keep-empty ${local_branch} -X ours
     echo -e "${TAB}after rebase:"
     N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
-    echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commits ahead of '${local_branch}'${RESET}"
+    echo -e "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commit"
+    if [ $N_local -ne 1 ]; then
+        echo -en "s"
+    fi
+    echo -e " ahead of '${local_branch}'${RESET}"
 
     # merge
     cbar "${BOLD}merging local changes...${RESET}"
@@ -710,7 +730,11 @@ fi
 cbar "${BOLD}pushing local changes...${RESET}"
 N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
 if [ $N_local -gt 0 ]; then
-    echo -e "${TAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
+    echo -en "${TAB}${YELLOW}local branch is $N_local commit"
+    if [ $N_local -ne 1 ]; then
+        echo -en "s"
+    fi
+    echo -e " ahead of remote${RESET}"
     echo -e "${TAB}list of commits: "
     itab
     git --no-pager log ${pull_branch}..HEAD -n ${hash_limit} --color=always | sed "s/^/${TAB}/"
