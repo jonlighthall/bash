@@ -184,15 +184,16 @@ function check_remotes() {
                 for arg in $@; do
                     decho -en "${TAB}checking $remote_url against argument ${ARG}${ARG}${RESET}... "
                     if [[ $remote_url =~ $arg ]]; then
-                        echo -en "${GOOD}OK${RESET}"
+                        arg_stat=$(echo -en "${GOOD}OK${RESET}")
                         url_stat=$(echo -e "${GOOD}OK${RESET}")
                         break
                     else
-                        echo -e "${GRAY}SKIP${RESET}"
+                        arg_stat=$(echo -e "${GRAY}SKIP${RESET}")
                         url_stat=$(echo -e "${GRAY}SKIP${RESET}")
                         do_connect=false
                     fi
                 done
+                echo -n $arg_stat
                 if [ ${do_connect} = 'false' ]; then
                     dtab 2
                     continue
