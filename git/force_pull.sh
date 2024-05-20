@@ -491,14 +491,16 @@ else
 fi
 
 # determine remote commits not found locally
+dtab
 echo -en "${TAB}${YELLOW}remote branch is "
-itab
 cond_remote=$hash_local..${pull_branch}
 hash_start_remote=$(git rev-list $cond_remote | tail -n 1)
 if [ ! -z ${hash_start_remote} ]; then
     N_remote=$(git rev-list $cond_remote | wc -l)
     echo -e "${N_remote} commits behind local branch${RESET}"
+    itab
     echo -e "${TAB}trailing remote commits:"
+    itab
     git rev-list $cond_remote -n $hash_limit | sed "s/^/${TAB}/"
 
     if [ $N_remote -gt $hash_limit ]; then
