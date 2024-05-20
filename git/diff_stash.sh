@@ -122,7 +122,7 @@ if [ $N_stash -gt 0 ]; then
     echo -e "$repo has $N_stash entries in stash"
 
     # loop over stash entries
-    for ((n = 0; n < $N_stash; n++)); do
+    for ((n = 0; n < 1; n++)); do
         echo
         stash="stash@{$n}"
         echo "${stash}"
