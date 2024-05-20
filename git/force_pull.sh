@@ -750,9 +750,8 @@ print_exit $?' EXIT
         echo
         echo "${TAB}skipping push"
         echo -e "${TAB}${YELLOW}$N_local commits not pushed${RESET}"
-        dtab
-    fi   
-
+    fi
+    dtab
 else
     echo -e "${TAB}${fTAB}no need to push"
 fi
