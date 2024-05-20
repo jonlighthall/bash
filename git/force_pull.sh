@@ -527,7 +527,7 @@ else
     if [ $N_remote -ne 1 ]; then
         echo -en "s"
     fi
-    echo "behind local branch${RESET}"
+    echo -e "behind local branch${RESET}"
 fi
 dtab 2
 
