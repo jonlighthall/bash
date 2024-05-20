@@ -484,7 +484,6 @@ if [ "$hash_local" == "$hash_remote" ]; then
     else
         echo "a different hash"
     fi
-    dtab
 else
     echo "a different hash (diverged)"
     echo "${TAB} local: $hash_local"
