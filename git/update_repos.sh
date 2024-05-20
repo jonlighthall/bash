@@ -989,4 +989,4 @@ else
     echo -ne "${RESET}"           
 fi
 
-set_traps
+set_exit
