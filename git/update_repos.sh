@@ -46,7 +46,7 @@ fi
 print_source
 
 # save and print starting directory
-start_dir=$PWD
+start_dir="$PWD"
 echo "${TAB}starting directory = ${start_dir}"
 
 # load git utils
@@ -136,8 +136,12 @@ declare -i n_pull=0
 declare -i n_push=0
 
 # reset SSH status list
-export host_bad=''
-export host_OK=''
+if [ -z ${host_bad:+dummy} ]; then
+    export host_bad=''
+fi
+if [ -z ${host_OK:+dummy} ]; then
+    export host_OK=''
+fi
 
 # list failures
 loc_fail=''
@@ -171,14 +175,14 @@ fetch_max=0
 
 # define timeout command
 timeout_ver=$(timeout --version | head -1 | sed 's/^.*) //')
-declare -ir timeout_ver_maj=$(echo $timeout_ver | awk -F. '{print $1}')
-declare -ir timeout_ver_min=$(echo $timeout_ver | awk -F. '{print $2}')
+declare -i timeout_ver_maj=$(echo $timeout_ver | awk -F. '{print $1}')
+declare -i timeout_ver_min=$(echo $timeout_ver | awk -F. '{print $2}')
 to_base0="timeout"
 if [[ $timeout_ver_min -gt 4 ]]; then
     to_base0+=" --foreground --preserve-status"
 fi
 to_base0+=" -s 9"
-declare -r to_base="${to_base0}"
+declare to_base="${to_base0}"
 
 # beautify settings
 GIT_HIGHLIGHT='\E[7m'
