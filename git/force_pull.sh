@@ -729,9 +729,15 @@ if [ $N_local -gt 0 ]; then
     echo -e "${TAB}${YELLOW}local branch is $N_local commits ahead of remote${RESET}"
     echo -e "${TAB}${fTAB}list of commits: "
     itab
-    git --no-pager log ${pull_branch}..HEAD -n ${hash_limit} | sed "s/^/${TAB}/"
+    git --no-pager log ${pull_branch}..HEAD -n ${hash_limit} --color=always | sed "s/^/${TAB}/"
+    echo
+    if [ $N_local -gt $hash_limit ]; then
+        N_skip=$(( $N_local - $hash_limit))
+        echo -e "${TAB}${YELLOW}$N_skip commits not displayed${RESET}"
+    fi
+    
     dtab
-    trap 'set_color; lecho;
+    trap 'set_color; lecho
 echo -e "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
 echo -e "${trap_head}stash pop"
 echo -e "${trap_head}reset HEAD"
@@ -744,7 +750,18 @@ print_exit $?' EXIT
     read -p "${TAB}Proceed with push? (y/n) " -n 1 -r 
     reset_traps
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        do_cmd git push --set-upstream ${pull_repo} ${pull_refspec}
+        #do_cmd git push --set-upstream ${pull_repo} ${pull_refspec}
+#        do_cmd_stdbuf git branch -u ${remote_tracking_branch}
+
+        do_cmd_stdbuf git push $upstream_repo HEAD:$upstream_refspec
+        RETVAL=$?
+        echo -ne "${TAB}${INVERT} push ${RESET} "
+        if [[ $RETVAL == 0 ]]; then
+            echo -e "${GOOD}OK${RESET}"
+        else
+            echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+            exit
+        fi      
     else
         echo "${TAB}skipping push"
     fi   
