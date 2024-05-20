@@ -29,10 +29,6 @@ proj_name=$(basename "$src_dir_phys")
 target_dir="${HOME}/utils/${proj_name}"
 link_dir=$HOME/bin
 
-# check directories
-check_target "${target_dir}"
-do_make_dir "${link_dir}"
-
 cbar "Start Linking Repo Files"
 # list of files to be linked
 ext=.sh
