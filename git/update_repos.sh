@@ -223,6 +223,9 @@ for repo in $list; do
         fi
         continue
     fi
+
+    # increment git counter
+    ((++n_git))
     
     # parse remote
     echo -n "${TAB}checking remote tracking branch... "
