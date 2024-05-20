@@ -1,11 +1,12 @@
 #!/bin/bash -u
-# set tab
-TAB+=${fTAB:='   '}
+
 # no echo source since this is a utility
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
 fi
+# set tab
+itab
 #
 # check for input
 if [ $# -eq 0 ]; then
