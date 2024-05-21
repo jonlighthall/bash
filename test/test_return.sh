@@ -29,9 +29,20 @@ set -e
 
 function cleanup () {
     echo -e "${INVERT}${FUNCNAME}${NORMAL}"
-    echo "${BASH_SOURCE[0]##*/}"
+    echo "${BASH_SOURCE[0]##*/}"    
 }
 
+function do_return() {
+    echo -e "${INVERT}${FUNCNAME}${NORMAL}"
+    echo "${BASH_SOURCE[0]##*/}"
+    print_stack
+    return
+
+}
+
+
+set -e
+set_traps
 
 
 echo "function:"
@@ -46,9 +57,9 @@ dtab
 
 lecho
 echo "here"
-DEBUG=2
-clear_traps
-trap cleanup RETURN EXIT ERR INT
+#DEBUG=0
+#clear_traps
+trap do_return EXIT
 
 
 #trap 'echo "${FUNCNAME} return"; trap -- RETURN; trap -- EXIT; trap -- ERR; set +eE' RETURN
