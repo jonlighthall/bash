@@ -59,6 +59,7 @@ for my_link in \
     test/get_wttr \
     test/test_file \
     test/test_ls_color \
+    test/test_return \
     untar \
     update_packages \
     whatsup \
