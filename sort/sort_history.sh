@@ -107,12 +107,12 @@ set -e
 # check save directory
 check_target ${save_dir}
 
-if true; then 
+if true; then
     # if the save directory exists, history should be saved there
     hist_save=${save_dir}/${hist_name}
-    
+
     # check if the history file is a link
-    echo -n "${hist_ref} is a "    
+    echo -n "${hist_ref} is a "
     if [ -L ${hist_ref} ]; then
         echo -n "link and "
         # check if the link is valid
@@ -120,7 +120,6 @@ if true; then
             # check if the link points where we want it
             if [[ "${hist_ref}" -ef "${hist_save}" ]];then
                 echo "already points to ${hist_save}"
-
                 # you're done!
             else
 		            echo -en "$points to "
@@ -129,25 +128,24 @@ if true; then
                 echo "${hist_link}"
 
                 # add link to list
-                list_in+=( "${hist_link}")                
+                list_in+=( "${hist_link}")
                 # remove bad link
-                echo "remove"
+                echo "remove..."
                 #rm -v "${hist_ref}"
                 # re-link
-                
+                # ...
             fi
 	      else
 		        echo -e "${BROKEN}broken${RESET} ${UL}link${RESET}"
 		        echo "${hist_ref} points to ${hist_link}"
 
-            # if link points to the correct location, touch link to create dummy file            
-		        echo "touching ${hist_link}..." 
+            # if link points to the correct location, touch link to create dummy file
+		        echo "touching ${hist_link}..."
 		        #touch "${hist_link}"
             # otherwise delete link
 	      fi
     else
         echo "not a link"
-
         # check if the original file exits
         if [ -f ${hist_ref} ]; then
 		        echo -e "is a regular ${UL}file${RESET}"
@@ -164,7 +162,7 @@ if true; then
     hist_bak=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
 fi
 
-echo " backup file is $hist_bak"
+echo "backup file is $hist_bak"
 
 echo "backup history file"
 cp -pv $hist_ref ${hist_bak} | sed "s/^/${TAB}${fTAB}/"
@@ -177,7 +175,7 @@ echo "${TAB}${list_in[@]}"
 if [ $# -gt 0 ]; then
     echo "${TAB}list of arguments:"
     for arg in "$@"; do
-        echo "${TAB}${fTAB}$arg"
+        echo -n "${TAB}${fTAB}$arg"
         list_in+=( "$arg" )
     done
 fi
@@ -186,7 +184,8 @@ dtab
 if [ ${#list_in[@]} -gt 0 ]; then
     echo "${TAB}list of files (input):"
     for file in ${list_in[@]}; do
-        echo "${TAB}${fTAB}$file"
+        echo -n "${TAB}${fTAB}"
+        wc $file
     done
 fi
 
@@ -240,7 +239,7 @@ for file in $list_out; do
 done
 
 # set output file name
-hist_out=${hist_ref}_merge
+hist_out=${hist_save}_merge
 list_del+="${hist_out} "
 echo "${TAB}output file name is ${hist_out}"
 
@@ -255,13 +254,17 @@ print_markers
 for hist_edit in ${hist_bak} ${hist_out}; do
     # get file length
     L=$(cat ${hist_edit} | wc -l)
-    echo "${TAB}${fTAB}${hist_edit} has $L lines"
 
+    cbar "sorting ${YELLOW}${hist_edit}${RESET}..."
+    itab
+    echo "${TAB}${hist_edit} has $L lines"
     # clean up whitespace
     echo -n "${TAB}delete trailing whitespaces... "
     sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${hist_edit}
     echo "done"
 
+    echo -e "${TAB}${UL}mark timestamps${RESET}"
+    itab
     marker_list=''
     # find and mark timestamp lines
     gen_marker "${hist_edit}"
@@ -285,7 +288,10 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     echo -n "${TAB}remove orphaned timestamp lines... "
     sed -i '/^#[0-9]\{10\}$/d' ${hist_edit}
     echo "done"
+    dtab
 
+    echo -e "${TAB}${UL}mark commands${RESET}"
+    itab
     # mark orphaned lines
     gen_marker "${hist_edit}"
     marker_list+="$marker "
@@ -298,7 +304,10 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     echo -n "${TAB}merge orphaned lines... "
     sed -i ":start;N;s/\n${OR_MARKER}/${OR_MARKER}/;t start;P;D" ${hist_edit}
     echo "done"
+    dtab
 
+    echo -e "${TAB}${UL}mark comments${RESET}"
+    itab
     # generate login marker
     echo "${TAB}generate superior/inferior markers... "
     N=${#TS_MARKER}
@@ -336,13 +345,19 @@ for hist_edit in ${hist_bak} ${hist_out}; do
         sed -i "s/ ${tail}/${LO_MARKER}${tail}/" ${hist_edit}
     done
     echo "done"
+    dtab
 
+    echo -e "${TAB}${UL}sort${RESET}"
+    itab
     # sort history
     echo -n "${TAB}sorting lines... "
     sort -u ${hist_edit} -o ${hist_edit}
     echo "done"
     echo -e "${TAB}\E[1;31msorted $L lines in $SECONDS seconds${RESET}"
+    dtab
 
+    echo -e "${TAB}${UL}clean up${RESET}"
+    itab
     # unmark log in/out lines
     echo -n "${TAB}unmark login lines... "
     for head in ${head_list}; do
@@ -391,6 +406,8 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     echo -n "${TAB}unmerge commands... "
     sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_edit}
     echo "done"
+    dtab 2
+    echo -e "${TAB}done sorting ${YELLOW}${hist_edit}${RESET}"
 done
 
 # fix unmatched quotes
