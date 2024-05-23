@@ -407,8 +407,11 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_edit}
     echo "done"
     dtab 2
-    echo -e "${TAB}done sorting ${YELLOW}${hist_edit}${RESET}"
+    echo -e "${TAB}done sorting ${hist_edit}"
 done
+
+echo -e "${TAB}${UL}clean up unmatched symbols${RESET}"
+itab
 
 # fix unmatched quotes
 echo -n "${TAB}find unmatched quotes... "
@@ -432,8 +435,9 @@ echo "done"
 #(?!^.*".*'+.*".*$)(?!^.*`.*'+.*`.*$)^[^\n']*'[^\n']*$ quotes and graves
 #(?!^.*".*'+.*".*$)(?!^.*`.*'+.*`.*$)^[^\n']*(?<!\\)'[^\n']*$
 
+dtab
 # remove repeated lines
-echo "${TAB}remvoed duplicate consecutive lines... "
+echo "${TAB}remove duplicate consecutive lines... "
 
 itab
 # set output file name
