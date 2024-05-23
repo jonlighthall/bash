@@ -286,7 +286,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     # get file length
     L=$(cat ${hist_edit} | wc -l)
 
-    cbar "sorting ${YELLOW}${hist_edit}${RESET}..."
+    cbar "sorting ${YELLOW}${hist_edit##*/}${RESET}..."
     itab
     echo "${TAB}${hist_edit} has $L lines"
     # clean up whitespace
@@ -438,10 +438,10 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_edit}
     echo "done"
     dtab 2
-    echo -e "${TAB}done sorting ${hist_edit}"
+    echo -e "${TAB}done sorting ${hist_edit##*/}"
 done
 
-echo -e "${TAB}${UL}clean up unmatched symbols in ${hist_out}${RESET}"
+echo -e "${TAB}${UL}clean up ${hist_out##*/}${RESET}"
 itab
 
 # fix unmatched quotes
@@ -466,7 +466,6 @@ echo "done"
 #(?!^.*".*'+.*".*$)(?!^.*`.*'+.*`.*$)^[^\n']*'[^\n']*$ quotes and graves
 #(?!^.*".*'+.*".*$)(?!^.*`.*'+.*`.*$)^[^\n']*(?<!\\)'[^\n']*$
 
-dtab
 # remove repeated lines
 echo "${TAB}remove duplicate consecutive lines... "
 
@@ -491,9 +490,10 @@ N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_uni} | wc -l)
 echo -e "${TAB}\E[1;31mnumber of differences = $N${RESET}"
 echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_uni}
 
+echo -n "${TAB}"
 cp -Lpv ${hist_uni} ${hist_ref}
 
-echo "list del = ${list_del}"
+dtab
 
 if [[ ! -z ${list_del} ]]; then
     echo "${TAB}removing merged files..."
