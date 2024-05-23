@@ -58,23 +58,29 @@ function gen_marker() {
 }
 
 function print_markers() {
+    echo -e "${TAB}${UL}marker list${RESET}"
+    itab
     # print bad list
     echo "${TAB}bad list:"
-    echo -n "${TAB}${fTAB}"
+    itab
+    echo -n "${TAB}"
     for i in ${bad_list}; do
         printf "\\$(printf %03o "$i")"
     done
     echo
+    dtab
 
     # print good list
     echo "${TAB}good list:"
-    echo -n "${TAB}${fTAB}"
+    itab
+    echo -n "${TAB}"
     for ((j = $m_start; j <= $m_end; j++)); do
         if [[ ! $bad_list =~ ${j} ]]; then
             printf "\\$(printf %03o "$j")"
         fi
     done
     echo
+    dtab 2
 }
 
 # set sort order (C sorting is the most consistient)
@@ -104,6 +110,9 @@ unset list_in
 
 set -e
 
+echo -e "${TAB}${UL}check files${RESET}"
+itab
+
 # check save directory
 check_target ${save_dir}
 
@@ -112,7 +121,7 @@ if true; then
     hist_save=${save_dir}/${hist_name}
 
     # check if the history file is a link
-    echo -n "${hist_ref} is a "
+    echo -n "${TAB}${hist_ref} is a "
     if [ -L ${hist_ref} ]; then
         echo -n "link and "
         # check if the link is valid
@@ -162,14 +171,14 @@ if true; then
     hist_bak=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
 fi
 
-echo "backup file is $hist_bak"
+echo "${TAB}backup file is $hist_bak"
 
-echo "backup history file"
+echo "${TAB}backup history file..."
 cp -pv $hist_ref ${hist_bak} | sed "s/^/${TAB}${fTAB}/"
 
 # set list of files to check
 list_in+=( "${hist_ref}" )
-echo "${#list_in[@]} files in list"
+echo "${TAB}${#list_in[@]} files in list"
 echo "${TAB}${list_in[@]}"
 
 if [ $# -gt 0 ]; then
@@ -187,7 +196,6 @@ if [ $# -gt 0 ]; then
     dtab
 fi
 
-dtab
 if [ ${#list_in[@]} -gt 0 ]; then
     echo "${TAB}list of files (input):"
     for file in ${list_in[@]}; do
@@ -202,24 +210,28 @@ list_out=''
 list_del=''
 set +e
 unset_traps
+itab
 for hist_in in ${list_in[@]}; do
-    echo -n "${TAB}${fTAB}${hist_in}... "
+    echo "${TAB}${hist_in}... "
+    itab
     if [ -f ${hist_in} ]; then
-        echo -e "is a regular ${UL}file${RESET}"
+        echo -e "${TAB}is a regular ${UL}file${RESET}"
         list_out+="${hist_in} "
         if [ ! ${hist_in} -ef ${hist_ref} ]; then
-            echo "${TAB}${fTAB}${hist_in} is not the same as ${hist_ref}"
+            echo "${TAB}is not the same as ${hist_ref##*/}"
             list_del+="${hist_in} "
         else
-            echo "${TAB}${fTAB}${hist_ref} and ${hist_in} are the same file"
+            echo -e "${TAB}${YELLOW}is the same file as ${hist_ref##*/}${RESET}"
         fi
 
         # add check for initial orphaned lines
         (head -n 1 ${hist_in} | grep "#[0-9]\{10\}") >/dev/null
         if [ $? -eq 0 ]; then
-            echo "${TAB}${fTAB}${hist_in} starts with timestamp"
+            echo "${TAB}starts with timestamp"
         else
-            echo "${TAB}${fTAB}${hist_in} DOES NOT start with timestamp"
+            echo -e "${TAB}${YELLOW}DOES NOT start with timestamp${RESET}"
+            itab
+            echo -n "${TAB}inserting timestamp..."
             # get next timestamp
             TS=$(grep "#[0-9]\{10\}" .bash_history -m 1 | sed 's/^#\([0-9]\{10\}\)[ \n].*/\1/')
             echo "${TAB}   TS = $TS"
@@ -231,29 +243,41 @@ for hist_in in ${list_in[@]}; do
             echo "${TAB}$hist_temp"
             echo "#$preTS INSERT MISSING TIMESTAMP" | cat - ${hist_in} >${hist_temp}
             mv -v ${hist_temp} ${hist_in}
+            echo "done"
+            dtab
         fi
     else
-        echo -e "${BAD}${UL}does not exist${RESET}"
+        echo -e "${TAB}${BAD}does not exist${RESET}"
     fi
+    dtab
 done
+dtab
 set -eE
-echo "list out = ${list_out}"
-echo "list del = ${list_del}"
+echo "${TAB}list out = ${list_out}"
+echo "${TAB}list del = ${list_del}"
 
-echo "list of files (checked):"
+echo "${TAB}list of files (checked):"
+itab
 for file in $list_out; do
-    echo "${TAB}${fTAB}$file"
+    echo "${TAB}$file"
 done
+dtab
+
+dtab
+echo -e "${TAB}${UL}merge files${RESET}"
+itab
 
 # set output file name
 hist_out=${hist_save}_merge
 list_del+="${hist_out} "
-echo "${TAB}output file name is ${hist_out}"
+echo -e "${TAB}output file name is ${YELLOW}${hist_out}${RESET}"
 
 # create history file
 echo -n "${TAB}concatenate files... "
 cat ${list_out} >${hist_out}
 echo "done"
+
+dtab
 
 # print good/bad markers
 print_markers
