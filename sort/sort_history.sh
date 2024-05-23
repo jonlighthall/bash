@@ -174,10 +174,17 @@ echo "${TAB}${list_in[@]}"
 
 if [ $# -gt 0 ]; then
     echo "${TAB}list of arguments:"
+    itab
     for arg in "$@"; do
-        echo -n "${TAB}${fTAB}$arg"
-        list_in+=( "$arg" )
+        echo -n "${TAB}$arg "
+        if [ -e $arg ]; then
+            echo -e "${GOOD}OK${RESET}"
+            list_in+=( "$arg" )
+        else
+            echo -e "${BAD}FAIL${RESET}"
+        fi
     done
+    dtab
 fi
 
 dtab
@@ -356,7 +363,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     echo -e "${TAB}\E[1;31msorted $L lines in $SECONDS seconds${RESET}"
     dtab
 
-    echo -e "${TAB}${UL}clean up${RESET}"
+    echo -e "${TAB}${UL}clean up ${hist_edit##*/}${RESET}"
     itab
     # unmark log in/out lines
     echo -n "${TAB}unmark login lines... "
@@ -410,7 +417,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     echo -e "${TAB}done sorting ${hist_edit}"
 done
 
-echo -e "${TAB}${UL}clean up unmatched symbols${RESET}"
+echo -e "${TAB}${UL}clean up unmatched symbols in ${hist_out}${RESET}"
 itab
 
 # fix unmatched quotes
