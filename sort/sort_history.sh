@@ -253,8 +253,6 @@ for hist_in in ${list_in[@]}; do
 done
 dtab
 set -eE
-echo "${TAB}list out = ${list_out}"
-echo "${TAB}list del = ${list_del}"
 
 echo "${TAB}list of files (checked):"
 itab
