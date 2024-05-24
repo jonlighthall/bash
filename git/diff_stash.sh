@@ -106,6 +106,11 @@ function check_min() {
         n_min=$tot            
     else
         ((++i_count))
+        if [ $((i_count % 10)) -eq 0 ]; then
+            echo ". $i_count"
+        else
+            echo -n "."
+        fi
         if [ $i_count -gt 500 ]; then
             break
         fi
@@ -118,6 +123,26 @@ function check_min() {
 echo
 cbar "${BOLD}parsing stash...${RESET}"
 N_stash=$(git stash list | wc -l)
+
+if [ $N_stash -gt 0 ]; then
+    echo -e "$repo has $N_stash entries in stash"
+
+    # loop over stash entries
+    for ((n = 0; n < $(($N_stash-1)); n++)); do
+        stash="stash@{$n}"
+        next="stash@{$(($n+1))}"
+
+        if [ -z "$(git diff --stat $stash $next)" ]; then
+            echo $n
+            echo "${stash}"
+            git diff --stat $stash $next
+            git log -1 ${stash}
+            echo
+            exit
+        fi        
+    done
+fi
+
 if [ $N_stash -gt 0 ]; then
     echo -e "$repo has $N_stash entries in stash"
 
@@ -220,7 +245,12 @@ if [ $N_stash -gt 0 ]; then
             echo "${hash_min[@]} " | sed "s/ /\n/g" | sed "s/^/${TAB}/"
             dtab
 
-            git diff ${hash_min} ${stash} -- $fname --color=always
+            lecho
+            cmd="git --no-pager diff ${hash_min} ${stash} -- $fname"
+            echo $cmd
+            
+            $cmd
+            
             
         done        
     done
