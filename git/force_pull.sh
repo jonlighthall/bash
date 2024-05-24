@@ -273,9 +273,9 @@ else
             echo "local time+ $(git log ${local_branch} --format="%ad" -1)"
             echo "remote time+ $(git log ${pull_branch} --format="%ad" -1)"
         ) | column -t -s+ -o ":" -R1 | sed "s/^/${TAB}/"
-        dtab
 
         echo -n "${TAB}remote commits commited after local HEAD:"
+        dtab
         cond_after="${pull_branch} --after=${T_local}"        
         N_after=$(git rev-list ${cond_after} | wc -l)
         if [ $N_after -eq 0 ]; then
@@ -406,9 +406,16 @@ while [ -z ${hash_local} ]; do
         fi     
     else
         echo "do not match"
-        echo "${TAB}subj = $hash_local_s"
-        echo "${TAB}time = $hash_local"
-        echo "${TAB} using $hash_local"
+        itab
+        echo "${TAB}subj = $hash_local_s" | sed "! 1 s/^/${TAB}       /"
+        echo -n "${TAB}time = "
+        if [ ! -z ${hash_local} ]; then
+            echo "$hash_local"
+            echo "${TAB} using $hash_local"
+        else
+            echo -e "${YELLOW}not found${RESET}"
+        fi
+        dtab
     fi
     
     echo "${TAB}remote commit hash: ............ ${hash_remote}"
@@ -432,10 +439,14 @@ while [ -z ${hash_local} ]; do
                 if [ $N_skip -lt $N_tail ]; then
                     N_tail=$N_skip
                 else
-                    echo "${TAB}..."
+                    if [ $N_skip -gt 0 ]; then
+                        echo "${TAB}..."
+                    fi
                 fi
                 git rev-list ${cond_local} | tail -${N_tail} | sed "s/^/${TAB}/"
-                echo -e "${TAB}${YELLOW}$(($N_skip-$N_tail)) commits not displayed${RESET}"
+                if [ $N_skip -gt 0 ]; then
+                    echo -e "${TAB}${YELLOW}$(($N_skip-$N_tail)) commits not displayed${RESET}"
+                fi
             fi
             
             if [ $N_local -gt 1 ]; then
