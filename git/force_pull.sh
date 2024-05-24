@@ -411,6 +411,7 @@ while [ -z ${hash_local} ]; do
         echo -n "${TAB}time = "
         if [ ! -z ${hash_local} ]; then
             echo "$hash_local"
+            decho "${TAB} the time-based commited is selected by default" # is there a reason for this?
             echo "${TAB} using $hash_local"
         else
             echo -e "${YELLOW}not found${RESET}"
