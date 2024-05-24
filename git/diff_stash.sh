@@ -9,7 +9,7 @@ if [ -e "${fpretty}" ]; then
     source "${fpretty}"
 else
     # ignore undefined variables
-    set +u 
+    set +u
     # do not exit on errors
     set +e
 fi
@@ -85,13 +85,14 @@ function check_min() {
         n_min=$tot
         hash_min=$hash
     fi
-    
+
     if [ ${tot} -le ${n_min} ]; then
-        echo -n "$hash: "
-        echo -n "$tot +/- changes "                    
+        [ $i_count -gt 0 ] && echo
+        echo -n "${TAB}$hash: "
+        echo -n "$tot +/- changes "
         if [ ${tot} -eq ${n_min} ]; then
 
-            if [[ ! "${hash}" == ${hash_min} ]]; then            
+            if [[ ! "${hash}" == ${hash_min} ]]; then
                 hash_min+=( "$hash" )
             fi
             echo "same min"
@@ -100,14 +101,17 @@ function check_min() {
             hash_min=$hash
             echo "new min"
 
-            git diff --stat ${hash} ${stash} -- $fname
+            git diff --ignore-space-change --stat ${hash} ${stash} -- $fname
         fi
-        echo "${hash_min[@]}"
-        n_min=$tot            
+        echo "${TAB}${hash_min[@]}"
+        [ $i_count -gt 0 ] && echo -n "${TAB}"
+        n_min=$tot
     else
+        [ $i_count -eq 0 ] && echo -n "${TAB}"
         ((++i_count))
         if [ $((i_count % 10)) -eq 0 ]; then
             echo ". $i_count"
+            echo -n "${TAB}"
         else
             echo -n "."
         fi
@@ -132,19 +136,38 @@ if [ $N_stash -gt 0 ]; then
         stash="stash@{$n}"
         next="stash@{$(($n+1))}"
 
-        if [ -z "$(git diff --stat $stash $next)" ]; then
-            echo $n
+        decho "$n : $(($n+1))"
+        if [ -z "$(git diff --ignore-space-change --stat $stash $next)" ]; then
+            echo
             echo "${stash}"
-            git diff --stat $stash $next
+            git diff --color-moved=blocks --ignore-space-change --stat $stash $next
             git log -1 ${stash}
             echo
             exit
-        fi        
+        else
+            : #  git diff --ignore-space-change --numstat $stash $next
+        fi
     done
 fi
 
 if [ $N_stash -gt 0 ]; then
     echo -e "$repo has $N_stash entries in stash"
+
+    echo $PWD
+
+		if git rev-parse --git-dir &>/dev/null; then
+			  # This is a valid git repository
+			  echo "$PWD is part of a Git repository"
+			  GITDIR=$(git rev-parse --git-dir)
+			  echo "the .git folder is $GITDIR"
+        ROOTDIR=$(dirname $GITDIR)
+			  echo "the base folder is $ROOTDIR"
+        cd $ROOTDIR
+    else
+        echo "$not a git dir"
+        exit
+
+    fi
 
     # loop over stash entries
     for ((n = 0; n < 1; n++)); do
@@ -153,17 +176,17 @@ if [ $N_stash -gt 0 ]; then
         echo "${stash}"
         git log -1 ${stash}
         echo
-        
+
         # get names of stashed files
-        for fil in $(git diff --name-only ${stash}^ ${stash}); do            
+        for fil in $(git diff --ignore-space-change --name-only ${stash}^ ${stash}); do
             stash_files+=( "$fil" )
         done
-        
+
         # check if stash is empty
         if [ -z "${stash_files}" ]; then
             echo "stash@{$n} has no diff"
             git stash drop stash@{$n}
-            continue           
+            continue
         fi
 
         # list stashed files
@@ -173,35 +196,40 @@ if [ $N_stash -gt 0 ]; then
         echo "${TAB}$n_stash_files files found"
         echo "${stash_files[@]}" | sed "s/ /\n/g" | sed "s/^/${TAB}/"
         dtab
-        
+
+        cbar "${BOLD}looping over files in stash@{$n}...${RESET}"
+
         # loop over stashed files
         for fname in ${stash_files[@]}; do
-            echo -e "${YELLOW}$fname${RESET}..."
-
+            echo -e "${TAB}${YELLOW}$fname${RESET}..."
+            itab
             # define counters
             unset n_min
             unset hash_min
             declare -i i_count=0
 
-            n_rev=$(git rev-list ${stash}^ -- $fname | wc -l)
-            echo "$n_rev revisions found"
+            cmd="git rev-list ${stash}^ -- $fname"
+            echo "${TAB}${cmd}"
 
-            for hash in $(git rev-list ${stash}^ -- $fname); do
+            n_rev=$($cmd | wc -l)
+            echo "${TAB}$n_rev revisions found"
+
+            for hash in $($cmd); do
                 # git diff --stat ${hash} ${stash} -- $fname
                 # git diff --numstat ${hash} ${stash} -- $fname
-                add=$(git diff --numstat ${hash} ${stash} -- $fname | awk '{print $1}' )
-                sub=$(git diff --numstat ${hash} ${stash} -- $fname | awk '{print $2}' )
+                add=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $1}' )
+                sub=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $2}' )
 
                 if [ -z "$add" ]; then
                     add=0
                 fi
-                
+
                 if [ -z "$sub" ]; then
                     sub=0
                 fi
-                
+
                 # get total number of changes
-                declare -i tot=$(( $add + $sub))                
+                declare -i tot=$(( $add + $sub))
 
                 # exit loop of zero changes found
                 if [ $tot -eq 0 ]; then
@@ -209,50 +237,54 @@ if [ $N_stash -gt 0 ]; then
                 fi
 
                 check_min
-                
+
             done
 
-            n_rev=$(git rev-list HEAD -- $fname | wc -l)
-            echo "$n_rev revisions found"
+            echo
+            cmd="git rev-list HEAD -- $fname"
+            echo "${TAB}${cmd}"
+            n_rev=$($cmd | wc -l)
+            echo "${TAB}$n_rev revisions found"
+            i_count=0
 
-            for hash in $(git rev-list HEAD -- $fname); do
+            for hash in $($cmd); do
                 # git diff --stat ${hash} ${stash} -- $fname
                 # git diff --numstat ${hash} ${stash} -- $fname
-                add=$(git diff --numstat ${hash} ${stash} -- $fname | awk '{print $1}' )
-                sub=$(git diff --numstat ${hash} ${stash} -- $fname | awk '{print $2}' )
+                add=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $1}' )
+                sub=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $2}' )
 
                 if [ -z "$add" ]; then
                     add=0
                 fi
-                
+
                 if [ -z "$sub" ]; then
                     sub=0
-                fi                
+                fi
 
                 # get total number of changes
-                declare -i tot=$(($add+$sub))                
+                declare -i tot=$(($add+$sub))
 
                 # exit loop of zero changes found
                 if [ $tot -eq 0 ]; then
                     break
                 fi
-                check_min                
-            done                     
+                check_min
+            done
             echo
-            echo "minimum diff:"
+            echo "${TAB}minimum diff:"
             itab
-            echo "$n_min +/- changes"
+            echo "${TAB}$n_min +/- changes"
             echo "${hash_min[@]} " | sed "s/ /\n/g" | sed "s/^/${TAB}/"
             dtab
 
             lecho
-            cmd="git --no-pager diff ${hash_min} ${stash} -- $fname"
-            echo $cmd
-            
-            $cmd
-            
-            
-        done        
+            cmd="git --no-pager diff --color-moved=blocks --ignore-space-change ${hash_min} ${stash} -- $fname"
+            echo "${TAB}$cmd"
+
+            do_cmd_script $cmd
+            dtab
+
+        done
     done
 else
     echo "no stash entries found"
