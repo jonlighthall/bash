@@ -42,34 +42,28 @@ else
 			      # this is not a git repository
 			      echo "$1 is not part of a Git repsoity"
 			      echo "removing binary files..."
-			      #find ./ -type f -not -path "*/.git/*" | perl -lne 'print if -B' | xargs -r rm -v
-
             itab
-
             for file in $(find ./ -type f -not -path "*/.git/*"); do
-
                 # Check if the file is binary
                 if perl -e 'exit -B $ARGV[0]' "$file"; then
-                    :  #echo "File is text."
-                    file $file
+                    :  #echo "File is text."; file $file
                 else
                     if [ -s $file ]; then
-                        echo -e "${TAB}${BAD}${file}${RESET} is binary"
+                        echo -e "${TAB}${BAD}${file##*./}${RESET} is binary"
                     else
-                        echo -e "${TAB}${YELLOW}${file}${RESET} is empty"
+                        echo -e "${TAB}${YELLOW}${file##*./}${RESET} is empty"
                     fi
+                    itab
+                    echo -en "${TAB}"
+                    ls $file -l --color=always
+                    dtab
                 fi
-                continue
-
             done
             dtab
-
-            #      find ./ -type f -not -path "*/.git/*" | perl -lne 'print if -B' | xargs -r rm -v
 		    fi
 	  else
 		    echo "$1 is not found"
 		    exit 1
 	  fi
 fi
-# print time at exit
-echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+set_exit
