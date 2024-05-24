@@ -359,6 +359,7 @@ for repo in $list; do
 
     if [[ "$host_stat" =~ *"FAIL"* ]]; then
         decho "skipping fetch..."
+        enable_exit_on_fail
         exit_on_fail
         continue
     else
@@ -478,6 +479,7 @@ for repo in $list; do
     if [ $RETVAL -ne 0 ]; then
         fetch_fail+="$repo "
         echo -e "\E[32m> \E[0mWSL may need to be restarted"
+        enable_exit_on_fail
         exit_on_fail
         echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
         read -e -i "shutdown_wsl" -p $'\e[0;32m$\e[0m ' -t 10 && eval $REPLY
@@ -525,6 +527,7 @@ for repo in $list; do
                     itab
                     echo -e "${TAB}merge conflicts found!"
                     itab
+                    enable_exit_on_fail
                     if [ $(git diff --name-only --diff-filter=M | wc -l) -gt 0 ]; then
                         echo -en "${TAB}modified files found, "
                         if [ $(git diff -w --diff-filter=M | wc -l) -gt 0 ]; then
@@ -533,8 +536,6 @@ for repo in $list; do
                             git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}\x1b[31m&\x1b[m/"
                             dtab 
                             check_mod
-                            enable_exit_on_fail
-
                             exit_on_fail
                             continue
                         else
@@ -660,6 +661,7 @@ for repo in $list; do
         if [[ $RETVAL != 0 ]]; then
             # add to failure list
             pull_fail+="$repo "
+            enable_exit_on_fail
             exit_on_fail
         else
             # update links after pull
@@ -753,6 +755,7 @@ for repo in $list; do
         if [[ $RETVAL != 0 ]]; then
             # add to failure list
             push_fail+="$repo "
+            enable_exit_on_fail
             exit_on_fail
         fi
     fi
@@ -805,6 +808,7 @@ for repo in $list; do
         else
             echo -en "${GIT_HIGHLIGHT} gc ${RESET} "
         fi
+        enable_exit_on_fail
         if [[ $RETVAL != 0 ]]; then
             echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
             exit_on_fail
