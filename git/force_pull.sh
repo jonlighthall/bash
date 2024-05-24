@@ -341,12 +341,13 @@ while [ -z ${hash_local} ]; do
         git log --color=always | grep -B4 "$subj_remote" | sed "s/^/${TAB}/"
         echo
     fi
-    git log --format="%C(auto)%h%d %at %ai %s" --color=always | grep "${subj_remote}" | sed "s/^/${TAB}/"
+    subj_pat=" ${subj_remote}$"
+    git log --format="%C(auto)%h%d %at %ai %s" --color=always | grep "${subj_pat}" | sed "s/^/${TAB}/"
 
     # get the has of the corresponding commit
-    hash_local_s=$(git log --format="%H %s" | grep "${subj_remote}" | awk '{print $1}')
+    hash_local_s=$(git log --format="%H %s" | grep "${subj_pat}$" | awk '{print $1}')
     # check the number of corresponding commits
-    N_hash_local_s=$(git log --format="%h %s" | grep "${subj_remote}" | awk '{print $1}' | wc -l)
+    N_hash_local_s=$(git log --format="%h %s" | grep "${subj_pat}$" | awk '{print $1}' | wc -l)
 
     if [ $N_hash_local_s -gt 1 ]; then
         echo -e "${TAB}${YELLOW}multiple matching entries found!${RESET}"
