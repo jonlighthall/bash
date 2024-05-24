@@ -56,7 +56,7 @@ for library in git; do
     fname="${src_dir_phys}/lib_${library}.sh"
     if [ -e "${fname}" ]; then
         if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
-            echo "${TAB}loading $(basename ${fname})"
+            echo "${TAB}loading $(basename "${fname}")"
         fi
         source "${fname}"
     else
@@ -195,7 +195,7 @@ for repo in $list; do
     #------------------------------------------------------
     # find
     #------------------------------------------------------
-    echo -e "locating ${PSDIR}$repo${RESET}... \c"
+    echo -e "${TAB}locating ${PSDIR}$repo${RESET}... \c"
     if [ -e ${HOME}/$repo ]; then
         echo -e "${GOOD}OK${RESET}"
         ((++n_found))
@@ -254,6 +254,7 @@ for repo in $list; do
         continue
     fi
     remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
+    decho -n "${TAB}"
     echo "$remote_tracking_branch"
 
     upstream_repo=${remote_tracking_branch%%/*}
@@ -515,8 +516,9 @@ for repo in $list; do
             RETVAL=$?
             t_end=$(date +%s%N)
             dt_pull=$((${t_end} - ${t_start}))
+            dtab
 
-            echo -en "${GIT_HIGHLIGHT} pull ${RESET} "
+            echo -en "${TAB}${GIT_HIGHLIGHT} pull ${RESET} "
             if [[ $RETVAL != 0 ]]; then
                 echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
                 if [[ $RETVAL == 1 ]]; then
@@ -527,13 +529,17 @@ for repo in $list; do
                         echo -en "${TAB}modified files found, "
                         if [ $(git diff -w --diff-filter=M | wc -l) -gt 0 ]; then
                             echo "modifications are non-trivial: "
-                            git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[31m&\x1b[m/"
-                            dtab 2
+                            itab
+                            git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}\x1b[31m&\x1b[m/"
+                            dtab 
                             check_mod
+                            enable_exit_on_fail
+
                             exit_on_fail
+                            continue
                         else
                             echo "modifications are trivial: "
-                            git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}${fTAB}\x1b[33m&\x1b[m/"
+                            git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}\x1b[33m&\x1b[m/"
 
                             echo "${TAB}checking out modified files..."
                             git diff --name-only --diff-filter=M | xargs -L 1 git checkout
@@ -981,7 +987,7 @@ if [ -z "$mod_repos" ]; then
     echo "none"
 else
     echo "$mod_repos"
-    echo -e "${YELLOW}$mod_files${RESET}" | sed "s/^/${list_indent}/"
+    echo -e "${YELLOW}$mod_files${RESET}" | sort -n | sort -u | sed "s/^/${list_indent}/"
 fi
 
 # stash
