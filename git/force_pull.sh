@@ -408,7 +408,7 @@ while [ -z ${hash_local} ]; do
     else
         echo "do not match"
         itab
-        echo "${TAB}subj = $hash_local_s" | sed "! 1 s/^/${TAB}       /"
+        echo "${TAB}subj = $hash_local_s" | sed "1! s/^/${TAB}       /"
         echo -n "${TAB}time = "
         if [ ! -z ${hash_local} ]; then
             echo "$hash_local"
