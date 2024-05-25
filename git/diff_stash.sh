@@ -49,13 +49,26 @@ for library in git; do
     fi
 done
 
+cbar "${BOLD}check directory...${RESET}"
+
 check_repo
 
 # get repo name
 repo_dir=$(git rev-parse --show-toplevel)
-echo "repository directory is ${repo_dir}"
+echo -e "repository directory is ${PSDIR}${repo_dir}${RESET}"
 repo=${repo_dir##*/}
 echo "repository name is $repo"
+
+GITDIR=$(readlink -f $(git rev-parse --git-dir))
+echo "the .git folder is $GITDIR"
+if [[ ${PWD} -ef ${repo_dir} ]]; then
+    echo "already in top level directory"
+else
+    echo "$PWD is part of a Git repository"
+    echo "moving to top level directory..."
+    cd -L $repo_dir
+    echo "$PWD"
+fi
 
 # parse remote
 echo
@@ -152,22 +165,6 @@ fi
 
 if [ $N_stash -gt 0 ]; then
     echo -e "$repo has $N_stash entries in stash"
-
-    echo $PWD
-
-		if git rev-parse --git-dir &>/dev/null; then
-			  # This is a valid git repository
-			  echo "$PWD is part of a Git repository"
-			  GITDIR=$(git rev-parse --git-dir)
-			  echo "the .git folder is $GITDIR"
-        ROOTDIR=$(dirname $GITDIR)
-			  echo "the base folder is $ROOTDIR"
-        cd $ROOTDIR
-    else
-        echo "$not a git dir"
-        exit
-
-    fi
 
     # loop over stash entries
     for ((n = 0; n < 1; n++)); do
