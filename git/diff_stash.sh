@@ -50,7 +50,6 @@ for library in git; do
 done
 
 cbar "${BOLD}check directory...${RESET}"
-
 check_repo
 
 # get repo name
@@ -71,7 +70,6 @@ else
 fi
 
 # parse remote
-echo
 cbar "${BOLD}parse remote tracking branch...${RESET}"
 if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
     echo "${TAB}no remote tracking branch set for current branch"
@@ -137,15 +135,12 @@ function check_min() {
 #check_remotes
 
 # check for stash entries
-echo
 cbar "${BOLD}parsing stash...${RESET}"
 N_stash=$(git stash list | wc -l)
 
 if [ $N_stash -gt 0 ]; then
     echo -e "$repo has $N_stash entries in stash"
     do_cmd_stdbuf git stash list
-
-    echo
     cbar "${BOLD}looking for duplicate stashes...${RESET}"
     
     # loop over stash entries
@@ -167,7 +162,7 @@ if [ $N_stash -gt 0 ]; then
             echo "new limit should be $new_lim"
             if [ $n -ge $new_lim ]; then
                 echo "new limit exceeded"
-                echo "exiting"
+                echo "breaking..."
                 break
             fi
         fi
@@ -177,10 +172,8 @@ if [ $N_stash -gt 0 ]; then
         cmd="git diff --ignore-space-change --stat $stash $next"
         echo $cmd
         $cmd
-        lecho
         # check if empty
         if [ -z "$(git diff --ignore-space-change --stat $stash $next 2>&1)" ]; then
-            lecho
             # print commit
             echo "${stash} $next"
             git log -1 ${stash}
@@ -192,14 +185,14 @@ if [ $N_stash -gt 0 ]; then
             echo -en "${RESET}"
 
             # drecrement counter
-            echo "n = $n"
             ((--n))
-            echo "n = $n"
         fi
         echo "n = $n (end)"
     done
 fi
 
+# update stash list
+N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo -e "$repo has $N_stash entries in stash"
 
@@ -263,6 +256,7 @@ if [ $N_stash -gt 0 ]; then
             unset hash_min
             declare -i i_count=0
 
+            # get list of hashes before stash that contain file
             cmd="git rev-list ${stash}^ -- $fname"
             echo "${TAB}${cmd}"
 
@@ -296,7 +290,8 @@ if [ $N_stash -gt 0 ]; then
             done
 
             echo
-            cmd="git rev-list HEAD -- $fname"
+            # get list of hashes after stash, up to HEAD, that contain file
+            cmd="git rev-list ${stash}^..HEAD -- $fname"
             echo "${TAB}${cmd}"
             n_rev=$($cmd | wc -l)
             echo "${TAB}$n_rev revisions found"
@@ -332,7 +327,6 @@ if [ $N_stash -gt 0 ]; then
             echo "${hash_min[@]} " | sed "s/ /\n/g" | sed "s/^/${TAB}/"
             dtab
 
-            lecho
             cmd="git --no-pager diff --color-moved=blocks --ignore-space-change ${hash_min} ${stash} -- $fname"
             echo "${TAB}$cmd"
 
