@@ -166,8 +166,15 @@ fi
 if [ $N_stash -gt 0 ]; then
     echo -e "$repo has $N_stash entries in stash"
 
+    if [ -z "$@" ]; then
+        n_start=0;
+    else
+        n_start=$1;
+    fi
+    echo "checking entry ${n_start}"    
+
     # loop over stash entries
-    for ((n = 0; n < 1; n++)); do
+    for ((n = $n_start; n < ((n_start + 1 )); n++)); do
         echo
         stash="stash@{$n}"
         echo "${stash}"
@@ -281,8 +288,9 @@ if [ $N_stash -gt 0 ]; then
             do_cmd_script $cmd
             dtab
 
-        done
-    done
+        done # files
+        echo "use git stash drop stash@{$n} to delete"
+    done # stash entreis
 else
     echo "no stash entries found"
 fi
