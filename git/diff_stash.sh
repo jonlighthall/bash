@@ -171,7 +171,14 @@ if [ $N_stash -gt 0 ]; then
     else
         n_start=$1;
     fi
-    echo "checking entry ${n_start}"    
+
+    if [ $n_start -ge $N_stash ]; then
+        echo "cannot diff stash $1"
+        echo "stash only has $N_stash entries"
+        exit 1
+    fi
+
+    echo "checking entry ${n_start}"
 
     # loop over stash entries
     for ((n = $n_start; n < ((n_start + 1 )); n++)); do
