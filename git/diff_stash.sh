@@ -143,23 +143,60 @@ N_stash=$(git stash list | wc -l)
 
 if [ $N_stash -gt 0 ]; then
     echo -e "$repo has $N_stash entries in stash"
+    do_cmd_stdbuf git stash list
 
+    echo
+    cbar "${BOLD}looking for duplicate stashes...${RESET}"
+    
     # loop over stash entries
-    for ((n = 0; n < $(($N_stash-1)); n++)); do
+    loop_lim=$(($N_stash-1))
+    for ((n = 0; n < loop_lim; n++)); do
+        echo "n = $n (start)"
+        # check entries
+        N_stash_in=$(git stash list | wc -l)
+
+        if [ $N_stash_in = $N_stash ]; then
+            echo "no change in number of stash entries ($N_stash_in)"
+        else
+            echo "number of stash entries has changed"
+            echo "$repo now has $N_stash_in entries in stash"
+
+            # check limit
+            echo "old loop limit = $loop_lim"
+            new_lim=$((N_stash_in-1))
+            echo "new limit should be $new_lim"
+            if [ $n -ge $new_lim ]; then
+                echo "new limit exceeded"
+                echo "exiting"
+                break
+            fi
+        fi
+
         stash="stash@{$n}"
         next="stash@{$(($n+1))}"
-
-        decho "$n : $(($n+1))"
-        if [ -z "$(git diff --ignore-space-change --stat $stash $next)" ]; then
-            echo
-            echo "${stash}"
-            git diff --color-moved=blocks --ignore-space-change --stat $stash $next
+        cmd="git diff --ignore-space-change --stat $stash $next"
+        echo $cmd
+        $cmd
+        lecho
+        # check if empty
+        if [ -z "$(git diff --ignore-space-change --stat $stash $next 2>&1)" ]; then
+            lecho
+            # print commit
+            echo "${stash} $next"
             git log -1 ${stash}
             echo
-            exit
-        else
-            : #  git diff --ignore-space-change --numstat $stash $next
+            echo -e "${BAD}EMPTY: no diff"
+            
+            # remove duplicate stash
+            git stash drop ${stash}
+            echo -en "${RESET}"
+
+            # drecrement counter
+            echo "n = $n"
+            ((--n))
+            echo "n = $n"
         fi
+        echo "n = $n (end)"
     done
 fi
 
@@ -178,26 +215,33 @@ if [ $N_stash -gt 0 ]; then
         exit 1
     fi
 
-    echo "checking entry ${n_start}"
+    echo
+    cbar "${BOLD}checking stash entry ${n_start}...${RESET}"
 
     # loop over stash entries
     for ((n = $n_start; n < ((n_start + 1 )); n++)); do
-        echo
         stash="stash@{$n}"
         echo "${stash}"
         git log -1 ${stash}
         echo
 
         # get names of stashed files
-        for fil in $(git diff --ignore-space-change --name-only ${stash}^ ${stash}); do
-            stash_files+=( "$fil" )
-        done
+        cmd="git diff --ignore-space-change --name-only ${stash}^ ${stash}"
+        echo $cmd
+        $cmd 
 
-        # check if stash is empty
-        if [ -z "${stash_files}" ]; then
+
+        if [ -z $(${cmd}) ]; then
+            # check if stash is empty
+            echo -e "${BAD}EMPTY: no diff"
             echo "stash@{$n} has no diff"
             git stash drop stash@{$n}
+            echo -en "${RESET}"
             continue
+        else
+            for fil in $($cmd); do
+                stash_files+=( "$fil" )
+            done
         fi
 
         # list stashed files
