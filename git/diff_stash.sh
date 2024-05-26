@@ -224,7 +224,7 @@ if [ $N_stash -gt 0 ]; then
         $cmd 
 
 
-        if [ -z $(${cmd}) ]; then
+        if [ -z "$(${cmd})" ]; then
             # check if stash is empty
             echo -e "${BAD}EMPTY: no diff"
             echo "stash@{$n} has no diff"
