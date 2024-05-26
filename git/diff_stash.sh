@@ -142,7 +142,7 @@ if [ $N_stash -gt 0 ]; then
     echo -e "$repo has $N_stash entries in stash"
     do_cmd_stdbuf git stash list
     cbar "${BOLD}looking for duplicate stashes...${RESET}"
-    
+
     # loop over stash entries
     loop_lim=$(($N_stash-1))
     for ((n = 0; n < loop_lim; n++)); do
@@ -171,7 +171,10 @@ if [ $N_stash -gt 0 ]; then
         next="stash@{$(($n+1))}"
         cmd="git diff --ignore-space-change --stat $stash $next"
         echo $cmd
-        $cmd
+        if [ $DEBUG -gt 0 ]; then
+            $cmd
+        fi
+
         # check if empty
         if [ -z "$(git diff --ignore-space-change --stat $stash $next 2>&1)" ]; then
             # print commit
@@ -179,7 +182,7 @@ if [ $N_stash -gt 0 ]; then
             git log -1 ${stash}
             echo
             echo -e "${BAD}EMPTY: no diff"
-            
+
             # remove duplicate stash
             git stash drop ${stash}
             echo -en "${RESET}"
@@ -221,8 +224,7 @@ if [ $N_stash -gt 0 ]; then
         # get names of stashed files
         cmd="git diff --ignore-space-change --name-only ${stash}^ ${stash}"
         echo $cmd
-        $cmd 
-
+        $cmd
 
         if [ -z "$(${cmd})" ]; then
             # check if stash is empty
@@ -334,7 +336,10 @@ if [ $N_stash -gt 0 ]; then
             dtab
 
         done # files
-        echo "use git stash drop stash@{$n} to delete"
+        echo "${TAB}to delete, use"
+        itab
+        echo "${TAB}git stash drop stash@{$n}"
+        dtab
     done # stash entreis
 else
     echo "no stash entries found"
