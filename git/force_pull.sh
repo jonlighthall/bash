@@ -745,7 +745,7 @@ if [ $N_local -gt 0 ]; then
     echo -e " ahead of remote${RESET}"
     echo -e "${TAB}list of commits: "
     itab
-    git --no-pager log ${pull_branch}..HEAD -n ${hash_limit} --color=always | sed "s/^/${TAB}/"
+    git --no-pager log --stat ${pull_branch}..HEAD -n ${hash_limit} --color=always | sed "s/^/${TAB}/"
     echo
     if [ $N_local -gt $hash_limit ]; then
         N_skip=$(( $N_local - $hash_limit))
