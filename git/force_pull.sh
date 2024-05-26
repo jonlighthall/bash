@@ -223,7 +223,7 @@ if [ ! -z ${remote_tracking_branch} ]; then
     fi
 fi
 
-echo -n "local branch and remote branch name... "
+echo -n "local branch and remote branch names... "
 if [ "$local_branch" == "$pull_refspec" ]; then
     echo "match"
     echo -e "${TAB}${fTAB}${GREEN}${local_branch}${RESET}"
@@ -545,6 +545,7 @@ if [ ! -z ${hash_start_remote} ]; then
     fi
     dtab
 else
+    dtab
     N_remote=0
     echo -e "${N_remote} commits behind local branch${RESET}"
 fi
