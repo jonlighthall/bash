@@ -471,13 +471,13 @@ while [ -z ${hash_local} ]; do
         fi
     else
         echo -e "${YELLOW}not found${RESET}"
-        dtab            
+        dtab 2           
     fi
     iHEAD="${iHEAD}~"
 done
 
 dtab
-echo "${TAB}remote commit found"
+echo -e "${TAB}${GOOD}remote commit found${RESET}"
 # compare local commit to remote commit
 itab
 echo -n "${TAB}corresponding remote commit: ... "
