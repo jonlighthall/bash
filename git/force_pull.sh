@@ -425,15 +425,20 @@ while [ -z ${hash_local} ]; do
         itab
         echo "$hash_local"
         # determine local commits not found on remote
-        echo -n "${TAB}leading local commits: "
+        echo -en "${TAB}${YELLOW}local branch is "
         cond_local="$hash_remote..HEAD"
         hash_start=$(git rev-list $cond_local | tail -n 1)
         if [ ! -z ${hash_start} ]; then
-            echo
+            N_local=$(git rev-list $cond_local | wc -l)
+            echo -en "${N_local} commit"
+            if [ $N_local -ne 1 ]; then
+                echo -en "s"
+            fi
+            echo -e " ahead of remote${RESET}"
+            itab
+            echo "${TAB}leading local commits: "
             itab
             git rev-list $cond_local -n $hash_limit | sed "s/^/${TAB}/"
-            N_local=$(git rev-list $cond_local | wc -l)
-
             if [ $N_local -gt $hash_limit ]; then
                 N_skip=$(( $N_local - $hash_limit))
                 N_tail=$(($hash_limit/2))
@@ -454,18 +459,14 @@ while [ -z ${hash_local} ]; do
                 echo -ne "${TAB}\E[3Dor ${hash_start}^.."
                 hash_end=$(git rev-list $cond_local | head -n 1)
                 echo ${hash_end}
+                dtab
             else
                 hash_end=$hash_start
             fi
-            dtab 2
-            echo -en "${TAB}${YELLOW}local branch is $N_local commit"
-            if [ $N_local -ne 1 ]; then
-                echo -en "s"
-            fi
-            echo -e " ahead of remote${RESET}"
+            dtab            
         else
-            echo -e "${GREEN}none${RESET}"
             N_local=0
+            echo -e "${N_remote} commits behind local branch${RESET}"            
             dtab
         fi
     else
@@ -545,11 +546,7 @@ if [ ! -z ${hash_start_remote} ]; then
     dtab
 else
     N_remote=0
-    echo -en "${N_remote} commit"
-    if [ $N_remote -ne 1 ]; then
-        echo -en "s"
-    fi
-    echo -e " behind local branch${RESET}"
+    echo -e "${N_remote} commits behind local branch${RESET}"
 fi
 dtab 2
 
