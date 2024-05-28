@@ -673,18 +673,18 @@ for repo in $list; do
                     if [ -f "bin/${prog}" ]; then
                         prog=bin/${prog}
                     fi
+                    itab
                     bash ${prog}
-                    
-                    # print make_links status
                     RETVAL3=$?
                     dtab
+                    
+                    # print make_links status
                     echo -en "${GIT_HIGHLIGHT} make links ${RESET} "
                     if [ ${RETVAL3} -eq 0 ]; then
                         echo -e "${GOOD}OK${RESET}"
                     else
                         echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL3${RESET}"
                     fi
-
                 else
                     echo "skip"
                 fi
