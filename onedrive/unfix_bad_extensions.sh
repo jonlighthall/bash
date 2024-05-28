@@ -58,6 +58,8 @@ else
     fi
 fi
 
-echo "Files found: $count_found"
-echo "Files renamed: $count_mv"
-echo "Files not renamed: $count_mv_fail"
+# print summary
+echo
+echo -e "\E[4m${count_found} files found:\E[0m"
+echo "${count_mv} files renamed"
+echo -e "${count_mv_fail} files not renamed"
