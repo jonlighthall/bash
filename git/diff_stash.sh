@@ -188,6 +188,7 @@ if [ $N_stash -gt 0 ]; then
     if [ $n_start -ge $N_stash ]; then
         echo -e "${TAB}${BAD}cannot diff stash@{$1}${RESET}"
         itab
+        echo -e "${TAB}user argument: ${ARG}$1${RESET}"
         echo "${TAB}stash only has $N_stash entries"
         echo "${TAB}exiting..."
         dtab
