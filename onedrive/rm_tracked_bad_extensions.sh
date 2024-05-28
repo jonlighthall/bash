@@ -25,17 +25,17 @@ fi
 
 # find input directory
 if [[ "$1" == "." ]]; then
-    in_dir=$(readlink -f $PWD/$1)
+    in_dir=$(readlink -f "$PWD/$1")
 else
     in_dir=$(readlink -f $1)
 fi
 echo -n "target directory $in_dir..."
-if [ ! -d ${in_dir} ]; then
+if [ ! -d "${in_dir}" ]; then
 		echo "not found"
 		exit 1
 fi
 echo "found "
-cd ${in_dir}
+cd "${in_dir}"
 
 itab
 # check if PWD is a git repository
@@ -53,7 +53,9 @@ echo "${TAB}the .git folder is $GITDIR"
 dtab
 
 if [ -f makefile ]; then
-    make clean
+    echo "${TAB}makefile found"
+    echo "${TAB}executing make clean..."
+    do_cmd make clean
 fi
 
 declare -i count_found=0
