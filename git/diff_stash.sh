@@ -69,27 +69,7 @@ else
     echo "$PWD"
 fi
 
-# parse remote
-cbar "${BOLD}parse remote tracking branch...${RESET}"
-if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
-    echo "${TAB}no remote tracking branch set for current branch"
-else
-    remote_tracking_branch=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
-    echo -e "${TAB}remote tracking branch: ${BLUE}${remote_tracking_branch}${RESET}"
-    remote_name=${remote_tracking_branch%%/*}
-    echo "${TAB}remote name: .......... $remote_name"
-    remote_url=$(git remote -v | grep ${remote_name} | awk '{print $2}' | uniq)
-    echo "${TAB}remote url: ${remote_url}"
-    remote_pro=$(echo ${remote_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
-    echo "protocol:   ${remote_pro}"
-    n_remotes=$(git remote | wc -l)
-    # parse branches
-    branch_remote=${remote_tracking_branch#*/}
-    echo "${TAB}remote branch: $branch_remote"
-
-    branch_local=$(git branch | grep \* | sed 's/^\* //')
-    echo -e "${TAB} local branch: ${GREEN}${branch_local}${RESET}"
-fi
+parse_remote_tracking_branch
 
 function check_min() {
     if [ -z ${n_min+dummy} ]; then
@@ -138,7 +118,7 @@ function check_min() {
 cbar "${BOLD}parsing stash...${RESET}"
 N_stash=$(git stash list | wc -l)
 
-if [ $N_stash -gt 0 ]; then
+if [ $N_stash -gt 1 ]; then   
     echo -e "$repo has $N_stash entries in stash"
     do_cmd_stdbuf git stash list
     cbar "${BOLD}looking for duplicate stashes...${RESET}"
@@ -206,8 +186,11 @@ if [ $N_stash -gt 0 ]; then
     fi
 
     if [ $n_start -ge $N_stash ]; then
-        echo "cannot diff stash $1"
-        echo "stash only has $N_stash entries"
+        echo -e "${TAB}${BAD}cannot diff stash@{$1}${RESET}"
+        itab
+        echo "${TAB}stash only has $N_stash entries"
+        echo "${TAB}exiting..."
+        dtab
         exit 1
     fi
 
