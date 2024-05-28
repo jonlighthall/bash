@@ -3,7 +3,7 @@
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
 
-# load formatting and functions
+# load bash utilities
 fpretty="${HOME}/config/.bashrc_pretty"
 if [ -e "${fpretty}" ]; then
     source "${fpretty}"

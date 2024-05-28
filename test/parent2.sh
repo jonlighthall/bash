@@ -8,7 +8,7 @@ declare src_dir_logi=$(dirname "${BASH_SOURCE}")
 # get starting directory
 declare start_dir=$PWD
 
-# load formatting and functions
+# load bash utilities
 fpretty="${src_dir_phys}/alias.sh"
 echo -n "$fpretty..."
 if [ -e "$fpretty" ]; then

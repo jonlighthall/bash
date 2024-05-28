@@ -109,7 +109,7 @@ function check_remotes() {
     # manually set
     #local -i DEBUG=1
 
-    # load formatting and functions
+    # load bash utilities
     local fpretty=${HOME}/config/.bashrc_pretty
     if [ -e $fpretty ]; then
         source $fpretty

@@ -14,7 +14,7 @@ declare -i start_time=$(date +%s%N)
 # substitue default value if DEBUG is unset or null
 declare -i DEBUG=${DEBUG:-0}
 
-# load formatting and functions
+# load bash utilities
 fpretty="${HOME}/config/.bashrc_pretty"
 if [ -e "${fpretty}" ]; then
     source "${fpretty}"
