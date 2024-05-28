@@ -244,7 +244,9 @@ if [ $N_stash -gt 0 ]; then
         itab
         n_stash_files=${#stash_files[@]}
         echo "${TAB}$n_stash_files files found"
+        echo -en "${YELLOW}"
         echo "${stash_files[@]}" | sed "s/ /\n/g" | sed "s/^/${TAB}/"
+        echo -en "${RESET}"
         dtab
 
         cbar "${BOLD}looping over files in stash@{$n}...${RESET}"
