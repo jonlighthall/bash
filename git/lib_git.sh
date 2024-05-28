@@ -65,13 +65,9 @@ function check_repo() {
 }
 
 function print_remote() {
-    if [ "${n_remotes}" -gt 1 ]; then
-        ((++i))
-        echo -n "${TAB}${fTAB}$i) "
-        itab
-    else
-        echo -n "${TAB}"
-    fi
+    itab
+    ((++i))
+    echo -n "${TAB}$i) "
     echo -en "${PSBR}${remote_name}${RESET} "
     
     # get URL
@@ -337,9 +333,9 @@ function check_remotes() {
         fi # do check
         dtab
 
-        if [ "${n_remotes}" -gt 1 ]; then
-            dtab
-        fi
+        #        if [ "${n_remotes}" -gt 1 ]; then
+        dtab
+        #       fi
     done
     unset remote_url
     unset remote_pro
@@ -407,20 +403,6 @@ function check_mod() {
 }
 
 function print_branches() {
-    # load git utils
-    get_source
-    for library in git; do
-        fname="${src_dir_phys}/lib_${library}.sh"
-        if [ -e "${fname}" ]; then
-            if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
-                echo "${TAB}loading $(basename "${fname}")"
-            fi
-            source "${fname}"
-        else
-            echo "${fname} not found"
-        fi
-    done
-
     # before starting, fetch remote
     echo -n "${TAB}fetching ${pull_repo}..."
     do_cmd_stdbuf git fetch --all --verbose ${pull_repo}    
@@ -489,21 +471,6 @@ function parse_remote_tracking_branch() {
 }
 
 function track_all_branches() {
-    # DEBUG=1
-    get_source
-    # load git utils
-    for library in git; do
-        fname="${src_dir_phys}/lib_${library}.sh"
-        if [ -e "${fname}" ]; then
-            if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
-                echo "${TAB}loading $(basename "${fname}")"
-            fi
-            source "${fname}"
-        else
-            echo "${fname} not found"
-        fi
-    done
-
     check_remotes
     local RETVAL=$?
     reset_shell ${old_opts-''}
