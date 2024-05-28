@@ -18,12 +18,6 @@ else
 fi
 print_source
 
-# define colors
-TRUE='\E[1;32mtrue\E[0m'
-FALSE='\E[1;31mfalse\E[0m'
-UNSET='\E[1;33munset\E[0m'
-NULL='\E[1;36mnull\E[0m'
-
 # define conditions and anti-conditions
 c1="${UNSET} or ${NULL}"
 a1="set and not null"
