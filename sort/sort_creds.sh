@@ -7,7 +7,7 @@
 #
 # Aug 2023 JCL
 
-# load formatting
+# load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty

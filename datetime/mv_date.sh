@@ -129,7 +129,7 @@ function get_mod_date() {
 # set debug level
 declare -i DEBUG=${DEBUG:-0}
 
-# load formatting and functions
+# load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
