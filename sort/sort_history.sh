@@ -179,7 +179,11 @@ cp -pv $hist_ref ${hist_bak} | sed "s/^/${TAB}${fTAB}/"
 # set list of files to check
 list_in+=( "${hist_ref}" )
 echo "${TAB}${#list_in[@]} files in list"
-echo "${TAB}${list_in[@]}"
+itab
+for file in ${list_in[@]}; do
+    echo "${TAB}${file}"
+done
+dtab
 
 if [ $# -gt 0 ]; then
     echo "${TAB}list of arguments:"
@@ -198,10 +202,13 @@ fi
 
 if [ ${#list_in[@]} -gt 0 ]; then
     echo "${TAB}list of files (input):"
+    itab
+    (
     for file in ${list_in[@]}; do
-        echo -n "${TAB}${fTAB}"
         wc $file
     done
+    ) | column -t -N "lines,words,bytes,file" | sed "s/^/${TAB}/"
+    dtab
 fi
 
 # check list of files
@@ -233,7 +240,7 @@ for hist_in in ${list_in[@]}; do
             itab
             echo -n "${TAB}inserting timestamp..."
             # get next timestamp
-            TS=$(grep "#[0-9]\{10\}" .bash_history -m 1 | sed 's/^#\([0-9]\{10\}\)[ \n].*/\1/')
+            TS=$(grep "#[0-9]\{10\}" ${hist_in} -m 1 | sed 's/^#\([0-9]\{10\}\)[ \n].*/\1/')
             echo "${TAB}   TS = $TS"
             # generate preceeding timestamp
             preTS=$((TS - 1))
