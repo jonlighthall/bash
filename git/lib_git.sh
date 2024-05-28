@@ -545,14 +545,14 @@ function track_all_branches() {
             # dtab
             do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
         else
-            echo -en "${TAB}${GRH}"
+            echo -en "${GRH}"
             hline 72
             echo "${TAB}branch does not exist"
             # create local branch to track remote branch
             dtab
             do_cmd git branch "${branch_name}" --track "$branch"
             itab
-            echo -en "${TAB}${GRH}"
+            echo -en "${GRH}"
             hline 72
             echo -en "${RESET}"
             #dtab
