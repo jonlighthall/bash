@@ -224,8 +224,6 @@ if [ ${#list_in[@]} -gt 0 ]; then
     dtab
 fi
 
-sort_TS=$(echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z')")
-
 # check list of files
 echo "${TAB}checking file list..."
 list_out=''
@@ -233,45 +231,18 @@ list_del=''
 set +e
 unset_traps
 itab
-echo "${sort_TS} start" >${hist_out}
 for hist_in in ${list_in[@]}; do
     echo -n "${TAB}${hist_in}... "
     itab
     if [ -f ${hist_in} ]; then
         echo -e "${GOOD}OK${RESET}"
         decho -e "${TAB}is a regular ${UL}file${RESET}"
-
+        list_out+="${hist_in} "
         if [ ! ${hist_in} -ef ${hist_ref} ]; then
             decho "${TAB}is not the same as ${hist_ref##*/}"
             list_del+="${hist_in} "
-            cmp "${hist_in}" "${hist_ref}"
-            RETVAL=$?
-            decho "RETVAL = $RETVAL"
-            if [ $RETVAL -gt 0 ]; then
-
-                if [[ $(cmp ${hist_in} ${hist_ref} 2>&1) =~ "EOF" ]]; then
-                    echo "EOF"
-                    echo "subset"
-                    continue
-                else
-
-                    echo "differ"
-                    cmp ${hist_in} ${hist_ref} | awk '{print $7}'
-                    diff_line=$(cmp ${hist_in} ${hist_ref} | sed -n 's/.* \([0-9]*$\)/\1/p')
-                    echo "files differ on line $diff_line"
-
-                    sed -n "${diff_line},\$p" "${hist_in}" >>${hist_out}
-                fi
-
-            else
-                echo "files do not differ"
-            fi
-
-            list_out+="${hist_in} "
         else
             decho -e "${TAB}${YELLOW}is the same file as ${hist_ref##*/}${RESET}"
-            cat ${hist_in} >>${hist_out}
-            
         fi
 
         # add check for initial orphaned lines
@@ -396,42 +367,15 @@ echo -e "${TAB}output file name is ${YELLOW}${hist_out}${RESET}"
 
 # create history file
 echo -n "${TAB}concatenate files... "
-#cat ${list_out} >${hist_out}
+cat ${list_out} >${hist_out}
 echo "done"
 
-# remove repeated lines
 dtab
-echo -e "${TAB}${UL}remove duplicate lines${RESET}"
-itab
-
-# set output file name
-hist_uni=${hist_save}_uniq
-list_del+="${hist_uni} "
-echo "${TAB}output file name is ${hist_uni}"
-echo "${TAB}copying output..."
-echo -n "${TAB}"
-cp -pv ${hist_out} ${hist_uni}
-# select if remove repeated only
-echo -n "${TAB}scanning with "
-if true; then
-    echo -n "uniq..."
-    uniq ${hist_uni} > ${hist_out}
-else
-    echo -n "awk..."
-    awk '!a[$0]++' ${hist_uni} > ${hist_out}
-fi
-echo "done"
-set +e
-declare -i ndiff=$(diff -y --suppress-common-lines ${hist_out} ${hist_uni} | wc -l)
-echo "${TAB}$ndiff lines removed"
-
-diff -y --suppress-common-lines ${hist_out} ${hist_uni} | head -5
-echo "diff -y --suppress-common-lines ${hist_out} ${hist_uni}"
-
-dtab 2
 
 # print good/bad markers
 print_markers
+
+sort_TS=$(echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') insert ")
 
 for hist_edit in ${hist_bak} ${hist_out}; do
     # get file length
@@ -454,7 +398,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     TS_MARKER=${marker}
     echo -n "${TAB}mark timestamp lines... "
     sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_edit}
-    echo "${sort_TS} insert TS_MARKER ${TS_MARKER}" >>${hist_edit}
+    echo "${sort_TS}TS_MARKER ${TS_MARKER}" >>${hist_edit}
     echo "done"
 
     # remove marks from timestamp lines with no associated commands
@@ -481,7 +425,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     OR_MARKER=${marker}
     echo -n "${TAB}mark orphaned lines... "
     sed -i "/^#[0-9]\{10\}.*$/!s/^.*$/${OR_MARKER}&/" ${hist_edit}
-    echo "${sort_TS} insert OR_MARKER ${OR_MARKER}" >>${hist_edit}
+    echo "${sort_TS}OR_MARKER ${OR_MARKER}" >>${hist_edit}
     echo "done"
 
     # merge commands with timestamps
@@ -577,27 +521,10 @@ for hist_edit in ${hist_bak} ${hist_out}; do
         "[a-z]"
     )
 
-    diff_line=$(wc -l ${hist_edit} )
-    cmp "${hist_edit}" "${hist_ref}"
-    RETVAL=$?
-    decho "RETVAL = $RETVAL"
-    if [ $RETVAL -gt 0 ]; then        
-        if [[ $(cmp ${hist_edit} ${hist_ref} 2>&1) =~ "EOF" ]]; then
-            echo "EOF"
-            echo "subset"
-        else
-            echo "differ"
-        fi
-        diff_line=$(cmp ${hist_edit} ${hist_ref} | sed -n 's/.* \([0-9]*$\)/\1/p')
-        echo "files differ on line $diff_line"    
-    else
-        echo "files do not differ"
-    fi    
-
     for igno in "${ignore_list[@]}"; do
         echo -n "${TAB}${fTAB}deleting ${igno}... "
-        sed -i "${diff_line},/${TS_MARKER}${igno}$/d" ${hist_edit}
-        sed -i "${diff_line},\$s/${OR_MARKER}${igno}$//" ${hist_edit}
+        sed -i "/${TS_MARKER}${igno}$/d" ${hist_edit}
+        sed -i "s/${OR_MARKER}${igno}$//" ${hist_edit}
         echo "done"
     done
 
@@ -638,21 +565,40 @@ echo "done"
 #(?!^.*".*'+.*".*$)(?!^.*`.*'+.*`.*$)^[^\n']*'[^\n']*$ quotes and graves
 #(?!^.*".*'+.*".*$)(?!^.*`.*'+.*`.*$)^[^\n']*(?<!\\)'[^\n']*$
 
+# remove repeated lines
+echo "${TAB}remove duplicate consecutive lines... "
+
+itab
+# set output file name
+hist_uni=${hist_ref}_uniq
+list_del+="${hist_uni} "
+echo "${TAB}output file name is ${hist_uni}"
+dtab
+#sed '$!N; /^\(.*\)\n\1$/!P; D' ${hist_out}
+#perl -0777 -pe 's/(.+\R.+\R)\1/$1/g' ${hist_out}
+
+# select if remove repeated only
+if false; then
+    uniq ${hist_out} > ${hist_uni}
+else
+    awk '!a[$0]++' ${hist_out} > ${hist_uni}
+fi
+
 # check for repeated timestamps
-echo "${TAB}reapeated timestamps in ${hist_out}"
-grep "#[0-9]\{10\}" ${hist_out} | sed 's/ .*$//' | sort -n | uniq -c | sort -k1 -n -r | head -5
+echo "${TAB}reapeated timestamps in ${hist_uni}"
+grep "#[0-9]\{10\}" ${hist_uni} | sed 's/ .*$//' | sort -n | uniq -c | sort -k1 -n -r | head -5
 
 # save markers
-N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_out} | wc -l)
+N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_uni} | wc -l)
 echo -e "${TAB}\E[1;31mnumber of differences = $N${RESET}"
 if [ $N -gt 0 ]; then
-    echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_out}
+    echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_uni}
     sed -i 's/^[[:space:]]*$//' ${hist_bak}
-    sed -i 's/^[[:space:]]*$//' ${hist_out}
+    sed -i 's/^[[:space:]]*$//' ${hist_uni}
 fi
 
 echo -n "${TAB}"
-cp -Lpv ${hist_out} ${hist_ref}
+cp -Lpv ${hist_uni} ${hist_ref}
 
 dtab
 
