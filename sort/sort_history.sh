@@ -302,7 +302,7 @@ for hist_in in ${list_in[@]}; do
 
                 declare imark=$(grep "^#[0-9]\{10\}[a-zA-Z0-9]\{$n\}" "${hist_in}" | sed "s/^#[0-9]\{10\}\([a-zA-Z0-9]\{$n\}\).*$/\1/" | sort -n | uniq -c | sort -n | head -1 | awk '{print $2}')
                 declare -i cmark=$(grep "^#[0-9]\{10\}[a-zA-Z0-9]\{$n\}" "${hist_in}" | sed "s/^#[0-9]\{10\}\([a-zA-Z0-9]\{$n\}\).*$/\1/" | sort -n | uniq -c | sort -n | head -1 | awk '{print $1}')
-        echo -e "${TAB}marker candidate is ${GRH}$imark${RESET} with cout $cmark"
+                echo -e "${TAB}marker candidate is ${GRH}$imark${RESET} with cout $cmark"
             else
                 if [ $DEBUG -gt 0 ]; then
                     echo "${TAB}grep: matching lines"
@@ -332,11 +332,11 @@ for hist_in in ${list_in[@]}; do
         done
         echo -e "${TAB}marker candidate is ${GRH}$imark${RESET} with cout $cmark in ${hist_in}"
 
-        echo "${TAB}sed -i 's/$imark/\n/' ${hist_in}"
+        echo "${TAB}sed -i 's/$imark/\n/g' ${hist_in}"
 
         read -p "${TAB}Proceed with sed? (y/n) " -n 1 -r -t 15
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            sed -i "s/$imark/\n/" "${hist_in}"
+            sed -i "s/$imark/\n/g" "${hist_in}"
             echo
             echo "done"
         else
@@ -344,7 +344,7 @@ for hist_in in ${list_in[@]}; do
             echo
             echo "${TAB}exiting..."
             dtab
-            exit            
+            exit
         fi
         dtab
     fi
@@ -398,7 +398,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     TS_MARKER=${marker}
     echo -n "${TAB}mark timestamp lines... "
     sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_edit}
-    echo "${sort_TS}TS_MARKER ${TS_MARKER}" >>${hist_edit}    
+    echo "${sort_TS}TS_MARKER ${TS_MARKER}" >>${hist_edit}
     echo "done"
 
     # remove marks from timestamp lines with no associated commands
@@ -511,22 +511,20 @@ for hist_edit in ${hist_bak} ${hist_out}; do
         "gitr"
         "gits"
         "history"
-        "la"
-        "ls"
-        "lt"
+        "l[a-zA-z]"
         "make"
         "make clean"
         "make run"
         "pwd"
         "up"
         "update_repos"
-        "x"
+        "[a-z]"
     )
 
     for igno in "${ignore_list[@]}"; do
         echo -n "${TAB}${fTAB}deleting ${igno}... "
-        #        sed -i "/${TS_MARKER}${igno}$/d" ${hist_edit}
-        #        sed -i "s/${OR_MARKER}${igno}$//" ${hist_edit}
+        sed -i "/${TS_MARKER}${igno}$/d" ${hist_edit}
+        sed -i "s/${OR_MARKER}${igno}$//" ${hist_edit}
         echo "done"
     done
 
@@ -534,6 +532,10 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     echo -n "${TAB}unmerge commands... "
     sed -i "s/${TS_MARKER}/\n/;s/${OR_MARKER}/\n/g" ${hist_edit}
     echo "done"
+
+    # remove fail-safe marker saves
+    sed -i "/^${sort_TS}/d" ${hist_edit}
+
     dtab 2
     echo -e "${TAB}done sorting ${hist_edit##*/}"
 done
@@ -582,10 +584,18 @@ else
     awk '!a[$0]++' ${hist_out} > ${hist_uni}
 fi
 
+# check for repeated timestamps
+echo "${TAB}reapeated timestamps in ${hist_uni}"
+grep "#[0-9]\{10\}" ${hist_uni} | sed 's/ .*$//' | sort -n | uniq -c | sort -k1 -n -r | head -5
+
 # save markers
 N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_uni} | wc -l)
 echo -e "${TAB}\E[1;31mnumber of differences = $N${RESET}"
-echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_uni}
+if [ $N -gt 0 ]; then
+    echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') using markers ${TS_MARKER} ${OR_MARKER} LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_uni}
+    sed -i 's/^[[:space:]]*$//' ${hist_bak}
+    sed -i 's/^[[:space:]]*$//' ${hist_uni}
+fi
 
 echo -n "${TAB}"
 cp -Lpv ${hist_uni} ${hist_ref}
