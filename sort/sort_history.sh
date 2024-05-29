@@ -106,6 +106,13 @@ bad_list=$(echo {58..64} {91..96})
 hist_name=.bash_history
 hist_ref=${HOME}/${hist_name}
 save_dir=${HOME}/home
+
+# if the save directory exists, history should be saved there
+hist_save=${save_dir}/${hist_name}
+
+# set output file name
+hist_out=${hist_save}_merge
+
 unset list_in
 
 set -e
@@ -117,8 +124,6 @@ itab
 check_target ${save_dir}
 
 if true; then
-    # if the save directory exists, history should be saved there
-    hist_save=${save_dir}/${hist_name}
 
     # check if the history file is a link
     echo -n "${TAB}${hist_ref} is a "
@@ -191,8 +196,16 @@ if [ $# -gt 0 ]; then
     for arg in "$@"; do
         echo -n "${TAB}$arg "
         if [ -e $arg ]; then
-            echo -e "${GOOD}OK${RESET}"
-            list_in+=( "$arg" )
+
+            if [ $arg -ef $hist_out ]; then
+                echo -e "${YELLOW}rename${RESET}"
+                itab
+                mv_date $arg
+                dtab
+            else
+                echo -e "${GOOD}OK${RESET}"
+                list_in+=( "$arg" )
+            fi
         else
             echo -e "${BAD}FAIL${RESET}"
         fi
@@ -204,10 +217,10 @@ if [ ${#list_in[@]} -gt 0 ]; then
     echo "${TAB}list of files (input):"
     itab
     (
-    for file in ${list_in[@]}; do
-        wc $file
-    done
-    ) | column -t -N "lines,words,bytes,file" | sed "s/^/${TAB}/"
+        for file in ${list_in[@]}; do
+            wc $file
+        done
+    ) | sort -k1 -n | column -t -N "lines,words,bytes,file" | sed "s/^/${TAB}/"
     dtab
 fi
 
@@ -219,38 +232,40 @@ set +e
 unset_traps
 itab
 for hist_in in ${list_in[@]}; do
-    echo "${TAB}${hist_in}... "
+    echo -n "${TAB}${hist_in}... "
     itab
     if [ -f ${hist_in} ]; then
-        echo -e "${TAB}is a regular ${UL}file${RESET}"
+        echo -e "${GOOD}OK${RESET}"
+        decho -e "${TAB}is a regular ${UL}file${RESET}"
         list_out+="${hist_in} "
         if [ ! ${hist_in} -ef ${hist_ref} ]; then
-            echo "${TAB}is not the same as ${hist_ref##*/}"
+            decho "${TAB}is not the same as ${hist_ref##*/}"
             list_del+="${hist_in} "
         else
-            echo -e "${TAB}${YELLOW}is the same file as ${hist_ref##*/}${RESET}"
+            decho -e "${TAB}${YELLOW}is the same file as ${hist_ref##*/}${RESET}"
         fi
 
         # add check for initial orphaned lines
         (head -n 1 ${hist_in} | grep "#[0-9]\{10\}") >/dev/null
         if [ $? -eq 0 ]; then
-            echo "${TAB}starts with timestamp"
+            decho "${TAB}starts with timestamp"
         else
-            echo -e "${TAB}${YELLOW}DOES NOT start with timestamp${RESET}"
+            decho -e "${TAB}${YELLOW}DOES NOT start with timestamp${RESET}"
             itab
-            echo -n "${TAB}inserting timestamp..."
+            decho "${TAB}inserting timestamp..."
             # get next timestamp
-            TS=$(grep "#[0-9]\{10\}" ${hist_in} -m 1 | sed 's/^#\([0-9]\{10\}\)[ \n].*/\1/')
-            echo "${TAB}   TS = $TS"
+            declare -i TS=$(grep "#[0-9]\{10\}" "${hist_in}" -m 1 | sed 's/^#\([0-9]\{10\}\)[ \n].*/\1/' | sed 's/^#//' )
+            decho "${TAB}   TS = $TS"
             # generate preceeding timestamp
             preTS=$((TS - 1))
-            echo "${TAB}preTS = $preTS"
+            decho "${TAB}preTS = $preTS"
             # create temporary file
             hist_temp=${hist_in}_$(date +'%s')
-            echo "${TAB}$hist_temp"
-            echo "#$preTS INSERT MISSING TIMESTAMP" | cat - ${hist_in} >${hist_temp}
+            decho "${TAB}$hist_temp"
+            decho "#$preTS INSERT MISSING TIMESTAMP" | cat - "${hist_in}" >${hist_temp}
+            decho -ne ${TAB}
             mv -v ${hist_temp} ${hist_in}
-            echo "done"
+            decho "${TAB}done"
             dtab
         fi
     else
@@ -260,6 +275,80 @@ for hist_in in ${list_in[@]}; do
 done
 dtab
 set -eE
+
+echo "${TAB}checking for markers..."
+declare -i print_ln=3
+
+for hist_in in ${list_in[@]}; do
+    echo -n "${TAB}${hist_in}... "
+
+    declare -i nmark=$(grep "^#[0-9]\{10\}[a-zA-Z0-9]\{1,3\}" "${hist_in}" | wc -l)
+
+    if [ $nmark -eq 0 ]; then
+        echo -e "${GOOD}OK${RESET}"
+    else
+        echo -e "${BAD}FAIL${RESET}"
+        itab
+        echo "${TAB}possible markers detected in $hist_in"
+        grep "^#[0-9]\{10\}[a-zA-Z0-9]\{1,3\}" "${hist_in}" -m 1 --color=always | sed "s/^/${TAB}/"
+
+        for ((n = 1; n < 5; n++)); do
+            echo "${TAB}checking marker length $n..."
+            itab
+            declare -i n_mark=$(grep "^#[0-9]\{10\}[a-zA-Z0-9]\{$n\}" "${hist_in}" | sed "s/^#[0-9]\{10\}\([a-zA-Z0-9]\{$n\}\).*$/\1/" | sort -n | uniq -c | sort -k1 -n | wc -l)
+            echo "${TAB}$n_mark candidates found"
+
+            if [ $n_mark -eq 1 ]; then
+
+                declare imark=$(grep "^#[0-9]\{10\}[a-zA-Z0-9]\{$n\}" "${hist_in}" | sed "s/^#[0-9]\{10\}\([a-zA-Z0-9]\{$n\}\).*$/\1/" | sort -n | uniq -c | sort -n | head -1 | awk '{print $2}')
+                declare -i cmark=$(grep "^#[0-9]\{10\}[a-zA-Z0-9]\{$n\}" "${hist_in}" | sed "s/^#[0-9]\{10\}\([a-zA-Z0-9]\{$n\}\).*$/\1/" | sort -n | uniq -c | sort -n | head -1 | awk '{print $1}')
+        echo -e "${TAB}marker candidate is ${GRH}$imark${RESET} with cout $cmark"
+            else
+                if [ $DEBUG -gt 0 ]; then
+                    echo "${TAB}grep: matching lines"
+                    itab
+                    grep "^#[0-9]\{10\}[a-zA-Z0-9]\{$n\}" "${hist_in}" | head -${print_ln} | sed "s/^/${TAB}/"
+                    dtab
+
+                    echo "${TAB}sed: markers"
+                    itab
+                    grep "^#[0-9]\{10\}[a-zA-Z0-9]\{$n\}" "${hist_in}" | sed "s/^#[0-9]\{10\}\([a-zA-Z0-9]\{$n\}\).*$/\1/" | head -${print_ln}| sed "s/^/${TAB}/"
+                    dtab
+
+                    echo "${TAB}sort"
+                    itab
+                    grep "^#[0-9]\{10\}[a-zA-Z0-9]\{$n\}" "${hist_in}" | sed "s/^#[0-9]\{10\}\([a-zA-Z0-9]\{$n\}\).*$/\1/" | sort -n | head -${print_ln}| sed "s/^/${TAB}/"
+                    dtab
+
+                    echo "${TAB}uniq"
+                    grep "^#[0-9]\{10\}[a-zA-Z0-9]\{$n\}" "${hist_in}" | sed "s/^#[0-9]\{10\}\([a-zA-Z0-9]\{$n\}\).*$/\1/" | sort -n | uniq -c | head -${print_ln}| sed "s/^/${TAB}/"
+
+                    echo "${TAB}sort"
+                    grep "^#[0-9]\{10\}[a-zA-Z0-9]\{$n\}" "${hist_in}" | sed "s/^#[0-9]\{10\}\([a-zA-Z0-9]\{$n\}\).*$/\1/" | sort -n | uniq -c | sort -k1 -n -r | head -${print_ln}| sed "s/^/${TAB}/"
+                fi
+
+            fi
+            dtab
+        done
+        echo -e "${TAB}marker candidate is ${GRH}$imark${RESET} with cout $cmark in ${hist_in}"
+
+        echo "${TAB}sed -i 's/$imark/\n/' ${hist_in}"
+
+        read -p "${TAB}Proceed with sed? (y/n) " -n 1 -r -t 15
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            sed -i "s/$imark/\n/" "${hist_in}"
+            echo
+            echo "done"
+        else
+            dtab
+            echo
+            echo "${TAB}exiting..."
+            dtab
+            exit            
+        fi
+        dtab
+    fi
+done
 
 echo "${TAB}list of files (checked):"
 itab
@@ -273,7 +362,6 @@ echo -e "${TAB}${UL}merge files${RESET}"
 itab
 
 # set output file name
-hist_out=${hist_save}_merge
 list_del+="${hist_out} "
 echo -e "${TAB}output file name is ${YELLOW}${hist_out}${RESET}"
 
@@ -286,6 +374,8 @@ dtab
 
 # print good/bad markers
 print_markers
+
+sort_TS=$(echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') insert ")
 
 for hist_edit in ${hist_bak} ${hist_out}; do
     # get file length
@@ -308,6 +398,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     TS_MARKER=${marker}
     echo -n "${TAB}mark timestamp lines... "
     sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_edit}
+    echo "${sort_TS}TS_MARKER ${TS_MARKER}" >>${hist_edit}    
     echo "done"
 
     # remove marks from timestamp lines with no associated commands
@@ -334,6 +425,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     OR_MARKER=${marker}
     echo -n "${TAB}mark orphaned lines... "
     sed -i "/^#[0-9]\{10\}.*$/!s/^.*$/${OR_MARKER}&/" ${hist_edit}
+    echo "${sort_TS}OR_MARKER ${OR_MARKER}" >>${hist_edit}
     echo "done"
 
     # merge commands with timestamps
@@ -433,8 +525,8 @@ for hist_edit in ${hist_bak} ${hist_out}; do
 
     for igno in "${ignore_list[@]}"; do
         echo -n "${TAB}${fTAB}deleting ${igno}... "
-        sed -i "/${TS_MARKER}${igno}$/d" ${hist_edit}
-        sed -i "s/${OR_MARKER}${igno}$//" ${hist_edit}
+        #        sed -i "/${TS_MARKER}${igno}$/d" ${hist_edit}
+        #        sed -i "s/${OR_MARKER}${igno}$//" ${hist_edit}
         echo "done"
     done
 
