@@ -376,6 +376,7 @@ dtab
 print_markers
 
 sort_TS=$(echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') insert ")
+do_awk=false
 
 for hist_edit in ${hist_bak} ${hist_out}; do
     # get file length
@@ -389,6 +390,15 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${hist_edit}
     echo "done"
 
+    # copy files to process with awk and create additional backup
+    if [[ "${do_awk}" == true ]]; then
+        # set output file name
+        hist_uni=${hist_edit}_uniq
+        list_del+="${hist_uni} "
+        cp -pv ${hist_edit} ${hist_uni}
+        cp_date ${hist_edit}
+    fi
+
     echo -e "${TAB}${UL}mark timestamps${RESET}"
     itab
     marker_list=''
@@ -400,6 +410,13 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     sed -i "s/^#[0-9]\{10\}.*/&${TS_MARKER}/" ${hist_edit}
     echo "${sort_TS}TS_MARKER ${TS_MARKER}" >>${hist_edit}
     echo "done"
+
+    # remove duplicate commands
+    if [[ "${do_awk}" == true ]]; then
+        echo -n "${TAB}remove duplicate lines... "
+        #awk '!a[$0]++' ${hist_uni} > ${hist_edit}
+        echo "done"
+    fi
 
     # remove marks from timestamp lines with no associated commands
     echo -n "${TAB}un-mark childless timestamp lines... "
@@ -577,12 +594,8 @@ dtab
 #sed '$!N; /^\(.*\)\n\1$/!P; D' ${hist_out}
 #perl -0777 -pe 's/(.+\R.+\R)\1/$1/g' ${hist_out}
 
-# select if remove repeated only
-if true; then
-    uniq ${hist_out} > ${hist_uni}
-else
-    awk '!a[$0]++' ${hist_out} > ${hist_uni}
-fi
+# remove repeated lines
+uniq ${hist_out} > ${hist_uni}
 
 # check for repeated timestamps
 echo "${TAB}reapeated timestamps in ${hist_uni}"
