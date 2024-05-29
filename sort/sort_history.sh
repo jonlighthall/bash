@@ -578,7 +578,7 @@ dtab
 #perl -0777 -pe 's/(.+\R.+\R)\1/$1/g' ${hist_out}
 
 # select if remove repeated only
-if false; then
+if true; then
     uniq ${hist_out} > ${hist_uni}
 else
     awk '!a[$0]++' ${hist_out} > ${hist_uni}
