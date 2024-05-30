@@ -148,6 +148,24 @@ function get_mod_date() {
 	      return 1
     fi
 
+}
+
+function get_unique_name() {
+    trap 'print_return; trap -- RETURN' RETURN
+    # set debug level
+    declare -i DEBUG=${DEBUG:-0}
+
+    itab
+    # set trap and print function name
+    if [ $DEBUG -gt -1 ]; then
+        trap 'print_return $?;dtab' RETURN
+        echo -e "${TAB}${INVERT}function: ${FUNCNAME}${RESET}"
+    fi
+    if [ $# -lt 2 ]; then
+	      echo "${TAB}Please provide an input file and an output variable"
+	      return 1
+    fi
+
     print_arg $@
     itab
     parse_arg $1
