@@ -52,11 +52,13 @@ function parse_arg() {
     # set debug level
     local -i DEBUG=${DEBUG:-0}
     DEBUG=0
+    itab
     # set trap and print function name
     if [ $DEBUG -gt 0 ]; then
-        itab
         trap 'print_return $?;dtab' RETURN
         echo -e "${TAB}${INVERT}function: ${FUNCNAME}${RESET}"
+    else
+        trap 'dtab' RETURN
     fi
 
     print_arg $@
@@ -97,7 +99,7 @@ function parse_arg() {
             readlink -e $arg >/dev/null
         fi
         RETVAL=$?
-        [ $RETVAL -eq 0 ] && echo -n "${TAB}"
+        [ $RETVAL -eq 0 ] & [ $DEBUG -gt 0 ] && echo -n "${TAB}"
         decho -n "readlink "
         if [ $RETVAL -eq 0 ]; then
             decho -e "${GOOD}OK${RESET}"
@@ -113,8 +115,10 @@ function parse_arg() {
         itab
 
 		    if [ ! -e "${arg}" ]; then
-            echo -en "${TAB}"
-            ls -l --color ${arg} | sed 's,^.*\(\./\),\1,'
+            if [ $DEBUG -gt 0 ]; then
+                echo -en "${TAB}"
+                ls -l --color ${arg} | sed 's,^.*\(\./\),\1,'
+            fi
             # check if the broken link is a duplicate of a valid link
             echo ${arg} | grep -q "_[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-t[0-9]\{6\}"
             if [ $? -eq 0 ]; then
@@ -162,33 +166,33 @@ function parse_arg() {
 function get_mod_date() {
     # set debug level
     local -i DEBUG=${DEBUG:-0}
-#    DEBUG=0
-
+    DEBUG=0
+    itab
     # set trap and print function name
-    if [ $DEBUG -gt -1 ]; then
-        itab
+    if [ $DEBUG -gt 0 ]; then
+
         trap 'print_return $?;dtab' RETURN
         echo -e "${TAB}${INVERT}function: ${FUNCNAME}${RESET}"
+    else
+        trap 'dtab' RETURN
     fi
     if [ $# -lt 2 ]; then
 	      echo "${TAB}Please provide an input file and an output variable"
 	      return 1
     fi
 
-    techo "parsing arguments..."
+    decho "${TAB}parsing arguments..."
     print_arg $@
     parse_arg "$1"
-    echo "${TAB}done parsing arguments"
+    decho "${TAB}done parsing arguments"
 
 	  # parse input
     echo -en "${TAB}input ${type}${in_file##*/}${RESET}... "
     # check if input exists
     if [ -L "${in_file}" ] || [ -f "${in_file}" ] || [ -d "${in_file}" ]; then
-
-	      # extract date from broken link
-
         if [ ! -e "${in_file}" ]; then
             if [ -L "$in_file" ]; then
+                # extract date from broken link
                 echo -e "${YELLOW}name exists${RESET}"
                 itab
 		            echo "${TAB}${in_file} is a broken link!"
@@ -207,7 +211,7 @@ function get_mod_date() {
                 echo "${TAB}modification date of broken link $mod_date"
                 dtab
             else
-                echo "does not exist"
+                echo "${BAD}does not exist${RESET}"
 		            echo -e "${TAB}${BAD}exiting...${RESET}"
                 dtab
 		            exit 1
@@ -216,14 +220,14 @@ function get_mod_date() {
             echo -e "${GOOD}exists${RESET}"
             itab
             if [ -L "$in_file" ]; then
-                echo "${TAB}${in_file} is a valid link"
-                echo "${TAB}getting modification date with date()..."
+                decho "${TAB}${in_file} is a valid link"
+                decho "${TAB}getting modification date with date()..."
             else
-                echo "${TAB}getting file modification date... "
+                decho "${TAB}getting file modification date... "
             fi
             local mod_date=$(date -r "${in_file}" +'%Y-%m-%d-t%H%M%S')
-            echo "${TAB}modification date is ${mod_date}"
             dtab
+            echo "${TAB}modification date is ${mod_date}"
         fi
     else
 	      echo "is not valid"
@@ -241,28 +245,39 @@ function get_mod_date() {
 function get_unique_name() {
     # set debug level
     declare -i DEBUG=${DEBUG:-0}
+    DEBUG=0
 
+    itab
     # set trap and print function name
-    if [ $DEBUG -gt -1 ]; then
-        itab
+    if [ $DEBUG -gt 0 ]; then
         trap 'print_return $?;dtab' RETURN
         echo -e "${TAB}${INVERT}function: ${FUNCNAME}${RESET}"
+    else
+        trap 'dtab' RETURN
     fi
     if [ $# -lt 2 ]; then
 	      echo "${TAB}Please provide an input file and an output variable"
 	      return 1
     fi
 
-    techo "parsing arguments..."
+    echo "${TAB}parsing arguments..."
     print_arg $@
     parse_arg $1
-    techo "done parsing"
-
+    itab
 	  # parse input
-    techo -n "input path: ${in_file##*/}... "
+    echo -en "${TAB}input ${type}${in_file##*/}${RESET}... "
     # check if input exists
     if [ -L "${in_file}" ] || [ -f "${in_file}" ] || [ -d "${in_file}" ]; then
-	      echo -e "${GOOD}exists${RESET}"
+        if [ ! -e "${in_file}" ]; then
+            if [ -L "$in_file" ]; then
+                echo -e "${YELLOW}name exists${RESET}"
+            else
+                echo "${BAD}does not exist${RESET}"
+                return 1
+            fi
+        else
+	          echo -e "${GOOD}exists${RESET}"
+        fi
         # directory name
         in_dir="$(dirname "${in_file}")"
         # base name
@@ -296,12 +311,13 @@ function get_unique_name() {
 
         # set default output file name to match input
 	      out_base="${in_base}"
-        #	      out_file="${in_dir}/${out_base}${ext}"
+        dtab
+        decho "${TAB}done parsing arguments"
 
         local get_date
         echo "${TAB}getting modifcation date..."
         get_mod_date "${in_file}" get_date
-        echo "${TAB}modification date is ${get_date}"
+        decho "${TAB}modification date is ${get_date}"
 
         echo "${TAB}getting unique file name..."
 
@@ -317,29 +333,31 @@ function get_unique_name() {
 		        echo -e "${BAD}exists${RESET}"
             # append the curent timestamp to the file name and wait to find a file that doesn't
             # exist
-		        echo -n "${TAB}waiting for new time stamp... "
+		        decho -n "${TAB}waiting for new time stamp... "
 		        while [ -L "${out_file}" ] || [ -f "${out_file}" ] || [ -d "${out_file}" ]; do
                 local ts_date=$(date +'%Y-%m-%d-t%H%M%S')
 			          out_file=${in_dir}/${out_base}_${ts_date}${ext}
 		        done
-		        echo "done"
+		        decho "done"
             # print summary
             itab
-            echo "${TAB}timestamp is ${ts_date}"
+            decho "${TAB}timestamp is ${ts_date}"
             dtab
-		        echo "${TAB}unique file name found"
-            dtab 2
+		        decho "${TAB}unique file name found"
+            dtab
 	      else
 		        echo -e "${GOOD}does not exist${RESET}"
-            dtab 2
+            dtab
 	      fi
         echo -e "${TAB}output ${type}${out_file##*/}${RESET} is unique"
+        dtab
     else
 	      echo "is not valid"
 		    echo -e "${TAB}${BAD}exiting...${RESET}"
 		    return 1
     fi
 
+    decho "${TAB}done getting unique file name"
     local -n output_var=$2
     decho "${TAB}output variable: ${!output_var}"
     output_var=$out_file
