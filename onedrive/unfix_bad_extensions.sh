@@ -44,7 +44,7 @@ else
                 echo -n "${TAB}${fTAB}"
                 mv -nv "$fname" "$(echo $fname | sed "s/$sep$bad/.$bad/")"
                 if [ -f "$fname" ];then
-                    echo "rename $fname FAILED"
+                    echo -e  "rename $fname ${BAD}FAILED${RESET}"
                     ((++count_mv_fail))
                 else
                     ((++count_mv))
