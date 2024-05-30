@@ -113,6 +113,8 @@ hist_save=${save_dir}/${hist_name}
 # set output file name
 hist_out=${hist_save}_merge
 
+declare hist_bak
+
 unset list_in
 
 set -e
@@ -120,10 +122,7 @@ set -e
 echo -e "${TAB}${UL}check files${RESET}"
 itab
 
-# check save directory
-check_target ${save_dir}
-
-if true; then
+if false; then
 
     # check if the history file is a link
     echo -n "${TAB}${hist_ref} is a "
@@ -174,15 +173,32 @@ if true; then
     fi
 
     hist_bak=${save_dir}/$(basename ${hist_ref})_$(date -r ${hist_ref} +'%Y-%m-%d-t%H%M%S')
+
+    echo "${TAB}backup history file..."
+    cp -pv $hist_ref ${hist_bak} | sed "s/^/${TAB}${fTAB}/"
+
+else
+    # check save directory
+    check_target ${save_dir}
+
+    target="${hist_save}"
+    link_name="${hist_ref}"
+
+    do_link "${hist_save}" "${hist_ref}"
+
+    source cp_date "${hist_save}" hist_bak
+
+    echo "${hist_bak}"
+    echo "${hist_bak##*/}"
+    echo "${save_dir}/${hist_bak##*/}"
+    hist_bak="${save_dir}/${hist_bak##*/}"
+    echo "${hist_bak}"
 fi
 
 echo "${TAB}backup file is $hist_bak"
 
-echo "${TAB}backup history file..."
-cp -pv $hist_ref ${hist_bak} | sed "s/^/${TAB}${fTAB}/"
-
 # set list of files to check
-list_in+=( "${hist_ref}" )
+list_in+=( "${hist_save}" )
 echo "${TAB}${#list_in[@]} files in list"
 itab
 for file in ${list_in[@]}; do
