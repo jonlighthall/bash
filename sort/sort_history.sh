@@ -294,7 +294,7 @@ set -eE
 
 echo "${TAB}checking for markers..."
 declare -i print_ln=3
-
+itab
 for hist_in in ${list_in[@]}; do
     echo -n "${TAB}${hist_in}... "
 
@@ -365,6 +365,7 @@ for hist_in in ${list_in[@]}; do
         dtab
     fi
 done
+dtab
 
 echo "${TAB}list of files (checked):"
 itab
