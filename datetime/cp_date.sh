@@ -32,7 +32,7 @@ function get_mod_date() {
     local -n output=$2
     ddecho "${TAB}argument 2: $2"
     dtab
-    
+
 	  # parse input
     echo -n "${TAB}input path: ${in_file##*/}... "
     # check if input exists
@@ -55,7 +55,7 @@ function get_mod_date() {
             in_base="${ext}"
             ext=''
         fi
-        
+
         # print summary
         (
             ddecho "input dir: $in_dir"
@@ -68,7 +68,7 @@ function get_mod_date() {
 		            ddecho
 	          fi
         ) | column -t -s: -o ":" -R1 | sed "s/^/${TAB}/"
-        
+
 	      # set default output file name to match input
 	      out_base="${in_base}"
 	      output="${in_dir}/${out_base}${ext}"
@@ -116,10 +116,10 @@ function get_mod_date() {
 		        decho "${TAB}${link_name} is a broken link!"
 		        mdate=$(stat -c '%y' "${link_name}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
 		        output=${link_name}_${mdate}
-	      else		
-            dtab 
+	      else
+            dtab
 		        echo -e "${TAB}${BAD}exiting...${RESET}"
-            dtab 
+            dtab
 		        exit 1
 	      fi
         dtab
@@ -145,12 +145,18 @@ ddecho "${TAB}number of arguments = $#"
 itab
 ddecho "${TAB}argument 1: $1"
 
+if [ $# -eq 2 ]; then
+    declare  -n out_name=$2
+    ddecho "${TAB}argument 2: $2"
+    dtab
+fi
+
 # if argument is a broken link, an error is produced
 set +e
 # set file names
 in_file=$(readlink -f $1)
 RETVAL=$?
-decho -n "${TAB}link "
+decho -n "${TAB}readlink "
 if [ $RETVAL -eq 0 ]; then
     decho -e "${GOOD}OK${RESET}"
 else
@@ -164,10 +170,15 @@ echo "${TAB}getting modifcation date..."
 declare out_file
 get_mod_date "${in_file}" out_file
 
-# now move file
+
+# now copy file
 echo "${TAB}copying file..."
 itab
 echo -n "${TAB}"
 cp -npv "${in_file}" "${out_file}"
 dtab 2
+
+out_name=${out_file}
+echo "${!out_name} = ${out_name}"
+
 trap 'print_exit' EXIT
