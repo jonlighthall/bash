@@ -161,7 +161,7 @@ function check_remotes() {
                 # change remote to SSH
                 remote_ssh="git@${remote_host}:${remote_repo}"
                 echo -e "${YELLOW} change URL to ${remote_ssh}..."
-                echo " ${fTAB}git remote set-url ${remote_name} ${remote_ssh}${RESET}"
+                echo -e " ${TAB}git remote set-url ${remote_name} ${remote_ssh}${RESET}"
                 git remote set-url ${remote_name} ${remote_ssh}
             else
                 remote_pro="local"
@@ -542,16 +542,14 @@ function track_all_branches() {
                 echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
             fi
             # set existing branch to track remote branch
-            # dtab
             do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
+            dtab
         else
             echo -en "${GRH}"
             hline 72
             echo "${TAB}branch does not exist"
             # create local branch to track remote branch
-            dtab
             do_cmd git branch "${branch_name}" --track "$branch"
-            itab
             echo -en "${GRH}"
             hline 72
             echo -en "${RESET}"
