@@ -23,21 +23,36 @@ function check_arg1() {
     echo "${TAB}argument 1: $1"
 }
 
+function print_arg() {
+    # print arguments
+    local -i n_arg=$#
+    echo "${TAB}number of arguments = $n_arg"
+
+    echo $@
+    local -i i=0
+    for iarg in "$@"; do
+        ((++i))
+        echo "$i $iarg"
+    done
+}
+
 function parse_arg() {
+    print_arg $@
+
     # if argument is a broken link, an error is produced
     set +e
     # set file names
     arg=$1
-
-    # print arguments
-    echo "${TAB}number of arguments = $#"
-    for iarg in $@; do
-        echo "$iarg"
-    done
-
     echo $arg
 
     test_file "$arg" | sed "s/^/${TAB}/"
+
+    # determine type
+    if [ -L "${arg}" ]; then
+        [ -e "${arg}" ] && type="link ${VALID}" || type="broken link ${BROKEN}"
+    fi
+    [ -f "${arg}" ] && type="file ${FILE}"
+    [ -d "${arg}" ] && type="directory ${DIR}"
 
     if [ -L "${arg}" ]; then
         echo "${arg} is a link"
@@ -117,7 +132,6 @@ function parse_arg() {
 }
 
 function get_mod_date() {
-    echo "$FUNCNAME"
     trap 'print_return; trap -- RETURN' RETURN
     # set debug level
     declare -i DEBUG=${DEBUG:-0}
@@ -129,15 +143,12 @@ function get_mod_date() {
         echo -e "${TAB}${INVERT}function: ${FUNCNAME}${RESET}"
     fi
     if [ $# -lt 2 ]; then
-	      echo "${TAB}Please provide an input file"
+	      echo "${TAB}Please provide an input file and an output variable"
 	      return 1
     fi
 
-    # print arguments
-    echo "${TAB}number of arguments = $#"
-    for iarg in $@; do
-        echo "$iarg"
-    done
+    print_arg $@
+
     itab
 
     parse_arg $1
@@ -191,52 +202,70 @@ function get_mod_date() {
 	      test_file "$in_file" | sed "s/^/${TAB}/"
         # extract date from broken link
 	      if [ -L "$in_file" ]; then
-            echo "$in_file is a link"
+            echo -ne "${TAB}output ${type}${output##*/}${RESET}... "
 		        link_name=$in_file
             if [ ! -e "${in_file}" ]; then
+                echo -e "${BAD}name exists${RESET}"
+                itab
 		            echo "${TAB}${link_name} is a broken link!"
-                echo "getting modification date with stat()" 
-                stat -c '%y' "${link_name}"
-                stat -c '%y' "${link_name}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/'
-                stat -c '%y' "${link_name}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g'
+                echo "${TAB}getting modification date with stat()"
+                #stat -c '%y' "${link_name}"
+                #stat -c '%y' "${link_name}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/'
+                #stat -c '%y' "${link_name}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g'
 		            mdate=$(stat -c '%y' "${link_name}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
-                echo "modification date of broken link $mdate"
+                itab
+                echo "${TAB}modification date of broken link $mdate"
+                dtab 2
 		            output=${link_name}_${mdate}
             else
+                echo "exits"
+                itab
                 echo "${TAB}${link_name} is a valid link"
-                echo "getting modification date with date()..."
+                echo "${TAB}getting modification date with date()..."
 
             fi
 	      else
-            dtab
-            
-		      #  echo -e "${TAB}${BAD}exiting...${RESET}"
-              dtab
-		       # exit 1
+            dtab 2
+
+		        #  echo -e "${TAB}${BAD}exiting...${RESET}"
+
+		        # exit 1
 	      fi
 
 	      # check if input and output are the same file
-	      echo -e "${TAB}output file ${output##*/}... "
-        itab
-#	      while [ "${in_file}" -ef "${output}" ]; do
-		        echo -e "${TAB}is ${YELLOW}the same file${RESET} as input file ${in_file##*/}"
-            echo "${TAB}renaming output..."
-		        echo "${TAB}getting file modification date... "
+        [ -L "${output}" ] & [ -e "${output}" ] &&  echo -ne "${TAB}output ${type}${output##*/}${RESET}... "
+        if [ -L "${output}" ] || [ -f "${output}" ] || [ -d "${output}" ]; then
+            if [ -e "${output}" ]; then
+                echo -e "${BAD}exists${RESET}"
+                itab
+                #	      while [ "${in_file}" -ef "${output}" ]; do
+		            echo -e "${TAB}is ${YELLOW}the same file${RESET} as input file ${in_file##*/}"
+		            echo "${TAB}getting file modification date... "
+                local mod_date=$(date -r "${output}" +'%Y-%m-%d-t%H%M%S')
+                itab
+                echo "${TAB}modification date is ${mod_date}"
+                dtab
+                echo "${TAB}renaming output..."
+		            # NB: don't rename any existing files; change the ouput file name to something unique
+		            output=${in_dir}/${out_base}_${mod_date}${ext}
+                itab
+		            echo "${TAB}${output##*/}"
+                #	      done
+	              echo "${TAB}named differently than input"
+                dtab 2
+            else
+                : #  echo -e "${BAD}is already used${RESET}"
+            fi
 
-            local mod_date=$(date -r "${output}" +'%Y-%m-%d-t%H%M%S')
-
-            echo "${TAB}modification date is ${mod_date}"
-		        # NB: don't rename any existing files; change the ouput file name to something unique
-		        output=${in_dir}/${out_base}_${mod_date}${ext}
-		        echo "${TAB}${output##*/}"
-#	      done
-	      echo "${TAB}named differently than input"
-        dtab
+        else
+            echo -e "${GOOD}OK${RESET}"
+        fi
 
 	      # check if output exists
-	      echo -n "${TAB}output file ${output##*/}... "
+        echo -en "${TAB}output ${type}${output##*/}${RESET}... "
         itab
         if [ -L "${output}" ] || [ -f "${output}" ] || [ -d "${output}" ]; then
+            [ ! -e "${output}" ] && echo -en "${BAD}name "
 		        echo -e "${BAD}exists${RESET}"
 		        echo -n "${TAB}waiting for new time stamp... "
             # append the cuurent timestamp to the file name and wait to find a file that doesn't
@@ -245,13 +274,15 @@ function get_mod_date() {
 			          # NB: don't rename any existing files; change the ouput file name to something
 			          # unique
                 local ts_date=$(date +'%Y-%m-%d-t%H%M%S')
-
 			          output=${in_dir}/${out_base}_${ts_date}${ext}
 		        done
 		        echo "done"
+            itab
             echo "${TAB}timestamp is ${ts_date}"
+            dtab
 		        echo "${TAB}unique file name found"
-		        echo "${TAB}output file ${output##*/}"
+            dtab
+		        echo -e "${TAB}output ${type}${output##*/}${RESET} is unique"
 	      else
 		        echo -e "${GOOD}does not exist${RESET} (uniquely named)"
 	      fi
@@ -260,22 +291,11 @@ function get_mod_date() {
 	      echo "is not valid"
         itab
 	      test_file "$in_file" | sed "s/^/${TAB}/"
-        # extract date from broken link
-	      if [ -L "$in_file" ]; then
-		        link_name=$in_file
-		        echo "${TAB}${link_name} is a broken link!"
-            stat -c '%y' "${link_name}"
-            stat -c '%y' "${link_name}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/'
-            stat -c '%y' "${link_name}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g'
-		        mdate=$(stat -c '%y' "${link_name}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
-            echo "modification date of broken link $mdate"
-		        output=${link_name}_${mdate}
-	      else
-            dtab
-		        echo -e "${TAB}${BAD}exiting...${RESET}"
-            dtab
-		        exit 1
-	      fi
+
         dtab
+		    echo -e "${TAB}${BAD}exiting...${RESET}"
+        dtab
+		    exit 1
+	      dtab
     fi
 }
