@@ -36,6 +36,8 @@ for library in date; do
     fi
 done
 
+trap 'print_exit' EXIT
+
 # check for input
 check_arg1 $@
 
@@ -46,9 +48,11 @@ if [ $# -eq 2 ]; then
 fi
 
 dtab
-echo "${TAB}getting modifcation date..."
+
 declare out_file
+DEBUG=1
 get_unique_name $1 out_file
+[ $? -eq 1 ] && exit
 
 # now copy file
 echo "${TAB}copying file..."
@@ -57,7 +61,6 @@ echo -n "${TAB}"
 if [ -L "${in_file}" ]; then
     cp -nPpv "${in_file}" "${out_file}"
 else
-
     cp -npv "${in_file}" "${out_file}"
 fi
 dtab 2
@@ -65,5 +68,3 @@ if [ $# -eq 2 ]; then
     out_name=${out_file}
     echo "${!out_name} = ${out_name}"
 fi
-
-trap 'print_exit' EXIT

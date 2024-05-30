@@ -36,6 +36,8 @@ for library in date; do
     fi
 done
 
+trap 'print_exit' EXIT
+
 # check for input
 check_arg1 $@
 
@@ -46,9 +48,10 @@ if [ $# -eq 2 ]; then
 fi
 
 dtab
-echo "${TAB}getting modifcation date..."
+
 declare out_file
 get_unique_name $1 out_file
+[ $? -eq 1 ] && exit
 
 # now move file
 echo "${TAB}moving file..."
