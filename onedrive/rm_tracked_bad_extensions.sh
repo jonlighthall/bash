@@ -79,7 +79,7 @@ declare -i count_mv=0
 declare -i count_mv_fail=0
 
 # first, remove tracked files from the repository
-echo "${TAB}removing tracked binary files from the repository..."
+echo -n "${TAB}removing tracked binary files from the repository... "
 itab
 for fname in $(find ./ -not -path "*$GITDIR/*" -not -path "*/.git/*" -type f ); do
 
@@ -87,6 +87,7 @@ for fname in $(find ./ -not -path "*$GITDIR/*" -not -path "*/.git/*" -type f ); 
     if perl -e 'exit -B $ARGV[0]' "$fname"; then
         :  #echo "File is text."; file $file
     else
+        start_new_line
         echo -en "${TAB}${fname##*./}... "
         if [ ! -s $fname ]; then
             echo -en "${YELLOW}empty: ${RESET}"
@@ -121,7 +122,7 @@ echo "done"
 dtab
 
 # look for bad extensions
-echo "${TAB}checking for files with bad extensions..."
+echo -n "${TAB}checking for files with bad extensions... "
 itab
 for bad in bat bin cmd csh exe gz js ksh osx out prf ps ps1; do
 
@@ -131,11 +132,12 @@ for bad in bat bin cmd csh exe gz js ksh osx out prf ps ps1; do
         continue
     fi
 
-    echo "${TAB}.${bad}..."
+    start_new_line
+    echo -n "${TAB}.${bad}... "
     itab
 
     n_files=$(echo "$name_list" | wc -l)
-    echo "${TAB}$n_files files found"
+    echo "$n_files files found"
 
     for fname in $(find ./ -name "*.${bad}"); do
         ((++count_found))
@@ -202,7 +204,8 @@ echo "done"
 
 echo
 
-echo "Files found: $count_found"
+echo -e "${UL}Files found: $count_found${NORMAL}"
 echo "Files deleted: $count_rm"
 echo "Files renamed: $count_mv"
 echo "Files not renamed: $count_mv_fail"
+echo
