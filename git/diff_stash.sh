@@ -91,8 +91,9 @@ function check_min() {
             unset hash_min
             hash_min=$hash
             echo "new min"
-
-            git diff --ignore-space-change --stat ${hash} ${stash} -- $fname
+            itab
+            git diff --color=always --ignore-space-change --stat ${hash} ${stash} -- $fname | sed "s/^/$TAB/"
+            dtab
         fi
         echo "${TAB}${hash_min[@]}"
         [ $i_count -gt 0 ] && echo -n "${TAB}"
@@ -272,14 +273,13 @@ if [ $N_stash -gt 0 ]; then
                 if [ $tot -eq 0 ]; then
                     break
                 fi
-
                 check_min
-
             done
+            echo -e "\x1B[14G done "
 
             echo
-            # get list of hashes after stash, up to HEAD, that contain file
-            cmd="git rev-list ${stash}^..HEAD -- $fname"
+            # get list of hashes not found in stash, up to HEAD, that contain file
+            cmd="git rev-list HEAD ^${stash}^ -- $fname"
             echo "${TAB}${cmd}"
             n_rev=$($cmd | wc -l)
             echo "${TAB}$n_rev revisions found"
@@ -308,6 +308,7 @@ if [ $N_stash -gt 0 ]; then
                 fi
                 check_min
             done
+            echo -e "\x1B[14G done "
             echo
             echo "${TAB}minimum diff:"
             itab
@@ -315,10 +316,9 @@ if [ $N_stash -gt 0 ]; then
             echo "${hash_min[@]} " | sed "s/ /\n/g" | sed "s/^/${TAB}/"
             dtab
 
-            cmd="git --no-pager diff --color-moved=blocks --ignore-space-change ${hash_min} ${stash} -- $fname"
+            cmd="git --no-pager diff --color=always --color-moved=blocks --ignore-space-change ${hash_min} ${stash} -- $fname"
             echo "${TAB}$cmd"
-
-            do_cmd_script $cmd
+            do_cmd $cmd
             dtab
 
         done # files
