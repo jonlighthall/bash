@@ -1,4 +1,4 @@
-#!/bin/bash -u
+#!/bin/bash -eu
 # -----------------------------------------------------------------------------------------------
 #
 # cp_date.sh
@@ -11,7 +11,11 @@
 #
 # -----------------------------------------------------------------------------------------------
 
+# get starting time in nanoseconds
+declare -i start_time=$(date +%s%N)
+
 # set debug level
+# substitute default value if DEBUG is unset or null
 declare -i DEBUG=${DEBUG:-0}
 
 # load bash utilities
@@ -44,13 +48,10 @@ check_arg1 $@
 if [ $# -eq 2 ]; then
     declare  -n out_name=$2
     echo "${TAB}argument 2: $2"
-    dtab
 fi
 
-dtab
-
+echo "${TAB}generate unique file name..."
 declare out_file
-DEBUG=1
 get_unique_name $1 out_file
 [ $? -eq 1 ] && exit
 
@@ -59,11 +60,14 @@ echo "${TAB}copying file..."
 itab
 echo -n "${TAB}"
 if [ -L "${in_file}" ]; then
+    # do not follow links, copy the link itself
     cp -nPpv "${in_file}" "${out_file}"
 else
     if [ -d "${in_file}" ]; then
+        # recursive copy
         cp -nprv "${in_file}" "${out_file}"
     else
+        # no-clobber and preserve
         cp -npv "${in_file}" "${out_file}"
     fi
 fi
