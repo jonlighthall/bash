@@ -48,7 +48,7 @@ fi
 dtab
 echo "${TAB}getting modifcation date..."
 declare out_file
-get_mod_date $1 out_file
+get_unique_name $1 out_file
 
 # now move file
 echo "${TAB}moving file..."
