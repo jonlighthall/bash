@@ -23,7 +23,7 @@ function check_arg1() {
 function print_arg() {
     # set debug level
     local -i DEBUG=${DEBUG:-0}
-    #    DEBUG=0
+    DEBUG=0
     # set trap and print function name
     if [ $DEBUG -gt 0 ]; then
         itab
@@ -51,7 +51,7 @@ function print_arg() {
 function parse_arg() {
     # set debug level
     local -i DEBUG=${DEBUG:-0}
-    #   DEBUG=0
+    DEBUG=0
     # set trap and print function name
     if [ $DEBUG -gt 0 ]; then
         itab
@@ -80,8 +80,8 @@ function parse_arg() {
     # check if argument is a link
     if [ -L "${arg}" ]; then
         decho "${TAB}${arg_base} is a link"
+        itab
         if [ $DEBUG -gt 0 ]; then
-            itab
             echo -n "${TAB}readlink    : "
             readlink $arg
             echo -n "${TAB}readlink -e : "
@@ -115,23 +115,25 @@ function parse_arg() {
 		    if [ ! -e "${arg}" ]; then
             echo -en "${TAB}"
             ls -l --color ${arg} | sed 's,^.*\(\./\),\1,'
-
             # check if the broken link is a duplicate of a valid link
-            og_fname=$(echo ${arg} | sed 's/_[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-t[0-9]\{6\}//')
-            echo -n "${TAB}original target ${og_fname}... "
-            itab
-            if [ -e "${og_fname}" ]; then
-                echo "exists"
-                echo "${TAB}${og_fname} points to $(echo $(readlink -f ${og_fname}) | sed 's,^.*/,,')"
-                echo -e "${TAB}${YELLOW}${type}${RESET}${YELLOW}${arg_base} should be removed${RESET}"
-            else
-                echo "not found"
+            echo ${arg} | grep -q "_[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-t[0-9]\{6\}"
+            if [ $? -eq 0 ]; then
+                og_fname=$(echo ${arg} | sed 's/_[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-t[0-9]\{6\}//')
+                echo -n "${TAB}original target ${og_fname}... "
+                itab
+                if [ -e "${og_fname}" ]; then
+                    echo "exists"
+                    echo "${TAB}${og_fname} points to $(echo $(readlink -f ${og_fname}) | sed 's,^.*/,,')"
+                    echo -e "${TAB}${YELLOW}${type}${RESET}${YELLOW}${arg_base} should be removed${RESET}"
+                else
+                    echo "not found"
+                fi
+                dtab
             fi
-            dtab 2
         else
             decho "${TAB}the link is valid"
-            dtab 2
 		    fi
+        dtab
     else
         decho "${TAB}$arg_base is not a link"
         in_file="$(readlink -f "$arg")"
@@ -160,6 +162,7 @@ function parse_arg() {
 function get_mod_date() {
     # set debug level
     local -i DEBUG=${DEBUG:-0}
+#    DEBUG=0
 
     # set trap and print function name
     if [ $DEBUG -gt -1 ]; then
@@ -189,8 +192,8 @@ function get_mod_date() {
                 echo -e "${YELLOW}name exists${RESET}"
                 itab
 		            echo "${TAB}${in_file} is a broken link!"
+                echo "${TAB}getting modification date with stat()..."
                 itab
-                echo "${TAB}getting modification date with stat()"
                 if [ $DEBUG -gt 0 ]; then
                     echo -n "${TAB}"
                     stat -c '%y' "${in_file}"
@@ -200,7 +203,6 @@ function get_mod_date() {
                     stat -c '%y' "${in_file}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g'
                 fi
 		            mod_date=$(stat -c '%y' "${in_file}" | sed 's/\(^[0-9-]*\) \([0-9:]*\)\..*$/\1-t\2/' | sed 's/://g')
-
                 dtab
                 echo "${TAB}modification date of broken link $mod_date"
                 dtab
@@ -212,15 +214,14 @@ function get_mod_date() {
             fi
         else
             echo -e "${GOOD}exists${RESET}"
+            itab
             if [ -L "$in_file" ]; then
-                itab
                 echo "${TAB}${in_file} is a valid link"
                 echo "${TAB}getting modification date with date()..."
-                dtab
+            else
+                echo "${TAB}getting file modification date... "
             fi
-            echo "${TAB}getting file modification date... "
             local mod_date=$(date -r "${in_file}" +'%Y-%m-%d-t%H%M%S')
-            itab
             echo "${TAB}modification date is ${mod_date}"
             dtab
         fi
@@ -232,7 +233,7 @@ function get_mod_date() {
     fi
 
     local -n output_var=$2
-    echo "${TAB}output variable: ${!output_var}"
+    decho "${TAB}output variable: ${!output_var}"
     output_var=$mod_date
 
 }
@@ -256,10 +257,6 @@ function get_unique_name() {
     print_arg $@
     parse_arg $1
     techo "done parsing"
-    techo "input: ${in_file##*/}"
-
-    local -n output_var=$2
-    techo "output variable: output_var"
 
 	  # parse input
     techo -n "input path: ${in_file##*/}... "
@@ -296,19 +293,17 @@ function get_unique_name() {
 		            echo
 	          fi
         ) | column -t -s: -o ":" | sed "s/^/${TAB}/"
-        
+
         # set default output file name to match input
 	      out_base="${in_base}"
-#	      out_file="${in_dir}/${out_base}${ext}"
-        
+        #	      out_file="${in_dir}/${out_base}${ext}"
 
         local get_date
         echo "${TAB}getting modifcation date..."
         get_mod_date "${in_file}" get_date
-        echo "${TAB}done getting date"
+        echo "${TAB}modification date is ${get_date}"
 
         echo "${TAB}getting unique file name..."
-	      
 
         out_file=${in_dir}/${out_base}_${get_date}${ext}
         itab
@@ -333,13 +328,12 @@ function get_unique_name() {
             echo "${TAB}timestamp is ${ts_date}"
             dtab
 		        echo "${TAB}unique file name found"
-            dtab
-		        echo -e "${TAB}output ${type}${out_file##*/}${RESET} is unique"
+            dtab 2
 	      else
-		        echo -e "${GOOD}does not exist${RESET} (uniquely named)"
-            dtab
+		        echo -e "${GOOD}does not exist${RESET}"
+            dtab 2
 	      fi
-        dtab
+        echo -e "${TAB}output ${type}${out_file##*/}${RESET} is unique"
     else
 	      echo "is not valid"
 		    echo -e "${TAB}${BAD}exiting...${RESET}"
@@ -347,6 +341,6 @@ function get_unique_name() {
     fi
 
     local -n output_var=$2
-    echo "${TAB}output variable: ${!output_var}"
+    decho "${TAB}output variable: ${!output_var}"
     output_var=$out_file
 }
