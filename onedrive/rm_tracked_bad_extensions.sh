@@ -116,8 +116,8 @@ for fname in $(find ./ -not -path "*$GITDIR/*" -not -path "*/.git/*" -type f ); 
             ((++count_rm))
         fi
     fi
-    echo "done"
 done
+echo "done"
 dtab
 
 # look for bad extensions
