@@ -61,7 +61,11 @@ echo -n "${TAB}"
 if [ -L "${in_file}" ]; then
     cp -nPpv "${in_file}" "${out_file}"
 else
-    cp -npv "${in_file}" "${out_file}"
+    if [ -d "${in_file}" ]; then
+        cp -nprv "${in_file}" "${out_file}"
+    else
+        cp -npv "${in_file}" "${out_file}"
+    fi
 fi
 dtab 2
 if [ $# -eq 2 ]; then
