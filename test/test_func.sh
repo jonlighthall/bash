@@ -1,6 +1,6 @@
 #!/bin/bash -u
 hello() {
-    echo "world"
+    echo "${TAB}world"
 }
 
 # load bash utilities
@@ -15,15 +15,13 @@ do
     itab
     if [ "$(type -t $func)" != function ]; then
 	      echo "${TAB}$func not a function"
-        echo "${TAB}redefining $func as a no-op function..."        
-	      eval "$func() {
-	    :
-	}"
+        echo "${TAB}redefining $func as a no-op function..."
+	      eval "$func(){ :;}"
     else
 	      echo "${TAB}$func is a function"
     fi
     echo "${TAB}output:"
     itab
-    $func | sed "s/^/${TAB}/"
+    $func
     dtab 2
 done
