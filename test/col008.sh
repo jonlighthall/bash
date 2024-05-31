@@ -17,11 +17,12 @@ for mode in $(seq 0 ${mode_max}); do
 	fi			
 	
 	echo "mode = ${mode}"
-	for fore in $(seq 0 ${fore_max}); do
+  echo "${mode}:3-:4- standard"
+	for ((fore=0; fore<=${fore_max}; fore++)); do
 		if [ $fore -eq 8 ]; then
 			continue
 		fi			
-		for back in $(seq 0 ${back_max}); do
+		for ((back=0; back<=${back_max}; back++)); do
 			if [ $back -eq 8 ]; then
 				continue
 			fi			
@@ -31,20 +32,21 @@ for mode in $(seq 0 ${mode_max}); do
 		echo -e "\E[m"
 	done
 	echo -e "\E[m"
-	for fore in $(seq 0 ${fore_max}); do
+  echo "${mode}:3-:10- bright background"
+	for ((fore=0; fore<=${fore_max}; fore++)); do
 		if [ $fore -eq 8 ]; then
 			continue
 		fi			
-		for back in $(seq 0 7); do
+		for ((back=0; back<=${back_max}; back++)); do
 			echo -ne "\E[${mode};3${fore};10${back}m"
 			printf ' %d;3%d;10%d ' $mode $fore $back
 		done
 		echo -e "\E[m"
 	done
 	echo -e "\E[m"
-
-	for fore in $(seq 0 7); do
-		for back in $(seq 0 ${back_max}); do
+  echo "${mode}:9-:4- bright foreground"
+	for ((fore=0; fore<=${fore_max}; fore++)); do
+		for ((back=0; back<=${back_max}; back++)); do
 			if [ $back -eq 8 ]; then
 				continue
 			fi			
@@ -54,9 +56,9 @@ for mode in $(seq 0 ${mode_max}); do
 		echo -e "\E[m"
 	done
 	echo -e "\E[m"
-
-	for fore in $(seq 0 7); do
-		for back in $(seq 0 7); do
+  echo "${mode}:9-:10- all bright"
+	for ((fore=0; fore<=${fore_max}; fore++)); do
+		for ((back=0; back<=${back_max}; back++)); do
 			echo -ne "\E[${mode};9${fore};10${back}m"
 			printf ' %d;9%d;10%d ' $mode $fore $back
 		done
