@@ -54,19 +54,20 @@ check_repo
 
 # get repo name
 repo_dir=$(git rev-parse --show-toplevel)
-echo -e "repository directory is ${PSDIR}${repo_dir}${RESET}"
+echo -e "${TAB}repository directory is ${PSDIR}${repo_dir}${RESET}"
 repo=${repo_dir##*/}
-echo "repository name is $repo"
+echo "${TAB}repository name is $repo"
 
 GITDIR=$(readlink -f $(git rev-parse --git-dir))
-echo "the .git folder is $GITDIR"
+echo "${TAB}the git-dir folder is ${GITDIR##*/}"
+
 if [[ ${PWD} -ef ${repo_dir} ]]; then
-    echo "already in top level directory"
+    echo "${TAB}already in top level directory"
 else
-    echo "$PWD is part of a Git repository"
-    echo "moving to top level directory..."
+    echo "${TAB}$PWD is part of a Git repository"
+    echo "${TAB}moving to top level directory..."
     cd -L $repo_dir
-    echo "$PWD"
+    echo "${TAB}$PWD"
 fi
 
 parse_remote_tracking_branch
@@ -119,7 +120,7 @@ function check_min() {
 cbar "${BOLD}parsing stash...${RESET}"
 N_stash=$(git stash list | wc -l)
 
-if [ $N_stash -gt 1 ]; then   
+if [ $N_stash -gt 1 ]; then
     echo -e "$repo has $N_stash entries in stash"
     do_cmd_stdbuf git stash list
     cbar "${BOLD}looking for duplicate stashes...${RESET}"
@@ -237,6 +238,8 @@ if [ $N_stash -gt 0 ]; then
         cbar "${BOLD}looping over files in stash@{$n}...${RESET}"
 
         # loop over stashed files
+        # track total changes
+        declare -i tot
         for fname in ${stash_files[@]}; do
             echo -e "${TAB}${YELLOW}$fname${RESET}..."
             itab
@@ -267,7 +270,7 @@ if [ $N_stash -gt 0 ]; then
                 fi
 
                 # get total number of changes
-                declare -i tot=$(( $add + $sub))
+                tot=$(( $add + $sub))
 
                 # exit loop of zero changes found
                 if [ $tot -eq 0 ]; then
