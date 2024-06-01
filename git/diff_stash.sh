@@ -1,4 +1,4 @@
-#!/bin/bash -u
+y#!/bin/bash -u
 
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
@@ -52,21 +52,22 @@ done
 cbar "${BOLD}check directory...${RESET}"
 check_repo
 
-# get repo name
+# get root dir
 repo_dir=$(git rev-parse --show-toplevel)
 echo -e "${TAB}repository directory is ${PSDIR}${repo_dir}${RESET}"
+# get repo name
 repo=${repo_dir##*/}
 echo "${TAB}repository name is $repo"
-
-GITDIR=$(readlink -f $(git rev-parse --git-dir))
+# get git dir
+GITDIR=$(readlink -f "$(git rev-parse --git-dir)")
 echo "${TAB}the git-dir folder is ${GITDIR##*/}"
-
+# cd to repo root dir
 if [[ ${PWD} -ef ${repo_dir} ]]; then
     echo "${TAB}already in top level directory"
 else
     echo "${TAB}$PWD is part of a Git repository"
     echo "${TAB}moving to top level directory..."
-    cd -L $repo_dir
+    cd -L "$repo_dir"
     echo "${TAB}$PWD"
 fi
 
