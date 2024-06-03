@@ -8,6 +8,8 @@
 # arguments, respectively. The default remote branch is the current tracking branch.
 #
 # Apr 2023 JCL
+#
+# -----------------------------------------------------------------------------------------------
 
 function check_git() {
     # substitute default debug if unset or null
@@ -25,7 +27,7 @@ function check_git() {
             export git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
             export git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
             export git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-            export check_git=false           
+            export check_git=false
             decho -e "${GRAY}v${git_ver}${NORMAL}"
             return 0
         else
@@ -47,7 +49,7 @@ function check_repo() {
     echo -n "${TAB}checking repository status... "
     # set shell options
     if [[ "$-" == *e* ]]; then
-        # exit on errors must be turned off; otherwise shell will exit no remote branch found
+        # exit on errors must be turned off; otherwise shell will exit when not inside a repository
         old_opts=$(echo "$-")
         set +e
     fi
@@ -58,10 +60,10 @@ function check_repo() {
         echo -e "${GOOD}OK${RESET} "
         return 0
     else
-        echo -e "${BAD}FAIL${RESET} "        
+        echo -e "${BAD}FAIL${RESET} "
         #echo "${TAB}not a Git repository"
         return 1
-    fi    
+    fi
 }
 
 function print_remote() {
@@ -69,7 +71,7 @@ function print_remote() {
     ((++i))
     echo -n "${TAB}$i) "
     echo -en "${PSBR}${remote_name}${RESET} "
-    
+
     # get URL
     export remote_url
     if [ $git_ver_maj -lt 2 ]; then
@@ -94,7 +96,7 @@ function print_remotes() {
         for remote_name in ${r_names}; do
             print_remote
             echo
-            dtab          
+            dtab
         done
     fi
 }
@@ -119,7 +121,7 @@ function check_remotes() {
         # exit on errors must be turned off; otherwise shell will exit when not in a repo
         old_opts=$(echo "$-")
         set +e
-    fi    
+    fi
     check_repo
     local -i RETVAL=$?
     reset_shell ${old_opts-''}
@@ -129,13 +131,13 @@ function check_remotes() {
     else
         echo "${TAB}not a Git repository"
         return 1
-    fi    
-    
+    fi
+
     # print list of hosts that have already been checked
     if [ $DEBUG -gt 0 ]; then
         print_hosts
     fi
-    
+
     # get number of remotes
     local -i n_remotes=$(git remote | wc -l)
     export r_names=$(git remote)
@@ -143,7 +145,7 @@ function check_remotes() {
     local -i i=0
     for remote_name in ${r_names}; do
         print_remote
-        
+
         # parse protocol
         local remote_pro
         local remote_host
@@ -176,7 +178,6 @@ function check_remotes() {
 
             # check against argument
             if [ $# -gt 0 ]; then
-                # decho -en "\n"
                 for arg in $@; do
                     decho -en "${TAB}checking $remote_url against argument ${ARG}${ARG}${RESET}... "
                     if [[ $remote_url =~ $arg ]]; then
@@ -230,7 +231,6 @@ function check_remotes() {
         fi # SSH
 
         if [ $DEBUG = 0 ]; then
-            #printf '\e[0;90;40m\u21b5\n\e[m'
             echo
         fi
 
@@ -241,7 +241,7 @@ function check_remotes() {
         ) | column -t -s+ -o : -R 1
         decho "${TAB}do_connect = $do_connect"
 
-        # check connection before proceeding       
+        # check connection before proceeding
         if [ ${do_connect} = 'true' ]; then
             echo -n "${TAB}checking connection... "
             unset_traps
@@ -250,14 +250,13 @@ function check_remotes() {
             if [[ "${remote_host}" == *"navy.mil" ]]; then
                 decho "${TAB}Navy host: ${remote_host}"
                 do_cmd $ssh_cmd_base -o LogLevel=error
-                #2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2) 1> >(sed -u $'s,.*,\e[32m&\e[m,' >&1)
                 RETVAL=$?
             else
                 if [[ ${remote_host} =~ "github.com" ]]; then
                     decho "${TAB}GitHub host: ${remote_host}"
                     # set shell options
                     if [[ "$-" == *e* ]]; then
-                        echo -n "${TAB}setting shell options..."    
+                        echo -n "${TAB}setting shell options..."
                         old_opts=$(echo "$-")
                         # exit on errors must be turned off; otherwise shell will exit...
                         set +e
@@ -291,7 +290,7 @@ function check_remotes() {
                     echo -e "${GRAY}RETVAL=$RETVAL${RESET}"
                 else
                     echo
-                fi  
+                fi
                 # add to list
                 if [ ! -z ${host_OK:+dummy} ]; then
                     host_OK+=$'\n'
@@ -300,7 +299,6 @@ function check_remotes() {
             else
                 if [[ $RETVAL == 1 ]]; then
                     echo -e "${YELLOW}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
-                    #dtab
                     if [[ $remote_host =~ "github.com" ]]; then
                         decho "${TAB}GitHub host: ${remote_host}"
                         # Github will return 1 if everything is working
@@ -350,6 +348,7 @@ function check_remotes() {
 
     unset_traps
 
+    decho "done"
     # add return code for parent script
     if [ $DEBUG -gt 0 ]; then
         trap 'print_return $?; trap - RETURN' RETURN
@@ -405,7 +404,7 @@ function check_mod() {
 function print_branches() {
     # before starting, fetch remote
     echo -n "${TAB}fetching ${pull_repo}..."
-    do_cmd_stdbuf git fetch --all --verbose ${pull_repo}    
+    do_cmd_stdbuf git fetch --all --verbose ${pull_repo}
 
     check_remotes
     parse_remote_tracking_branch
@@ -415,7 +414,7 @@ function print_branches() {
     #    echo $branches
     for remote_name in ${r_names}; do
         echo -e "${PSBR}${remote_name}${RESET} "
-        git branch -vvr --color=always -l ${remote_name}* | grep -v '\->' 
+        git branch -vvr --color=always -l ${remote_name}* | grep -v '\->'
     done
 }
 
@@ -437,7 +436,7 @@ function parse_remote_tracking_branch() {
     else
         echo "${TAB}not a Git repository"
         return 1
-    fi    
+    fi
 
     # parse local
     local_branch=$(git branch | grep \* | sed 's/^\* //')
@@ -479,7 +478,7 @@ function track_all_branches() {
         set_traps
     else
         return 1
-    fi    
+    fi
     parse_remote_tracking_branch
 
     # parse arguments
@@ -517,7 +516,7 @@ function track_all_branches() {
     # print remote branches
     echo "${TAB}remote tracking branches:"
     git branch -vvr --color=always | grep -v '\->'
-    
+
     echo "${TAB}${pull_repo} branches:"
     git branch -vvr --color=always -l ${pull_repo}* | grep -v '\->'
 
@@ -526,7 +525,7 @@ function track_all_branches() {
 
     # loop over branches
     echo "${TAB}checking branches..."
-    
+
     for branch in ${pull_branches}; do
         # define (local) branch name
         branch_name=${branch#${pull_repo}/}
@@ -559,5 +558,5 @@ function track_all_branches() {
     done
     dtab
     echo "${TAB}list of local branches:"
-    git branch -vv --color=always 
+    git branch -vv --color=always
 }
