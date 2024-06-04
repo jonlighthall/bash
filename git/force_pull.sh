@@ -459,11 +459,10 @@ while [ -z ${hash_local} ]; do
                 echo -ne "${TAB}\E[3Dor ${hash_start}^.."
                 hash_end=$(git rev-list $cond_local | head -n 1)
                 echo ${hash_end}
-                dtab
             else
                 hash_end=$hash_start
             fi
-            dtab            
+            dtab 2
         else
             N_local=0
             echo -e "${N_remote} commits behind local branch${RESET}"            
@@ -539,11 +538,10 @@ if [ ! -z ${hash_start_remote} ]; then
         echo -ne "${TAB}\E[3Dor ${hash_start_remote}^.."
         hash_end_remote=$(git rev-list $cond_remote | head -n 1)
         echo ${hash_end_remote}
-        dtab
     else
         hash_end_remote=$hash_start_remote
     fi
-    dtab
+    dtab 2
 else
     dtab
     N_remote=0
