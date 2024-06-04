@@ -342,6 +342,7 @@ for repo in $list; do
                 ((++n_fetch_fail))
                 fetch_fail+="$repo ($upstream_repo) "$'\n'
                 host_stat=$(echo -e "${BAD}FAIL${RESET}")
+                check_mod
                 continue 2
             fi
         done
@@ -479,6 +480,7 @@ for repo in $list; do
     if [ $RETVAL -ne 0 ]; then
         fetch_fail+="$repo "
         echo -e "\E[32m> \E[0mWSL may need to be restarted"
+        check_mod
         enable_exit_on_fail
         exit_on_fail
         echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
