@@ -990,8 +990,13 @@ echo -n "      modified: "
 if [ -z "$mod_repos" ]; then
     echo "none"
 else
-    echo "$mod_repos"
-    echo -e "${YELLOW}$mod_files${RESET}" | sort -n | sort -u | sed "s/^/${list_indent}/"
+    echo -en "${YELLOW}"
+    echo -e "$(echo -e $mod_repos | sed "s/ /\n/g" | sed "s,$,/,")\n$mod_files" \
+        | sort -n \
+        | uniq \
+        | sed "s|\(.*\)/$|${BOLD}\1${NORMAL}|" \
+        | sed "1! s/^/${list_indent}/"
+    echo -en "${RESET}"
 fi
 
 # stash
