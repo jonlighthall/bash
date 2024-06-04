@@ -1,4 +1,4 @@
-y#!/bin/bash -u
+#!/bin/bash -u
 
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
@@ -90,15 +90,18 @@ function check_min() {
             fi
             echo "same min"
         else
-            unset hash_min
+            hash_min=
             hash_min=$hash
             echo "new min"
             itab
             git diff --color=always --ignore-space-change --stat ${hash} ${stash} -- $fname | sed "s/^/$TAB/"
             dtab
         fi
-        echo "${TAB}${hash_min[@]}"
+
+        # print current list of hashes with number of changes equal to n_min
         [ $i_count -gt 0 ] && echo -n "${TAB}"
+
+        # update value of n_min
         n_min=$tot
     else
         [ $i_count -eq 0 ] && echo -n "${TAB}"
@@ -109,10 +112,48 @@ function check_min() {
         else
             echo -n "."
         fi
-        if [ $i_count -gt 500 ]; then
+
+    fi
+}
+
+function loop_hosts() {
+    echo "${TAB}${cmd}"
+
+    n_rev=$($cmd | wc -l)
+    echo "${TAB}$n_rev revisions found"
+
+    i_count=0
+
+    for hash in $($cmd); do
+        # git diff --ignore-space-change --stat ${hash} ${stash} -- $fname
+        add=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $1}' )
+        sub=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $2}' )
+
+        if [ -z "$add" ]; then
+            add=0
+        fi
+
+        if [ -z "$sub" ]; then
+            sub=0
+        fi
+
+        # get total number of changes
+        declare -i tot=$(($add+$sub))
+
+        # exit loop of zero changes found
+        if [ $tot -eq 0 ]; then
+            check_min
             break
         fi
-    fi
+        if [ $i_count -gt 15 ]; then
+            break
+        fi
+
+        check_min
+
+    done
+    [ $tot -gt 0 ] && echo -e "\x1B[17G done"
+    echo
 }
 
 #check_remotes
@@ -247,85 +288,37 @@ if [ $N_stash -gt 0 ]; then
             # define counters
             unset n_min
             unset hash_min
+            declare -a hash_min
             declare -i i_count=0
 
             # get list of hashes before stash that contain file
             cmd="git rev-list ${stash}^ -- $fname"
-            echo "${TAB}${cmd}"
+            loop_hosts
 
-            n_rev=$($cmd | wc -l)
-            echo "${TAB}$n_rev revisions found"
-
-            for hash in $($cmd); do
-                # git diff --stat ${hash} ${stash} -- $fname
-                # git diff --numstat ${hash} ${stash} -- $fname
-                add=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $1}' )
-                sub=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $2}' )
-
-                if [ -z "$add" ]; then
-                    add=0
-                fi
-
-                if [ -z "$sub" ]; then
-                    sub=0
-                fi
-
-                # get total number of changes
-                tot=$(( $add + $sub))
-
-                # exit loop of zero changes found
-                if [ $tot -eq 0 ]; then
-                    break
-                fi
-                check_min
-            done
-            echo -e "\x1B[14G done "
-
-            echo
             # get list of hashes not found in stash, up to HEAD, that contain file
             cmd="git rev-list HEAD ^${stash}^ -- $fname"
-            echo "${TAB}${cmd}"
-            n_rev=$($cmd | wc -l)
-            echo "${TAB}$n_rev revisions found"
-            i_count=0
+            loop_hosts
 
-            for hash in $($cmd); do
-                # git diff --stat ${hash} ${stash} -- $fname
-                # git diff --numstat ${hash} ${stash} -- $fname
-                add=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $1}' )
-                sub=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $2}' )
-
-                if [ -z "$add" ]; then
-                    add=0
-                fi
-
-                if [ -z "$sub" ]; then
-                    sub=0
-                fi
-
-                # get total number of changes
-                declare -i tot=$(($add+$sub))
-
-                # exit loop of zero changes found
-                if [ $tot -eq 0 ]; then
-                    break
-                fi
-                check_min
-            done
-            echo -e "\x1B[14G done "
-            echo
             echo "${TAB}minimum diff:"
             itab
             echo "${TAB}$n_min +/- changes"
-            echo "${hash_min[@]} " | sed "s/ /\n/g" | sed "s/^/${TAB}/"
+            echo "${hash_min[@]} " | sed "s/ /\n/g" | sed "s/^/${TAB}/" | sed '/^\s*$/d'
             dtab
 
-            cmd="git --no-pager diff --color=always --color-moved=blocks --ignore-space-change ${hash_min} ${stash} -- $fname"
-            echo "${TAB}$cmd"
-            do_cmd $cmd
-            dtab
+            if [ $n_min -eq 0 ] && [ $n_stash_files -eq 1 ]; then
+                echo "${TAB}dropping stash@{$n}..."
+                do_cmd_in git stash drop stash@{$n}                
+                continue 2
+            else
+
+                cmd="git --no-pager diff --color=always --color-moved=blocks --ignore-space-change ${hash_min} ${stash} -- $fname"
+                echo "${TAB}$cmd"
+                do_cmd $cmd
+                dtab
+            fi
 
         done # files
+        echo $n
         echo "${TAB}to delete, use"
         itab
         echo "${TAB}git stash drop stash@{$n}"
