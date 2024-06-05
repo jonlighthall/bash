@@ -152,7 +152,7 @@ function loop_hosts() {
         check_min
 
     done
-    [ $tot -gt 0 ] && echo -e "\x1B[17G done"
+    [ $n_rev -gt 0 ] && [ $tot -gt 0 ] && echo -e "\x1B[17G done"
     echo
 }
 
@@ -302,12 +302,18 @@ if [ $N_stash -gt 0 ]; then
             echo "${TAB}minimum diff:"
             itab
             echo "${TAB}$n_min +/- changes"
-            echo "${hash_min[@]} " | sed "s/ /\n/g" | sed "s/^/${TAB}/" | sed '/^\s*$/d'
+            # echo "${hash_min[@]} " | sed "s/ /\n/g" | sed "s/^/${TAB}/" | sed '/^\s*$/d'
+
+            for hash in "${hash_min[@]}"; do
+                echo -n "${TAB}$(git log --color=always -n 1 --format="%C(auto)%H%d %ad" $hash) "
+                echo -e "$(git log --color=always -n 1 --relative-date --format="%Cblue%ad" $hash)${RESET}"
+            done
+
             dtab
 
             if [ $n_min -eq 0 ] && [ $n_stash_files -eq 1 ]; then
                 echo "${TAB}dropping stash@{$n}..."
-                do_cmd_in git stash drop stash@{$n}                
+                do_cmd_in git stash drop stash@{$n}
                 continue 2
             else
 
@@ -318,13 +324,24 @@ if [ $N_stash -gt 0 ]; then
             fi
 
         done # files
-        echo $n
         echo "${TAB}to delete, use"
         itab
         echo "${TAB}git stash drop stash@{$n}"
         dtab
+        echo
+        # list stashed files
+        echo "${TAB}stashed files: "
+        itab
+        echo "${TAB}$n_stash_files files found"
+        echo -en "${YELLOW}"
+        echo "${stash_files[@]}" | sed "s/ /\n/g" | sed "s/^/${TAB}/"
+        echo -en "${RESET}"
+        dtab
     done # stash entreis
+    dtab
+    echo "${TAB}done"
 else
     echo "no stash entries found"
 fi
 echo
+set_exit
