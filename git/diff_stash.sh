@@ -21,16 +21,10 @@ print_debug
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
     set +e
-    trap 'echo -en "${YELLOW}RETURN${RESET}: ${BASH_SOURCE##*/} "' RETURN
 else
-    RUN_TYPE="executing"
-    # exit on errors
     set -e
     trap 'print_error $LINENO $? $BASH_COMMAND' ERR
-    # print time at exit
-    trap print_exit EXIT
 fi
 print_source
 
@@ -254,6 +248,8 @@ if [ $N_stash -gt 0 ]; then
         echo $cmd
         $cmd
 
+        unset stash_files
+        
         if [ -z "$(${cmd})" ]; then
             # check if stash is empty
             echo -e "${BAD}EMPTY: no diff"
