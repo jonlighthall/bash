@@ -81,7 +81,6 @@ cbar "${BOLD}check remotes...${RESET}"
 check_remotes
 
 parse_remote_tracking_branch
-dtab
 
 # parse arguments
 cbar "${BOLD}parse arguments...${RESET}"
@@ -325,7 +324,7 @@ if [ -z ${hash_local} ]; then
 fi
 
 while [ -z ${hash_local} ]; do
-    echo "${TAB}checking ${iHEAD}..."
+    echo "${TAB}checking ${YELLOW}${iHEAD}${RESET}..."
     hash_remote=$(git rev-parse ${iHEAD})
     subj_remote=$(git log ${iHEAD} --format=%s -n 1)
     time_remote=$(git log ${iHEAD} --format=%at -n 1)
