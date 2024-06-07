@@ -465,7 +465,7 @@ function parse_remote_tracking_branch() {
             echo "remote name+$upstream_repo"
             echo "remote refspec+$upstream_refspec"
             echo -e "local branch+${GREEN}${local_branch}${RESET}"
-        ) | column -t -s+ -o ": " -R1 | sed "s/^//"
+        ) | column -t -s+ -o ": " -R1 | sed "s/^/${TAB}/"
     fi
 }
 
