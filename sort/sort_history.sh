@@ -107,6 +107,8 @@ hist_name=.bash_history
 hist_ref=${HOME}/${hist_name}
 save_dir=${HOME}/home
 
+[ ! -d ${save_dir} ] && save_dir=${HOME}
+
 # if the save directory exists, history should be saved there
 hist_save=${save_dir}/${hist_name}
 
