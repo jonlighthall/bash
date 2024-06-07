@@ -32,10 +32,7 @@ fi
 declare -i GIT_OP_THRESH=0
 
 # determine if script is being sourced or executed and add conditional behavior
-if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
-else
-    RUN_TYPE="executing"
+if ! (return 0 2>/dev/null); then
     # exit on errors
     set -e
 
