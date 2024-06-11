@@ -116,16 +116,12 @@ hist_save=${save_dir}/${hist_name}
 hist_out=${hist_save}_merge
 
 declare hist_bak
-
 unset list_in
-
 set -e
-
 echo -e "${TAB}${UL}check files${RESET}"
 itab
 
 if false; then
-
     # check if the history file is a link
     echo -n "${TAB}${hist_ref} is a "
     if [ -L ${hist_ref} ]; then
@@ -190,11 +186,11 @@ else
 
     source cp_date "${hist_save}" hist_bak
 
-    echo "${hist_bak}"
-    echo "${hist_bak##*/}"
-    echo "${save_dir}/${hist_bak##*/}"
+    echo "${TAB}full path: ${hist_bak}"
+    echo "${TAB}file name: ${hist_bak##*/}"
+    echo "${TAB} set path: ${save_dir}/${hist_bak##*/}"
     hist_bak="${save_dir}/${hist_bak##*/}"
-    echo "${hist_bak}"
+    echo "${TAB}new value: ${hist_bak}"
 fi
 
 echo "${TAB}backup file is $hist_bak"
