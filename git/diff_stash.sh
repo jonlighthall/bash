@@ -23,6 +23,7 @@ print_debug
 if (return 0 2>/dev/null); then
     set +e
 else
+    # exit on errors
     set -e
     trap 'print_error $LINENO $? $BASH_COMMAND' ERR
 fi
@@ -157,7 +158,7 @@ cbar "${BOLD}parsing stash...${RESET}"
 N_stash=$(git stash list | wc -l)
 
 if [ $N_stash -gt 1 ]; then
-    echo -e "$repo has $N_stash entries in stash"
+    echo -e "${TAB}$repo has $N_stash entries in stash"
     do_cmd_stdbuf git stash list
     cbar "${BOLD}looking for duplicate stashes...${RESET}"
 
@@ -215,7 +216,7 @@ fi
 # update stash list
 N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
-    echo -e "$repo has $N_stash entries in stash"
+    echo -e "${TAB}repo has $N_stash entries in stash"
 
     if [ -z "$@" ]; then
         n_start=0;
@@ -239,14 +240,14 @@ if [ $N_stash -gt 0 ]; then
     # loop over stash entries
     for ((n = $n_start; n < ((n_start + 1 )); n++)); do
         stash="stash@{$n}"
-        echo "${stash}"
-        git log -1 ${stash}
+        echo "${TAB}${stash}"
+        do_cmd_in git log -1 ${stash}
         echo
 
         # get names of stashed files
         cmd="git diff --ignore-space-change --name-only ${stash}^ ${stash}"
-        echo $cmd
-        $cmd
+        echo "${TAB}$cmd"
+        do_cmd_in $cmd
 
         unset stash_files
         
@@ -264,7 +265,7 @@ if [ $N_stash -gt 0 ]; then
         fi
 
         # list stashed files
-        echo "stashed files: "
+        echo "${TAB}stashed files: "
         itab
         n_stash_files=${#stash_files[@]}
         echo "${TAB}$n_stash_files files found"
@@ -292,7 +293,7 @@ if [ $N_stash -gt 0 ]; then
             loop_hosts
 
             # get list of hashes not found in stash, up to HEAD, that contain file
-            cmd="git rev-list HEAD ^${stash}^ -- $fname"
+            cmd="git rev-list HEAD^ ^${stash}^ -- $fname"
             loop_hosts
 
             echo "${TAB}minimum diff:"
@@ -312,9 +313,13 @@ if [ $N_stash -gt 0 ]; then
                 do_cmd_in git stash drop stash@{$n}
                 continue 2
             else
-
+                echo "${TAB}displaying minimum diff:"
+                itab
+                echo -e "${TAB}${RED}-removed by stash@{$n}${RESET}"
+                echo -e "${TAB}${GREEN}+  added by stash@{$n}${RESET}"                
                 cmd="git --no-pager diff --color=always --color-moved=blocks --ignore-space-change ${hash_min} ${stash} -- $fname"
                 echo "${TAB}$cmd"
+                dtab
                 do_cmd $cmd
                 dtab
             fi
