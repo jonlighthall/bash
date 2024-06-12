@@ -23,26 +23,28 @@ declare -i check=0
 list=$(git ls-files -d)
 
 if [ -z "${list[@]}" ]; then
-    echo "no files to restore"
+    echo -e "${TAB}${GOOD}no files to restore${RESET}\n"
 else
-    echo "restoring deleted files..."
-
+    echo "${TAB}restoring deleted files..."
+    itab
     # checkout deleted files
     for fname in $list; do
         ((++found))
-        echo $fname
-        git checkout $fname
+        echo "${TAB}$fname"
+        do_cmd git checkout $fname
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]; then
             ((++check))
         fi
     done
-    echo "done"
+    dtab
+    echo "${TAB}done"
 
     # print summary
     echo
-    echo -e "\E[4m${found} files found:\E[0m"
-    echo "${check} files restored"
+    echo -e "${TAB}\E[4m${found} files found:\E[0m"
+    echo "${TAB}${check} files restored"
+    echo
 fi
 
 set_exit
