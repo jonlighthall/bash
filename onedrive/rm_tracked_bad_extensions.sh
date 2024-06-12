@@ -6,6 +6,8 @@
 #
 # May 2024 JCL
 
+declare -i start_time=$(date +%s%N)
+
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
@@ -79,7 +81,7 @@ declare -i count_mv=0
 declare -i count_mv_fail=0
 
 # first, remove tracked files from the repository
-echo -n "${TAB}removing tracked binary files from the repository... "
+echo -n "${TAB}removing tracked binary (and empty) files from the repository... "
 itab
 for fname in $(find ./ -not -path "*$GITDIR/*" -not -path "*/.git/*" -type f ); do
 
@@ -209,3 +211,5 @@ echo "Files deleted: $count_rm"
 echo "Files renamed: $count_mv"
 echo "Files not renamed: $count_mv_fail"
 echo
+
+set_exit
