@@ -73,136 +73,156 @@ if [ -f makefile ]; then
     echo "${TAB}makefile found"
     echo "${TAB}executing make clean..."
     do_cmd make clean
+    echo "${TAB}done"
 fi
+
+echo "${TAB}executing git fetch..."
+do_cmd git fetch --verbose --all --prune
+echo "${TAB}done"
 
 declare -i count_found=0
 declare -i count_rm=0
 declare -i count_mv=0
 declare -i count_mv_fail=0
 
-# first, remove tracked files from the repository
-echo -n "${TAB}removing tracked binary (and empty) files from the repository... "
-itab
-for fname in $(find ./ -not -path "*$GITDIR/*" -not -path "*/.git/*" -type f ); do
+set -E +e
+trap -- ERR
 
-    # Check if the file is binary
-    if perl -e 'exit -B $ARGV[0]' "$fname"; then
-        :  #echo "File is text."; file $file
-    else
-        start_new_line
-        echo -en "${TAB}${fname##*./}... "
-        if [ ! -s $fname ]; then
-            echo -en "${YELLOW}empty: ${RESET}"
-            rm -v "$fname"
-            ((++count_rm))
-            continue
-        else
-            echo -e "${BAD}binary: ${RESET}"
-        fi
-      
-        # check if the file is tracked
-        git ls-files --error-unmatch $fname &>/dev/null
-        RETVAL=$?
-        if [ $RETVAL -eq 0 ]; then
-            echo -n "tracked: "
-            # check if the file is modified
-            if [ -z "$(git diff $fname)" ]; then
-                echo -n "unmodified: "
-                rm -v "$fname"
-                ((++count_rm))
-            else
-                echo "modified"
-            fi
-        else
-            echo "untracked"
-            rm -v "$fname"
-            ((++count_rm))
-        fi
-    fi
-done
-echo "done"
-dtab
-
-# look for bad extensions
-echo -n "${TAB}checking for files with bad extensions... "
-itab
-for bad in bat bin cmd csh exe gz js ksh osx out prf ps ps1; do
-
-    name_list=$(find ./ -name "*.${bad}")
-
-    if [ -z "${name_list}" ]; then
-        continue
-    fi
-
-    start_new_line
-    echo -n "${TAB}.${bad}... "
+function fix_bin() {
+    # first, remove tracked files from the repository
+    echo -n "${TAB}removing tracked binary (and empty) files from the repository... "
     itab
+    for fname in $(find ./ -not -path "*$GITDIR/*" -not -path "*/*git/*" -type f ); do
 
-    n_files=$(echo "$name_list" | wc -l)
-    echo "$n_files files found"
-
-    for fname in $(find ./ -name "*.${bad}"); do
-        ((++count_found))
-        echo -n "${TAB}${count_found}) $fname... "
-
-        # check if the file is tracked
-        git ls-files --error-unmatch "$fname" &>/dev/null
-        RETVAL=$?
-        if [ $RETVAL -eq 0 ]; then
-            echo -n "tracked: "
-
-            # check if the file is modified
-            if [ -z "$(git diff $fname)" ]; then
-                echo -n "unmodified: "
+        # Check if the file is binary
+        if perl -e 'exit -B $ARGV[0]' "$fname"; then
+            :  #echo "File is text."; file $file
+        else
+            start_new_line
+            echo -en "${TAB}${fname##*./}... "
+            if [ ! -s $fname ]; then
+                echo -en "${YELLOW}empty: ${RESET}"
                 rm -v "$fname"
                 ((++count_rm))
+                continue
             else
-                echo -n "modified: "
-                mv -nv "$fname" "$(echo "$fname" | sed "s/\.$bad/$sep$bad/")"
-                if [ -f "$fname" ];then
-                    echo "rename $fname FAILED"
-                    ((++count_mv_fail))
-                else
-                    ((++count_mv))
-                fi
+                echo -ne "${BAD}binary: ${RESET}"
             fi
-        else
-            echo -n "untracked: "
 
-            git check-ignore "${fname}" &>/dev/null
+            # check if the file is tracked
+            git ls-files --error-unmatch $fname &>/dev/null
             RETVAL=$?
             if [ $RETVAL -eq 0 ]; then
-                echo -n "ignored: "
-
+                echo -n "tracked: "
+                # check if the file is modified
+                if [ -z "$(git diff $fname)" ]; then
+                    echo -n "unmodified: "
+                    rm -v "$fname"
+                    ((++count_rm))
+                else
+                    echo "modified"
+                fi
+            else
+                echo -n "untracked: "
                 rm -v "$fname"
                 ((++count_rm))
-
-            else
-                echo -n "not ignored: "
-
-                fname_out=$(echo "$fname" | sed "s/\.$bad/$sep$bad/")
-                echo
-                itab
-                decho "${TAB}fname: $fname"
-                decho "${TAB}fname out: $fname_out"
-                decho "${TAB}mv -nv $fname ${fname_out}"
-                echo -n "${TAB}"
-                dtab
-                mv -nv "$fname" "${fname_out}"
-                if [ -f "$fname" ];then
-                    echo "rename $fname FAILED"
-                    ((++count_mv_fail))
-                else
-                    ((++count_mv))
-                fi
             fi
         fi
+    done
+    echo "done"
+    dtab
 
+}
+
+function fix_bad_ext() {
+    # look for bad extensions
+    echo -n "${TAB}checking for files with bad extensions... "
+    itab
+    for bad in bat bin cmd csh exe gz js ksh osx out prf ps ps1; do
+
+        name_list=$(find ./ -name "*.${bad}")
+
+        if [ -z "${name_list}" ]; then
+            continue
+        fi
+
+        start_new_line
+        echo -n "${TAB}.${bad}... "
+        itab
+
+        n_files=$(echo "$name_list" | wc -l)
+        echo "$n_files files found"
+
+        for fname in $(find ./ -name "*.${bad}"); do
+            ((++count_found))
+            echo -n "${TAB}${count_found}) $fname... "
+
+            # check if the file is tracked
+            git ls-files --error-unmatch "$fname" &>/dev/null
+            RETVAL=$?
+            if [ $RETVAL -eq 0 ]; then
+                echo -n "tracked: "
+
+                # check if the file is modified
+                if [ -z "$(git diff $fname)" ]; then
+                    echo -n "unmodified: "
+                    rm -v "$fname"
+                    ((++count_rm))
+                else
+                    echo -n "modified: "
+                    mv -nv "$fname" "$(echo "$fname" | sed "s/\.$bad/$sep$bad/")"
+                    if [ -f "$fname" ];then
+                        echo "rename $fname FAILED"
+                        ((++count_mv_fail))
+                    else
+                        ((++count_mv))
+                    fi
+                fi
+            else
+                echo -n "untracked: "
+
+                git check-ignore "${fname}" &>/dev/null
+                RETVAL=$?
+                if [ $RETVAL -eq 0 ]; then
+                    echo -n "ignored: "
+
+                    rm -v "$fname"
+                    ((++count_rm))
+                else
+                    echo -n "not ignored: "
+
+                    fname_out=$(echo "$fname" | sed "s/\.$bad/$sep$bad/")
+                    echo
+                    itab
+                    decho "${TAB}fname: $fname"
+                    decho "${TAB}fname out: $fname_out"
+                    decho "${TAB}mv -nv $fname ${fname_out}"
+                    echo -n "${TAB}"
+                    dtab
+                    mv -nv "$fname" "${fname_out}"
+                    if [ -f "$fname" ];then
+                        echo "rename $fname FAILED"
+                        ((++count_mv_fail))
+                    else
+                        ((++count_mv))
+                    fi
+                fi
+            fi
+
+        done
+        dtab
     done
     dtab
-done
-dtab
-echo "done"
+    echo "done"
+
+}
+
+fix_bin
+
+if command -v wsl.exe >/dev/null; then
+	  echo -n "${TAB}WSL defined."
+    fix_bad_ext
+fi
 
 echo
 
