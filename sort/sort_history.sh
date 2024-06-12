@@ -276,8 +276,8 @@ for hist_in in ${list_in[@]}; do
             # create temporary file
             hist_temp=${hist_in}_$(date +'%s')
             decho "${TAB}$hist_temp"
-            decho "#$preTS INSERT MISSING TIMESTAMP" | cat - "${hist_in}" >${hist_temp}
-            decho -ne ${TAB}
+            echo "#$preTS INSERT MISSING TIMESTAMP" | cat - "${hist_in}" >${hist_temp}
+            decho -ne "${TAB}"
             mv -v ${hist_temp} ${hist_in}
             decho "${TAB}done"
             dtab
