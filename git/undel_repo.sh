@@ -9,18 +9,11 @@ if [ -e $fpretty ]; then
 fi
 
 # print source at start
-if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
-else
-    RUN_TYPE="executing"
+if ! (return 0 2>/dev/null); then
     set -eE
     trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
-echo -e "${TAB}${RUN_TYPE} ${PSDIR}$BASH_SOURCE${RESET}..."
-src_name=$(readlink -f $BASH_SOURCE)
-if [ ! "$BASH_SOURCE" = "$src_name" ]; then
-    echo -e "${TAB}${VALID}link${RESET} -> $src_name"
-fi
+print_source
 
 # define counters
 declare -i found=0
@@ -29,24 +22,27 @@ declare -i check=0
 # get list of deleted files
 list=$(git ls-files -d)
 
-# checkout deleted files
-for fname in $list; do
-    ((++found))
-    echo $fname
-    git checkout $fname
-    RETVAL=$?
-    if [[ $RETVAL -eq 0 ]]; then
-        ((++check))
-    fi
-done
-wait
+if [ -z "${list[@]}" ]; then
+    echo "no files to restore"
+else
+    echo "restoring deleted files..."
 
-echo "done"
+    # checkout deleted files
+    for fname in $list; do
+        ((++found))
+        echo $fname
+        git checkout $fname
+        RETVAL=$?
+        if [[ $RETVAL -eq 0 ]]; then
+            ((++check))
+        fi
+    done
+    echo "done"
 
-# print summary
-echo
-echo -e "\E[4m${found} files found:\E[0m"
-echo "${check} files restored"
+    # print summary
+    echo
+    echo -e "\E[4m${found} files found:\E[0m"
+    echo "${check} files restored"
+fi
 
-# print time at exit
-echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+set_exit
