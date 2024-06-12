@@ -17,10 +17,8 @@ fi
 
 # determine if script is being sourced or executed
 if (return 0 2>/dev/null); then
-	  RUN_TYPE="sourcing"
 	  set -T +e
 else
-	  RUN_TYPE="executing"
     set -e
 fi
 
