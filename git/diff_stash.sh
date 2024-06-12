@@ -316,7 +316,8 @@ if [ $N_stash -gt 0 ]; then
                     do_cmd_in git stash drop stash@{$n}
                     continue 2
                 fi
-                echo -e "${TAB}stashed changes saved in ${YELLOW}${hash_min[@]}${RESET}"
+                echo -e "${TAB}${BOLD}${GREEN}stashed changes saved in commits${RESET}"
+                dtab
             else
 
                 diff_files+=( "$fname" )
@@ -338,16 +339,7 @@ if [ $N_stash -gt 0 ]; then
         itab
         echo "${TAB}git stash drop stash@{$n}"
         dtab
-        echo
-
-        # list stashed files
-        echo "${TAB}stashed files: "
-        itab
-        echo "${TAB}$n_stash_files files found"
-        echo -en "${YELLOW}"
-        echo "${stash_files[@]}" | sed "s/ /\n/g" | sed "s/^/${TAB}/"
-        echo -en "${RESET}"
-        dtab
+        echo    
         
         # list diff files
         echo "${TAB}diff files: "
