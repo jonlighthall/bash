@@ -56,6 +56,8 @@ else
                     itab
                     echo -en "${TAB}"
                     ls $file -l --color=always
+                    echo -en "${TAB}"
+                    rm -rv $file
                     dtab
                 fi
             done
