@@ -10,9 +10,10 @@
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-	  set_traps
-    set -e
 fi
+
+unset_traps
+set +e
 
 if [ $# -eq 0 ]; then
 	  echo "Please provide a target directory"
