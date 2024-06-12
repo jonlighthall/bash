@@ -250,6 +250,8 @@ if [ $N_stash -gt 0 ]; then
         do_cmd_in $cmd
 
         unset stash_files
+        unset diff_files
+        declare -i n_diff_files=0;
         
         if [ -z "$(${cmd})" ]; then
             # check if stash is empty
@@ -308,11 +310,18 @@ if [ $N_stash -gt 0 ]; then
 
             dtab
 
-            if [ $n_min -eq 0 ] && [ $n_stash_files -eq 1 ]; then
-                echo "${TAB}dropping stash@{$n}..."
-                do_cmd_in git stash drop stash@{$n}
-                continue 2
+            if [ $n_min -eq 0 ]; then
+                if [ $n_stash_files -eq 1 ]; then
+                    echo "${TAB}dropping stash@{$n}..."
+                    do_cmd_in git stash drop stash@{$n}
+                    continue 2
+                fi
+                echo -e "${TAB}stashed changes saved in ${YELLOW}${hash_min[@]}${RESET}"
             else
+
+                diff_files+=( "$fname" )
+                ((++n_diff_files))
+
                 echo "${TAB}displaying minimum diff:"
                 itab
                 echo -e "${TAB}${RED}-removed by stash@{$n}${RESET}"
@@ -330,6 +339,7 @@ if [ $N_stash -gt 0 ]; then
         echo "${TAB}git stash drop stash@{$n}"
         dtab
         echo
+
         # list stashed files
         echo "${TAB}stashed files: "
         itab
@@ -338,6 +348,15 @@ if [ $N_stash -gt 0 ]; then
         echo "${stash_files[@]}" | sed "s/ /\n/g" | sed "s/^/${TAB}/"
         echo -en "${RESET}"
         dtab
+        
+        # list diff files
+        echo "${TAB}diff files: "
+        itab
+        echo "${TAB}$n_diff_files files found"
+        echo -en "${YELLOW}"
+        echo "${diff_files[@]}" | sed "s/ /\n/g" | sed "s/^/${TAB}/"
+        echo -en "${RESET}"
+        dtab        
     done # stash entreis
     dtab
     echo "${TAB}done"
