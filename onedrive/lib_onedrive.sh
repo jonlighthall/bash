@@ -10,7 +10,7 @@ declare -i count_mv_fail=0
 declare -i count_skip=0
 
 declare -a bad_list
-bad_list=( "bat" "bin" "cmd" "csh" "exe" "gz" "js" "ksh" "osx" "out" "prf" "ps" "ps1" )
+bad_list=( "bat" "bin" "cmd" "csh" "exe" "gz" "js" "ksh" "mar" "osx" "out" "prf" "ps" "ps1" )
 
 function check_arg() {
     # check argument
