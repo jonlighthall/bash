@@ -12,12 +12,6 @@ if [ -e $fpretty ]; then
 	  source $fpretty
 fi
 
-# print source name at start
-if (return 0 2>/dev/null); then
-	  RUN_TYPE="sourcing"
-else
-	  RUN_TYPE="executing"
-fi
 print_source
 
 # define conditions and anti-conditions
