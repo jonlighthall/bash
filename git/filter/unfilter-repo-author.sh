@@ -5,10 +5,7 @@ if [ -e $fpretty ]; then
 fi
 
 # print source name at start
-if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
-else
-    RUN_TYPE="executing"
+if ! (return 0 2>/dev/null); then
     set -eE
     trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
@@ -34,6 +31,11 @@ echo -e " local branch is ${GREEN}${branch_local}${RESET}"
 branch_list=$(git branch -va | sed 's/^*/ /' | awk '{print $1}' | sed 's|remotes/.*/||' | sort -u | sed '/HEAD/d')
 echo "list of branches: "
 echo "${branch_list}" | sed 's/^/   /'
+
+export FILTER_BRANCH_SQUELCH_WARNING=1
+if [ -f ./.git-rewirte ]; then
+    rm -rdv ./.git-rewrite
+fi
 
 git filter-repo $@ --partial --commit-callback '
     # define correct name
