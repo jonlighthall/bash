@@ -84,6 +84,7 @@ declare -i count_found=0
 declare -i count_rm=0
 declare -i count_mv=0
 declare -i count_mv_fail=0
+declare -i count_skip=0
 
 set -E +e
 trap -- ERR
@@ -120,12 +121,12 @@ function fix_bin() {
                     rm -v "$fname"
                     ((++count_rm))
                 else
-                    echo "modified"
+                    echo -e "${CYAN}modified${RESET}"
+                    ((++count_skip))
                 fi
             else
-                echo -n "untracked: "
-                rm -v "$fname"
-                ((++count_rm))
+                echo -e "${MAGENTA}untracked${RESET}"
+                ((++count_skip))
             fi
         fi
     done
@@ -228,6 +229,7 @@ echo
 
 echo -e "${UL}Files found: $count_found${NORMAL}"
 echo "Files deleted: $count_rm"
+echo "Files skipped: $count_skip"
 echo "Files renamed: $count_mv"
 echo "Files not renamed: $count_mv_fail"
 echo
