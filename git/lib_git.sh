@@ -19,7 +19,7 @@ function check_git() {
 
     # check if Git is defined
     ddecho -n "${TAB}checking Git... "
-    if [ -z "${check_git:+dummy}" ]; then
+    if [ -z "${git_checked:+dummy}" ]; then
         if command -v git &>/dev/null; then
             ddecho -en "${GOOD}OK${RESET} "
             # parse Git version
@@ -27,7 +27,7 @@ function check_git() {
             export git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
             export git_ver_min=$(echo $git_ver | awk -F. '{print $2}')
             export git_ver_pat=$(echo $git_ver | awk -F. '{print $3}')
-            export check_git=false
+            export git_checked=false
             decho -e "${GRAY}v${git_ver}${NORMAL}"
             return 0
         else
