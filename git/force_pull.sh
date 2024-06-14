@@ -43,10 +43,8 @@ fi
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
     set +e
 else
-    RUN_TYPE="executing"
     # exit on errors
     set -e
     set_traps
@@ -188,7 +186,7 @@ else
 fi
 
 cbar "${BOLD}comparing branches...${RESET}"
-if [ ! -z ${remote_tracking_branch} ]; then
+if [ ! -z ${remote_tracking_branch:+dummy} ]; then
     echo -n "${TAB}remote tracking branches... "
 
     if [ "$pull_branch" == "$remote_tracking_branch" ]; then
@@ -246,6 +244,7 @@ echo -e "${fTAB}remote: ${YELLOW}behind $N_remote${RESET}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     echo -e "${fTAB}${YELLOW}local branch '${local_branch}' and remote branch '${pull_branch}' have diverged${RESET}"
+    git update-ref -m "${BASH_SOURCE##*/} (start):"
 fi
 
 # -----------------
@@ -324,7 +323,7 @@ if [ -z ${hash_local} ]; then
 fi
 
 while [ -z ${hash_local} ]; do
-    echo "${TAB}checking ${YELLOW}${iHEAD}${RESET}..."
+    echo -e "${TAB}checking ${YELLOW}${iHEAD}${RESET}..."
     hash_remote=$(git rev-parse ${iHEAD})
     subj_remote=$(git log ${iHEAD} --format=%s -n 1)
     time_remote=$(git log ${iHEAD} --format=%at -n 1)
@@ -421,7 +420,6 @@ while [ -z ${hash_local} ]; do
     echo "${TAB}remote commit hash: ............ ${hash_remote}"
     echo -n "${TAB}corresponding local commit hash: "
     if [ ! -z ${hash_local} ]; then
-        itab
         echo "$hash_local"
         # determine local commits not found on remote
         echo -en "${TAB}${YELLOW}local branch is "
