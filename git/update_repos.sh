@@ -193,8 +193,15 @@ for repo in $list; do
     # find
     #------------------------------------------------------
     echo -e "${TAB}locating ${PSDIR}$repo${RESET}... \c"
+    declare -i db_check
+    if [ $# -gt 0 ]; then
+        db_check=0
+    else
+        db_check=1
+    fi
+
     if [ -e ${HOME}/$repo ]; then
-        echo -e "${GOOD}OK${RESET}"
+        [ $db_check -gt 1 ] && echo -e "${GOOD}OK${RESET}"
         ((++n_found))
     else
         echo -e "${BAD}FAIL${RESET}"
@@ -213,7 +220,7 @@ for repo in $list; do
     #------------------------------------------------------
     cd ${HOME}/$repo
     unset_traps
-    check_repo 1
+    check_repo $db_check
     RETVAL=$?
     reset_traps
     if [[ $RETVAL -gt 0 ]]; then
@@ -228,31 +235,17 @@ for repo in $list; do
     # increment git counter
     ((++n_git))
 
-    # parse remote
-    echo -n "${TAB}checking remote tracking branch... "
-    # set shell options
-    if [[ "$-" == *e* ]]; then
-        # exit on errors must be turned off; otherwise shell will exit no remote branch found
-        old_opts=$(echo "$-")
-        set +e
-    fi
-    unset_traps
-    git rev-parse --abbrev-ref @{upstream} &>/dev/null
+    parse_remote_tracking_branch $db_check
     RETVAL=$?
-    reset_shell ${old_opts-''}
-    reset_traps
+
     if [[ $RETVAL -ne 0 ]]; then
-        echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
-        do_cmd git rev-parse --abbrev-ref @{upstream}
-        echo "${TAB}no remote tracking branch set for current branch"
         decho "skipping..."
         upstream_fail+=( "${repo}" )
         check_mod
         continue
     fi
-    remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
     decho -n "${TAB}"
-    echo "$remote_tracking_branch"
+    [ $db_check -gt 1 ] && echo "$remote_tracking_branch"
 
     upstream_repo=${remote_tracking_branch%%/*}
     if [ $git_ver_maj -lt 2 ]; then
@@ -266,7 +259,7 @@ for repo in $list; do
     # check against argument
     if [ $# -gt 0 ]; then
         for arg in $@; do
-            echo -en "${TAB}checking argument \x1b[36m$arg\x1b[m... "
+            [ $db_check -gt 1 ] && echo -en "${TAB}checking argument \x1b[36m$arg\x1b[m... "
             if [[ $upstream_url =~ $arg ]]; then
                 echo -e "${GOOD}OK${RESET}"
                 ((++n_match))
@@ -533,7 +526,7 @@ for repo in $list; do
                             echo "modifications are non-trivial: "
                             itab
                             git diff --name-only --diff-filter=M 2>&1 | sed "s/.*/${TAB}\x1b[31m&\x1b[m/"
-                            dtab 
+                            dtab
                             check_mod
                             exit_on_fail
                             continue
@@ -676,7 +669,7 @@ for repo in $list; do
                     bash ${prog}
                     RETVAL3=$?
                     dtab
-                    
+
                     # print make_links status
                     echo -en "${GIT_HIGHLIGHT} make links ${RESET} "
                     if [ ${RETVAL3} -eq 0 ]; then

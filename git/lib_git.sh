@@ -54,7 +54,7 @@ function check_repo() {
         DEBUG=${DEBUG:-0}
         # set manually
         #DEBUG=0
-    fi    
+    fi
 
     [ $DEBUG -gt 0 ] && echo -n "${TAB}checking repository status... "
     # set shell options
@@ -429,29 +429,41 @@ function print_branches() {
 }
 
 function parse_remote_tracking_branch() {
-    # parse remote tracking branch and local branch
-    cbar "${BOLD}parse current settings...${RESET}"
-    # set shell options
-    if [[ "$-" == *e* ]]; then
-        # exit on errors must be turned off; otherwise shell will exit no remote branch found
-        old_opts=$(echo "$-")
-        set +e
-    fi
     check_repo
     local -i RETVAL=$?
-    reset_shell ${old_opts-''}
+
+    local -i do_print
+    # set local debug value
+    if [ $# -eq 1 ]; then
+        # use argument to manually set do_print
+        do_print=$1
+    else
+        # substitute default value if do_print is unset or null
+        do_print=${do_print:-0}
+        # set manually
+        #do_print=0
+    fi
+
+    # parse remote tracking branch and local branch
+    [ $do_print -gt 0 ] && cbar "${BOLD}parse current settings...${RESET}"
+
     if [[ $RETVAL -eq 0 ]]; then
         decho "${TAB}proceeding to check hosts"
         set_traps
     else
-        echo "${TAB}not a Git repository"
         return 1
     fi
 
     # parse local
     local_branch=$(git branch | grep \* | sed 's/^\* //')
     # parse remote
-    echo -n "${TAB}checking remote tracking branch... "
+    [ $do_print -gt 0 ] && echo -n "${TAB}checking remote tracking branch... "
+    # set shell options
+    if [[ "$-" == *e* ]]; then
+        # exit on errors must be turned off; otherwise shell will exit no remote branch found
+        old_opts=$(echo "$-")
+        set +e
+    fi
     unset_traps
     git rev-parse --abbrev-ref @{upstream} &>/dev/null
     RETVAL=$?
@@ -468,15 +480,16 @@ function parse_remote_tracking_branch() {
         # parse branches
         upstream_refspec=${remote_tracking_branch#*/}
         if [ ${DEBUG:-0} -eq 0 ]; then
-            echo
+            : #echo
         fi
-        (
+        [ $do_print -gt 0 ] && (
             echo -e "remote tracking branch+${BLUE}${remote_tracking_branch}${RESET}"
             echo "remote name+$upstream_repo"
             echo "remote refspec+$upstream_refspec"
             echo -e "local branch+${GREEN}${local_branch}${RESET}"
         ) | column -t -s+ -o ": " -R1 | sed "s/^/${TAB}/"
     fi
+    return 0
 }
 
 function track_all_branches() {
