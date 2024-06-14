@@ -829,7 +829,7 @@ else
 fi
 
 cbar "${BOLD}resetting...${RESET}"
-if [ ! -z ${remote_tracking_branch} ]; then
+if [ ! -z ${remote_tracking_branch:+dummy} ]; then
     echo "resetting upstream remote tracking branch..."
     trap 'set_color; lecho;
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
