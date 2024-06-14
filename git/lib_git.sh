@@ -438,12 +438,9 @@ function parse_remote_tracking_branch() {
         # use argument to manually set do_print
         do_print=$1
     else
-        # substitute default value if do_print is unset or null
-        do_print=${do_print:-0}
         # set manually
-        #do_print=0
+        do_print=0
     fi
-
     # parse remote tracking branch and local branch
     [ $do_print -gt 0 ] && cbar "${BOLD}parse current settings...${RESET}"
 
@@ -482,12 +479,15 @@ function parse_remote_tracking_branch() {
         if [ ${DEBUG:-0} -eq 0 ]; then
             : #echo
         fi
-        [ $do_print -gt 0 ] && (
-            echo -e "remote tracking branch+${BLUE}${remote_tracking_branch}${RESET}"
-            echo "remote name+$upstream_repo"
-            echo "remote refspec+$upstream_refspec"
-            echo -e "local branch+${GREEN}${local_branch}${RESET}"
-        ) | column -t -s+ -o ": " -R1 | sed "s/^/${TAB}/"
+        if [ $do_print -gt 0 ]; then
+            start_new_line
+            (
+                echo -e "remote tracking branch+${BLUE}${remote_tracking_branch}${RESET}"
+                echo "remote name+$upstream_repo"
+                echo "remote refspec+$upstream_refspec"
+                echo -e "local branch+${GREEN}${local_branch}${RESET}"
+            ) | column -t -s+ -o ": " -R1 | sed "s/^/${TAB}/"
+        fi
     fi
     return 0
 }

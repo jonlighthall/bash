@@ -201,7 +201,7 @@ for repo in $list; do
     fi
 
     if [ -e ${HOME}/$repo ]; then
-        [ $db_check -gt 1 ] && echo -e "${GOOD}OK${RESET}"
+        echo -e "${GOOD}OK${RESET}"
         ((++n_found))
     else
         echo -e "${BAD}FAIL${RESET}"
@@ -235,7 +235,7 @@ for repo in $list; do
     # increment git counter
     ((++n_git))
 
-    parse_remote_tracking_branch $db_check
+    parse_remote_tracking_branch $DEBUG
     RETVAL=$?
 
     if [[ $RETVAL -ne 0 ]]; then
@@ -259,7 +259,7 @@ for repo in $list; do
     # check against argument
     if [ $# -gt 0 ]; then
         for arg in $@; do
-            [ $db_check -gt 1 ] && echo -en "${TAB}checking argument \x1b[36m$arg\x1b[m... "
+            echo -en "${TAB}checking argument \x1b[36m$arg\x1b[m... "
             if [[ $upstream_url =~ $arg ]]; then
                 echo -e "${GOOD}OK${RESET}"
                 ((++n_match))
