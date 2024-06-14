@@ -213,7 +213,7 @@ for repo in $list; do
     #------------------------------------------------------
     cd ${HOME}/$repo
     unset_traps
-    check_repo
+    check_repo 1
     RETVAL=$?
     reset_traps
     if [[ $RETVAL -gt 0 ]]; then

@@ -40,16 +40,27 @@ function check_git() {
     return 0
 }
 
+# check if directory is a repository
 function check_repo() {
-    # substitute default debug if unset or null
-    local DEBUG=${DEBUG:-0}
-    # manually set
-    #local -i DEBUG=1
     check_git
-    echo -n "${TAB}checking repository status... "
+
+    local -i DEBUG
+    # set local debug value
+    if [ $# -eq 1 ]; then
+        # use argument to manually set DEBUG
+        DEBUG=$1
+    else
+        # substitute default value if DEBUG is unset or null
+        DEBUG=${DEBUG:-0}
+        # set manually
+        #DEBUG=0
+    fi    
+
+    [ $DEBUG -gt 0 ] && echo -n "${TAB}checking repository status... "
     # set shell options
     if [[ "$-" == *e* ]]; then
-        # exit on errors must be turned off; otherwise shell will exit when not inside a repository
+        # exit on errors must be turned off; otherwise shell will exit when not inside a
+        # repository
         old_opts=$(echo "$-")
         set +e
     fi
@@ -57,10 +68,10 @@ function check_repo() {
     local -i RETVAL=$?
     reset_shell ${old_opts-''}
     if [[ $RETVAL -eq 0 ]]; then
-        echo -e "${GOOD}OK${RESET} "
+        decho -e "${GOOD}OK${RESET} "
         return 0
     else
-        echo -e "${BAD}FAIL${RESET} "
+        decho -e "${BAD}FAIL${RESET} "
         #echo "${TAB}not a Git repository"
         return 1
     fi
@@ -79,7 +90,6 @@ function print_remote() {
     else
         remote_url=$(git remote get-url ${remote_name})
     fi
-
 }
 
 function print_remotes() {
