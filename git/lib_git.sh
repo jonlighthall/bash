@@ -489,7 +489,7 @@ function parse_remote_tracking_branch() {
             ) | column -t -s+ -o ": " -R1 | sed "s/^/${TAB}/"
         fi
     fi
-    return 0
+    return $RETVAL
 }
 
 function track_all_branches() {
