@@ -27,7 +27,7 @@ for suff in ${list[@]}; do
                 echo    "   text"
 
                 # diff files
-                diff "${fname}" "${fname2}" &>/dev/null
+                diff -EZbwB "${fname}" "${fname2}" &>/dev/null
 
                 RETVAL=$?
                 if [ $RETVAL = 0 ]; then
@@ -54,6 +54,7 @@ for suff in ${list[@]}; do
             fi
         else
             echo "not found"
+            mv -v "${fname}" "${fname2}"
         fi
     done
 done
