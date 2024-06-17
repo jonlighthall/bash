@@ -15,8 +15,8 @@ for suff in ${list[@]}; do
             exit 1
         fi
 
-        fname2=${fname/-JCL-Spectre-i7-Vega/}
-        echo $fname2
+        fname2=${fname//"${suff}"/}
+        echo -n "   original file ${fname2}... "
 
         if [ -e "$fname2" ]; then
 
