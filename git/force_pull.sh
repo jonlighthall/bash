@@ -244,7 +244,7 @@ echo -e "${fTAB}remote: ${YELLOW}behind $N_remote${RESET}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
     echo -e "${fTAB}${YELLOW}local branch '${local_branch}' and remote branch '${pull_branch}' have diverged${RESET}"
-    git update-ref -m "${BASH_SOURCE##*/} (start):"
+    git update-ref -m "${BASH_SOURCE##*/} (start):" HEAD HEAD
 fi
 
 # -----------------
@@ -660,7 +660,7 @@ if [ $N_temp -gt 0 ]; then
     fi
     echo -e " ahead of '${local_branch}'${RESET}"
     # rebase
-    trap 'set_color; lecho;
+    trap 'set_color;
 echo -e "${trap_head}checkout ${branch_temp:-<temp>}"
 echo -e "${trap_head}rebase ${local_branch}"
 echo -e "${trap_head}checkout ${local_branch}"
@@ -674,7 +674,7 @@ unset_color
 print_exit $?' EXIT
 
     do_cmd git checkout ${branch_temp}
-    trap 'set_color; lecho;
+    trap 'set_color;
 echo -e "${trap_head}rebase ${local_branch}"
 echo -e "${trap_head}checkout ${local_branch}"
 echo -e "${trap_head}merge ${branch_temp}"
@@ -696,7 +696,7 @@ print_exit $?' EXIT
 
     # merge
     cbar "${BOLD}merging local changes...${RESET}"
-    trap 'set_color; lecho;
+    trap 'set_color;
 echo -e "${trap_head}checkout ${local_branch}"
 echo -e "${trap_head}merge ${branch_temp}"
 echo -e "${trap_head}branch -d ${branch_temp}"
@@ -707,7 +707,7 @@ echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
     do_cmd git checkout ${local_branch}
-    trap 'set_color; lecho;
+    trap 'set_color;
 echo -e "${trap_head}merge ${branch_temp}"
 echo -e "${trap_head}branch -d ${branch_temp}"
 echo -e "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
@@ -717,7 +717,7 @@ echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
     do_cmd git merge --ff-only ${branch_temp}
-    trap 'set_color; lecho;
+    trap 'set_color;
 echo -e "${trap_head}branch -d ${branch_temp}"
 echo -e "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
 echo -e "${trap_head}stash pop"
@@ -749,7 +749,7 @@ if [ $N_local -gt 0 ]; then
     fi
     
     dtab
-    trap 'set_color; lecho
+    trap 'set_color
 echo -e "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
 echo -e "${trap_head}stash pop"
 echo -e "${trap_head}reset HEAD"
@@ -793,7 +793,7 @@ N_stash=$(git stash list | wc -l)
 if [ $N_stash -gt 0 ]; then
     echo -e "${TAB}there are $N_stash entries in stash"
     if $b_stash; then
-        trap 'set_color; lecho;
+        trap 'set_color;
 echo -e "${trap_head}stash pop"
 echo -e "${trap_head}reset HEAD"
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
@@ -814,7 +814,7 @@ print_exit $?' EXIT
         else
             echo -e "${YELLOW}changes!${RESET}"
             dtab
-            trap 'set_color; lecho;
+            trap 'set_color;
 echo -e "${trap_head}reset HEAD"
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
@@ -831,7 +831,7 @@ fi
 cbar "${BOLD}resetting...${RESET}"
 if [ ! -z ${remote_tracking_branch:+dummy} ]; then
     echo "resetting upstream remote tracking branch..."
-    trap 'set_color; lecho;
+    trap 'set_color
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
