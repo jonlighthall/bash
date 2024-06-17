@@ -8,10 +8,10 @@ for suff in ${list[@]}; do
         echo $fname
 
         if [ -e "$fname" ]; then
-            echo "file found"
+            echo "   duplicate file found"
         else
-            echo "no files found"
-            echo "exiting..."
+            echo "   no files found"
+            echo "   exiting..."
             exit 1
         fi
 
@@ -19,18 +19,23 @@ for suff in ${list[@]}; do
         echo -n "   original file ${fname2}... "
 
         if [ -e "$fname2" ]; then
-
-            compare -compose src "${fname}" "${fname2}" ${dname}
-
-            convert ${dname} -scale 1x1! -format "%[fx:u]\n" info:
-
-            if [ $(convert ${dname} -scale 1x1! -format "%[fx:u]\n" info:) -eq 1 ]; then
-                echo "delte"
-                rm -v "${fname}" ${dname}
-            else
-                echo "keep"
+            echo "found"
+            type="$(file ${fname})"
+            echo "   $type"
+            
+            if [[ "${type}" == *"image"* ]]; then
+                echo "   image"
+                compare -compose src "${fname}" "${fname2}" ${dname}
+                echo -n "   diff pixel average: "
+                convert ${dname} -scale 1x1! -format "%[fx:u]\n" info:
+                
+                if [ $(convert ${dname} -scale 1x1! -format "%[fx:u]\n" info:) -eq 1 ]; then
+                    echo "   delete"
+                    rm -v "${fname}" "${dname}"
+                else
+                    echo "   keep"
+                fi
             fi
-
         else
             echo "not found"
         fi
