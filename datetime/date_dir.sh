@@ -61,7 +61,7 @@ dir_out=${cdate}_${name_in}
 if [[ "${dir_in}" == "${dir_out}" ]]; then
     echo "   no change"
 else
-    echo "   mv ${dir_in} ${dir_out}"
+    echo "   mv -nv ${dir_in} ${dir_out}"
 fi
 
 # find newest date
@@ -75,6 +75,6 @@ dir_out=${mdate}_${name_in}
 if [[ "${dir_in}" == "${dir_out}" ]]; then
     echo "   no change"
 else
-    echo "   mv ${dir_in} ${mdate}_${name_in}"
-#    mv ${dir_in} ${mdate}_${name_in}
+    echo "   mv -nv ${dir_in} ${mdate}_${name_in}"
+    mv -nv ${dir_in} ${mdate}_${name_in}
 fi
