@@ -37,6 +37,7 @@ for my_link in \
     bell \
     clean_mac \
     datetime/cp_date \
+    datetime/date_dir \
     datetime/file_age \
     datetime/mv_date \
     datetime/sec2elap \
