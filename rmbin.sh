@@ -12,7 +12,6 @@ declare -i start_time=$(date +%s%N)
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-    set_traps
 fi
 
 if [ $# -eq 0 ]; then
