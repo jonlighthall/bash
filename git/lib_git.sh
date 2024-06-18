@@ -575,7 +575,7 @@ function track_all_branches() {
             echo -en "${GRH}"
             hline 72
             echo -en "${RESET}"
-            #dtab
+            dtab
         fi
         dtab
     done
