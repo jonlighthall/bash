@@ -760,7 +760,7 @@ print_exit $?' EXIT
     if [ $N_local -ne 1 ]; then
         echo -en "s"
     fi
-    echo -e "${RESET} to remote"
+    echo -e "${RESET} to remote ${PSBR}${pull_url}${RESET}"
     itab
     unset_traps
     read -p "${TAB}Proceed with push? (y/n) " -n 1 -r 
