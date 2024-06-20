@@ -656,6 +656,9 @@ for repo in $list; do
             enable_exit_on_fail
             exit_on_fail
         else
+            # update libraries after pull
+            load_libs
+            
             # update links after pull
             prog=make_links.sh
             echo -ne "${TAB}${prog}... \x1b[0m"
