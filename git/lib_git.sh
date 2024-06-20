@@ -612,7 +612,7 @@ function track_all_branches() {
         if git branch | grep "^[ *]*${branch_name}$" &>/dev/null; then
             echo "${TAB}branch exists"
             # check if branch is current branch
-            if git branch | grep "\* ${branch_name}" &>/dev/null; then
+            if git branch | grep "^\* ${branch_name}$" &>/dev/null; then
                 echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
             fi
             # set existing branch to track remote branch
@@ -636,6 +636,9 @@ function track_all_branches() {
 }
 
 function diff_all_branches() {
+    set -e
+    enable_exit_on_fail
+    check_arg2 $@
     local pull_branches
     get_all_branches $1
     set_upstream_branch
@@ -662,14 +665,14 @@ function diff_all_branches() {
         itab
 
         # check if branch exists
-        if git branch | grep "${branch_name}" &>/dev/null; then
-            echo "${TAB}branch exists"
+        if git branch | grep "^[ *]*${branch_name}$" &>/dev/null; then
+            decho "${TAB}branch exists"
 
             test_branch=${pull_repo}/${branch_name}
             dupe_branch=${2}/${branch_name}
             echo -n "${TAB}${test_branch} "
 
-            if git branch -r | grep "${test_branch}" &>/dev/null; then
+            if git branch -r | grep "^[ *]*${test_branch}$" &>/dev/null; then
                 echo "exists"
             else
                 echo "does not exist"
@@ -677,7 +680,7 @@ function diff_all_branches() {
                 continue
             fi
             echo -n "${TAB}${dupe_branch} "
-            if git branch -r | grep "${dupe_branch}" &>/dev/null; then
+            if git branch -r | grep "^[ *]*${dupe_branch}$" &>/dev/null; then
                 echo "exists"
             else
                 echo "$does not exist"
@@ -724,10 +727,10 @@ function pull_all_branches() {
         itab
 
         # check if branch exists
-        if git branch | grep "${branch_name}" &>/dev/null; then
+        if git branch | grep "^[ *]*${branch_name}$" &>/dev/null; then
             echo "${TAB}branch exists"
             # check if branch is current branch
-            if git branch | grep "\* ${branch_name}" &>/dev/null; then
+            if git branch | grep "^\* ${branch_name}$" &>/dev/null; then
                 echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
             fi
             # set existing branch to track remote branch
