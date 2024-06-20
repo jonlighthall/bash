@@ -571,10 +571,7 @@ function get_all_branches() {
     pull_branches=$(git branch -rl ${pull_repo}* | grep -v '\->')
 }
 
-function track_all_branches() {
-    local pull_branches
-    get_all_branches $@
-
+function set_upstream_branch() {
     # check if remote tracking branch is defined
     if [ -z ${remote_tracking_branch:+dummy} ]; then
         echo -e "${YELLOW}remote tracking branch unset${RESET}"
@@ -584,9 +581,9 @@ function track_all_branches() {
 
         echo "remote: $pull_repo"
         # check if refspec is defined on remote
-        git branch -a | grep "${pull_repo}/${local_refspec}"        
-        local -i RETVAL=$?        
-        if [ $RETVAL == 0 ]; then        
+        git branch -a | grep "${pull_repo}/${local_refspec}"
+        local -i RETVAL=$?
+        if [ $RETVAL == 0 ]; then
             echo "cannot set upstream branches"
             return 1
         else
@@ -595,6 +592,65 @@ function track_all_branches() {
             git push --set-upstream ${pull_repo} ${local_refspec}
         fi
     fi
+}
+
+function track_all_branches() {
+    local pull_branches
+    get_all_branches $@
+    set_upstream_branch
+
+    # loop over branches
+    echo "${TAB}checking branches..."
+    for branch in ${pull_branches}; do
+        # define (local) branch name
+        branch_name=${branch#${pull_repo}/}
+        itab
+        echo -e "${TAB}${PSBR}${branch_name}${RESET} "
+        itab
+
+        # check if branch exists
+        if git branch | grep "^[ *]*${branch_name}$" &>/dev/null; then
+            echo "${TAB}branch exists"
+            # check if branch is current branch
+            if git branch | grep "\* ${branch_name}" &>/dev/null; then
+                echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
+            fi
+            # set existing branch to track remote branch
+            do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
+            dtab
+        else
+            echo -en "${GRH}"
+            hline 72
+            echo -e "${TAB}${GRH}branch does not exist"
+            # create local branch to track remote branch
+            do_cmd git branch "${branch_name}" --track "$branch"
+            echo -en "${GRH}"
+            hline 72
+            dtab
+        fi
+        dtab
+    done
+    dtab
+    echo "${TAB}list of local branches:"
+    git branch -vv --color=always
+}
+
+function diff_all_branches() {
+    local pull_branches
+    get_all_branches $1
+    set_upstream_branch
+
+    check_remotes
+
+    for arg in "$@"; do
+        echo -en "${TAB}${ARG}${arg}... "
+        if [[ $r_names =~ $arg ]]; then
+            echo -e "${GOOD}OK${RESET}"
+        else
+            echo -e "${BAD}FAIL${RESET}"
+            return 1
+        fi
+    done
 
     # loop over branches
     echo "${TAB}checking branches..."
@@ -608,21 +664,41 @@ function track_all_branches() {
         # check if branch exists
         if git branch | grep "${branch_name}" &>/dev/null; then
             echo "${TAB}branch exists"
-            # check if branch is current branch
-            if git branch | grep "\* ${branch_name}" &>/dev/null; then
-                echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
+
+            test_branch=${pull_repo}/${branch_name}
+            dupe_branch=${2}/${branch_name}
+            echo -n "${TAB}${test_branch} "
+
+            if git branch -r | grep "${test_branch}" &>/dev/null; then
+                echo "exists"
+            else
+                echo "does not exist"
+                dtab 2
+                continue
             fi
-            # set existing branch to track remote branch
-            do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
+            echo -n "${TAB}${dupe_branch} "
+            if git branch -r | grep "${dupe_branch}" &>/dev/null; then
+                echo "exists"
+            else
+                echo "$does not exist"
+                dtab 2
+                continue
+            fi
+
+            git --no-pager diff --quiet --exit-code --ignore-space-change ${test_branch} ${dupe_branch}
+
+            local -i RETVAL=$?
+            if [ $RETVAL == 0 ]; then
+                echo "${TAB}no diff"
+                git push -d ${pull_repo} ${branch_name}                
+            else
+                echo "${TAB}diff"
+            fi
+
             dtab
         else
-            echo -en "${GRH}"
-            hline 72
-            echo "${TAB}${GRH}branch does not exist"
+            echo "${TAB}${GRH}branch does not exist${RESET}"
             # create local branch to track remote branch
-            do_cmd git branch "${branch_name}" --track "$branch"
-            echo -en "${GRH}"
-            hline 72
             dtab
         fi
         dtab
