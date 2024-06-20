@@ -470,6 +470,9 @@ function parse_remote_tracking_branch() {
         do_cmd git rev-parse --abbrev-ref @{upstream}
         reset_traps
         echo "${TAB}no remote tracking branch set for current branch"
+        unset remote_tracking_branch
+        unset upstream_repo
+        unset upstream_refspec
     else
         reset_traps
         remote_tracking_branch=$(git rev-parse --abbrev-ref @{upstream})
@@ -492,7 +495,7 @@ function parse_remote_tracking_branch() {
     return $RETVAL
 }
 
-function track_all_branches() {
+function get_all_branches() {
     check_remotes
     local RETVAL=$?
     reset_shell ${old_opts-''}
@@ -502,7 +505,7 @@ function track_all_branches() {
     else
         return 1
     fi
-    parse_remote_tracking_branch
+    parse_remote_tracking_branch 1
 
     # parse arguments
     cbar "${BOLD}parse arguments...${RESET}"
@@ -534,7 +537,28 @@ function track_all_branches() {
 
     # before starting, fetch remote
     echo -n "${TAB}fetching ${pull_repo}..."
+    declare -i x1
+    declare -i y1
+    get_curpos x1 y1
     do_cmd_stdbuf git fetch --verbose --prune ${pull_repo}
+    RETVAL=$?
+    declare -i x2
+    declare -i y2
+    get_curpos x2 y2
+    # check if cursor moved
+    if [ $x1 = $x2 ] && [ $y1 == $y2 ]; then
+        :
+    else
+        echo -ne "${GIT_HIGHLIGHT} fetch ${RESET} "
+    fi
+
+    if [[ $RETVAL == 0 ]]; then
+        echo -e "${GOOD}OK${RESET}"
+    else
+        echo -e "${BAD}FAIL${RESET}"
+        echo "$pull_repo not found"
+        return 1
+    fi
 
     # print remote branches
     echo "${TAB}remote tracking branches:"
@@ -544,7 +568,74 @@ function track_all_branches() {
     git branch -vvr --color=always -l ${pull_repo}* | grep -v '\->'
 
     # get branches of pull repo
-    local pull_branches=$(git branch -rl ${pull_repo}* | grep -v '\->')
+    pull_branches=$(git branch -rl ${pull_repo}* | grep -v '\->')
+}
+
+function track_all_branches() {
+    local pull_branches
+    get_all_branches $@
+
+    # check if remote tracking branch is defined
+    if [ -z ${remote_tracking_branch:+dummy} ]; then
+        echo -e "${YELLOW}remote tracking branch unset${RESET}"
+        # get local branch
+        local_refspec=$(git branch | sed '/^*/!d;s/* //')
+        echo "local branch: $local_refspec"
+
+        echo "remote: $pull_repo"
+        # check if refspec is defined on remote
+        git branch -a | grep "${pull_repo}/${local_refspec}"        
+        local -i RETVAL=$?        
+        if [ $RETVAL == 0 ]; then        
+            echo "cannot set upstream branches"
+            return 1
+        else
+            echo $RETVAL
+            # define remote tracking branch
+            git push --set-upstream ${pull_repo} ${local_refspec}
+        fi
+    fi
+
+    # loop over branches
+    echo "${TAB}checking branches..."
+    for branch in ${pull_branches}; do
+        # define (local) branch name
+        branch_name=${branch#${pull_repo}/}
+        itab
+        echo -e "${TAB}${PSBR}${branch_name}${RESET} "
+        itab
+
+        # check if branch exists
+        if git branch | grep "${branch_name}" &>/dev/null; then
+            echo "${TAB}branch exists"
+            # check if branch is current branch
+            if git branch | grep "\* ${branch_name}" &>/dev/null; then
+                echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
+            fi
+            # set existing branch to track remote branch
+            do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
+            dtab
+        else
+            echo -en "${GRH}"
+            hline 72
+            echo "${TAB}${GRH}branch does not exist"
+            # create local branch to track remote branch
+            do_cmd git branch "${branch_name}" --track "$branch"
+            echo -en "${GRH}"
+            hline 72
+            dtab
+        fi
+        dtab
+    done
+    dtab
+    echo "${TAB}list of local branches:"
+    git branch -vv --color=always
+}
+
+function pull_all_branches() {
+    unset pull_branches
+    local pull_branches
+    get_all_branches $@
 
     # loop over branches
     echo "${TAB}checking branches..."
@@ -569,14 +660,15 @@ function track_all_branches() {
         else
             echo -en "${GRH}"
             hline 72
-            echo "${TAB}branch does not exist"
+            echo "${TAB}${GRH}branch does not exist"
             # create local branch to track remote branch
             do_cmd git branch "${branch_name}" --track "$branch"
             echo -en "${GRH}"
             hline 72
-            echo -en "${RESET}"
             dtab
         fi
+
+        git pull
         dtab
     done
     dtab
