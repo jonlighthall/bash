@@ -48,6 +48,7 @@ else
     # exit on errors
     set -e
     set_traps
+    enable_exit_on_fail
 fi
 print_source
 
