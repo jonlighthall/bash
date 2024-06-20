@@ -756,14 +756,18 @@ echo -e "${trap_head}reset HEAD"
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    echo "pushing..."
+    echo -en "Ready to push ${YELLOW}$N_local local commit"
+    if [ $N_local -ne 1 ]; then
+        echo -en "s"
+    fi
+    echo -e "${RESET} to remote"
     itab
     unset_traps
     read -p "${TAB}Proceed with push? (y/n) " -n 1 -r 
     reset_traps
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo
-        echo -e "${TAB}pushing ${GREEN}$local_branch${RESET} to ${BLUE}$pull_branch${RESET}"
+        echo -e "${TAB}pushing ${GREEN}$local_branch${RESET} to ${BLUE}$pull_branch${RESET}... "
         if [ "${local_branch}" == "${pull_refspec}" ]; then
             do_cmd_stdbuf git push --verbose --set-upstream ${pull_repo} ${pull_refspec}
         else
