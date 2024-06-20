@@ -606,8 +606,8 @@ N=$(diff --suppress-common-lines -yiEbwB ${hist_bak} ${hist_uni} | wc -l)
 echo -e "${TAB}\E[1;31mnumber of differences = $N${RESET}"
 if [ $N -gt 0 ]; then
     echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') LC_COLLATE = ${set_loc} (${LCcol}) on ${HOSTNAME%%.*} NDIFF=${N}" >>${hist_uni}
-    sed -i 's/^[[:space:]]*$//' ${hist_bak}
-    sed -i 's/^[[:space:]]*$//' ${hist_uni}
+    sed -i '/^[[:space:][:blank:]/s/t ]*$/d' ${hist_bak}
+    sed -i '/^[[:space:][:blank:]/s/t ]*$/d' ${hist_uni}
 fi
 
 echo -n "${TAB}"
