@@ -712,13 +712,12 @@ function diff_all_branches() {
 }
 
 function pull_all_branches() {
-    unset pull_branches
     local pull_branches
     get_all_branches $@
+    set_upstream_branch
 
     # loop over branches
     echo "${TAB}checking branches..."
-
     for branch in ${pull_branches}; do
         # define (local) branch name
         branch_name=${branch#${pull_repo}/}
@@ -739,7 +738,7 @@ function pull_all_branches() {
         else
             echo -en "${GRH}"
             hline 72
-            echo "${TAB}${GRH}branch does not exist"
+            echo -e "${TAB}${GRH}branch does not exist"
             # create local branch to track remote branch
             do_cmd git branch "${branch_name}" --track "$branch"
             echo -en "${GRH}"
