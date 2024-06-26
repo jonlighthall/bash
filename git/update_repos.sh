@@ -186,6 +186,7 @@ GIT_HIGHLIGHT='\E[7m'
 
 check_git
 
+# loop over repositories...
 for repo in $list; do
     start_new_line
     hline 70
@@ -820,11 +821,11 @@ cd ${start_dir}
 
 # sort and uniquify remotes list
 sort -u ${list_remote} -o ${list_remote}
+list_indent='                '
 
 # print list of remotes
 echo -n "   all remotes: "
 head -n 1 ${list_remote}
-list_indent='                '
 tail -n +2 ${list_remote} | sed "s/^/${list_indent}/"
 echo
 echo -n " these remotes: "
@@ -832,8 +833,8 @@ if [ -z "$git_OK" ]; then
     echo "none"
 else
     git_OK=$(echo ${git_OK} | sed 's/ /\n/g' | sort -n)
-    echo "${git_OK}" | head -n 1
-    echo "${git_OK}" | tail -n +2 | sed "s/^/${list_indent}/"
+    head -n 1 ${git_OK}
+    tail -n +2 ${git_OK} | sed "s/^/${list_indent}/"
     echo
 fi
 
