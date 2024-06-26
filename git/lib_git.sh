@@ -594,6 +594,33 @@ function set_upstream_branch() {
     fi
 }
 
+function track_branch() {
+    # check if branch exists
+    itab
+    if git branch | grep "^[ *]*${branch_name}$" &>/dev/null; then
+        echo "${TAB}branch exists"
+        # check if branch is current branch
+        if git branch | grep "^\* ${branch_name}$" &>/dev/null; then
+            echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
+        fi
+        # set existing branch to track remote branch
+        dtab
+        do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
+        dtab
+    else
+        echo -en "${GRH}"
+        hline 72
+        echo -e "${TAB}${GRH}branch does not exist"
+        # create local branch to track remote branch
+        dtab
+        do_cmd git branch "${branch_name}" --track "$branch"
+        echo -en "${GRH}"
+        hline 72
+        dtab
+    fi
+    dtab
+}
+
 function track_all_branches() {
     local pull_branches
     get_all_branches $@
@@ -607,27 +634,7 @@ function track_all_branches() {
         itab
         echo -e "${TAB}${PSBR}${branch_name}${RESET} "
         itab
-
-        # check if branch exists
-        if git branch | grep "^[ *]*${branch_name}$" &>/dev/null; then
-            echo "${TAB}branch exists"
-            # check if branch is current branch
-            if git branch | grep "^\* ${branch_name}$" &>/dev/null; then
-                echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
-            fi
-            # set existing branch to track remote branch
-            do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
-            dtab
-        else
-            echo -en "${GRH}"
-            hline 72
-            echo -e "${TAB}${GRH}branch does not exist"
-            # create local branch to track remote branch
-            do_cmd git branch "${branch_name}" --track "$branch"
-            echo -en "${GRH}"
-            hline 72
-            dtab
-        fi
+        track_branch
         dtab
     done
     dtab
@@ -642,7 +649,6 @@ function diff_all_branches() {
     local pull_branches
     get_all_branches $1
     set_upstream_branch
-
     check_remotes
 
     for arg in "$@"; do
@@ -693,18 +699,12 @@ function diff_all_branches() {
             local -i RETVAL=$?
             if [ $RETVAL == 0 ]; then
                 echo "${TAB}no diff"
-                git push -d ${pull_repo} ${branch_name}                
+                git push -d ${pull_repo} ${branch_name}
             else
                 echo "${TAB}diff"
             fi
-
-            dtab
-        else
-            echo "${TAB}${GRH}branch does not exist${RESET}"
-            # create local branch to track remote branch
-            dtab
         fi
-        dtab
+        dtab 2
     done
     dtab
     echo "${TAB}list of local branches:"
@@ -724,32 +724,35 @@ function pull_all_branches() {
         itab
         echo -e "${TAB}${PSBR}${branch_name}${RESET} "
         itab
-
-        # check if branch exists
-        if git branch | grep "^[ *]*${branch_name}$" &>/dev/null; then
-            echo "${TAB}branch exists"
-            # check if branch is current branch
-            if git branch | grep "^\* ${branch_name}$" &>/dev/null; then
-                echo -e "${TAB}* ${GREEN}current branch${NORMAL}"
-            fi
-            # set existing branch to track remote branch
-            do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
-            dtab
-        else
-            echo -en "${GRH}"
-            hline 72
-            echo -e "${TAB}${GRH}branch does not exist"
-            # create local branch to track remote branch
-            do_cmd git branch "${branch_name}" --track "$branch"
-            echo -en "${GRH}"
-            hline 72
-            dtab
-        fi
-
-        git pull
+        track_branch
+        do_cmd git pull
         dtab
     done
     dtab
     echo "${TAB}list of local branches:"
     git branch -vv --color=always
 }
+
+function sync_all_branches() {
+    local pull_branches
+    get_all_branches $@
+    set_upstream_branch
+
+    # loop over branches
+    echo "${TAB}checking branches..."
+    for branch in ${pull_branches}; do
+        # define (local) branch name
+        branch_name=${branch#${pull_repo}/}
+        itab
+        echo -e "${TAB}${PSBR}${branch_name}${RESET} "
+        track_branch
+        itab
+        do_cmd git pull
+        do_cmd git push -v
+        dtab
+    done
+    dtab
+    echo "${TAB}list of local branches:"
+    git branch -vv --color=always
+}
+
