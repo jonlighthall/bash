@@ -13,32 +13,15 @@ if ! (return 0 2>/dev/null); then
     echo -e "\x1b[31mNOTICE: this script must be soured to save changes to path!\x1b[m"
 fi
 
-# Path additions
-path=$(dirname "$PWD")
-path+=( $(dirname "$path") )
+# set variable
+unset path
+declare -a path
 
-for ADDPATH in ${path[@]}; do
-	  echo -en "   \x1b[33m${ADDPATH}\x1b[m... "
-	  # check if path exists
-	  if [ -d "${ADDPATH}" ]; then
-		    echo "found"
-		    ABSPATH=$(readlink -f $ADDPATH)
-        if [[ "$ABSPATH" != "$ADDPATH" ]]; then
-            echo -n "-> ${ABSPATH}"
-        fi
-    else
-        echo "not found"
-        continue
-    fi
-    # prepend path to PATH
-	  if [[ "$PATH" != *"${ABSPATH}:"* ]]; then
-		    export PATH=$ABSPATH:$PATH
-		    echo "added to PATH"
-	  else
-		    echo "already in PATH"
-	  fi
-done
-echo "done"
+# Path additions
+path="$(dirname "$PWD")"       # parent directory
+path+=( "$(dirname "$path")" ) # grandparent directory
+
+source add_path "${path[@]}"
 
 # print time at exit
 echo -e "\n${BASH_SOURCE##*/} "$(sec2elap $SECONDS)"on $(date +"%a %b %-d %-l:%M %p %Z")"
