@@ -23,12 +23,15 @@ for ADDPATH in ${path[@]}; do
 	  if [ -d "${ADDPATH}" ]; then
 		    echo "found"
 		    ABSPATH=$(readlink -f $ADDPATH)
-	  else
-		    echo "not found"
-		    continue
-	  fi
-	  # prepend path to PATH
-	  if [[ "$PATH" != *"${ADDPATH}:"* ]]; then
+        if [[ "$ABSPATH" != "$ADDPATH" ]]; then
+            echo -n "-> ${ABSPATH}"
+        fi
+    else
+        echo "not found"
+        continue
+    fi
+    # prepend path to PATH
+	  if [[ "$PATH" != *"${ABSPATH}:"* ]]; then
 		    export PATH=$ABSPATH:$PATH
 		    echo "added to PATH"
 	  else
