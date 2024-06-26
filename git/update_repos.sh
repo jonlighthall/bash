@@ -833,8 +833,8 @@ if [ -z "$git_OK" ]; then
     echo "none"
 else
     git_OK=$(echo ${git_OK} | sed 's/ /\n/g' | sort -n)
-    head -n 1 ${git_OK}
-    tail -n +2 ${git_OK} | sed "s/^/${list_indent}/"
+    echo "${git_OK}" | head -n 1
+    echo "${git_OK}" | tail -n +2 | sed "s/^/${list_indent}/"
     echo
 fi
 
