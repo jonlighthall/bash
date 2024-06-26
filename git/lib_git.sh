@@ -681,7 +681,7 @@ function diff_all_branches() {
             if git branch -r | grep "^[ *]*${test_branch}$" &>/dev/null; then
                 echo "exists"
             else
-                echo "does not exist"
+                echo -e "${YELLOW}does not exist${RESET}"
                 dtab 2
                 continue
             fi
@@ -689,7 +689,7 @@ function diff_all_branches() {
             if git branch -r | grep "^[ *]*${dupe_branch}$" &>/dev/null; then
                 echo "exists"
             else
-                echo "$does not exist"
+                echo -e "${YELLOW}does not exist${RESET}"
                 dtab 2
                 continue
             fi
@@ -698,8 +698,10 @@ function diff_all_branches() {
 
             local -i RETVAL=$?
             if [ $RETVAL == 0 ]; then
-                echo "${TAB}no diff"
-                git push -d ${pull_repo} ${branch_name}
+                echo -e "${TAB}${GRH}no diff${RESET}"
+                echo "${TAB}git push -d ${pull_repo} ${branch_name}"
+                do_cmd git push -d ${pull_repo} ${branch_name}
+                dtab 2
             else
                 echo "${TAB}diff"
             fi
@@ -723,8 +725,8 @@ function pull_all_branches() {
         branch_name=${branch#${pull_repo}/}
         itab
         echo -e "${TAB}${PSBR}${branch_name}${RESET} "
-        itab
         track_branch
+        itab
         do_cmd git pull
         dtab
     done
@@ -755,4 +757,3 @@ function sync_all_branches() {
     echo "${TAB}list of local branches:"
     git branch -vv --color=always
 }
-
