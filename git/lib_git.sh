@@ -595,6 +595,8 @@ function set_upstream_branch() {
 }
 
 function track_branch() {
+    local track_new=false
+
     # check if branch exists
     itab
     if git branch | grep "^[ *]*${branch_name}$" &>/dev/null; then
@@ -608,15 +610,22 @@ function track_branch() {
         do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
         dtab
     else
-        echo -en "${GRH}"
-        hline 72
-        echo -e "${TAB}${GRH}branch does not exist"
-        # create local branch to track remote branch
-        dtab
-        do_cmd git branch "${branch_name}" --track "$branch"
-        echo -en "${GRH}"
-        hline 72
-        dtab
+        if [ ${track_new} = 'true' ]; then
+            echo -en "${GRH}"
+            hline 72
+            echo -e "${TAB}${GRH}branch does not exist"
+
+            # create local branch to track remote branch
+            do_cmd git branch "${branch_name}" --track "$branch"
+            dtab
+            echo -en "${GRH}"
+            hline 72
+            dtab
+        else
+            echo "${TAB}branch does not exist"
+            dtab 2
+            return 1
+        fi
     fi
     dtab
 }
@@ -726,9 +735,12 @@ function pull_all_branches() {
         itab
         echo -e "${TAB}${PSBR}${branch_name}${RESET} "
         track_branch
-        itab
-        do_cmd git pull
-        dtab
+        local -i RETVAL=$?
+        if [ $RETVAL == 0 ]; then
+            itab
+            do_cmd git pull
+            dtab
+        fi
     done
     dtab
     echo "${TAB}list of local branches:"
@@ -748,10 +760,13 @@ function sync_all_branches() {
         itab
         echo -e "${TAB}${PSBR}${branch_name}${RESET} "
         track_branch
-        itab
-        do_cmd git pull
-        do_cmd git push -v
-        dtab
+        local -i RETVAL=$?
+        if [ $RETVAL == 0 ]; then
+            itab
+            do_cmd git pull
+            do_cmd git push -v
+            dtab
+        fi
     done
     dtab
     echo "${TAB}list of local branches:"
