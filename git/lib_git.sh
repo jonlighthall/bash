@@ -724,6 +724,7 @@ function diff_all_branches() {
 
 function pull_all_branches() {
     local pull_branches
+    start_branch=$(git branch | grep "^*" | awk '{print $2}')
     get_all_branches $@
     set_upstream_branch
 
@@ -738,6 +739,7 @@ function pull_all_branches() {
         local -i RETVAL=$?
         if [ $RETVAL == 0 ]; then
             itab
+            do_cmd git checkout ${branch_name}
             do_cmd git pull
             dtab
         fi
@@ -745,10 +747,12 @@ function pull_all_branches() {
     dtab
     echo "${TAB}list of local branches:"
     git branch -vv --color=always
+    do_cmd git checkout ${start_branch}
 }
 
 function sync_all_branches() {
     local pull_branches
+    start_branch=$(git branch | grep "^*" | awk '{print $2}')
     get_all_branches $@
     set_upstream_branch
 
@@ -763,6 +767,7 @@ function sync_all_branches() {
         local -i RETVAL=$?
         if [ $RETVAL == 0 ]; then
             itab
+            do_cmd git checkout ${branch_name}
             do_cmd git pull
             do_cmd git push -v
             dtab
@@ -771,4 +776,5 @@ function sync_all_branches() {
     dtab
     echo "${TAB}list of local branches:"
     git branch -vv --color=always
+    do_cmd git checkout ${start_branch}
 }
