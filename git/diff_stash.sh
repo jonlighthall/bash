@@ -252,7 +252,7 @@ if [ $N_stash -gt 0 ]; then
         unset stash_files
         unset diff_files
         declare -i n_diff_files=0;
-        
+
         if [ -z "$(${cmd})" ]; then
             # check if stash is empty
             echo -e "${BAD}EMPTY: no diff"
@@ -326,7 +326,7 @@ if [ $N_stash -gt 0 ]; then
                 echo "${TAB}displaying minimum diff:"
                 itab
                 echo -e "${TAB}${RED}-removed by stash@{$n}${RESET}"
-                echo -e "${TAB}${GREEN}+  added by stash@{$n}${RESET}"                
+                echo -e "${TAB}${GREEN}+  added by stash@{$n}${RESET}"
                 cmd="git --no-pager diff --color=always --color-moved=blocks --ignore-space-change ${hash_min} ${stash} -- $fname"
                 echo "${TAB}$cmd"
                 dtab
@@ -335,20 +335,29 @@ if [ $N_stash -gt 0 ]; then
             fi
 
         done # files
-        echo "${TAB}to delete, use"
-        itab
-        echo "${TAB}git stash drop stash@{$n}"
-        dtab
-        echo    
-        
+
         # list diff files
+        echo
         echo "${TAB}diff files: "
         itab
+        if [ ${n_diff_files} -eq 0 ]; then
+            echo "${TAB}none"
+            echo "${TAB}dropping stash@{$n}..."
+            do_cmd_in git stash drop stash@{$n}
+            continue
+        fi
+
         echo "${TAB}$n_diff_files files found"
         echo -en "${YELLOW}"
         echo "${diff_files[@]}" | sed "s/ /\n/g" | sed "s/^/${TAB}/"
         echo -en "${RESET}"
-        dtab        
+        dtab
+
+        echo "${TAB}to delete, use"
+        itab
+        echo "${TAB}git stash drop stash@{$n}"
+        dtab
+        echo
     done # stash entreis
     dtab
     echo "${TAB}done"
