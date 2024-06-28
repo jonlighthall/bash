@@ -595,7 +595,7 @@ function set_upstream_branch() {
 }
 
 function track_branch() {
-    local track_new=false
+    local track_new=${track_new:-false} # substitute default value if DEBUG is unset or null
 
     # check if branch exists
     itab
@@ -614,7 +614,6 @@ function track_branch() {
             echo -en "${GRH}"
             hline 72
             echo -e "${TAB}${GRH}branch does not exist"
-
             # create local branch to track remote branch
             do_cmd git branch "${branch_name}" --track "$branch"
             dtab
@@ -628,6 +627,18 @@ function track_branch() {
         fi
     fi
     dtab
+}
+
+function checkout_all_branches() {
+    local track_new=true
+    track_all_branches $@
+}
+
+function print_local() {
+    echo "${TAB}list of local branches:"
+    fTAB=' '
+    do_cmd_in git branch -vv --color=always | sed "s|${pull_repo}/|${DIM}&${NORMAL}|"
+    rtab
 }
 
 function track_all_branches() {
@@ -647,8 +658,7 @@ function track_all_branches() {
         dtab
     done
     dtab
-    echo "${TAB}list of local branches:"
-    git branch -vv --color=always
+    print_local
 }
 
 function diff_all_branches() {
@@ -718,8 +728,7 @@ function diff_all_branches() {
         dtab 2
     done
     dtab
-    echo "${TAB}list of local branches:"
-    git branch -vv --color=always
+    print_local
 }
 
 function pull_all_branches() {
@@ -745,8 +754,8 @@ function pull_all_branches() {
         fi
     done
     dtab
-    echo "${TAB}list of local branches:"
-    git branch -vv --color=always
+    print_local
+    echo "${TAB}returning to ${start_branch}..."
     do_cmd git checkout ${start_branch}
 }
 
@@ -774,7 +783,7 @@ function sync_all_branches() {
         fi
     done
     dtab
-    echo "${TAB}list of local branches:"
-    git branch -vv --color=always
+    print_local
+    echo "${TAB}returning to ${start_branch}..."
     do_cmd git checkout ${start_branch}
 }
