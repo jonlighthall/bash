@@ -28,18 +28,9 @@ else
 			          echo -e " ${UL}link${RESET}"
                 ls -l --color ${arg} | sed 's,^.*\(\./\),\1,'
 
-                og_fname=$(echo ${arg} | sed 's/_[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-t[0-9]\{6\}//')
-                echo -n "${TAB}${og_fname}..."
-
-                itab
-                if [ -e "${og_fname}" ]; then
-                    echo "exists"
-                else
-                    echo "not found"
-                fi
                 echo "${TAB}deleting $arg..."
                 rm -v ${arg} | sed "s/^/${TAB}/"
-                dtab                
+                dtab
 			      fi
 		    fi
 	  done
