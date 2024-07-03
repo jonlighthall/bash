@@ -12,10 +12,17 @@
 # -----------------------------------------------------------------------------------------------
 
 function check_git() {
-    # substitute default debug if unset or null
-    local DEBUG=${DEBUG:-0}
-    # manually set
-    #local -i DEBUG=1
+    local -i DEBUG
+    # set local debug value
+    if [ $# -eq 1 ]; then
+        # use argument to manually set DEBUG
+        DEBUG=$1
+    else
+        # substitute default value if DEBUG is unset or null
+        DEBUG=${DEBUG:-0}
+        # set manually
+        #DEBUG=0
+    fi
 
     # check if Git is defined
     ddecho -n "${TAB}checking Git... "
