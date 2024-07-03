@@ -16,7 +16,11 @@ unset_traps
 
 # check for input
 if [ $# -eq 0 ]; then
-	  echo "Please provide an input file"
+	  echo "Please provide a list of files"
+    get_source
+    echo -e "${TAB}EXAMPLE${RESET}"
+    itab
+    echo -e "${TAB}${BOLD}find -L ./ -type l | xargs ${src_dir_logi}/${src_base}${RESET}"
 else
 	  # check arguments
 	  for arg in "$@"; do
@@ -28,6 +32,7 @@ else
 			          echo -e " ${UL}link${RESET}"
                 ls -l --color ${arg} | sed 's,^.*\(\./\),\1,'
 
+                # remove broken link
                 echo "${TAB}deleting $arg..."
                 rm -v ${arg} | sed "s/^/${TAB}/"
                 dtab
