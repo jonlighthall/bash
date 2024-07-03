@@ -56,6 +56,7 @@ for my_link in \
     onedrive/rm_tracked_bad_extensions \
     onedrive/unfix_bad_extensions \
     onedrive/unsync_repo \
+    rm_broken_dupes \
     rmbin \
     sort/sort_history \
     sort/sort_hosts \
