@@ -1,4 +1,6 @@
 #!/bin/bash -u
+#
+# Jun 2020 JCL
 
 # get starting time in nanoseconds
 start_time=$(date +%s%N)
@@ -11,10 +13,7 @@ if [ -e "$fpretty" ]; then
 fi
 
 # determine if script is being sourced or executed
-if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
-else
-    RUN_TYPE="executing"
+if ! (return 0 2>/dev/null); then
     # exit on errors
     set -e
 fi
@@ -25,7 +24,8 @@ start_dir=$PWD
 echo "${TAB}starting directory = ${start_dir}"
 
 # set target and link directories
-proj_name=$(basename "$src_dir_phys")
+proj_name=$(basename "${src_dir_phys}")
+echo " project directory = $proj_name"
 target_dir="${HOME}/utils/${proj_name}"
 link_dir=$HOME/bin
 
