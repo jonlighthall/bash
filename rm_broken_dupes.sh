@@ -18,7 +18,9 @@ unset_traps
 if [ $# -eq 0 ]; then
 	  echo "Please provide a list of files"
     get_source
-    echo "example: find -L ./ \( -type l -o -xtype l \) | xargs ${src_dir_logi}/${src_base}"
+    echo -e "${TAB}EXAMPLE${RESET}"
+    itab
+    echo -e "${TAB}${BOLD}find -L ./ -type l | xargs ${src_dir_logi}/${src_base}${RESET}"
 else
 	  # check arguments
 	  for arg in "$@"; do
@@ -30,12 +32,13 @@ else
 			          echo -e " ${UL}link${RESET}"
                 ls -l --color ${arg} | sed 's,^.*\(\./\),\1,'
 
+                # find duplicate link
                 og_fname=$(echo ${arg} | sed 's/_[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-t[0-9]\{6\}//')
                 echo -n "${TAB}${og_fname}..."
-
                 itab
                 if [ -e "${og_fname}" ]; then
                     echo "exists"
+                    # remove broken link
                     echo "${TAB}deleting $arg..."
                     rm -v ${arg} | sed "s/^/${TAB}/"
                 else
