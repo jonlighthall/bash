@@ -16,7 +16,9 @@ unset_traps
 
 # check for input
 if [ $# -eq 0 ]; then
-	  echo "Please provide an input file"
+	  echo "Please provide a list of files"
+    get_source
+    echo "example: find -L ./ \( -type l -o -xtype l \) | xargs ${src_dir_logi}/${src_base}"
 else
 	  # check arguments
 	  for arg in "$@"; do
