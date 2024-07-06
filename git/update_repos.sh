@@ -490,7 +490,7 @@ for repo in $list; do
         decho "${N_remote}"
 
         echo -n "${TAB}pulling... "
-        cmd_base="git pull --all --progress --tags --verbose" #--prune"
+        cmd_base="git pull --progress --prune --tags --verbose"
         if [ $git_ver_maj -ge 2 ]; then
             cmd_base+=" --ff-only --ipv4"
         fi
