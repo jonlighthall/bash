@@ -46,7 +46,7 @@ trap 'print_exit' EXIT
 check_arg1 $@
 
 if [ $# -eq 2 ]; then
-    declare  -n out_name=$2
+    declare -n out_name=$2
     echo "${TAB}argument 2: $2"
 fi
 
