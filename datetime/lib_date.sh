@@ -48,7 +48,7 @@ function print_arg() {
     return 0
 }
 
-function parse_arg() {
+function get_file_type() {
     # set debug level
     local -i DEBUG=${DEBUG:-0}
     DEBUG=0
@@ -183,7 +183,7 @@ function get_mod_date() {
 
     decho "${TAB}parsing arguments..."
     print_arg $@
-    parse_arg "$1"
+    get_file_type "$1"
     decho "${TAB}done parsing arguments"
 
 	  # parse input
@@ -239,12 +239,11 @@ function get_mod_date() {
     local -n output_var=$2
     decho "${TAB}output variable: ${!output_var}"
     output_var=$mod_date
-
 }
 
-function parse_input() {
-    echo "${TAB}parsing arguments..."
-    parse_arg $1
+function parse_file_parts() {
+    echo "${TAB}parsing file parts..."
+    get_file_type $1
     itab
 	  # parse input
     echo -en "${TAB}input ${type}${in_file##*/}${RESET}... "
@@ -346,7 +345,6 @@ function get_unique_name() {
     dtab
 
     if [ $do_gen = true ]; then
-        echo "${TAB}generating unique file name..."
         print_arg $@
         if [ -z ${2+dummy} ]; then
             parse_input $1
@@ -354,13 +352,14 @@ function get_unique_name() {
             parse_input $out_file
         fi
 
+        echo "${TAB}generating unique file name..."
+        itab
         local get_date
         echo "${TAB}getting modifcation date..."
         get_mod_date "${in_file}" get_date
-        decho "${TAB}modification date is ${get_date}"
+        decho "${TAB}done getting modification"
 
         echo "${TAB}getting unique file name..."
-
         out_file=${in_dir}/${out_base}_${get_date}${ext}
         itab
 
@@ -392,11 +391,13 @@ function get_unique_name() {
         echo -e "${TAB}output ${type}${out_file##*/}${RESET} is unique"
         dtab
         decho "${TAB}done getting unique file name"
+        dtab
+        decho "${TAB}done generating unique file name"
     fi
 
     local -n output_var=$2
     decho "${TAB}output variable: ${!output_var}"
     output_var=$out_file
-    decho "${TAB}output value: ${output_var}"
+    decho "${TAB}output value   : ${output_var##*/}"
     return 0
 }
