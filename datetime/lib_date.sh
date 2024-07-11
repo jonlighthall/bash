@@ -242,26 +242,8 @@ function get_mod_date() {
 
 }
 
-function get_unique_name() {
-    # set debug level
-    declare -i DEBUG=${DEBUG:-0}
-    DEBUG=0
-
-    itab
-    # set trap and print function name
-    if [ $DEBUG -gt 0 ]; then
-        trap 'print_return $?;dtab' RETURN
-        echo -e "${TAB}${INVERT}function: ${FUNCNAME}${RESET}"
-    else
-        trap 'dtab' RETURN
-    fi
-    if [ $# -lt 2 ]; then
-	      echo "${TAB}Please provide an input file and an output variable"
-	      return 1
-    fi
-
+function parse_input() {
     echo "${TAB}parsing arguments..."
-    print_arg $@
     parse_arg $1
     itab
 	  # parse input
@@ -313,6 +295,64 @@ function get_unique_name() {
 	      out_base="${in_base}"
         dtab
         decho "${TAB}done parsing arguments"
+    else
+        echo "is not valid"
+        echo -e "${TAB}${BAD}exiting...${RESET}"
+        return 1
+    fi
+}
+
+function get_unique_name() {
+    # set debug level
+    declare -i DEBUG=${DEBUG:-0}
+    # manual
+    #DEBUG=0
+
+    itab
+    # set trap and print function name
+    if [ $DEBUG -gt 0 ]; then
+        trap 'print_return $?;dtab' RETURN
+        echo -e "${TAB}${INVERT}function: ${FUNCNAME}${RESET}"
+    else
+        trap 'dtab' RETURN
+    fi
+    if [ $# -lt 2 ]; then
+        echo "${TAB}Please provide an input file and an output variable"
+        return 1
+    fi
+    dtab
+
+    echo "${TAB}checking $2..."
+    itab
+    declare do_gen=true
+    if [ -z ${2+dummy} ]; then
+        echo "${TAB}$2 is unset"
+    else
+        echo "${TAB}$2 is set"
+        echo -n "${TAB}${!2}... "
+        out_file=${!2}
+
+        if [ -L "${out_file}" ] || [ -f "${out_file}" ] || [ -d "${out_file}" ]; then
+            [ ! -e "${out_file}" ] && echo -en "${BAD}name "
+            echo -e "${BAD}exists${RESET}"
+        else
+            echo -e "${GOOD}does not exist${RESET}"
+            do_gen=false
+            echo "${TAB}output file is unique"
+            dtab
+            decho "${TAB}done checking $2"
+        fi
+    fi
+    dtab
+
+    if [ $do_gen = true ]; then
+        echo "${TAB}generating unique file name..."
+        print_arg $@
+        if [ -z ${2+dummy} ]; then
+            parse_input $1
+        else
+            parse_input $out_file
+        fi
 
         local get_date
         echo "${TAB}getting modifcation date..."
@@ -351,14 +391,12 @@ function get_unique_name() {
 	      fi
         echo -e "${TAB}output ${type}${out_file##*/}${RESET} is unique"
         dtab
-    else
-	      echo "is not valid"
-		    echo -e "${TAB}${BAD}exiting...${RESET}"
-		    return 1
+        decho "${TAB}done getting unique file name"
     fi
 
-    decho "${TAB}done getting unique file name"
     local -n output_var=$2
     decho "${TAB}output variable: ${!output_var}"
     output_var=$out_file
+    decho "${TAB}output value: ${output_var}"
+    return 0
 }

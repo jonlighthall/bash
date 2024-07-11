@@ -50,7 +50,6 @@ if [ $# -eq 2 ]; then
     echo "${TAB}argument 2: $2"
 fi
 
-echo "${TAB}generate unique file name..."
 declare out_file
 get_unique_name $1 out_file
 [ $? -eq 1 ] && exit

@@ -46,11 +46,10 @@ trap 'print_exit' EXIT
 check_arg1 $@
 
 if [ $# -eq 2 ]; then
-    declare  -n out_name=$2
+    declare -n out_name=$2
     echo "${TAB}argument 2: $2"
 fi
 
-echo "${TAB}generate unique file name..."
 declare out_file
 get_unique_name $1 out_file
 [ $? -eq 1 ] && exit
