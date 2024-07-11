@@ -5,10 +5,7 @@ if [ -e $fpretty ]; then
 fi
 
 # print source name at start
-if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
-else
-    RUN_TYPE="executing"
+if ! (return 0 2>/dev/null); then
     set -eE
     trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
@@ -35,12 +32,18 @@ branch_list=$(git branch -va | sed 's/^*/ /' | awk '{print $1}' | sed 's|remotes
 echo "list of branches: "
 echo "${branch_list}" | sed 's/^/   /'
 
+export FILTER_BRANCH_SQUELCH_WARNING=1
+if [ -f ./.git-rewirte ]; then
+    rm -rdv ./.git-rewrite
+fi
+
 git filter-repo $@ --partial --commit-callback '
     # define correct name
     correct_name = b"Jon Lighthall"
 
     # list emails to replace
-    auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
+    auth_list = [b"jonlighthall@gmail.com"]
+    auth_list.append(b"jlighthall@fsu.edu",b"lighthall@lsu.edu")
     auth_list.append(b"lighthall@elwood.physics.fsu.edu")  
     auth_list.append(b"jonlighthall@users.noreply.github.com")
     auth_list.append(b"jon.lighthall@ygmail.com")
