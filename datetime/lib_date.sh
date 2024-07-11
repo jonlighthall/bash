@@ -232,7 +232,7 @@ function get_mod_date() {
     else
 	      echo "is not valid"
 		    echo -e "${TAB}${BAD}exiting...${RESET}"
-        dtab
+        dtab 2
 		    exit 1
     fi
 
@@ -324,8 +324,8 @@ function get_unique_name() {
     echo "${TAB}checking $2..."
     itab
     declare do_gen=true
-    if [ -z ${2+dummy} ]; then
-        echo "${TAB}$2 is unset"
+    if [ -z ${!2+dummy} ]; then
+        echo -e "${TAB}$2 is $UNSET"
     else
         echo "${TAB}$2 is set"
         echo -n "${TAB}${!2}... "
@@ -346,10 +346,10 @@ function get_unique_name() {
 
     if [ $do_gen = true ]; then
         print_arg $@
-        if [ -z ${2+dummy} ]; then
-            parse_input $1
+        if [ -z ${!2+dummy} ]; then
+            parse_file_parts $1
         else
-            parse_input $out_file
+            parse_file_parts $out_file
         fi
 
         echo "${TAB}generating unique file name..."
