@@ -265,6 +265,24 @@ function parse_file_parts() {
 	      in_fname="$(basename "${in_file}")"
         # file name
 	      in_base="${in_fname%.*}"
+        # check for existing timestamp
+        pat='^.*[0-9]{4}-[0-9]{2}-[0-9]{2}-t[0-9]{6}'
+        decho "${TAB}$pat"
+        echo -n "${TAB}${in_base}... "
+        if [[ ${in_base} =~ $pat ]]; then
+            echo "includes date"
+            itab
+            in_date=${in_base: -18}
+            echo "${TAB}date is ${in_date}"
+            name_in=${in_base:0: -18}
+            # remove leading underscore
+            name_in=${name_in%_}
+            echo "${TAB}base name is ${name_in##*/}"
+            dtab
+            in_base=${name_in}
+        else
+            echo "does not include date"
+        fi
         # extension
         if [[ $in_fname == *"."* ]]; then
 		        ext=".${in_fname##*.}"
