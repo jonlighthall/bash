@@ -36,7 +36,6 @@ if [[ ${dir_in} =~ $pat ]]; then
     echo "name is $name_in"
 else
     echo "no date"
-    in_date=
     name_in=${dir_in}
 fi
 
