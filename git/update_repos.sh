@@ -13,12 +13,12 @@ declare -i start_time=$(date +%s%N)
 # set debug level
 # substitue default value if DEBUG is unset or null
 declare -i DEBUG=${DEBUG:-0}
+decho "${TAB}${BASH_SOURCE##*/}: DEBUG = $DEBUG"
 
 # load bash utilities
 fpretty="${HOME}/config/.bashrc_pretty"
 if [ -e "${fpretty}" ]; then
-    source "${fpretty}"
-    print_debug
+    source "${fpretty}" -f
 else
     # ignore undefined variables
     set +u
@@ -41,6 +41,12 @@ if ! (return 0 2>/dev/null); then
     echo "    user SSH config settings MAY not be loaded??"
 fi
 print_source
+
+if [ $GIT_OP_THRESH -ne 0 ]; then
+    vecho -en "${TAB}${GREEN}${BOLD}"
+    cbar "git operations set for repos with $((GIT_OP_THRESH + 1)) or more leading/trailing commits"
+    vecho -en "${RESET}"
+fi
 
 # save and print starting directory
 start_dir="$PWD"
@@ -184,7 +190,7 @@ declare to_base="${to_base0}"
 # beautify settings
 GIT_HIGHLIGHT='\E[7m'
 
-check_git
+check_git || exit
 
 # loop over repositories...
 for repo in $list; do
@@ -484,8 +490,13 @@ for repo in $list; do
     decho -n "leading remote commits: "
     N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
     if [ ${N_remote} -le ${GIT_OP_THRESH} ]; then
-        decho "none"
-        decho "${fTAB}no need to pull"
+        if [ $GIT_OP_THRESH -gr 0 ]; then
+            decho "${N_remote}"
+            echo -e "${TAB}${GREEN}${BOLD}skipping pull"
+        else
+            decho "none"
+            decho "${fTAB}no need to pull"
+        fi
     else
         decho "${N_remote}"
 
@@ -697,8 +708,13 @@ for repo in $list; do
     decho -n "trailing local commits: "
     N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
     if [ ${N_local} -le ${GIT_OP_THRESH} ]; then
-        decho "none"
-        decho "${fTAB}no need to push"
+        if [ $GIT_OP_THRESH -gr 0 ]; then
+            decho "${N_local}"
+            echo -e "${TAB}${GREEN}${BOLD}skipping push"
+        else
+            decho "none"
+            decho "${fTAB}no need to push"
+        fi
     else
         decho "${N_local}"
 
@@ -812,6 +828,10 @@ for repo in $list; do
         else
             echo -e "${GOOD}OK${RESET}"
         fi
+    else
+        if [ $GIT_OP_THRESH -gr 0 ]; then
+            echo -e "${TAB}${GREEN}${BOLD}skipping clean"
+        fi        
     fi
 done
 
