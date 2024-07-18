@@ -1,13 +1,15 @@
 #!/bin/bash -u
 # -----------------------------------------------------------------------------------------------
+# DATETIME LIBRARY
+# -----------------------------------------------------------------------------------------------
 #
-# mv_date.sh
+# ~/utils/bash/datetime/lib_date.sh
 #
-# Purpose: Rename input file to include modification date.
+# Purpose: 
 #
-# Adapted from grep_matching.sh
+# Developed from mv_date.sh
 #
-# Apr 2023 JCL
+# May 2024 JCL
 #
 # -----------------------------------------------------------------------------------------------
 
