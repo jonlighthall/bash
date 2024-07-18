@@ -17,7 +17,7 @@ fi
 # set debug level
 # substitue default value if DEBUG is unset or null
 DEBUG=${DEBUG:-0}
-print_debug
+decho "${TAB}${BASH_SOURCE##*/}: DEBUG = $DEBUG"
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
@@ -45,7 +45,10 @@ for library in git; do
 done
 
 cbar "${BOLD}check directory...${RESET}"
-check_repo
+if ! check_repo 1 ; then
+    echo -e "${DIR}$PWD${RESET} is not a Git repository"
+    exit 1
+fi
 
 # get root dir
 repo_dir=$(git rev-parse --show-toplevel)
@@ -55,7 +58,7 @@ repo=${repo_dir##*/}
 echo "${TAB}repository name is $repo"
 # get git dir
 GITDIR=$(readlink -f "$(git rev-parse --git-dir)")
-echo "${TAB}the git-dir folder is ${GITDIR##*/}"
+echo -e "${TAB}the git-dir folder is ${PSDIR}${GITDIR##*/}${RESET}"
 # cd to repo root dir
 if [[ ${PWD} -ef ${repo_dir} ]]; then
     echo "${TAB}already in top level directory"
