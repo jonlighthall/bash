@@ -96,6 +96,7 @@ echo "done"
 # sort known hosts
 echo -n "${TAB}sorting lines... "
 sort -u ${host_out} -o ${host_out}
+sort -k3 ${host_out} -o ${host_out}
 echo "done"
 echo -e "${TAB}\E[1;31msorted $L lines in $SECONDS seconds${RESET}"
 
