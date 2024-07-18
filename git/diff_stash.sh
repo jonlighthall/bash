@@ -3,6 +3,11 @@
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
 
+# set debug level
+# substitue default value if DEBUG is unset or null
+declare -i DEBUG=${DEBUG:-0}
+decho "${TAB}${BASH_SOURCE##*/}: DEBUG = $DEBUG"
+
 # load bash utilities
 fpretty="${HOME}/config/.bashrc_pretty"
 if [ -e "${fpretty}" ]; then
@@ -13,11 +18,6 @@ else
     # do not exit on errors
     set +e
 fi
-
-# set debug level
-# substitue default value if DEBUG is unset or null
-DEBUG=${DEBUG:-0}
-decho "${TAB}${BASH_SOURCE##*/}: DEBUG = $DEBUG"
 
 # determine if script is being sourced or executed and add conditional behavior
 if (return 0 2>/dev/null); then
@@ -36,7 +36,7 @@ for library in git; do
     fname="${src_dir_phys}/lib_${library}.sh"
     if [ -e "${fname}" ]; then
         if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
-            echo "${TAB}loading $(basename ${fname})"
+            echo "${TAB}loading $(basename "${fname}")"
         fi
         source "${fname}"
     else
