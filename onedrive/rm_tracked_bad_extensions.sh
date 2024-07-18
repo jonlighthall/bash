@@ -58,7 +58,7 @@ dtab
 if [ -f makefile ]; then
     echo "${TAB}makefile found"
     echo "${TAB}executing make clean..."
-    do_cmd make clean
+    do_cmd make clean out
     echo "${TAB}done"
 fi
 
@@ -70,8 +70,10 @@ do_cmd git gc
 set -E +e
 trap -- ERR
 
+# remove tracked binary files
 fix_bin
 
+# remove tracked files with bad extensions
 if command -v wsl.exe >/dev/null; then
 	  echo -n "${TAB}WSL defined: "
     fix_bad_ext
