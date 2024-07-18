@@ -9,6 +9,17 @@ declare -i count_mv=0
 declare -i count_mv_fail=0
 declare -i count_skip=0
 
+function reset_counters() {
+    echo "${TAB}resetting counters..."
+    export count_found=0
+    export count_rm=0
+    export count_mv=0
+    export count_mv_fail=0
+    export count_skip=0
+}
+
+reset_counters
+
 declare -a bad_list
 bad_list=( "bat" "bin" "cmd" "csh" "exe" "gz" "js" "ksh" "mar" "osx" "out" "prf" "ps" "ps1" )
 
@@ -167,8 +178,15 @@ function fix_bin() {
                     ((++count_skip))
                 fi
             else
-                echo -e "${MAGENTA}untracked${RESET}"
-                ((++count_skip))
+                echo -en "${MAGENTA}untracked${RESET}"
+                if [[ "$@" =~ -[m]*u[m]* ]]; then
+                    echo -en "${MAGENTA} -u : ${RESET}"
+                    rm -v "$fname"
+                    ((++count_rm))
+                else
+                    echo
+                    ((++count_skip))
+                fi
             fi
         fi
     done
