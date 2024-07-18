@@ -97,6 +97,13 @@ echo "done"
 echo -n "${TAB}sorting lines... "
 sort -u ${host_out} -o ${host_out}
 sort -k3 ${host_out} -o ${host_out}
+# create temporary file
+host_temp=${host_out}_$(date +'%s')
+echo $host_temp
+column -t ${host_out} > ${host_temp}
+# clean up whitespace
+sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${host_temp}
+mv ${host_temp} ${host_out}
 echo "done"
 echo -e "${TAB}\E[1;31msorted $L lines in $SECONDS seconds${RESET}"
 
