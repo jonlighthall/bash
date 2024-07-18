@@ -25,10 +25,11 @@ function check_git() {
     fi
 
     # check if Git is defined
-    ddecho -n "${TAB}checking Git... "
     if [ -z "${git_checked:+dummy}" ]; then
+        echo -n "${TAB}checking Git... "
         if command -v git &>/dev/null; then
-            ddecho -en "${GOOD}OK${RESET} "
+            echo -en "${GOOD}OK${RESET} "
+            [ $DEBUG -gt 0 ] || echo
             # parse Git version
             export git_ver=$(git --version | awk '{print $3}')
             export git_ver_maj=$(echo $git_ver | awk -F. '{print $1}')
@@ -38,7 +39,8 @@ function check_git() {
             decho -e "${GRAY}v${git_ver}${NORMAL}"
             return 0
         else
-            ddecho -e "${BAD}FAIL${RESET} Git not defined"
+            echo -e "${BAD}FAIL${RESET}"
+            decho "Git not defined"
             return 1
         fi
     fi
