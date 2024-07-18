@@ -490,7 +490,7 @@ for repo in $list; do
     decho -n "leading remote commits: "
     N_remote=$(git rev-list HEAD..${remote_tracking_branch} | wc -l)
     if [ ${N_remote} -le ${GIT_OP_THRESH} ]; then
-        if [ $GIT_OP_THRESH -gr 0 ]; then
+        if [ $GIT_OP_THRESH -gt 0 ]; then
             decho "${N_remote}"
             echo -e "${TAB}${GREEN}${BOLD}skipping pull"
         else
@@ -708,7 +708,7 @@ for repo in $list; do
     decho -n "trailing local commits: "
     N_local=$(git rev-list ${remote_tracking_branch}..HEAD | wc -l)
     if [ ${N_local} -le ${GIT_OP_THRESH} ]; then
-        if [ $GIT_OP_THRESH -gr 0 ]; then
+        if [ $GIT_OP_THRESH -gt 0 ]; then
             decho "${N_local}"
             echo -e "${TAB}${GREEN}${BOLD}skipping push"
         else
@@ -829,7 +829,7 @@ for repo in $list; do
             echo -e "${GOOD}OK${RESET}"
         fi
     else
-        if [ $GIT_OP_THRESH -gr 0 ]; then
+        if [ $GIT_OP_THRESH -gt 0 ]; then
             echo -e "${TAB}${GREEN}${BOLD}skipping clean"
         fi        
     fi
