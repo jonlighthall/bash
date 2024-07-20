@@ -9,6 +9,14 @@ declare -i count_mv=0
 declare -i count_mv_fail=0
 declare -i count_skip=0
 
+# load bash utilities
+fpretty=${HOME}/config/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+	  set_traps
+    print_source
+fi
+
 function reset_counters() {
     echo "${TAB}resetting counters..."
     export count_found=0
@@ -36,7 +44,7 @@ function check_arg() {
     else
         in_dir=$(readlink -f $1)
     fi
-    echo -n "target directory $in_dir..."
+    echo -en "target directory ${PSDIR}${in_dir##*/}${RESET}..."
     if [ ! -d "${in_dir}" ]; then
 		    echo "not found"
 		    exit 1
