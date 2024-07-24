@@ -530,6 +530,8 @@ for hist_edit in ${hist_bak} ${hist_out}; do
         "gitl"
         "gitr"
         "gits"
+        "gp3"
+        "helmholtz"
         "history"
         "l[a-zA-z]"
         "load_libs"
@@ -537,6 +539,7 @@ for hist_edit in ${hist_bak} ${hist_out}; do
         "make run"
         "make"
         "pwd"
+        "snuffy"
         "up"
         "update_repos"
     )
@@ -599,8 +602,10 @@ dtab
 
 # select if remove repeated only
 if true; then
+    # remove consecutive repeated lines
     uniq ${hist_out} > ${hist_uni}
 else
+    # remove any duplicate lines
     awk '!a[$0]++' ${hist_out} > ${hist_uni}
 fi
 
