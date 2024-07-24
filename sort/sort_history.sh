@@ -510,14 +510,21 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     echo "done"
 
     ignore_list=(
+        "[a-z]"
         "bg"
         "cd \.\.\/"
+        "cd config"
+        "cd home"
+        "cd ~"
+        "clicker"
         "exit"
         "git diff"
+        "git fetch"
         "git log"
         "git pull"
         "git push"
         "git status"
+        "gita"
         "gitb"
         "gitd"
         "gitl"
@@ -525,13 +532,13 @@ for hist_edit in ${hist_bak} ${hist_out}; do
         "gits"
         "history"
         "l[a-zA-z]"
-        "make"
+        "load_libs"
         "make clean"
         "make run"
+        "make"
         "pwd"
         "up"
         "update_repos"
-        "[a-z]"
     )
 
     for igno in "${ignore_list[@]}"; do
