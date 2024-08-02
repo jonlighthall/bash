@@ -225,7 +225,7 @@ function check_remotes() {
                 if [ ! -z ${host_OK:+dummy} ]; then
                     for good_host in ${host_OK}; do
                         if [[ $remote_host =~ $good_host ]]; then
-                            decho "${TAB}${remote_host} matches $good_host"
+                            decho -e "${TAB}${remote_host} matches ${GOOD}$good_host${RESET}"
                             host_stat=$(echo -e "${GOOD}OK${RESET}")
                             do_connect=false
                             break
@@ -236,7 +236,7 @@ function check_remotes() {
                 if [ ! -z ${host_bad:+dummy} ]; then
                     for bad_host in ${host_bad}; do
                         if [[ "$remote_host" == "$bad_host" ]]; then
-                            decho "${TAB}${remote_host} matches $bad_host"
+                            decho -e "${TAB}${remote_host} matches ${BAD}$bad_host${RESET}"
                             host_stat=$(echo -e "${BAD}FAIL${RESET}")
                             do_connect=false
                             break
