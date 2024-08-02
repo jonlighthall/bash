@@ -367,7 +367,7 @@ function check_remotes() {
 
     unset_traps
 
-    decho "done"
+    decho "${TAB}$FUNCNAME done"
     # add return code for parent script
     if [ $DEBUG -gt 0 ]; then
         trap 'print_return $?; trap - RETURN' RETURN
