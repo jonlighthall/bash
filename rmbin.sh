@@ -42,7 +42,7 @@ else
 			      echo "$1 is not part of a Git repsoity"
 			      echo "removing binary files..."
             itab
-            for file in $(find ./ -type f -not -path "*/.git/*"); do
+            for file in $(find -L ./ -type f -not -path "*/.git/*"); do
                 # Check if the file is binary
                 if perl -e 'exit -B $ARGV[0]' "$file"; then
                     :  #echo "File is text."; file $file

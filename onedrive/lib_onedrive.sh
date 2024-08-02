@@ -69,7 +69,7 @@ function fix_bad_ext() {
     itab
     for bad in ${bad_list[@]}; do
         # find bad files
-        name_list=$(find ./ -name "*.${bad}")
+        name_list=$(find -L ./ -name "*.${bad}")
 
         # if list is empty, continue
         if [ -z "${name_list}" ]; then
@@ -154,7 +154,7 @@ function fix_bin() {
     # first, remove tracked files from the repository
     echo -n "${TAB}removing tracked binary (and empty) files from the repository... "
     itab
-    for fname in $(find ./ -not -path "*$GITDIR/*" -not -path "*/*git/*" -type f ); do
+    for fname in $(find -L ./ -not -path "*$GITDIR/*" -not -path "*/*git/*" -type f ); do
 
         # Check if the file is binary
         if perl -e 'exit -B $ARGV[0]' "$fname"; then
