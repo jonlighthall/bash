@@ -19,6 +19,27 @@ print_source
 declare -i found=0
 declare -i check=0
 
+# get root dir
+repo_dir=$(git rev-parse --show-toplevel)
+echo -e "${TAB}repository directory is ${PSDIR}${repo_dir}${RESET}"
+# get repo name
+repo=${repo_dir##*/}
+echo "${TAB}repository name is $repo"
+# get git dir
+GITDIR=$(readlink -f "$(git rev-parse --git-dir)")
+echo -e "${TAB}the git-dir folder is ${PSDIR}${GITDIR##*/}${RESET}"
+# cd to repo root dir
+if [[ ${PWD} -ef ${repo_dir} ]]; then
+    echo "${TAB}already in top level directory"
+else
+    echo "${TAB}$PWD is part of a Git repository"
+    echo "${TAB}moving to top level directory..."
+    cd -L "$repo_dir"
+    echo "${TAB}$PWD"
+fi
+
+unfix_bad_extensions .
+
 # get list of deleted files
 list=$(git ls-files -d)
 
