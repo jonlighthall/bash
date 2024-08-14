@@ -11,6 +11,8 @@ if [ -e $flib ]; then
 fi
 
 check_arg "$@"
+echo "${TAB}looking for bad extensions..."
+
 for bad in ${bad_list[@]}; do
     decho -n "${TAB}$bad: "
 
