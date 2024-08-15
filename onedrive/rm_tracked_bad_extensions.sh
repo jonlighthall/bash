@@ -15,13 +15,13 @@ if [ -e $fpretty ]; then
     print_source
 fi
 
-# load onedrive utilities
+# load OneDrive library
 flib=${HOME}/utils/bash/onedrive/lib_onedrive.sh
 if [ -e $flib ]; then
     source $flib
 fi
 
-# load onedrive utilities
+# load Git library
 glib=${HOME}/utils/bash/git/lib_git.sh
 if [ -e $glib ]; then
     source $glib

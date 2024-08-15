@@ -88,16 +88,22 @@ function check_repo() {
 
 function get_top() {
     check_repo
-    
+
     # This is a valid git repository
-    GITDIR=$(git rev-parse --git-dir)
-    echo "${TAB}the .git folder is $GITDIR"
+
+    # get git dir
+    GITDIR=$(readlink -f "$(git rev-parse --git-dir)")
+    echo -e "${TAB}the git-dir folder is ${PSDIR}${GITDIR##*/}${RESET}"
+
+    # get root dir
+    repo_dir=$(git rev-parse --show-toplevel)
+    echo -e "${TAB}repository directory is ${PSDIR}${repo_dir}${RESET}"
 
     # get repo name
-    repo_dir=$(git rev-parse --show-toplevel)
-    echo -e "repository directory is ${PSDIR}${repo_dir}${RESET}"
     repo=${repo_dir##*/}
     echo "repository name is $repo"
+
+    # cd to repo root dir
     if [[ ${PWD} -ef ${repo_dir} ]]; then
         echo "already in top level directory"
     else

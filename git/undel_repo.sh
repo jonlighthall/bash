@@ -6,38 +6,25 @@
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
+    print_source
 fi
 
-# print source at start
+# load Git library
+glib=${HOME}/utils/bash/git/lib_git.sh
+if [ -e $glib ]; then
+    source $glib
+fi
+
 if ! (return 0 2>/dev/null); then
     set -eE
     trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
-print_source
 
 # define counters
-declare -i found=0
-declare -i check=0
+declare -i count_found=0
+declare -i count_co=0
 
-# get root dir
-repo_dir=$(git rev-parse --show-toplevel)
-echo -e "${TAB}repository directory is ${PSDIR}${repo_dir}${RESET}"
-# get repo name
-repo=${repo_dir##*/}
-echo "${TAB}repository name is $repo"
-# get git dir
-GITDIR=$(readlink -f "$(git rev-parse --git-dir)")
-echo -e "${TAB}the git-dir folder is ${PSDIR}${GITDIR##*/}${RESET}"
-# cd to repo root dir
-if [[ ${PWD} -ef ${repo_dir} ]]; then
-    echo "${TAB}already in top level directory"
-else
-    echo "${TAB}$PWD is part of a Git repository"
-    echo "${TAB}moving to top level directory..."
-    cd -L "$repo_dir"
-    echo "${TAB}$PWD"
-fi
-
+get_top
 unfix_bad_extensions .
 
 # get list of deleted files
@@ -50,12 +37,12 @@ else
     itab
     # checkout deleted files
     for fname in $list; do
-        ((++found))
+        ((++count_found))
         echo "${TAB}$fname"
         do_cmd git checkout $fname
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]; then
-            ((++check))
+            ((++count_co))
         fi
     done
     dtab
@@ -63,8 +50,8 @@ else
 
     # print summary
     echo
-    echo -e "${TAB}\E[4m${found} files found:\E[0m"
-    echo "${TAB}${check} files restored"
+    echo -e "${UL}Files found: $count_found${NORMAL}"
+    echo "Files restored: ${count_co}"
     echo
 fi
 
