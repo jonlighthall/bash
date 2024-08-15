@@ -618,16 +618,22 @@ function set_upstream_branch() {
         echo "local branch: $local_refspec"
 
         echo "remote: $pull_repo"
+
+        echo "fetching..." 
+        do_cmd git fetch --all
+        
         # check if refspec is defined on remote
         git branch -a | grep "${pull_repo}/${local_refspec}"
         local -i RETVAL=$?
         if [ $RETVAL == 0 ]; then
+            # define remote tracking branch
+
+            
+            do_cmd git branch --set-upstream-to=${pull_repo}/${local_refspec} ${local_refspec}
+        else
+            echo "RETVAL = $RETVAL"
             echo "cannot set upstream branches"
             return 1
-        else
-            echo $RETVAL
-            # define remote tracking branch
-            git push --set-upstream ${pull_repo} ${local_refspec}
         fi
     fi
 }
