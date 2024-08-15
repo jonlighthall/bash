@@ -86,6 +86,29 @@ function check_repo() {
     fi
 }
 
+function get_top() {
+    check_repo
+    
+    # This is a valid git repository
+    GITDIR=$(git rev-parse --git-dir)
+    echo "${TAB}the .git folder is $GITDIR"
+
+    # get repo name
+    repo_dir=$(git rev-parse --show-toplevel)
+    echo -e "repository directory is ${PSDIR}${repo_dir}${RESET}"
+    repo=${repo_dir##*/}
+    echo "repository name is $repo"
+    if [[ ${PWD} -ef ${repo_dir} ]]; then
+        echo "already in top level directory"
+    else
+        echo "$PWD is part of a Git repository"
+        echo "moving to top level directory..."
+        cd -L "$repo_dir"
+        echo "$PWD"
+    fi
+
+}
+
 function print_remote() {
     itab
     ((++i))
