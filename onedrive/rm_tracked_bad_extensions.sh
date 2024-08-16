@@ -15,44 +15,23 @@ if [ -e $fpretty ]; then
     print_source
 fi
 
-# load onedrive utilities
+# load OneDrive library
 flib=${HOME}/utils/bash/onedrive/lib_onedrive.sh
 if [ -e $flib ]; then
     source $flib
 fi
 
+# load Git library
+glib=${HOME}/utils/bash/git/lib_git.sh
+if [ -e $glib ]; then
+    source $glib
+fi
+
 trap 'echo "${TAB}exiting ${BASH_SOURCE[0]##*/}..."' EXIT
 
 check_arg "$@"
-
 itab
-# check if PWD is a git repository
-if ! git rev-parse --git-dir &>/dev/null; then
-		# this is not a git repository
-		echo "${TAB}${in_dir} is not part of a Git repsoity"
-    dtab
-    exit 1
-fi
-
-# This is a valid git repository
-echo "${TAB}$PWD is part of a Git repository"
-GITDIR=$(git rev-parse --git-dir)
-echo "${TAB}the .git folder is $GITDIR"
-
-# get repo name
-repo_dir=$(git rev-parse --show-toplevel)
-echo -e "repository directory is ${PSDIR}${repo_dir}${RESET}"
-repo=${repo_dir##*/}
-echo "repository name is $repo"
-if [[ ${PWD} -ef ${repo_dir} ]]; then
-    echo "already in top level directory"
-else
-    echo "$PWD is part of a Git repository"
-    echo "moving to top level directory..."
-    cd -L "$repo_dir"
-    echo "$PWD"
-fi
-
+get_top
 dtab
 
 if [ -f makefile ]; then

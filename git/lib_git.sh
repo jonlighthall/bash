@@ -86,6 +86,35 @@ function check_repo() {
     fi
 }
 
+function get_top() {
+    check_repo
+
+    # This is a valid git repository
+
+    # get git dir
+    GITDIR=$(readlink -f "$(git rev-parse --git-dir)")
+    echo -e "${TAB}the git-dir folder is ${PSDIR}${GITDIR##*/}${RESET}"
+
+    # get root dir
+    repo_dir=$(git rev-parse --show-toplevel)
+    echo -e "${TAB}repository directory is ${PSDIR}${repo_dir}${RESET}"
+
+    # get repo name
+    repo=${repo_dir##*/}
+    echo "repository name is $repo"
+
+    # cd to repo root dir
+    if [[ ${PWD} -ef ${repo_dir} ]]; then
+        echo "already in top level directory"
+    else
+        echo "$PWD is part of a Git repository"
+        echo "moving to top level directory..."
+        cd -L "$repo_dir"
+        echo "$PWD"
+    fi
+
+}
+
 function print_remote() {
     itab
     ((++i))
@@ -589,16 +618,22 @@ function set_upstream_branch() {
         echo "local branch: $local_refspec"
 
         echo "remote: $pull_repo"
+
+        echo "fetching..." 
+        do_cmd git fetch --all
+        
         # check if refspec is defined on remote
         git branch -a | grep "${pull_repo}/${local_refspec}"
         local -i RETVAL=$?
         if [ $RETVAL == 0 ]; then
+            # define remote tracking branch
+
+            
+            do_cmd git branch --set-upstream-to=${pull_repo}/${local_refspec} ${local_refspec}
+        else
+            echo "RETVAL = $RETVAL"
             echo "cannot set upstream branches"
             return 1
-        else
-            echo $RETVAL
-            # define remote tracking branch
-            git push --set-upstream ${pull_repo} ${local_refspec}
         fi
     fi
 }
