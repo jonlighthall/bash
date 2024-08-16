@@ -9,7 +9,7 @@ echo "${0##*/}"
 # test X11
 export LC_ALL=C
 declare -a list_test
-list_test=( "xeyes" "xclock" "xcalc" "xman" "xlogo" "xterm" "xmessage hello")
+list_test=( "xeyes" "xclock -chime -update 1" "xcalc" "xman" "xlogo" "xterm" "xmessage hello")
 
 declare -i DEBUG=${DEBUG-0}
 declare -i i
@@ -26,7 +26,7 @@ declare -a list_prog
 
 [ $DEBUG -gt 0 ] && echo "programs:"
 for ((i=0; i<${#list_test[@]}; i++)); do
-    list_prog[i]=${list_test[i]% *}
+    list_prog[i]=${list_test[i]%% *}
 
     ilen=${#list_prog[i]}
     [ $DEBUG -gt 0 ] && echo "  $i: ${list_prog[i]} $ilen"
@@ -55,14 +55,14 @@ sp=$((len + 7))
 
 [ $DEBUG -gt 0 ] && echo "which:"
 for ((i=0; i<${#list_test[@]}; i++)); do
-    [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_test[i]% *}\t"
-	  which "${list_test[i]% *}" &>/dev/null
+    [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_test[i]%% *}\t"
+	  which "${list_test[i]%% *}" &>/dev/null
 	  RETVAL=$?
 	  if [ $RETVAL = 0 ]; then
 		    [ $DEBUG -gt 0 ] && echo -e "\E[${sp}G\E[32mOK\E[0m"
 		    list_found+=("${list_test[i]}")
 	  else
-		    echo -e "locating ${list_test[i]}... \r\E[${sp}C\c"
+		    echo -e "locating ${list_test[i]%% *}... \r\E[${sp}C\c"
 		    echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
 	  fi
 done
@@ -75,7 +75,7 @@ fi
 if [ $DEBUG -gt 0 ]; then
     echo "found"
     for ((i=0; i<${#list_found[@]}; i++)); do
-        echo "  $i: ${list_found[i]% *}"
+        echo "  $i: ${list_found[i]%% *}"
     done
 fi
 
@@ -83,7 +83,7 @@ fi
 # open programs
 declare -a list_open
 for ((i=0; i<${#list_found[@]}; i++)); do
-    [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_found[i]% *}\t"
+    [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_found[i]%% *}\t"
 	  ${list_found[i]} 2>/dev/null &
 	  RETVAL=$?
 	  if [ $RETVAL = 0 ]; then
@@ -112,9 +112,9 @@ sp=$((sp + 7))
 # check if programs are running
 declare -a list_run
 for ((i=0; i<${#list_open[@]}; i++)); do
-    echo -en " opening ${list_open[i]% *}..."
+    echo -en " opening ${list_open[i]%% *}..."
     echo -en "\E[${sp}G"
-	  ps | grep "${list_open[i]% *}" >/dev/null
+	  ps | grep "${list_open[i]%% *}" >/dev/null
 	  RETVAL=$?
 	  if [ $RETVAL = 0 ]; then
 		    echo -e "\E[32mOK\E[0m"
@@ -133,9 +133,9 @@ fi
 read -n 1 -s -r -p $'\E[32m> \E[0mPress any key to continue'
 echo
 for ((i=0; i<${#list_run[@]}; i++)); do
-    echo -en " closing ${list_run[i]% *}..."
+    echo -en " closing ${list_run[i]%% *}..."
     echo -en "\E[${sp}G"
-    pkill ${list_run[i]% *}
+    pkill ${list_run[i]%% *}
 	  RETVAL=$?
 	  if [ $RETVAL = 0 ]; then
 		    echo -e "\E[90mOK\E[0m"
