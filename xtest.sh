@@ -8,37 +8,91 @@ echo "${0##*/}"
 
 # test X11
 export LC_ALL=C
-list_test="xeyes xclock xcalc xman xlogo xterm"
+declare -a list_test
+list_test=( "xeyes" "xclock" "xcalc" "xman" "xlogo" "xterm" "xmessage hello")
+
+declare -i DEBUG=${DEBUG-0}
+declare -i i
+if [ $DEBUG -gt 0 ]; then
+    echo "elements:"
+    for ((i=0; i<${#list_test[@]}; i++)); do
+        echo "  $i: ${list_test[i]}"
+    done
+fi
+
+declare -i len=0
+declare -i ilen
+declare -a list_prog
+
+[ $DEBUG -gt 0 ] && echo "programs:"
+for ((i=0; i<${#list_test[@]}; i++)); do
+    list_prog[i]=${list_test[i]% *}
+
+    ilen=${#list_prog[i]}
+    [ $DEBUG -gt 0 ] && echo "  $i: ${list_prog[i]} $ilen"
+
+    if [ $ilen -gt $len ]; then
+        len=ilen
+    fi
+done
+
+if [ $DEBUG -gt 0 ]; then
+    echo "arguments:"
+    for ((i=0; i<${#list_test[@]}; i++)); do
+        echo -n "  $i: "
+        if [[ "${list_test[i]}" == *" "*  ]]; then
+            echo "${list_test[i]#* }"
+        else
+            echo
+        fi
+    done
+fi
 
 # find programs
-list_found=''
-for prog in $list_test; do
-	which $prog &>/dev/null
-	RETVAL=$?
-	if [ $RETVAL = 0 ]; then
-		list_found="$list_found $prog"
-	else
-		echo -e "locating $prog... \r\E[19C\c"
-		echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
-	fi
+declare -a list_found
+declare -i sp
+sp=$((len + 7))
+
+[ $DEBUG -gt 0 ] && echo "which:"
+for ((i=0; i<${#list_test[@]}; i++)); do
+    [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_test[i]% *}\t"
+	  which "${list_test[i]% *}" &>/dev/null
+	  RETVAL=$?
+	  if [ $RETVAL = 0 ]; then
+		    [ $DEBUG -gt 0 ] && echo -e "\E[${sp}G\E[32mOK\E[0m"
+		    list_found+=("${list_test[i]}")
+	  else
+		    echo -e "locating ${list_test[i]}... \r\E[${sp}C\c"
+		    echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
+	  fi
 done
 
 if [ -z "${list_found}" ]; then
-	echo -e "\E[31mFAIL\E[0m: no X11 programs found!"
+	  echo -e "\E[31mFAIL\E[0m: no X11 programs found!"
     exit
 fi
 
+if [ $DEBUG -gt 0 ]; then
+    echo "found"
+    for ((i=0; i<${#list_found[@]}; i++)); do
+        echo "  $i: ${list_found[i]% *}"
+    done
+fi
+
+[ $DEBUG -gt 0 ] && echo "open"
 # open programs
-list_open=''
-for prog in $list_found; do
-	$prog 2>/dev/null & 
-	RETVAL=$?
-	if [ $RETVAL = 0 ]; then
-		list_open="$list_open $prog"
-	else
-		echo -e " opening $prog... \r\E[19C\c"
-		echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
-	fi		
+declare -a list_open
+for ((i=0; i<${#list_found[@]}; i++)); do
+    [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_found[i]% *}\t"
+	  ${list_found[i]} 2>/dev/null &
+	  RETVAL=$?
+	  if [ $RETVAL = 0 ]; then
+        [ $DEBUG -gt 0 ] && echo -e "\E[${sp}G\E[32mOK\E[0m"
+		    list_open+=( "${list_found[i]}")
+	  else
+		    echo -e " opening ${list_found[i]}... \r\E[${sp}C\c"
+		    echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
+	  fi
 done
 
 if [ -z "${list_open}" ]; then
@@ -46,18 +100,28 @@ if [ -z "${list_open}" ]; then
     exit
 fi
 
+if [ $DEBUG -gt 0 ]; then
+    echo "open"
+    for ((i=0; i<${#list_open[@]}; i++)); do
+        decho "  $i: ${list_open[i]}"
+    done
+fi
+
+sp=$((sp + 7))
+
 # check if programs are running
-list_run=''
-for prog in $list_found; do
-    echo -e " opening $prog... \r\E[19C\c"
-	ps | grep "$prog" >/dev/null
-	RETVAL=$?
-	if [ $RETVAL = 0 ]; then
-		echo -e "\E[32mOK\E[0m"
-		list_run="$list_run $prog"
-	else
-		echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
-	fi
+declare -a list_run
+for ((i=0; i<${#list_open[@]}; i++)); do
+    echo -en " opening ${list_open[i]% *}..."
+    echo -en "\E[${sp}G"
+	  ps | grep "${list_open[i]% *}" >/dev/null
+	  RETVAL=$?
+	  if [ $RETVAL = 0 ]; then
+		    echo -e "\E[32mOK\E[0m"
+		    list_run+=("${list_found[i]}")
+	  else
+		    echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
+	  fi
 done
 
 if [ -z "${list_run}" ]; then
@@ -68,13 +132,14 @@ fi
 # close windows
 read -n 1 -s -r -p $'\E[32m> \E[0mPress any key to continue'
 echo
-for prog in $list_run; do
-    echo -e " closing $prog...\r\E[19C\c"
-    pkill $prog
-	RETVAL=$?
-	if [ $RETVAL = 0 ]; then
-		echo -e "\E[90mOK\E[0m"
-	else
-		echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
-	fi
+for ((i=0; i<${#list_run[@]}; i++)); do
+    echo -en " closing ${list_run[i]% *}..."
+    echo -en "\E[${sp}G"
+    pkill ${list_run[i]% *}
+	  RETVAL=$?
+	  if [ $RETVAL = 0 ]; then
+		    echo -e "\E[90mOK\E[0m"
+	  else
+		    echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
+	  fi
 done
