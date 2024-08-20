@@ -11,9 +11,15 @@ if [ -e $flib ]; then
 fi
 
 check_arg "$@"
-echo "${TAB}looking for bad extensions..."
+echo -n "${TAB}looking for bad extensions..."
+
+decho $(start_new_line)
+declare -i RETVAL
+declare cmd
+unset_traps
 
 for bad in ${bad_list[@]}; do
+
     decho -n "${TAB}$bad: "
 
     sep_in="${sep}${bad}"
@@ -26,7 +32,9 @@ for bad in ${bad_list[@]}; do
 
     # if list is empty, continue
     if [ -z "${name_list}" ]; then
-        decho "skip"
+        decho -n "skip"
+        echo -n "."
+        decho
         continue
     fi
 
@@ -37,7 +45,16 @@ for bad in ${bad_list[@]}; do
     for fname in ${name_list[@]}; do
         ((++count_found))
         echo -n "${TAB}"
-        git mv -fv "$fname" "$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
+        #       git ls-files --error-unmatch ${fname}
+        git ls-files --error-unmatch ${fname} &>/dev/null
+        RETVAL=$?
+        if [ $RETVAL == 0 ]; then
+            cmd="git mv"
+        else
+            cmd="mv"
+        fi
+
+        "${cmd}" -fv "$fname" "$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
         if [ -f "$fname" ];then
             echo -e  "rename $fname ${BAD}FAILED${RESET}"
             ((++count_mv_fail))
@@ -47,5 +64,6 @@ for bad in ${bad_list[@]}; do
     done
     dtab
 done
-
+echo "done"
 print_stat
+reset_traps
