@@ -24,29 +24,38 @@ fi
 declare -i count_found=0
 declare -i count_co=0
 
+DEBUG=1
 get_top
 unfix_bad_extensions .
 
 # get list of deleted files
 list=$(git ls-files -d)
+# create array
+declare -a alist
+for fname in $list; do
+    alist+=( "$fname" )
+done
+# get length
+declare -i nf=${#alist[@]}
 
 if [ -z "${list[@]}" ]; then
     echo -e "${TAB}${GOOD}no files to restore${RESET}\n"
 else
-    echo "${TAB}restoring deleted files..."
+    echo -n "${TAB}restoring deleted files... "
     itab
+    # print file names
+    echo "$nf files found"
+    for fname in $list; do
+        echo "${TAB} $fname"
+    done
+
     # checkout deleted files
-    echo "${#list} files found"
-        count_found=$((count_found+${#list}))
-     #   echo "${TAB}$list"
-        do_cmd git checkout $list
-        RETVAL=$?
-        #  for fname in $list; do
-        if [[ $RETVAL -eq 0 ]]; then
-            ((++count_co))
-            count_co=$((count_co+${#list}))
-        fi
-    #done
+    count_found=$((count_found + nf))
+    do_cmd git checkout $list
+    RETVAL=$?
+    if [[ $RETVAL -eq 0 ]]; then
+        count_co=$((count_co + nf))
+    fi
     dtab
     echo "${TAB}done"
 
