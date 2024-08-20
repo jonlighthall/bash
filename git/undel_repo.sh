@@ -36,15 +36,17 @@ else
     echo "${TAB}restoring deleted files..."
     itab
     # checkout deleted files
-    for fname in $list; do
-        ((++count_found))
-        echo "${TAB}$fname"
-        do_cmd git checkout $fname
+    echo "${#list} files found"
+        count_found=$((count_found+${#list}))
+     #   echo "${TAB}$list"
+        do_cmd git checkout $list
         RETVAL=$?
+        #  for fname in $list; do
         if [[ $RETVAL -eq 0 ]]; then
             ((++count_co))
+            count_co=$((count_co+${#list}))
         fi
-    done
+    #done
     dtab
     echo "${TAB}done"
 
