@@ -10,6 +10,12 @@ if [ -e $flib ]; then
     source $flib
 fi
 
+# load Git library
+glib=${HOME}/utils/bash/git/lib_git.sh
+if [ -e $glib ]; then
+    source $glib
+fi
+
 check_arg "$@"
 echo -n "${TAB}looking for bad extensions..."
 
