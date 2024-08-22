@@ -68,17 +68,18 @@ function fix_bad_ext() {
     echo -n "${TAB}checking for files with bad extensions... "
     itab
     for bad in ${bad_list[@]}; do
-        # find bad files
-        name_list=$(find -L ./ -name "*.${bad}")
-
-        # if list is empty, continue
-        if [ -z "${name_list}" ]; then
-            continue
-        fi
-
         # print current extension
         start_new_line
         echo -n "${TAB}.${bad}... "
+
+        # find bad files
+        name_list=$(find -L ./ -name "*.${bad}")  
+
+        # if list is empty, continue
+        if [ -z "${name_list}" ]; then
+            echo "none"
+            continue
+        fi
         itab
 
         # print number of matches
@@ -102,7 +103,7 @@ function fix_bad_ext() {
                     rm -v "$fname"
                     ((++count_rm))
                 else
-                    echo -eb "${CYAN}modified: ${RESET}"
+                    echo -en "${CYAN}modified: ${RESET}"
                     mv -nv "$fname" "$(echo "$fname" | sed "s/\.$bad/$sep$bad/")"
                     if [ -f "$fname" ];then
                         echo "rename $fname FAILED"
