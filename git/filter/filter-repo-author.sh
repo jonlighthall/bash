@@ -43,26 +43,16 @@ git filter-repo $@ --partial --commit-callback '
 
     # list emails to replace
     auth_list = [b"jonlighthall@gmail.com"]
-    auth_list.append(b"jlighthall@fsu.edu",b"lighthall@lsu.edu")
-    auth_list.append(b"lighthall@elwood.physics.fsu.edu")  
-    auth_list.append(b"jonlighthall@users.noreply.github.com")
     auth_list.append(b"jon.lighthall@ygmail.com")
+    auth_list.append(b"jonlighthall@users.noreply.github.com")
 
-    # load url from file
-    text_file = open(os.path.expanduser("~/utils/bash/git/filter/url.txt"), "r")
-    url = text_file.read()
-    text_file.close()
-
-    # add emails with url from files
-    email_str="jonathan.lighthall@"+url.strip()
-    email_bin=email_str.encode("ascii")
-    auth_list.append(email_bin)
-    email_str="jonathan.c.lighthall@"+url.strip()
-    email_bin=email_str.encode("ascii")	
-    auth_list.append(email_bin)
-    email_str="jlighthall@snuffleupagus."+url.strip()
-    email_bin=email_str.encode("ascii")	
-    auth_list.append(email_bin)   
+    # check if file exists
+    if os.path.isfile("./author_list.txt"):
+        # read file contents
+        with open("./author_list.txt", "r") as file:
+            # append each line to auth_list
+            for line in file:
+                auth_list.append(line.strip())
 
     # define correct email
     correct_email = b"jon.lighthall@gmail.com"
