@@ -47,7 +47,7 @@ auth_list = [b"jonlighthall@users.noreply.github.com"]
 file_name = os.path.expanduser("~/utils/bash/git/filter/author_list.txt")
 if os.path.isfile(file_name):
     # File exists
-    with open(file_name, "r", encoding='us-ascii') as file:
+    with open(file_name, "r", encoding="us-ascii") as file:
         for line in file:
             auth_list.append(line.strip().encode())
 else:
