@@ -42,17 +42,17 @@ git filter-repo $@ --partial --commit-callback '
     correct_name = b"Jon Lighthall"
 
     # list emails to replace
-    auth_list = [b"jonlighthall@gmail.com"]
-    auth_list.append(b"jon.lighthall@ygmail.com")
-    auth_list.append(b"jonlighthall@users.noreply.github.com")
-
+    auth_list = [b"jonlighthall@users.noreply.github.com"]
     # check if file exists
-    if os.path.isfile("./author_list.txt"):
-        # read file contents
-        with open("./author_list.txt", "r") as file:
-            # append each line to auth_list
+    file_name = os.path.expanduser("~/utils/bash/git/filter/author_list.txt")
+    if os.path.isfile(file_name):
+        # File exists
+        with open(file_name, "r") as file:
             for line in file:
-                auth_list.append(line.strip())
+                auth_list.append(line.strip().encode())
+    else:
+        # File not found, print error message
+        print("Error: File not found")
 
     # define correct email
     correct_email = b"jon.lighthall@gmail.com"
