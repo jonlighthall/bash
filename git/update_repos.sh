@@ -95,9 +95,9 @@ list+="${dir_examp}cpp \
    ${dir_examp}python "
 
 # matlab
-dir_matlab="matlab/"
+dir_matlab="matlab"
 list+="${dir_matlab} \
-   ${dir_matlab}macros "
+   ${dir_matlab}/macros "
 
 # private
 fname_private=${HOME}/${dir_script}bash/git/list_private_dir.txt
@@ -262,7 +262,7 @@ for repo in $list; do
     fi
     # add remote to list
     echo "${upstream_url}" >>${list_remote}
-
+dtab
     # check against argument
     if [ $# -gt 0 ]; then
         for arg in $@; do
@@ -791,6 +791,7 @@ for repo in $list; do
     else
         echo -e "${GOOD}OK${RESET}"
     fi
+    dtab
 
     # to speed things up, only clean if repo has changed
     if [ ${N_remote} -gt ${GIT_OP_THRESH} ] || [ ${N_local} -gt ${GIT_OP_THRESH} ]; then
