@@ -44,7 +44,7 @@ function check_arg() {
     else
         in_dir=$(readlink -f $1)
     fi
-    echo -en "target directory ${PSDIR}${in_dir##*/}${RESET}..."
+    echo -en "target directory ${PSDIR}${in_dir##*/}${RESET}... "
     if [ ! -d "${in_dir}" ]; then
 		    echo "not found"
 		    exit 1

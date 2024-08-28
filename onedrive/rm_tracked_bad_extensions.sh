@@ -36,15 +36,22 @@ dtab
 
 if [ -f makefile ]; then
     echo "${TAB}makefile found"
+    itab
     echo "${TAB}executing make clean..."
     do_cmd make clean out
     echo "${TAB}done"
+    dtab
 fi
 
-echo "${TAB}executing git fetch..."
-do_cmd git fetch --verbose --all --prune
-echo "${TAB}done"
-do_cmd git gc
+check_repo 0
+declare -i RETVAL=$?
+if [[ $RETVAL -eq 0 ]]; then
+    echo "${TAB}executing git fetch..."
+    do_cmd git fetch --verbose --all --prune
+    echo "${TAB}done"
+    do_cmd git gc
+fi
+dtab
 
 set -E +e
 trap -- ERR

@@ -73,9 +73,12 @@ function check_repo() {
         old_opts=$(echo "$-")
         set +e
     fi
+    unset_traps 0
     git rev-parse --is-inside-work-tree &>/dev/null
     local -i RETVAL=$?
     reset_shell ${old_opts-''}
+    itab
+    reset_traps 0
     if [[ $RETVAL -eq 0 ]]; then
         decho -e "${GOOD}OK${RESET} "
         return 0
@@ -87,8 +90,14 @@ function check_repo() {
 }
 
 function get_top() {
-    check_repo
+    check_repo 1
 
+    local -i RETVAL=$?
+    if [[ $RETVAL -ne 0 ]]; then
+        echo -e "${TAB}${ARG}${PWD##*/}${RESET} is ${BAD}not${RESET} a Git repository${RESET}"
+        return 1
+    fi
+        
     # This is a valid git repository
 
     # get git dir
@@ -113,6 +122,7 @@ function get_top() {
         echo "$PWD"
     fi
 
+    return 0
 }
 
 function print_remote() {
