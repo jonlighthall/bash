@@ -33,17 +33,17 @@ git push --force --tags origin 'refs/heads/*'
 ### Settings
 
 Before running, check the individual scripts and confirm that the author emails are correct.
-Unlisted emails maybe saved in the file [`author_list.txt`](filter/author_list.txt).
+Unlisted emails maybe saved in the file [`author_list.txt`](author_list.txt).
 To keep changes to `author_list.txt` unreported (and ignore upstream changes), the following command may be used
 
 ```bash
-git update-index --skip-worktree filter/author_list.txt
+git update-index --skip-worktree author_list.txt
 ```
 
 to undo this action, use the following command
 
 ```bash
-git update-index --no-skip-worktree filter/author_list.txt
+git update-index --no-skip-worktree author_list.txt
 ```
 
 The scripts can take inputs such as `--force` or `--prune-empty`
