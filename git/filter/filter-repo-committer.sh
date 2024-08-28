@@ -38,34 +38,32 @@ if [ -f ./.git-rewirte ]; then
 fi
 
 git filter-repo $@ --partial --commit-callback '
-    # define correct name
-    correct_name = b"Jon Lighthall"
+# define CORRECT name
+CORRECT_NAME = b"Jon Lighthall"
 
-    # list emails to replace
-    auth_list = [b"jonlighthall@users.noreply.github.com"]
-    # check if file exists
-    file_name = os.path.expanduser("~/utils/bash/git/filter/author_list.txt")
-    if os.path.isfile(file_name):
-        # File exists
-        with open(file_name, "r") as file:
-            for line in file:
-                auth_list.append(line.strip().encode())
-    else:
-        # File not found, print error message
-        print("Error: File not found")
+# list emails to replace
+auth_list = [b"jonlighthall@users.noreply.github.com"]
+# check if file exists
+file_name = os.path.expanduser("~/utils/bash/git/filter/author_list.txt")
+if os.path.isfile(file_name):
+    # File exists
+    with open(file_name, "r", encoding='us-ascii') as file:
+        for line in file:
+            auth_list.append(line.strip().encode())
+else:
+    # File not found, print error message
+    print("Error: File not found")
 
-    # define correct email
-    correct_email = b"jon.lighthall@gmail.com"
+# define CORRECT email
+CORRECT_EMAIL = b"jon.lighthall@gmail.com"
 
-    # conditionally replace commiter email
-    if commit.committer_email in auth_list:
-        if commit.committer_email != correct_email:
-           commit.committer_email = correct_email
-           if commit.committer_name != correct_name:
-               commit.committer_name = correct_name
+# conditionally replace emails and names
+if commit.committer_email in auth_list:
+    if commit.committer_email != CORRECT_EMAIL:
+        commit.committer_email = CORRECT_EMAIL
+    if commit.committer_name != CORRECT_NAME:
+        commit.committer_name = CORRECT_NAME
 '
 
 dtab
-
-# print time at exit
-echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
+print_done
