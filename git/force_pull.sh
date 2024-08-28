@@ -628,6 +628,11 @@ if [ $N_remote -gt 0 ]; then
     fi
     echo -e " behind remote${RESET}"
     do_cmd git pull --ff-only ${pull_repo} ${pull_refspec}
+    RETVAL=$?
+    if [[ $RETVAL -ne 0 ]]; then
+        echo -e "${TAB}pull ${BAD}FAIL${RESET}"
+        exit 1
+    fi
 else
     echo -e "${TAB}${fTAB}no need to pull"
 fi
