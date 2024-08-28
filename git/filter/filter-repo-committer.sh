@@ -5,10 +5,7 @@ if [ -e $fpretty ]; then
 fi
 
 # print source name at start
-if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
-else
-    RUN_TYPE="executing"
+if ! (return 0 2>/dev/null); then
     set -eE
     trap 'echo -e "${BAD}ERROR${RESET}: exiting ${BASH_SOURCE##*/}..."' ERR
 fi
@@ -35,28 +32,27 @@ branch_list=$(git branch -va | sed 's/^*/ /' | awk '{print $1}' | sed 's|remotes
 echo "list of branches: "
 echo "${branch_list}" | sed 's/^/   /'
 
+export FILTER_BRANCH_SQUELCH_WARNING=1
+if [ -f ./.git-rewirte ]; then
+    rm -rdv ./.git-rewrite
+fi
+
 git filter-repo $@ --partial --commit-callback '
     # define correct name
     correct_name = b"Jon Lighthall"
 
     # list emails to replace
-    auth_list = [b"jlighthall@fsu.edu",b"lighthall@lsu.edu"]
-    auth_list.append(b"lighthall@elwood.physics.fsu.edu")  
-    auth_list.append(b"jonlighthall@users.noreply.github.com")
-    auth_list.append(b"jon.lighthall@ygmail.com")
-
-    # load url from file
-    text_file = open(os.path.expanduser("~/utils/bash/git/filter/url.txt"), "r")
-    url = text_file.read()
-    text_file.close()
-
-    # add emails with url from files
-    email_str="jonathan.lighthall@"+url.strip()
-    email_bin=email_str.encode("ascii")
-    auth_list.append(email_bin)
-    email_str="jonathan.c.lighthall@"+url.strip()
-    email_bin=email_str.encode("ascii")	
-    auth_list.append(email_bin)
+    auth_list = [b"jonlighthall@users.noreply.github.com"]
+    # check if file exists
+    file_name = os.path.expanduser("~/utils/bash/git/filter/author_list.txt")
+    if os.path.isfile(file_name):
+        # File exists
+        with open(file_name, "r") as file:
+            for line in file:
+                auth_list.append(line.strip().encode())
+    else:
+        # File not found, print error message
+        print("Error: File not found")
 
     # define correct email
     correct_email = b"jon.lighthall@gmail.com"
