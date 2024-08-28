@@ -55,6 +55,13 @@ echo
 
 cdate=$(find $1 -not -path "*/.git*/*" -type f -printf "%TF\n" | sort -n | uniq -c | sort -n -k1 -r | head -n 1 | awk '{print $2}')
 echo "most common date: $cdate"
+dir_out=${cdate}_${name_in}
+
+if [[ "${dir_in}" == "${dir_out}" ]]; then
+    echo "   no change"
+else
+    echo "   mv -nv ${dir_in} ${dir_out}"
+fi
 
 # find newest date
 echo
@@ -63,3 +70,10 @@ find $1 -not -path "*/.git*/*" -type f -printf "%TF\n" | sort -n -r | uniq -c
 echo
 mdate=$(find $1 -not -path "*/.git*/*" -type f -printf "%TF\n" | sort -n -r | head -n 1)
 echo "newest date: $mdate"
+dir_out=${mdate}_${name_in} 
+if [[ "${dir_in}" == "${dir_out}" ]]; then
+    echo "   no change"
+else
+    echo "   mv -nv ${dir_in} ${mdate}_${name_in}"
+    mv -nv ${dir_in} ${mdate}_${name_in}
+fi
