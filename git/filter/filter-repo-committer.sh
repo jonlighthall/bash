@@ -59,9 +59,10 @@ git filter-repo $@ --partial --commit-callback '
 
     # conditionally replace commiter email
     if commit.committer_email in auth_list:
-        commit.committer_email = correct_email
-        if commit.committer_name != correct_name:
-            commit.committer_name = correct_name
+        if commit.committer_email != correct_email:
+           commit.committer_email = correct_email
+           if commit.committer_name != correct_name:
+               commit.committer_name = correct_name
 '
 
 dtab
