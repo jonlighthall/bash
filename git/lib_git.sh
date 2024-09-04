@@ -77,7 +77,6 @@ function check_repo() {
     git rev-parse --is-inside-work-tree &>/dev/null
     local -i RETVAL=$?
     reset_shell ${old_opts-''}
-    itab
     reset_traps 0
     if [[ $RETVAL -eq 0 ]]; then
         decho -e "${GOOD}OK${RESET} "
@@ -97,7 +96,7 @@ function get_top() {
         echo -e "${TAB}${ARG}${PWD##*/}${RESET} is ${BAD}not${RESET} a Git repository${RESET}"
         return 1
     fi
-        
+
     # This is a valid git repository
 
     # get git dir
@@ -629,16 +628,15 @@ function set_upstream_branch() {
 
         echo "remote: $pull_repo"
 
-        echo "fetching..." 
+        echo "fetching..."
         do_cmd git fetch --all
-        
+
         # check if refspec is defined on remote
         git branch -a | grep "${pull_repo}/${local_refspec}"
         local -i RETVAL=$?
         if [ $RETVAL == 0 ]; then
             # define remote tracking branch
 
-            
             do_cmd git branch --set-upstream-to=${pull_repo}/${local_refspec} ${local_refspec}
         else
             echo "RETVAL = $RETVAL"
