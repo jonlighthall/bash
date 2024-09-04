@@ -31,12 +31,123 @@ else
 	  echo -e "${GRH}CAUTION: script has not been sourced. Results may not reflect current shell.${RESET}"
 fi
 
-function pbool_test() {
-    }
-
 function bool_test() {
-    }
+		if [ "${!VAR}" = true ] || [ "${!VAR}" = false ]; then # boolean
+				echo "boolean tests"
+				# the following conditionals will fail when non-boolean: command not found
+				echo -e -n "  ${VAR}  : "
+				if ${!VAR}; then
+					  echo -e " ${TRUE}"
+				else
+					  echo -e "${FALSE}"
+				fi
 
+				echo -e -n " !${VAR}  : "
+				if ! ${!VAR}; then
+					  echo -e " ${TRUE}"
+				else
+					  echo -e "${FALSE}"
+				fi
+
+				echo -e -n " \"${VAR}\" : "
+				if "${!VAR}"; then
+					  echo -e " ${TRUE}"
+				else
+					  echo -e "${FALSE}"
+				fi
+
+				echo -e -n "!\"${VAR}\" : "
+				if ! "${!VAR}"; then
+					  echo -e " ${TRUE}"
+				else
+					  echo -e "${FALSE}"
+				fi
+		fi
+}
+
+function pbool_test() {
+    echo -e "----------------------------------------------------"
+		# true/false
+		echo "pseudo-boolean tests"
+		echo -e "----------------------------------------------------"
+		# NB [] tests must include a comparison, otherwise any non-null (including false) will test as true
+		echo "comparison tests"
+		if ! [[ "${!VAR}" =~ " " ]]; then
+				echo -e -n "[  ${VAR}  =   true  ] : " # fails when unset or null (condition 1): unary operator expected
+				if [ ${!VAR} = true ]; then
+					  echo -e " ${TRUE}"
+				else
+					  echo -e "${FALSE}"
+				fi
+
+				echo -e -n "[  ${VAR}  =  false  ] : "
+				if [ ${!VAR} = false ]; then
+					  echo -e " ${TRUE}"
+				else
+					  echo -e "${FALSE}"
+				fi
+
+				# literal
+				echo -e -n "[  ${VAR}  =  'true' ] : " # fails when unset or null (condition 1): unary operator expected
+				if [ ${!VAR} = 'true' ]; then
+					  echo -e " ${TRUE}"
+				else
+					  echo -e "${FALSE}"
+				fi
+
+				echo -e -n "[  ${VAR}  = 'false' ] : "
+				if [ ${!VAR} = 'false' ]; then
+					  echo -e " ${TRUE}"
+				else
+					  echo -e "${FALSE}"
+				fi
+
+				#string
+				echo -e -n "[  ${VAR}  =  \"true\" ] : "
+				if [ ${!VAR} = "true" ]; then
+					  echo -e " ${TRUE}"
+				else
+					  echo -e "${FALSE}"
+				fi
+
+				echo -e -n "[  ${VAR}  = \"false\" ] : "
+				if [ ${!VAR} = "false" ]; then
+					  echo -e " ${TRUE}"
+				else
+					  echo -e "${FALSE}"
+				fi
+		fi
+
+		echo -e -n "[ \"${VAR}\" =   true  ] : "
+		if [ "${!VAR}" = true ]; then
+				echo -e " ${TRUE}"
+		else
+				echo -e "${FALSE}"
+		fi
+
+		echo -e -n "[ \"${VAR}\" =  false  ] : "
+		if [ "${!VAR}" = false ]; then
+				echo -e " ${TRUE}"
+		else
+				echo -e "${FALSE}"
+		fi
+
+		# string
+		echo -e -n "[ \"${VAR}\" =  \"true\" ] : "
+		if [ "${!VAR}" = "true" ]; then
+				echo -e " ${TRUE}"
+		else
+				echo -e "${FALSE}"
+		fi
+
+		echo -e -n "[ \"${VAR}\" = \"false\" ] : "
+		if [ "${!VAR}" = "false" ]; then
+				echo -e " ${TRUE}"
+		else
+				echo -e "${FALSE}"
+		fi
+
+}
 
 function var_stat() {
     echo -e "${INVERT}${FUNCNAME} start${RESET}"
@@ -138,118 +249,8 @@ function var_stat() {
 
 	      if [ ! -z ${!VAR+alternate} ]; then  # set
 		        if [ ! -z "${!VAR-default}" ]; then # not null
-			          echo -e "----------------------------------------------------"
-			          # true/false
-			          echo "pseudo-boolean tests"
-			          echo -e "----------------------------------------------------"
-			          # NB [] tests must include a comparison, otherwise any non-null (including false) will test as true
-			          echo "comparison tests"
-			          if ! [[ "${!VAR}" =~ " " ]]; then
-				            echo -e -n "[  ${VAR}  =   true  ] : " # fails when unset or null (condition 1): unary operator expected
-				            if [ ${!VAR} = true ]; then
-					              echo -e " ${TRUE}"
-				            else
-					              echo -e "${FALSE}"
-				            fi
-
-				            echo -e -n "[  ${VAR}  =  false  ] : "
-				            if [ ${!VAR} = false ]; then
-					              echo -e " ${TRUE}"
-				            else
-					              echo -e "${FALSE}"
-				            fi
-
-				            # literal
-				            echo -e -n "[  ${VAR}  =  'true' ] : " # fails when unset or null (condition 1): unary operator expected
-				            if [ ${!VAR} = 'true' ]; then
-					              echo -e " ${TRUE}"
-				            else
-					              echo -e "${FALSE}"
-				            fi
-
-				            echo -e -n "[  ${VAR}  = 'false' ] : "
-				            if [ ${!VAR} = 'false' ]; then
-					              echo -e " ${TRUE}"
-				            else
-					              echo -e "${FALSE}"
-				            fi
-
-				            #string
-				            echo -e -n "[  ${VAR}  =  \"true\" ] : "
-				            if [ ${!VAR} = "true" ]; then
-					              echo -e " ${TRUE}"
-				            else
-					              echo -e "${FALSE}"
-				            fi
-
-				            echo -e -n "[  ${VAR}  = \"false\" ] : "
-				            if [ ${!VAR} = "false" ]; then
-					              echo -e " ${TRUE}"
-				            else
-					              echo -e "${FALSE}"
-				            fi
-			          fi
-
-			          echo -e -n "[ \"${VAR}\" =   true  ] : "
-			          if [ "${!VAR}" = true ]; then
-				            echo -e " ${TRUE}"
-			          else
-				            echo -e "${FALSE}"
-			          fi
-
-			          echo -e -n "[ \"${VAR}\" =  false  ] : "
-			          if [ "${!VAR}" = false ]; then
-				            echo -e " ${TRUE}"
-			          else
-				            echo -e "${FALSE}"
-			          fi
-
-			          # string
-			          echo -e -n "[ \"${VAR}\" =  \"true\" ] : "
-			          if [ "${!VAR}" = "true" ]; then
-				            echo -e " ${TRUE}"
-			          else
-				            echo -e "${FALSE}"
-			          fi
-
-			          echo -e -n "[ \"${VAR}\" = \"false\" ] : "
-			          if [ "${!VAR}" = "false" ]; then
-				            echo -e " ${TRUE}"
-			          else
-				            echo -e "${FALSE}"
-			          fi
-
-			          if [ "${!VAR}" = true ] || [ "${!VAR}" = false ]; then # boolean
-				            echo "boolean tests"
-				            # the following conditionals will fail when non-boolean: command not found
-				            echo -e -n "  ${VAR}  : "
-				            if ${!VAR}; then
-					              echo -e " ${TRUE}"
-				            else
-					              echo -e "${FALSE}"
-				            fi
-
-				            echo -e -n " !${VAR}  : "
-				            if ! ${!VAR}; then
-					              echo -e " ${TRUE}"
-				            else
-					              echo -e "${FALSE}"
-				            fi
-
-				            echo -e -n " \"${VAR}\" : "
-				            if "${!VAR}"; then
-					              echo -e " ${TRUE}"
-				            else
-					              echo -e "${FALSE}"
-				            fi
-
-				            echo -e -n "!\"${VAR}\" : "
-				            if ! "${!VAR}"; then
-					              echo -e " ${TRUE}"
-				            else
-					              echo -e "${FALSE}"
-				            fi
-			          fi
+                bool_test
+                pbool_test
 		        fi
 	      fi
 
@@ -325,7 +326,7 @@ for VAR in $input; do
 			      else
 				        echo -ne "${FALSE}>"
 				        if [[ ${!VAR-default} == default ]]; then
-					          echo -ne "${UNSET}\t"
+					          echo -ne "${UNSET}"
 				        else
 					          echo -n "${a1}"
 				        fi
@@ -355,7 +356,7 @@ for VAR in $input; do
 			      echo -ne "NULL [ -z \${VAR+a } ]>"
 			      # CONDITION 3: true when VAR is unset
 			      if [ -z ${!VAR+alternate} ]; then
-				        echo -ne " ${TRUE}>${c3}\t"
+				        echo -ne " ${TRUE}>${c3}"
 			      else
 				        echo -ne "${FALSE}>${a3}"
 			      fi
@@ -566,6 +567,7 @@ for VAR in $input; do
 	  # practical tests
 	  if ! [[ "${!VAR}" =~ " " ]]; then
 		    echo -e "----------------------------------------------------"
+        echo "practical"
 		    echo -ne "    not unset (set): "
 		    if [ ! -z ${!VAR+alternate} ]; then
 			      echo -e " ${TRUE}"
