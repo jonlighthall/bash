@@ -45,6 +45,7 @@ for suff in ${list[@]}; do
                     rm -v "${fname}"
                 else
                     echo "   keep"
+                    diff --color=auto --suppress-common-lines -yiEZbwB "${fname}" "${fname2}"
                 fi
             fi
 
