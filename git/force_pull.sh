@@ -768,7 +768,7 @@ print_exit $?' EXIT
     echo -e "${RESET} to remote ${PSBR}${pull_url}${RESET}"
     itab
     unset_traps
-    read -p "${TAB}Proceed with push? (y/n) " -n 1 -r 
+    read -p "${TAB}${GREEN}>${RESET} Proceed with push? (y/n) " -n 1 -r 
     reset_traps
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo
