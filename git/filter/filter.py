@@ -1,9 +1,5 @@
-;alsdkjf;aksjd; a;sd
-
-
-
 # define correct name
-CORRECT_NAME = b"Jon Lighthallz"
+CORRECT_NAME = b"Jon Lighthall"
 
 # define correct email
 CORRECT_EMAIL = b"jon.lighthall@gmail.com"
