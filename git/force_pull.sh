@@ -322,8 +322,12 @@ if [ -z ${hash_local} ]; then
     cbar "${BOLD}looping through remote commits...${RESET}"
 fi
 
+declare -i head_count
+head_count=0
+HEAD0=${iHEAD}
+
 while [ -z ${hash_local} ]; do
-    echo -e "${TAB}checking ${YELLOW}${iHEAD}${RESET}..."
+    echo -e "${TAB}checking ${YELLOW}${iHEAD} (${HEAD0}~${head_count})${RESET}..."
     hash_remote=$(git rev-parse ${iHEAD})
     subj_remote=$(git log ${iHEAD} --format=%s -n 1)
     time_remote=$(git log ${iHEAD} --format=%at -n 1)
@@ -470,6 +474,7 @@ while [ -z ${hash_local} ]; do
         dtab 2           
     fi
     iHEAD="${iHEAD}~"
+    ((++head_count))
 done
 
 dtab
@@ -598,7 +603,7 @@ fi
 
 # initiate HEAD
 if [ $N_remote -gt 0 ]; then
-    cbar "${BOLD}reseting HEAD to match remote...${RESET}"
+    cbar "${BOLD}resetting HEAD to match remote...${RESET}"
     if [ $N_local -eq 0 ]; then
         echo "${TAB}${fTAB}no need to reset"
     else
