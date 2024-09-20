@@ -413,6 +413,12 @@ function check_remotes() {
     return 0
 }
 
+function reset_hosts() {
+    unset host_OK
+    unset host_bad
+    print_hosts
+}
+
 function print_hosts() {
     # print good hosts
     echo "${TAB}good hosts: "
