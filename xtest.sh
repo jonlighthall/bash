@@ -48,21 +48,42 @@ if [ $DEBUG -gt 0 ]; then
     done
 fi
 
+function fill_dots() {
+    echo -en "\E[${spp}G"
+    for ((j=0; j<((dsp-1)); j++)); do
+        echo -n "."
+    done
+    echo -en "\r"
+}
+
 # find programs
 declare -a list_found
-declare -i sp
-sp=$((len + 7))
 
-[ $DEBUG -gt 0 ] && echo "which:"
+# lenght of prefix
+declare -i spp
+spp=$((9))
+# length of argument
+declare -i dsp
+dsp=$((len + 5))
+# total lenght
+declare -i sp
+sp=$((spp + dsp))
+
+if [ $DEBUG -gt 0 ]; then
+    echo "which:"
+    sp=$((sp+16))
+fi
+
 for ((i=0; i<${#list_test[@]}; i++)); do
     [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_test[i]%% *}\t"
 	  which "${list_test[i]%% *}" &>/dev/null
 	  RETVAL=$?
-	  if [ $RETVAL = 0 ]; then
+    fill_dots
+    if [ $RETVAL = 0 ]; then
 		    [ $DEBUG -gt 0 ] && echo -e "\E[${sp}G\E[32mOK\E[0m"
 		    list_found+=("${list_test[i]}")
 	  else
-		    echo -e "locating ${list_test[i]%% *}... \r\E[${sp}C\c"
+        echo -e "locating ${list_test[i]%% *}...\r\E[${sp}G\c"
 		    echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
 	  fi
 done
@@ -86,11 +107,12 @@ for ((i=0; i<${#list_found[@]}; i++)); do
     [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_found[i]%% *}\t"
 	  ${list_found[i]} 2>/dev/null &
 	  RETVAL=$?
+    fill_dots
 	  if [ $RETVAL = 0 ]; then
         [ $DEBUG -gt 0 ] && echo -e "\E[${sp}G\E[32mOK\E[0m"
 		    list_open+=( "${list_found[i]}")
 	  else
-		    echo -e " opening ${list_found[i]}... \r\E[${sp}C\c"
+		    echo -e " opening ${list_found[i]}... \r\E[${sp}G\c"
 		    echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
 	  fi
 done
@@ -103,11 +125,9 @@ fi
 if [ $DEBUG -gt 0 ]; then
     echo "open"
     for ((i=0; i<${#list_open[@]}; i++)); do
-        decho "  $i: ${list_open[i]}"
+        echo "  $i: ${list_open[i]}"
     done
 fi
-
-sp=$((sp + 7))
 
 # check if programs are running
 declare -a list_run
@@ -133,6 +153,7 @@ fi
 read -n 1 -s -r -p $'\E[32m> \E[0mPress any key to continue'
 echo
 for ((i=0; i<${#list_run[@]}; i++)); do
+    fill_dots
     echo -en " closing ${list_run[i]%% *}..."
     echo -en "\E[${sp}G"
     pkill ${list_run[i]%% *}
