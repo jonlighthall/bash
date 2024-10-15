@@ -38,13 +38,17 @@ if [ -f ./.git-rewirte ]; then
 fi
 
 git filter-repo $@ --partial --commit-callback '
-# define CORRECT name
+# define correct name
 CORRECT_NAME = b"Jon Lighthall"
+
+# define correct email
+CORRECT_EMAIL = b"jon.lighthall@gmail.com"
 
 # list emails to replace
 auth_list = [b"jonlighthall@users.noreply.github.com"]
-# check if file exists
+# define list file
 file_name = os.path.expanduser("~/utils/bash/git/filter/author_list.txt")
+# check if file exists
 if os.path.isfile(file_name):
     # File exists
     with open(file_name, "r", encoding="us-ascii") as file:
@@ -53,9 +57,6 @@ if os.path.isfile(file_name):
 else:
     # File not found, print error message
     print("Error: File not found")
-
-# define CORRECT email
-CORRECT_EMAIL = b"jon.lighthall@gmail.com"
 
 # conditionally replace emails and names
 if commit.committer_email in auth_list:
