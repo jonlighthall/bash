@@ -32,15 +32,21 @@ declare -a bad_list
 bad_list=( "bat" "bin" "cmd" "csh" "exe" "gz" "js" "ksh" "mar" "osx" "out" "prf" "ps" "ps1" )
 
 function check_arg() {
+    local arg
+    local in_dir
+    
     # check argument
     if [ $# -eq 0 ]; then
-	      echo "Please provide a target directory"
-	      exit 1
-    fi
+	      echo "No target directory specified"
+        echo "Using ."
+        arg="."
+    else
+        arg=$1
+    fi    
 
     # find input directory
-    if [[ "$1" == "." ]]; then
-        in_dir=$(readlink -f "$PWD/$1")
+    if [[ "${arg}" == "." ]]; then
+        in_dir=$(readlink -f "$PWD/${arg}")
     else
         in_dir=$(readlink -f $1)
     fi
