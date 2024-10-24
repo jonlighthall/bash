@@ -43,7 +43,7 @@ if [ -f makefile ]; then
     dtab
 fi
 
-check_repo 0
+check_remote_tracking_branch
 declare -i RETVAL=$?
 if [[ $RETVAL -eq 0 ]]; then
     echo "${TAB}executing git fetch..."
