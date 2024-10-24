@@ -548,6 +548,101 @@ function parse_remote_tracking_branch() {
     return $RETVAL
 }
 
+function check_remote_tracking_branch() {
+    parse_remote_tracking_branch 1
+    remote_url=$(git remote -v | grep "${upstream_repo}" | grep fetch | awk '{print $2}')
+    echo "            remote url: ${remote_url}"
+
+    remote_host=${remote_url%%:*}
+    echo "           remote host: ${remote_host}"
+
+    echo -n "${TAB}checking connection... "
+    unset_traps
+
+    ssh_cmd_base="ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 -T ${remote_host}"
+
+    if [[ "${remote_host}" == *"navy.mil" ]]; then
+        decho "${TAB}Navy host: ${remote_host}"
+        do_cmd $ssh_cmd_base -o LogLevel=error
+        RETVAL=$?
+    else
+        if [[ ${remote_host} =~ "github.com" ]]; then
+            decho "${TAB}GitHub host: ${remote_host}"
+            # set shell options
+            if [[ "$-" == *e* ]]; then
+                echo -n "${TAB}setting shell options..."
+                old_opts=$(echo "$-")
+                # exit on errors must be turned off; otherwise shell will exit...
+                set +e
+                echo "done"
+            fi
+            do_cmd $ssh_cmd_base -o LogLevel=info
+            # 2> >(sed -u $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,' >&2)
+            RETVAL=$?
+            reset_shell ${old_opts-''}
+        else
+            decho "${TAB}host: ${remote_host}"
+            do_cmd $ssh_cmd_base -o LogLevel=info
+            #2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2)
+            RETVAL=$?
+        fi
+    fi
+    reset_traps
+
+    # check cursor position
+    local -i x1c
+    get_curpos x1c
+    if [ $x1c -eq 1 ]; then
+        # beautify settings
+        GIT_HIGHLIGHT='\E[7m'
+        echo -en "${TAB}${fTAB}${GIT_HIGHLIGHT} auth ${RESET} "
+    fi
+
+    if [[ $RETVAL == 0 ]]; then
+        echo -en "${GOOD}OK${RESET} "
+        if [ $x1c -eq 1 ]; then
+            echo -e "${GRAY}RETVAL=$RETVAL${RESET}"
+        else
+            echo
+        fi
+        # add to list
+        if [ ! -z ${host_OK:+dummy} ]; then
+            host_OK+=$'\n'
+        fi
+        host_OK+=${remote_host}
+    else
+        if [[ $RETVAL == 1 ]]; then
+            echo -e "${YELLOW}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+            if [[ $remote_host =~ "github.com" ]]; then
+                decho "${TAB}GitHub host: ${remote_host}"
+                # Github will return 1 if everything is working
+                # add to list
+                if [ ! -z ${host_OK:+dummy} ]; then
+                    host_OK+=$'\n'
+                fi
+                host_OK+=${remote_host}
+                # update return value to signal success
+                RETVAL=0
+            else
+                decho "${TAB}host: ${remote_host}"
+                # add to list
+                if [ ! -z ${host_bad:+dummy} ]; then
+                    host_bad+=$'\n'
+                fi
+                host_bad+=${remote_host}
+            fi
+        else
+            echo -e "${BAD}FAIL${RESET} ${GRAY}RETVAL=$RETVAL${RESET}"
+            # add to list
+            if [ ! -z ${host_bad:+dummy} ]; then
+                host_bad+=$'\n'
+            fi
+            host_bad+=${remote_host}
+        fi # retval 1
+    fi # retval 0
+    return $RETVAL
+}
+
 function get_all_branches() {
     check_remotes
     local RETVAL=$?
