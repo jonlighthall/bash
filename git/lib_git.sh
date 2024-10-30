@@ -338,7 +338,7 @@ function check_remotes() {
             if [ $x1c -eq 1 ]; then
                 # beautify settings
                 GIT_HIGHLIGHT='\E[7m'
-                echo -en "${TAB}${fTAB}${GIT_HIGHLIGHT} auth ${RESET} "
+                echo -en "${TAB}${GIT_HIGHLIGHT} auth ${RESET} "
             fi
 
             if [[ $RETVAL == 0 ]]; then
@@ -595,7 +595,7 @@ function check_remote_tracking_branch() {
     if [ $x1c -eq 1 ]; then
         # beautify settings
         GIT_HIGHLIGHT='\E[7m'
-        echo -en "${TAB}${fTAB}${GIT_HIGHLIGHT} auth ${RESET} "
+        echo -en "${TAB}${GIT_HIGHLIGHT} auth ${RESET} "
     fi
 
     if [[ $RETVAL == 0 ]]; then
@@ -697,7 +697,7 @@ function get_all_branches() {
     if [ $x1 = $x2 ] && [ $y1 == $y2 ]; then
         :
     else
-        echo -ne "${GIT_HIGHLIGHT} fetch ${RESET} "
+        echo -ne "${TAB}${GIT_HIGHLIGHT} fetch ${RESET} "
     fi
 
     if [[ $RETVAL == 0 ]]; then
