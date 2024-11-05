@@ -651,5 +651,5 @@ if [ $N -gt 0 ]; then
 
     # type emacs ediff command
     echo -e "\e[7;33mPress Ctrl-C to cancel\e[0m"
-    read -e -i "emacs -nw --eval '(ediff-files \"${hist_bak}\" \"${hist_ref}\")'" -p $'\e[0;32m$\e[0m ' && eval "$REPLY"
+    read -e -i "emacs -nw --eval '(ediff-files \"${hist_bak}\" \"${hist_ref}\")'" -p $'\e[0;32m>\e[0m ' && eval "$REPLY"
 fi
