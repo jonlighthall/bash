@@ -761,7 +761,6 @@ function track_branch() {
         # set existing branch to track remote branch
         dtab
         do_cmd git branch "${branch_name}" --set-upstream-to="${branch}"
-        dtab
     else
         if [ ${track_new} = 'true' ]; then
             echo -en "${GRH}"
