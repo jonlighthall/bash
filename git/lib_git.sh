@@ -769,10 +769,9 @@ function track_branch() {
             echo -e "${TAB}${GRH}branch does not exist"
             # create local branch to track remote branch
             do_cmd git branch "${branch_name}" --track "$branch"
-            dtab
             echo -en "${GRH}"
             hline 72
-            dtab
+            dtab 2
         else
             echo "${TAB}branch does not exist"
             dtab 2
