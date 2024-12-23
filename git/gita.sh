@@ -1,5 +1,11 @@
 #!/bin/bash -u
-TAB="  "
+
+# load bash utilities
+fpretty=${HOME}/config/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+
 echo "current author name:"
 git config --get user.name | uniq | sed "s/^/${TAB}/"
 echo
