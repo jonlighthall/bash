@@ -720,9 +720,15 @@ function get_all_branches() {
 }
 
 function set_upstream_branch() {
+    # check if pull branch is defined
+    if [ -z ${pull_repo:+dummy} ]; then
+        echo -e "pull repo ${UNSET:-unset}"
+        return 1
+    fi
+    
     # check if remote tracking branch is defined
     if [ -z ${remote_tracking_branch:+dummy} ]; then
-        echo -e "${YELLOW}remote tracking branch unset${RESET}"
+        echo -e "${YELLOW}remote tracking branch ${UNSET:-unset}${RESET}"
         # get local branch
         local_refspec=$(git branch | sed '/^*/!d;s/* //')
         echo "local branch: $local_refspec"
@@ -737,13 +743,14 @@ function set_upstream_branch() {
         local -i RETVAL=$?
         if [ $RETVAL == 0 ]; then
             # define remote tracking branch
-
             do_cmd git branch --set-upstream-to=${pull_repo}/${local_refspec} ${local_refspec}
         else
             echo "RETVAL = $RETVAL"
             echo "cannot set upstream branches"
             return 1
         fi
+    else
+        echo "remote tracking branch is ${remote_tracking_branch}"
     fi
 }
 
