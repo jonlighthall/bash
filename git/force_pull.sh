@@ -344,7 +344,7 @@ while [ -z ${hash_local} ]; do
         echo
     fi
     subj_pat=" ${subj_remote}$"
-    git log --format="%C(auto)%h%d %at %ai %s" --color=always | grep "${subj_pat}" | sed "s/^/${TAB}/"
+    git log --format="%C(auto)%h%d %at %ai %s" --color=always | grep --color=always "${subj_pat}" | sed "s/^/${TAB}/"
 
     # get the has of the corresponding commit
     hash_local_s=$(git log --format="%H %s" | grep "${subj_pat}" | awk '{print $1}')
@@ -371,7 +371,7 @@ while [ -z ${hash_local} ]; do
 
     itab
     # display the corresponding commits
-    git log --format="%C(auto)%h %d %at %ai %<|(-1,trunc)%s" --color=always | grep "${time_remote}" | sed "s/^/${TAB}/"       
+    git log --format="%C(auto)%h %d %at %ai %<|(-1,trunc)%s" --color=always | grep "${time_remote}" --color=always | sed "s/^/${TAB}/"       
     
     if [ $N_hash_local -gt 1 ]; then
         echo -e "${TAB}${YELLOW}multiple matching entries found!${RESET}"
