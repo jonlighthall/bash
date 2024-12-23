@@ -37,7 +37,7 @@ if [ -f ./.git-rewirte ]; then
     rm -rdv ./.git-rewrite
 fi
 
-git filter-repo $@ --partial --commit-callback filter.py
+git filter-repo $@ --partial --commit-callback "${BASH_SOURCE%/*}/filter.py"
 
 dtab
 print_done
