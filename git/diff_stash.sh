@@ -1,4 +1,17 @@
-#!/bin/bash -u
+#!/bin/bash -eu
+# -----------------------------------------------------------------------------------------------
+#
+# git/diff_stash.sh
+#
+# PURPOSE: 
+#
+# METHOD:
+#
+# USAGE: 
+#
+# Feb 2024 JCL
+#
+# -----------------------------------------------------------------------------------------------
 
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
@@ -6,12 +19,12 @@ declare -i start_time=$(date +%s%N)
 # set debug level
 # substitue default value if DEBUG is unset or null
 declare -i DEBUG=${DEBUG:-0}
-decho "${TAB}${BASH_SOURCE##*/}: DEBUG = $DEBUG"
 
 # load bash utilities
 fpretty="${HOME}/config/.bashrc_pretty"
 if [ -e "${fpretty}" ]; then
     source "${fpretty}"
+    print_debug
 else
     # ignore undefined variables
     set +u
@@ -25,7 +38,7 @@ if (return 0 2>/dev/null); then
 else
     # exit on errors
     set -e
-    trap 'print_error $LINENO $? $BASH_COMMAND' ERR
+    set_traps
 fi
 print_source
 

@@ -62,7 +62,7 @@ for library in git; do
     fname="${src_dir_phys}/lib_${library}.sh"
     if [ -e "${fname}" ]; then
         if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
-            echo "${TAB}loading $(basename ${fname})"
+            echo "${TAB}loading $(basename "${fname}")"
         fi
         source "${fname}"
     else
