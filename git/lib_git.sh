@@ -733,6 +733,10 @@ function set_upstream_branch() {
         local_refspec=$(git branch | sed '/^*/!d;s/* //')
         echo "local branch: $local_refspec"
 
+        if [ -z ${pull_repo:+dummy} ]; then 
+            echo "pull branch not defined"
+            echo "calling func: ${BASH_SOURCE[1]}"
+        fi
         echo "remote: $pull_repo"
 
         echo "fetching..."
