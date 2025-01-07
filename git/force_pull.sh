@@ -473,8 +473,18 @@ while [ -z ${hash_local} ]; do
         echo -e "${YELLOW}not found${RESET}"
         dtab 2           
     fi
-    iHEAD="${iHEAD}~"
-    ((++head_count))
+
+    # check if next revision exists
+    HEAD_next="${iHEAD}~"
+
+    git rev-parse ${HEAD_next}
+    RETVAL=$?
+    if [ $RETVAL -eq 0 ]; then
+        iHEAD=${HEAD_next}
+        ((++head_count))
+    else
+        hash_local=${iHEAD}
+    fi
 done
 
 dtab
