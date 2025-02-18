@@ -56,13 +56,14 @@ dtab
 set -E +e
 trap -- ERR
 
-# remove tracked binary files
+# remove unmodified tracked binary files
 fix_bin
 
-# remove tracked files with bad extensions
+# remove tracked files with bad file names
 if command -v wsl.exe >/dev/null; then
 	  echo -n "${TAB}WSL defined: "
     fix_bad_ext
+    fix_bad_base
 fi
 
 print_stat

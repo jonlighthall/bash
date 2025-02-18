@@ -1,4 +1,23 @@
 #!/bin/bash
+# -----------------------------------------------------------------------------
+# ONEDRIVE LIBRARY
+# -----------------------------------------------------------------------------
+#
+# ~/utils/bash/onedrive/lib_onedrive.sh
+#
+# PURPOSE: functions for handling sync issues in OneDrive.
+#
+# CONTAINS:
+#   check_arg()
+#   fix_bad_base()
+#   fix_bad_ext()
+#   fix_bin()
+#   print_stat()
+#   reset_counters()
+#
+# Jun 2024 JCL
+#
+# -----------------------------------------------------------------------------
 
 # define replacement seperator
 sep=_._
@@ -34,7 +53,7 @@ bad_list=( "bat" "bin" "cmd" "crt" "csh" "exe" "gz" "js" "ksh" "mar" "osx" "out"
 function check_arg() {
     local arg
     local in_dir
-    
+
     # check argument
     if [ $# -eq 0 ]; then
 	      echo "No target directory specified"
@@ -42,7 +61,7 @@ function check_arg() {
         arg="."
     else
         arg=$1
-    fi    
+    fi
 
     # find input directory
     if [[ "${arg}" == "." ]]; then
@@ -70,6 +89,35 @@ function print_stat() {
 }
 
 function fix_bad_ext() {
+    # PURPOSE - remove or rename files names that are no allowed by OneDrive
+    #
+    # DEPENDENCIES (local)
+    #   bad_ext
+    #   count_found
+    #   count_mv
+    #   count_mv_fail
+    #   count_rm
+
+    #   itab
+    #   start_new_line
+    #   dtab
+    #   decho
+    #
+    # METHOD -
+    #   FIND files with bad extensions
+    #   check if tracked
+    #    + check if unmodified
+    #        + delete
+    #        - rename
+    #    - check if ignored
+    #        + delete
+    #        - rename
+    #
+    # CALLED BY
+    #   rm_tracked_bad_ext
+    #
+    # --------------------------------------------------------------------------
+
     # look for bad extensions
     echo -n "${TAB}checking for files with bad extensions... "
     itab
@@ -79,7 +127,7 @@ function fix_bad_ext() {
         echo -n "${TAB}.${bad}... "
 
         # find bad files
-        name_list=$(find -L ./ -name "*.${bad}")  
+        name_list=$(find -L ./ -name "*.${bad}")
 
         # if list is empty, continue
         if [ -z "${name_list}" ]; then
@@ -106,10 +154,12 @@ function fix_bad_ext() {
                 # check if the file is modified
                 if [ -z "$(git diff $fname)" ]; then
                     echo -n "unmodified: "
+                    # ...then remove
                     rm -v "$fname"
                     ((++count_rm))
                 else
                     echo -en "${CYAN}modified: ${RESET}"
+                    # ...then rename (move)
                     mv -nv "$fname" "$(echo "$fname" | sed "s/\.$bad/$sep$bad/")"
                     if [ -f "$fname" ];then
                         echo "rename $fname FAILED"
@@ -121,17 +171,109 @@ function fix_bad_ext() {
             else
                 echo -en "${MAGENTA}untracked: ${RESET}"
 
+                # check if the file is listed in .gitignore
                 git check-ignore "${fname}" &>/dev/null
                 RETVAL=$?
                 if [ $RETVAL -eq 0 ]; then
                     echo -n "ignored: "
-
+                    # ...then remove
                     rm -v "$fname"
                     ((++count_rm))
                 else
                     echo -n "not ignored: "
-
+                    # ...then rename (move)
                     fname_out=$(echo "$fname" | sed "s/\.$bad/$sep$bad/")
+                    echo
+                    itab
+                    decho "${TAB}fname: $fname"
+                    decho "${TAB}fname out: $fname_out"
+                    decho "${TAB}mv -nv $fname ${fname_out}"
+                    echo -n "${TAB}"
+                    dtab
+                    mv -nv "$fname" "${fname_out}"
+                    if [ -f "$fname" ];then
+                        echo "rename $fname FAILED"
+                        ((++count_mv_fail))
+                    else
+                        ((++count_mv))
+                    fi
+                fi
+            fi
+
+        done
+        dtab
+    done
+    dtab
+    echo "done"
+
+}
+
+function fix_bad_base() {
+    # look for bad extensions
+    echo -n "${TAB}checking for files with bad base names... "
+    itab
+    for bad in ${bad_base[@]}; do
+        # print current baseension
+        start_new_line
+        echo -n "${TAB}${bad}... "
+
+        # find bad files
+        name_list=$(find -L ./ -name "${bad}.*")
+
+        # if list is empty, continue
+        if [ -z "${name_list}" ]; then
+            echo "none"
+            continue
+        fi
+        itab
+
+        # print number of matches
+        local -i n_files=$(echo "$name_list" | wc -l)
+        echo "$n_files files found"
+
+        # loop over file names
+        for fname in ${name_list[@]}; do
+            ((++count_found))
+            echo -n "${TAB}${count_found}) $fname... "
+
+            # check if the file is tracked
+            git ls-files --error-unmatch "$fname" &>/dev/null
+            RETVAL=$?
+            if [ $RETVAL -eq 0 ]; then
+                echo -n "tracked: "
+
+                # check if the file is modified
+                if [ -z "$(git diff $fname)" ]; then
+                    echo -n "unmodified: "
+                    # ...then remove
+                    rm -v "$fname"
+                    ((++count_rm))
+                else
+                    echo -en "${CYAN}modified: ${RESET}"
+                    # ...then rename (move)
+                    mv -nv "$fname" "$sep$fname"
+                    if [ -f "$fname" ];then
+                        echo "rename $fname FAILED"
+                        ((++count_mv_fail))
+                    else
+                        ((++count_mv))
+                    fi
+                fi
+            else
+                echo -en "${MAGENTA}untracked: ${RESET}"
+
+                # check if the file is listed in .gitignore
+                git check-ignore "${fname}" &>/dev/null
+                RETVAL=$?
+                if [ $RETVAL -eq 0 ]; then
+                    echo -n "ignored: "
+                    # ...then remove
+                    rm -v "$fname"
+                    ((++count_rm))
+                else
+                    echo -n "not ignored: "
+                    # ...then rename (move)
+                    fname_out="$fname$sep"
                     echo
                     itab
                     decho "${TAB}fname: $fname"
