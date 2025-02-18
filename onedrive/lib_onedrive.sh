@@ -73,7 +73,7 @@ function fix_bad_ext() {
     # look for bad extensions
     echo -n "${TAB}checking for files with bad extensions... "
     itab
-    for bad in ${bad_list[@]}; do
+    for bad in ${bad_ext[@]}; do
         # print current extension
         start_new_line
         echo -n "${TAB}.${bad}... "

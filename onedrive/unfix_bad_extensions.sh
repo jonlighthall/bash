@@ -24,7 +24,7 @@ declare -i RETVAL
 declare cmd
 unset_traps
 
-for bad in ${bad_list[@]}; do
+for bad in ${bad_ext[@]}; do
 
     decho -n "${TAB}$bad: "
 

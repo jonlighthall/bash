@@ -13,7 +13,7 @@ fi
 check_arg "$@"
 echo "${TAB}looking for bad extensions..."
 
-for bad in ${bad_list[@]}; do
+for bad in ${bad_ext[@]}; do
     decho -n "${TAB}$bad: "
 
     sep_in=".${bad}"
