@@ -49,7 +49,9 @@ if [[ $RETVAL -eq 0 ]]; then
     echo "${TAB}executing git fetch..."
     do_cmd git fetch --verbose --all --prune
     echo "${TAB}done"
+    echo "${TAB}executing git gc..."
     do_cmd git gc
+    echo "${TAB}done"
 fi
 dtab
 

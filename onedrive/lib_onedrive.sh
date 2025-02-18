@@ -47,8 +47,10 @@ function reset_counters() {
 
 reset_counters
 
-declare -a bad_list
-bad_list=( "bat" "bin" "cmd" "crt" "csh" "exe" "gz" "js" "ksh" "mar" "osx" "out" "prf" "ps" "ps1" )
+declare -a bad_ext
+bad_ext=( "bat" "bin" "cmd" "crt" "csh" "exe" "gz" "js" "ksh" "mar" "osx" "out" "prf" "ps" "ps1" )
+declare -a bad_base
+bad_base=( "con" )
 
 function check_arg() {
     local arg
