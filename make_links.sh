@@ -36,6 +36,7 @@ for my_link in \
     add_path \
     bell \
     clean_mac \
+    cp_doc \
     datetime/cp_date \
     datetime/date_dir \
     datetime/file_age \
