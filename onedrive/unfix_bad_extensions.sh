@@ -38,7 +38,7 @@ for bad in ${bad_ext[@]}; do
 
     # if list is empty, continue
     if [ -z "${name_list}" ]; then
-        decho -n "skip"
+        decho -n "none"
         echo -n "."
         decho
         continue
