@@ -2,6 +2,8 @@
 # Checks a Git repository for deleted files and restores those files
 # by checking them out
 
+declare -i start_time=$(date +%s%N)
+
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
@@ -35,14 +37,14 @@ declare -a alist
 for fname in $list; do
     alist+=( "$fname" )
 done
-# get length
-declare -i nf=${#alist[@]}
 
 if [ -z "${list[@]}" ]; then
     echo -e "${TAB}${GOOD}no files to restore${RESET}\n"
 else
     echo -n "${TAB}restoring deleted files... "
     itab
+    # get length
+    declare -i nf=${#alist[@]}
     # print file names
     echo "$nf files found"
     for fname in $list; do
