@@ -128,7 +128,7 @@ else
 fi
 
 if [ -z ${pull_repo} ] || [ -z ${pull_refspec} ]; then
-    echo -e "${TAB}${BROKEN}ERROR: no remote tracking branch specified${RESET}"
+    echo -e "${TAB}${BAD}FAIL: no remote tracking branch specified${RESET}"
     echo "${TAB} HELP: specify remote tracking branch with"
     echo "${TAB}       ${TAB}${BASH_SOURCE##*/} <repository> <refspec>"
     exit 1
@@ -563,7 +563,7 @@ dtab 2
 
 # stash local changes
 cbar "${BOLD}stashing local changes...${RESET}"
-if [ -z "$(git diff)" ]; then
+if [ -z "$(git diff)" ] && [ -z "$(git ls-files -o)" ]; then
     echo -e "${TAB}${fTAB}no differences to stash"
     b_stash=false
 else
@@ -573,8 +573,13 @@ else
     do_cmd git status
     echo "stashing..."
     if [ $git_ver_maj -lt 2 ]; then
-        # old command
-        do_cmd git stash
+        if [ -z "$(git ls-files -o)" ]; then
+            # old command
+            do_cmd git stash
+        else
+            echo -e "${TAB}${BAD}FAIL: cannot stash untracked files! Update Git or update ${BASH_SOURCE##*/}\!${RESET}"
+            exit 1
+        fi
     else
         # modern command
         do_cmd git stash -u
@@ -641,7 +646,7 @@ if [ $N_remote -gt 0 ]; then
     if [ $N_local -ne 1 ]; then
         echo -en "s"
     fi
-    echo -e " behind remote${RESET}"
+    echo -e " behind local branch${RESET}"
     do_cmd git pull --ff-only ${pull_repo} ${pull_refspec}
     RETVAL=$?
     if [[ $RETVAL -ne 0 ]]; then
