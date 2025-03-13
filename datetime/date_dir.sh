@@ -61,5 +61,5 @@ echo
 echo "newest dates:"
 find $1 -not -path "*/.git*/*" -type f -printf "%TF\n" | sort -n -r | uniq -c
 echo
-mdate=$(find $1 -not -path "*/.git*/*" -type f -printf "%TF\n" | sort -n -r | head -n 1)
+mdate=$(find $1 -not -path "*/.git*/*" -type f -printf "%TF %TH:%TM:%.2TS\n" | sort -n -r | head -n 1)
 echo "newest date: $mdate"
