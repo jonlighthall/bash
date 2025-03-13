@@ -43,15 +43,15 @@ done
 trap 'print_exit' EXIT
 
 # check for input
-check_arg1 $@
+check_arg1 "$@"
 
 if [ $# -eq 2 ]; then
-    declare -n out_name=$2
+    declare -n out_name="${2}"
     echo "${TAB}argument 2: $2"
 fi
 
 declare out_file
-get_unique_name $1 out_file
+get_unique_name "$1" out_file
 [ $? -eq 1 ] && exit
 
 # now copy file
