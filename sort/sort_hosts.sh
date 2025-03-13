@@ -9,7 +9,7 @@
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
     source $fpretty
-	set_traps
+	  set_traps
 fi
 
 # print source name at start
@@ -98,6 +98,11 @@ echo -n "${TAB}sorting lines... "
 sort -k3 ${host_out} -o ${host_out}
 sort -u ${host_out} -o ${host_out}
 sort -k3 ${host_out} -o ${host_out}
+
+sed -i '/^<<<</d' ${host_out}
+sed -i '/^====/d' ${host_out}
+sed -i '/^>>>>/d' ${host_out}
+
 # create temporary file
 host_temp=${host_out}_$(date +'%s')
 echo $host_temp
@@ -119,7 +124,11 @@ echo "list del = ${list_del}"
 if [[ ! -z ${list_del} ]]; then
     echo "${TAB}removing merged files..."
     for file in ${list_del}; do
-        rm -vf $file{,~} 2>/dev/null | sed "s/^/${TAB}/"
+        if [[ "${host_ref}" -ef "${file}" ]]; then
+            echo "SKIP: ${host_ref} is symlinked to ${file}!"
+        else
+            rm -vf $file{,~} 2>/dev/null | sed "s/^/${TAB}/"
+        fi
     done
 fi
 
