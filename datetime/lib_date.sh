@@ -13,6 +13,8 @@
 #
 # -----------------------------------------------------------------------------------------------
 
+declare -i libDEBUG=1
+
 function check_arg1() {
     #   set +T
     #    trap 'print_return;trap -- RETRUN' RETURN
@@ -25,7 +27,8 @@ function check_arg1() {
 function print_arg() {
     # set debug level
     local -i DEBUG=${DEBUG:-0}
-    DEBUG=0
+    # manual
+    DEBUG=${libDEBUG}
     # set trap and print function name
     if [ $DEBUG -gt 0 ]; then
         itab
@@ -51,9 +54,11 @@ function print_arg() {
 }
 
 function get_file_type() {
+    decho "in type"
     # set debug level
     local -i DEBUG=${DEBUG:-0}
-    DEBUG=0
+    # manual
+    DEBUG=${libDEBUG}
     itab
     # set trap and print function name
     if [ $DEBUG -gt 0 ]; then
@@ -63,17 +68,20 @@ function get_file_type() {
         trap 'dtab' RETURN
     fi
 
-    print_arg $@
+    print_arg "$@"
 
     # if argument is a broken link, an error is produced
     set +e
     # set file names
-    arg=$1
+    arg="$1"
     arg_base=${arg##*/}
 
     decho "${TAB}input: $arg"
+    decho "${TAB}base: $arg_base"
+    
     [ $DEBUG -gt 0 ] && test_file "${arg_base}" | sed "s/^/${TAB}/"
 
+    echo "determining type..."
     # determine type
     [ -f "${arg}" ] && type="file ${FILE}"
     [ -d "${arg}" ] && type="directory ${DIR}"
@@ -168,7 +176,8 @@ function get_file_type() {
 function get_mod_date() {
     # set debug level
     local -i DEBUG=${DEBUG:-0}
-    DEBUG=0
+    # manual
+    DEBUG=${libDEBUG}
     itab
     # set trap and print function name
     if [ $DEBUG -gt 0 ]; then
@@ -184,10 +193,11 @@ function get_mod_date() {
     fi
 
     decho "${TAB}parsing arguments..."
-    print_arg $@
-    get_file_type "$1"
+    print_arg "$@"
+    get_file_type "$@"
     decho "${TAB}done parsing arguments"
 
+    echo "checking file..."   
 	  # parse input
     echo -en "${TAB}input ${type}${in_file##*/}${RESET}... "
     # check if input exists
@@ -245,7 +255,7 @@ function get_mod_date() {
 
 function parse_file_parts() {
     echo "${TAB}parsing file parts..."
-    get_file_type $1
+    get_file_type "$@"
     itab
 	  # parse input
     echo -en "${TAB}input ${type}${in_file##*/}${RESET}... "
@@ -325,7 +335,7 @@ function get_unique_name() {
     # set debug level
     declare -i DEBUG=${DEBUG:-0}
     # manual
-    #DEBUG=0
+    DEBUG=${libDEBUG}
 
     itab
     # set trap and print function name
@@ -341,6 +351,7 @@ function get_unique_name() {
     fi
     dtab
 
+    # check output variable
     echo "${TAB}checking $2..."
     itab
     declare do_gen=true
@@ -363,11 +374,14 @@ function get_unique_name() {
         fi
     fi
     dtab
-
+    
+    # generate unique file name
     if [ $do_gen = true ]; then
-        print_arg $@
+        decho "print..."
+        print_arg "$@"; echo $?
+        decho "parse..."
         if [ -z ${!2+dummy} ]; then
-            parse_file_parts $1
+            parse_file_parts "$1"
         else
             parse_file_parts $out_file
         fi
