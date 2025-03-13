@@ -262,7 +262,7 @@ for repo in $list; do
     fi
     # add remote to list
     echo "${upstream_url}" >>${list_remote}
-dtab
+    dtab
     # check against argument
     if [ $# -gt 0 ]; then
         for arg in $@; do
@@ -607,7 +607,10 @@ dtab
                     fi
                     echo -e "${TAB}source directory = $src_dir_logi"
                     prog=${src_dir_logi}/force_pull
-                    if [ -f ${prog} ]; then
+                    echo -n "${TAB}${prog}... "
+                    if [ -x ${prog} ]; then
+                        echo "found"
+                        echo "running..."
                         ${prog}
                         RETVAL2=$?
                         dtab
@@ -621,6 +624,9 @@ dtab
                             fpull_init+=( "$repo" )
                             RETVAL=$RETVAL2
                         fi
+                    else
+                        echo "not found"
+                        RETVAL=1
                     fi
                 fi
             else
@@ -670,7 +676,7 @@ dtab
         else
             # update libraries after pull
             load_libs
-            
+
             # update links after pull
             prog=make_links.sh
             echo -ne "${TAB}${prog}... \x1b[0m"
@@ -832,7 +838,7 @@ dtab
     else
         if [ $GIT_OP_THRESH -gt 0 ]; then
             echo -e "${TAB}${GREEN}${BOLD}skipping clean"
-        fi        
+        fi
     fi
 done
 
