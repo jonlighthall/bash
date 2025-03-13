@@ -10,6 +10,10 @@
 #
 # Apr 2023 JCL
 
+# get starting time in nanoseconds
+declare -i start_time=$(date +%s%N)
+
+# define tab
 TAB="   "
 
 # parse arguments
@@ -50,9 +54,68 @@ declare file_list=local_list.txt
 declare file_copy=source.txt
 declare -i RETVAL
 
+declare out_file
+
+# load bash utilities
+fpretty=${HOME}/config/.bashrc_pretty
+if [ -e $fpretty ]; then
+    source $fpretty
+fi
+print_source
+
+# load date library
+fname="${HOME}/utils/bash/datetime/lib_date.sh"
+if [ -e "${fname}" ]; then
+    if [[ "$-" == *i* ]] && [ ${DEBUG:-0} -gt 0 ]; then
+        echo "${TAB}loading $(basename "${fname}")"
+    fi
+    source "${fname}"
+else
+    echo "${fname} not found"
+    exit 1
+fi
+
+export DEBUG=0
+export NO_FMT=true
+
+function remote2unique() {
+    declare cp_fname
+    print_ cp_fname
+
+    local file_remote="$@"
+
+    echo "copying..."
+    parse_file_parts "${file_remote}"
+    echo "file name is ${in_fname}"
+    out_fname="${dir_mv}/${in_fname}"
+    echo "file name is ${out_fname}"
+    test_file "${out_fname}"
+
+    if [ -e "${out_fname}" ]; then
+        echo "need to re-name"
+        get_unique_name "${out_fname}" cp_fname
+    else
+        echo "no need to re-name"
+        cp_fname="${out_fname}"
+    fi
+
+    echo "local file name = ${cp_fname}"
+
+    #    set -x
+
+    echo -ne "${GRH}"
+    cp -pvi "${file_remote}" "${cp_fname}"
+    [ $? -eq 1 ] && exit
+    #  echo "RETVAL = $?"
+    #   set +x
+    echo -ne "${RESET}"
+    ((n_unique++))
+
+}
+
 # read input file
 while read line; do
-	  file_remote=/u/zing/$line
+	  file_remote=$line
 	  ((n_checked++))
 	  echo -n "$n_checked looking for ${file_remote}... "
 	  if [ -f "${file_remote}" ]; then
@@ -66,8 +129,14 @@ while read line; do
             cat $file_list
         else
             echo "no local files"
-            echo "copying..."
-            cp -pv "${file_remote}" "${dir_mv}"
+
+            remote2unique "${file_remote}"
+
+            continue
+
+            get_unique_name "${file_remote}" out_file
+            #[ $? -eq 1 ] && exit
+            cp -pv "${file_remote}" "${dir_mv}/${out_file##*/}"
             ((n_unique++))
             continue
         fi
@@ -77,7 +146,7 @@ while read line; do
             \diff "${file_local}" "${file_remote}"
             RETVAL=$?
             echo $RETVAL
-            echo -n "$file_local... "            
+            echo -n "$file_local... "
             if [ ${RETVAL} -eq 0 ]; then
                 echo "duplicate found: don't copy"
                 ((n_same++))
@@ -89,8 +158,8 @@ while read line; do
         echo "done checking local files"
         if [ ${n_same} -lt 1 ]; then
             echo "new file found: copy"
-            cp -pv "${file_remote}" "${dir_mv}"
-            ((n_unique++))
+            remote2unique "${file_remote}"
+            continue
         else
             echo "duplicates found: do not copy"
         fi
@@ -98,7 +167,6 @@ while read line; do
 		    echo "not found"
         ((n_not_found++))
 	  fi
-  #  break
 done <$file_in
 echo
 
@@ -106,6 +174,8 @@ echo "$n_checked files checked"
 echo "$n_found files found"
 echo "$n_not_found files not found"
 echo "$n_unique unique files found"
+
+ls -lah "${dir_mv}"
 
 # print time at exit
 echo -e "\n$(date +"%a %b %-d %-l:%M %p %Z") ${BASH_SOURCE##*/} $(sec2elap $SECONDS)"
