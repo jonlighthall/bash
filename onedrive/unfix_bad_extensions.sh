@@ -4,6 +4,8 @@
 
 # Nov 2021 JCL
 
+declare -i start_time=$(date +%s%N)
+
 # load onedrive utilities
 flib=${HOME}/utils/bash/onedrive/lib_onedrive.sh
 if [ -e $flib ]; then
