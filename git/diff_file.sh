@@ -91,8 +91,7 @@ function check_min() {
     fi
 
     if [ ${tot} -le ${n_min} ]; then
-        [ $i_count -gt 0 ] && echo
-        echo -n "${TAB}$hash: "
+        echo -en "${TAB}${YELLOW}$hash${RESET}: "
         echo -n "$tot +/- changes "
         if [ ${tot} -eq ${n_min} ]; then
 
@@ -109,30 +108,12 @@ function check_min() {
             dtab
         fi
 
-        # print current list of hashes with number of changes equal to n_min
-        [ $i_count -gt 0 ] && echo -n "${TAB}"
-
         # update value of n_min
         n_min=$tot
-    else
-        [ $i_count -eq 0 ] && echo -n "${TAB}"
-        ((++i_count))
-        if [ $((i_count % 10)) -eq 0 ]; then
-            echo ". $i_count"
-            echo -n "${TAB}"
-        else
-            echo -n "."
-        fi
-
     fi
 }
 
 function sum_diff() {
-    echo "${TAB}${cmd}"
-
-    i_count=0
-
-    # git diff --ignore-space-change --stat ${hash} ${stash} -- $fname
     add=$(${cmd} | awk '{print $1}' )
     sub=$(${cmd} | awk '{print $2}' )
 
@@ -153,13 +134,12 @@ function sum_diff() {
     fi
 
     check_min
-    echo
 }
 
 check_arg1 "$@"
 export in_file="$@"
 
-# check for stash entries
+# check for log entries
 cbar "${BOLD}parsing log...${RESET}"
 
 N_log=$(git log --pretty=format:"%h" "${in_file}" | wc -l)
@@ -178,24 +158,33 @@ echo "${N_hash} entries in hash list"
 echo
 cbar "${BOLD}looping over log entries ...${RESET}"
 
-# loop over stash entries
+# loop over hashes
 for ((n = 0; n < $N_hash ; n++)); do
-
+    # select has from list
     hash="${hash_list[$n]}"
 
-    # get names of stashed files
+    # diff file with hash
     cmd="git diff --ignore-space-change --numstat ${hash} ${in_file}"
-    echo "${TAB}$cmd"
-
-    if [ -z "$(${cmd})" ]; then
-        # check if diff is empty
-        echo -e "${TAB}${GOOD}EMPTY: no diff${RESET}"
-        echo -e "${TAB}${YELLOW}${hash}${RESET} has no diff"
+    cmd_out=$(${cmd} 2>/dev/null)
+    
+    # check if diff is empty
+    if [ -z "${cmd_out}" ]; then
+        # no diffs; stop loop
+        echo -e "${TAB}${YELLOW}${hash}${RESET}: 0 changes"
+        itab
+        echo -e "${TAB}${GOOD} EMPTY: no diff${RESET}"
+        dtab
+        hash_min=${hash}
         break
     else
+        # sum diffs and check min
         sum_diff
     fi
 done
 echo "${TAB}done"
+
+# print minimum difference
+git diff ${hash_min} -- "${in_file}"
+
 echo
 set_exit
