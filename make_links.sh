@@ -45,6 +45,7 @@ for my_link in \
     find/find_matching \
     find/find_matching_and_move \
     find/find_missing_and_empty \
+    git/diff_file \
     git/diff_stash \
     git/filter/filter-repo-author \
     git/force_pull \
