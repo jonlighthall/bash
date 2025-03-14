@@ -72,17 +72,27 @@ echo "${TAB}repository name is $repo"
 # get git dir
 GITDIR=$(readlink -f "$(git rev-parse --git-dir)")
 echo -e "${TAB}the git-dir folder is ${PSDIR}${GITDIR##*/}${RESET}"
+
+check_arg1 "$@"
+export in_file="$@"
+
 # cd to repo root dir
 if [[ ${PWD} -ef ${repo_dir} ]]; then
     echo "${TAB}already in top level directory"
 else
-    echo "${TAB}$PWD is part of a Git repository"
-    echo "${TAB}moving to top level directory..."
+    echo -e "${TAB}${PSDIR}$PWD${RESET} is part of a Git repository"
+    echo -n "${TAB}moving to top level directory... " 
+    start_dir="${PWD}"
     cd -L "$repo_dir"
-    echo "${TAB}$PWD"
+    echo -e "${PSDIR}$PWD${RESET}"
+    sub_dir=$(echo "${start_dir#$repo_dir}")
+    #echo "$sub_dir"
+    echo -en "redefining argument as... ${ARG}"
+    echo -e "${sub_dir}/${in_file}${RESET}" | sed 's,^/,,'
+    in_file=$(    echo "${sub_dir}/${in_file}" | sed 's,^/,,')
 fi
 
-parse_remote_tracking_branch
+#parse_remote_tracking_branch
 
 function check_min() {
     if [ -z ${n_min+dummy} ]; then
@@ -135,9 +145,6 @@ function sum_diff() {
 
     check_min
 }
-
-check_arg1 "$@"
-export in_file="$@"
 
 # check for log entries
 cbar "${BOLD}parsing log...${RESET}"
