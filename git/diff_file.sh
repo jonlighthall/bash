@@ -127,7 +127,7 @@ function check_min() {
     fi
 }
 
-function loop_hash() {
+function sum_diff() {
     echo "${TAB}${cmd}"
 
     i_count=0
@@ -146,7 +146,6 @@ function loop_hash() {
 
     # get total number of changes
     declare -i tot=$(($add+$sub))
-    echo $tot
 
     # exit loop of zero changes found
     if [ $tot -eq 0 ]; then
@@ -154,7 +153,6 @@ function loop_hash() {
     fi
 
     check_min
-
     echo
 }
 
@@ -170,35 +168,24 @@ if ! [ $N_log -gt 0 ]; then
     echo "no log entries found"
     exit 1
 fi
-echo -e "${TAB}repo has $N_log entries in stash"
 
+# read hashes into array
 declare -a hash_list
 readarray -t hash_list < <(git log --pretty=format:"%h" "${in_file}")
-
 N_hash=${#hash_list[@]}
-
 echo "${N_hash} entries in hash list"
 
-echo "first: ${hash_list[1]}"
-
-for ((n = 0; n < $N_hash ; n++)); do
-    echo "hash $n = ${hash_list[$n]}"
-done
-
 echo
-cbar "${BOLD}checking log entries ...${RESET}"
+cbar "${BOLD}looping over log entries ...${RESET}"
 
 # loop over stash entries
 for ((n = 0; n < $N_hash ; n++)); do
 
     hash="${hash_list[$n]}"
-    echo "${TAB}${hash}"
-    itab
 
     # get names of stashed files
     cmd="git diff --ignore-space-change --numstat ${hash} ${in_file}"
     echo "${TAB}$cmd"
-    do_cmd_in $cmd
 
     if [ -z "$(${cmd})" ]; then
         # check if diff is empty
@@ -206,12 +193,9 @@ for ((n = 0; n < $N_hash ; n++)); do
         echo -e "${TAB}${YELLOW}${hash}${RESET} has no diff"
         break
     else
-        loop_hash
+        sum_diff
     fi
-    dtab
-   
-done # stash entreis
-dtab
-echo "${TAB}donexxx"
+done
+echo "${TAB}done"
 echo
 set_exit
