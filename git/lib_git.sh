@@ -550,42 +550,49 @@ function parse_remote_tracking_branch() {
 
 function check_remote_tracking_branch() {
     parse_remote_tracking_branch 1
-    remote_url=$(git remote -v | grep "${upstream_repo}" | grep fetch | awk '{print $2}')
-    echo "            remote url: ${remote_url}"
+    RETVAL=$?
+    if [ $RETVAL -eq 0 ];then
+        decho "parse OK"
 
-    remote_host=${remote_url%%:*}
-    echo "           remote host: ${remote_host}"
+        remote_url=$(git remote -v | grep "${upstream_repo}" | grep fetch | awk '{print $2}')
+        echo "            remote url: ${remote_url}"
 
-    echo -n "${TAB}checking connection... "
-    unset_traps
+        remote_host=${remote_url%%:*}
+        echo "           remote host: ${remote_host}"
 
-    ssh_cmd_base="ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 -T ${remote_host}"
+        echo -n "${TAB}checking connection... "
+        unset_traps
 
-    if [[ "${remote_host}" == *"navy.mil" ]]; then
-        decho "${TAB}Navy host: ${remote_host}"
-        do_cmd $ssh_cmd_base -o LogLevel=error
-        RETVAL=$?
-    else
-        if [[ ${remote_host} =~ "github.com" ]]; then
-            decho "${TAB}GitHub host: ${remote_host}"
-            # set shell options
-            if [[ "$-" == *e* ]]; then
-                echo -n "${TAB}setting shell options..."
-                old_opts=$(echo "$-")
-                # exit on errors must be turned off; otherwise shell will exit...
-                set +e
-                echo "done"
-            fi
-            do_cmd $ssh_cmd_base -o LogLevel=info
-            # 2> >(sed -u $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,' >&2)
+        ssh_cmd_base="ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 -T ${remote_host}"
+
+        if [[ "${remote_host}" == *"navy.mil" ]]; then
+            decho "${TAB}Navy host: ${remote_host}"
+            do_cmd $ssh_cmd_base -o LogLevel=error
             RETVAL=$?
-            reset_shell ${old_opts-''}
         else
-            decho "${TAB}host: ${remote_host}"
-            do_cmd $ssh_cmd_base -o LogLevel=info
-            #2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2)
-            RETVAL=$?
+            if [[ ${remote_host} =~ "github.com" ]]; then
+                decho "${TAB}GitHub host: ${remote_host}"
+                # set shell options
+                if [[ "$-" == *e* ]]; then
+                    echo -n "${TAB}setting shell options..."
+                    old_opts=$(echo "$-")
+                    # exit on errors must be turned off; otherwise shell will exit...
+                    set +e
+                    echo "done"
+                fi
+                do_cmd $ssh_cmd_base -o LogLevel=info
+                # 2> >(sed -u $'s,^.*success.*$,\e[32m&\e[m,;s,.*,\e[31m&\e[m,' >&2)
+                RETVAL=$?
+                reset_shell ${old_opts-''}
+            else
+                decho "${TAB}host: ${remote_host}"
+                do_cmd $ssh_cmd_base -o LogLevel=info
+                #2> >(sed -u $'s,.*,\e[31m&\e[m,' >&2)
+                RETVAL=$?
+            fi
         fi
+    else
+        decho "parse fail"
     fi
     reset_traps
 
@@ -725,7 +732,7 @@ function set_upstream_branch() {
         echo -e "pull repo ${UNSET:-unset}"
         return 1
     fi
-    
+
     # check if remote tracking branch is defined
     if [ -z ${remote_tracking_branch:+dummy} ]; then
         echo -e "${YELLOW}remote tracking branch ${UNSET:-unset}${RESET}"
@@ -733,7 +740,7 @@ function set_upstream_branch() {
         local_refspec=$(git branch | sed '/^*/!d;s/* //')
         echo "local branch: $local_refspec"
 
-        if [ -z ${pull_repo:+dummy} ]; then 
+        if [ -z ${pull_repo:+dummy} ]; then
             echo "pull branch not defined"
             echo "calling func: ${BASH_SOURCE[1]}"
         fi
