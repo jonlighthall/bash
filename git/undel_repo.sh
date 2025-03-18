@@ -1,6 +1,17 @@
 #!/bin/bash -u
-# Checks a Git repository for deleted files and restores those files
-# by checking them out
+# ------------------------------------------------------------------------------
+#
+# git/undel_repo.sh
+#
+# PURPOSE: Checks a Git repository for deleted files and restores those files by
+#   checking them out
+#
+# Mar 2023 JCL
+#
+# ------------------------------------------------------------------------------
+
+# get starting time in nanoseconds
+declare -i start_time=$(date +%s%N)
 
 declare -i start_time=$(date +%s%N)
 
