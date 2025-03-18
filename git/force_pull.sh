@@ -1,13 +1,14 @@
 #!/bin/bash -eu
-# -----------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #
 # git/force_pull.sh
 #
-# PURPOSE: This script was developed to synchronize the local repository with the remote
-#   repository after a force push; hence the name. It assumes that---in the case of a force
-#   push---that the two repsoitories have common commit times, if not common hashes; this would
-#   be the case the history has been rewritten to update author names, for example. It is also
-#   useful for synchonizing diverged repsoitories without explicitly merging.
+# PURPOSE: This script was developed to synchronize the local repository with
+#   the remote repository after a force push; hence the name. It assumes
+#   that---in the case of a force push---that the two repsoitories have common
+#   commit times, if not common hashes; this would be the case the history has
+#   been rewritten to update author names, for example. It is also useful for
+#   synchonizing diverged repsoitories without explicitly merging.
 #
 # METHOD:
 #   STASH  save uncommited local changes
@@ -20,12 +21,13 @@
 #   STASH  restore uncommited changes
 #   RESET  unstage uncommited changes
 #
-# USAGE: The remote name and branch can be optionally specified by the first and second
-#   arguments, respectively. The default remote branch is the current tracking branch.
+# USAGE: The remote name and branch can be optionally specified by the first and
+#   second arguments, respectively. The default remote branch is the current
+#   tracking branch.
 #
 # Apr 2023 JCL
 #
-# -----------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
