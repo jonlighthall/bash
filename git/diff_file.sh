@@ -95,6 +95,7 @@ fi
 #parse_remote_tracking_branch
 
 first=true
+new=false
 
 function check_min() {
     if [ -z ${n_min+dummy} ]; then
@@ -121,12 +122,14 @@ function check_min() {
             else
                 echo -n "same min"
             fi
+            new=false
         else
             hash_min=$hash
-            echo -n "new min"
+            echo "new min"
             itab
-            git diff --no-pager --color=always --ignore-space-change --stat ${hash} ${in_file} | sed "s/^/$TAB/"
+            git --no-pager diff --color=always --ignore-space-change --stat ${hash} ${in_file} | sed "s/^/$TAB/"
             dtab
+            new=true
         fi
 
         # update value of n_min
@@ -171,6 +174,7 @@ fi
 
 # read hashes into array
 declare -a hash_list
+declare -a hash_min
 readarray -t hash_list < <(git log --pretty=format:"%h" "${in_file}")
 N_hash=${#hash_list[@]}
 echo "${N_hash} entries in hash list"
@@ -195,11 +199,14 @@ for ((n = 0; n < $N_hash ; n++)); do
     # check if diff is empty
     if [ -z "${cmd_out}" ]; then
         # no diffs; stop loop
+        [[ "${first}" == false ]] && echo
         echo -e "${TAB}${YELLOW}${hash}${RESET}: 0 changes"
         itab
-        echo -e "${TAB}${GOOD} EMPTY: no diff${RESET}"
+        echo -en "${TAB}${GOOD} EMPTY: no diff${RESET}"
         dtab
-        hash_min=${hash}
+        hash_min+=( "${hash}" )
+        n_min=0
+        first=false
         #break
     else
         # sum diffs and check min
@@ -210,6 +217,10 @@ dtab
 echo
 echo "${TAB}done"
 echo "${N_check} hashes checked"
+
+N_min=${#hash_min[@]}
+echo "${N_min} minimums found"
+echo "${hash_min[@]}"
 
 # print minimum difference
 git --no-pager diff ${hash_min} -- "${in_file}"
