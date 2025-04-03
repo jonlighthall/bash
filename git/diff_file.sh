@@ -94,6 +94,8 @@ fi
 
 #parse_remote_tracking_branch
 
+first=true
+
 function check_min() {
     if [ -z ${n_min+dummy} ]; then
         n_min=$tot
@@ -101,25 +103,36 @@ function check_min() {
     fi
 
     if [ ${tot} -le ${n_min} ]; then
+        if [[ "${first}" == true ]]; then
+            :
+        else
+            echo
+        fi
         echo -en "${TAB}${YELLOW}$hash${RESET}: "
-        echo -n "$tot +/- changes "
+        echo -n "$tot +/- changes, "
         if [ ${tot} -eq ${n_min} ]; then
 
             if [[ ! "${hash}" == ${hash_min} ]]; then
                 hash_min+=( "$hash" )
             fi
-            echo "same min"
+            if [[ "${first}" == true ]]; then
+                echo -n "first min"
+                first=false
+            else
+                echo -n "same min"
+            fi
         else
-            hash_min=
             hash_min=$hash
-            echo "new min"
+            echo -n "new min"
             itab
-            git diff --color=always --ignore-space-change --stat ${hash} ${in_file} | sed "s/^/$TAB/"
+            git diff --no-pager --color=always --ignore-space-change --stat ${hash} ${in_file} | sed "s/^/$TAB/"
             dtab
         fi
 
         # update value of n_min
         n_min=$tot
+    else
+        echo -n "."
     fi
 }
 
@@ -161,19 +174,24 @@ declare -a hash_list
 readarray -t hash_list < <(git log --pretty=format:"%h" "${in_file}")
 N_hash=${#hash_list[@]}
 echo "${N_hash} entries in hash list"
+itab
+echo "${TAB}${hash_list[@]}"
+dtab
 
 echo
 cbar "${BOLD}looping over log entries ...${RESET}"
 
+itab
+N_check=0
 # loop over hashes
 for ((n = 0; n < $N_hash ; n++)); do
     # select has from list
     hash="${hash_list[$n]}"
 
     # diff file with hash
-    cmd="git diff --ignore-space-change --numstat ${hash} ${in_file}"
+    cmd="git --no-pager diff --ignore-space-change --numstat ${hash} ${in_file}"
     cmd_out=$(${cmd} 2>/dev/null)
-    
+    ((++N_check))
     # check if diff is empty
     if [ -z "${cmd_out}" ]; then
         # no diffs; stop loop
@@ -182,16 +200,19 @@ for ((n = 0; n < $N_hash ; n++)); do
         echo -e "${TAB}${GOOD} EMPTY: no diff${RESET}"
         dtab
         hash_min=${hash}
-        break
+        #break
     else
         # sum diffs and check min
         sum_diff
     fi
 done
+dtab
+echo
 echo "${TAB}done"
+echo "${N_check} hashes checked"
 
 # print minimum difference
-git diff ${hash_min} -- "${in_file}"
+git --no-pager diff ${hash_min} -- "${in_file}"
 
 echo
 set_exit
