@@ -13,12 +13,7 @@ if [ -e $fpretty ]; then
     set_traps
 fi
 
-# determine if script is being sourced or executed
-if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
-else
-    RUN_TYPE="executing"
-fi
+# print source name at start
 print_source
 
 # update

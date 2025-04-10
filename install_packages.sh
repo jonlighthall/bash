@@ -4,29 +4,28 @@
 #
 # Oct 2020 JCL
 
+declare -i start_time=$(date +%s%N)
+
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
-    rtab
+    source $fpretty    
     set_traps
 fi
 
 # print source name at start
-if (return 0 2>/dev/null); then
-    RUN_TYPE="sourcing"
-else
-    RUN_TYPE="executing"
-fi
 print_source
 
 # update
 bar "update..."
 sudo apt update
+print_time
 
 # upgrade
 bar "upgrade and fix missing..."
+sudo apt --fix-broken install -y
 sudo apt upgrade -y --fix-missing
+print_time
 
 # install packages
 bar "install packages..."
@@ -34,10 +33,12 @@ for PACK in dbus-x11 x11-apps xterm git-filter-repo; do
     echo "installing ${PACK}..."
     sudo apt install -y --fix-missing ${PACK}
 done
+print_time
 
 # re-check
 bar "upgrade and fix missing..."
 sudo apt upgrade -y --fix-missing
+print_time
 
 # cleanup
 bar "autoremove and purge..."
