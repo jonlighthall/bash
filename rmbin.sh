@@ -28,10 +28,11 @@ echo "found $1"
 cd $1
 echo $PWD
 
+# check if PWD is a git repository
 if git rev-parse --git-dir &>/dev/null; then
-		# This is a valid git repository
-		echo "$1 is part of a Git repository"
-		GITDIR=$(git rev-parse --git-dir)
+    # This is a valid git repository
+    echo "${TAB}$PWD is part of a Git repository"
+    GITDIR=$(git rev-parse --git-dir)
 		echo "the .git folder is $GITDIR"
 
 		# first, remove tracked files from the repository
