@@ -27,6 +27,7 @@ declare -i count_rm=0
 declare -i count_mv=0
 declare -i count_mv_fail=0
 declare -i count_skip=0
+declare -i count_index=0
 
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
@@ -43,6 +44,7 @@ function reset_counters() {
     export count_mv=0
     export count_mv_fail=0
     export count_skip=0
+    export count_index=0
 }
 
 reset_counters
@@ -86,6 +88,7 @@ function print_stat() {
     echo "Files deleted: $count_rm"
     echo "Files skipped: $count_skip"
     echo "Files renamed: $count_mv"
+    echo "Files updated: $count_index"
     echo "Files not renamed: $count_mv_fail"
     echo
 }
@@ -156,6 +159,9 @@ function fix_bad_ext() {
                 # check if the file is modified
                 if [ -z "$(git diff $fname)" ]; then
                     echo -n "unmodified: "
+                    # ...ignore changes
+                    git update-index --assume-unchanged "${fname}"
+                    ((++count_index))
                     # ...then remove
                     rm -v "$fname"
                     ((++count_rm))
@@ -247,6 +253,9 @@ function fix_bad_base() {
                 # check if the file is modified
                 if [ -z "$(git diff $fname)" ]; then
                     echo -n "unmodified: "
+                    # ...ignore changes
+                    git update-index --assume-unchanged "${fname}"
+                    ((++count_index))
                     # ...then remove
                     rm -v "$fname"
                     ((++count_rm))
