@@ -8,7 +8,8 @@ fi
 
 # set shell options
 if [[ "$-" == *e* ]]; then
-    # exit on errors must be turned off; otherwise shell will exit no remote branch found
+    # exit on errors must be turned off; otherwise shell will exit broken links
+    # are found
     old_opts=$(echo "$-")
     set +e
 fi
