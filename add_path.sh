@@ -1,6 +1,6 @@
 #!/bin/bash -u
 # add_path.sh - prepends arguments to PATH. Add the directories passed to the
-# command as arguments to the start of the PATH environmental variable.
+#   command as arguments to the start of the PATH environmental variable.
 #
 # Sep 2022 JCL
 

@@ -1,7 +1,7 @@
 #!/bin/bash -u
-# set_path.sh - prepends the parent and grandparent directories of the current directory to
-# PATH. Add the directories one and two levels up from the present working directory to the start
-# of the PATH environmental variable.
+# set_path.sh - prepends the parent and grandparent directories of the current
+#   directory to PATH. Add the directories one and two levels up from the
+#   present working directory to the start of the PATH environmental variable.
 #
 # Jun 2022 JCL
 
