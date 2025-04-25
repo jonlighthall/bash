@@ -15,8 +15,8 @@ for suff in ${list[@]}; do
             echo "   duplicate file found"
         else
             echo "   no files found"
-            echo "   exiting..."
-            exit 1
+            echo "   breaking..."
+            break
         fi
 
         # strip suffix
