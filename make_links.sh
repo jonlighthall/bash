@@ -35,7 +35,7 @@ proj_name=$(basename "${src_dir_phys}")
 echo " project directory = $proj_name"
 target_dir="${HOME}/utils/${proj_name}"
 link_dir=$HOME/bin
-do_make_link "${link_dir}"
+mkdir -pv "${link_dir}"
 
 cbar "Start Linking Repo Files"
 # list of files to be linked
