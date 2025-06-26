@@ -13,8 +13,6 @@
 # get starting time in nanoseconds
 declare -i start_time=$(date +%s%N)
 
-declare -i start_time=$(date +%s%N)
-
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
@@ -46,7 +44,7 @@ list=$(git ls-files -d)
 # create array
 declare -a alist
 for fname in $list; do
-    alist+=( "$fname" )
+    alist+=("$fname")
 done
 
 if [ -z "${list[@]}" ]; then
