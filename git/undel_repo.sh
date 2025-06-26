@@ -47,7 +47,7 @@ for fname in $list; do
     alist+=("$fname")
 done
 
-if [ -z "${list[@]}" ]; then
+if [ -z "$list" ]; then
     echo -e "${TAB}${GOOD}no files to restore${RESET}\n"
 else
     echo -n "${TAB}restoring deleted files... "
@@ -56,13 +56,13 @@ else
     declare -i nf=${#alist[@]}
     # print file names
     echo "$nf files found"
-    for fname in $list; do
+    for fname in "${alist[@]}"; do
         echo "${TAB} $fname"
     done
 
     # checkout deleted files
     count_found=$((count_found + nf))
-    do_cmd git checkout $list
+    do_cmd git checkout "${alist[@]}"
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]; then
         count_co=$((count_co + nf))
