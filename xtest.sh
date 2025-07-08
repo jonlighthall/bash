@@ -88,10 +88,12 @@ for ((i=0; i<${#list_test[@]}; i++)); do
 	  fi
 done
 
+set +u
 if [ -z "${list_found}" ]; then
 	  echo -e "\E[31mFAIL\E[0m: no X11 programs found!"
     exit
 fi
+set -u
 
 if [ $DEBUG -gt 0 ]; then
     echo "found"
