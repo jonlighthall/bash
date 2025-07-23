@@ -166,8 +166,8 @@ function loop_hosts() {
 
     echo "${TAB}$n_rev revisions found"
 
-    local i_count=0
-    local tot=0
+    local -i i_count=0
+    local -i tot=0
 
     # Process each hash from the git command
     while IFS= read -r hash; do
@@ -191,6 +191,10 @@ function loop_hosts() {
         fi
 
         # Handle binary files and non-numeric values
+        # Check if file is binary
+        if git diff --ignore-space-change --numstat "${hash}" "${stash}" -- "$fname" 2>&1 | grep -q "^-\s\+-\s\+"; then
+            echo "${TAB}Warning: $fname appears to be a binary file (hash: $hash)" >&2
+        fi
         if [[ "$add" == "-" ]] || [[ ! "$add" =~ ^[0-9]+$ ]]; then
             add=0
         fi
@@ -384,7 +388,7 @@ if [ $N_stash -gt 0 ]; then
             if [[ -n "${n_min:-}" ]]; then
                 echo "${TAB}$n_min +/- changes"
             else
-                echo "${TAB}No minimum found"
+                echo -e "${TAB}${RED}No minimum found${RESET}"
             fi
 
             # Display hash information safely
@@ -428,7 +432,12 @@ if [ $N_stash -gt 0 ]; then
                         echo "${TAB}Warning: Could not display diff" >&2
                     fi
                 else
-                    echo "${TAB}Warning: No hash available for diff" >&2
+                    if git diff --ignore-space-change --numstat "${first_hash}" "${stash}" -- "$fname" 2>&1 | grep -q "^-\s\+-\s\+"; then
+                        echo "${TAB}Note: $fname appears to be a binary file (hash: $first_hash)"
+                    else
+                        echo "${TAB}Warning: No hash available for diff" >&2
+                    fi
+                    dtab
                 fi
                 dtab
             fi
