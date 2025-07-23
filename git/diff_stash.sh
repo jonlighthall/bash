@@ -3,11 +3,11 @@
 #
 # git/diff_stash.sh
 #
-# PURPOSE: 
+# PURPOSE:
 #
 # METHOD:
 #
-# USAGE: 
+# USAGE:
 #
 # Feb 2024 JCL
 #
@@ -85,37 +85,60 @@ fi
 parse_remote_tracking_branch
 
 function check_min() {
-    if [ -z ${n_min+dummy} ]; then
-        n_min=$tot
-        hash_min=$hash
+    # Validate input - ensure tot is numeric and not empty
+    if [[ -z "$tot" ]] || [[ ! "$tot" =~ ^[0-9]+$ ]]; then
+        echo "Warning: Invalid total value: '$tot'" >&2
+        return 1
     fi
 
-    if [ ${tot} -le ${n_min} ]; then
-        [ $i_count -gt 0 ] && echo
+    # Initialize n_min if not set
+    if [ -z "${n_min+dummy}" ]; then
+        n_min=$tot
+        hash_min=("$hash")  # Initialize as array
+    fi
+
+    # Ensure n_min is also numeric
+    if [[ ! "$n_min" =~ ^[0-9]+$ ]]; then
+        n_min=$tot
+        hash_min=("$hash")
+    fi
+
+    if [ "$tot" -le "$n_min" ]; then
+        [ "$i_count" -gt 0 ] && echo
         echo -n "${TAB}$hash: "
         echo -n "$tot +/- changes "
-        if [ ${tot} -eq ${n_min} ]; then
 
-            if [[ ! "${hash}" == ${hash_min} ]]; then
-                hash_min+=( "$hash" )
+        if [ "$tot" -eq "$n_min" ]; then
+            # Check if hash is already in array
+            local hash_exists=false
+            for existing_hash in "${hash_min[@]}"; do
+                if [[ "$existing_hash" == "$hash" ]]; then
+                    hash_exists=true
+                    break
+                fi
+            done
+
+            if ! $hash_exists; then
+                hash_min+=("$hash")
             fi
             echo "same min"
         else
-            hash_min=
-            hash_min=$hash
+            # New minimum found
+            hash_min=("$hash")  # Reset array with new hash
             echo "new min"
             itab
-            git diff --color=always --ignore-space-change --stat ${hash} ${stash} -- $fname | sed "s/^/$TAB/"
+            if git diff --color=always --ignore-space-change --stat "${hash}" "${stash}" -- "$fname" 2>/dev/null; then
+                git diff --color=always --ignore-space-change --stat "${hash}" "${stash}" -- "$fname" | sed "s/^/$TAB/"
+            else
+                echo "${TAB}Error: Could not generate diff" >&2
+            fi
             dtab
         fi
-
-        # print current list of hashes with number of changes equal to n_min
-        [ $i_count -gt 0 ] && echo -n "${TAB}"
 
         # update value of n_min
         n_min=$tot
     else
-        [ $i_count -eq 0 ] && echo -n "${TAB}"
+        [ "$i_count" -eq 0 ] && echo -n "${TAB}"
         ((++i_count))
         if [ $((i_count % 10)) -eq 0 ]; then
             echo ". $i_count"
@@ -123,47 +146,82 @@ function check_min() {
         else
             echo -n "."
         fi
-
     fi
 }
 
 function loop_hosts() {
     echo "${TAB}${cmd}"
 
-    n_rev=$($cmd | wc -l)
+    # Validate git command exists and repository is valid
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        echo "Error: Not in a git repository" >&2
+        return 1
+    fi
+
+    local n_rev
+    if ! n_rev=$($cmd 2>/dev/null | wc -l); then
+        echo "Error: Failed to execute git command: $cmd" >&2
+        return 1
+    fi
+
     echo "${TAB}$n_rev revisions found"
 
-    i_count=0
+    local i_count=0
+    local tot=0
 
-    for hash in $($cmd); do
-        # git diff --ignore-space-change --stat ${hash} ${stash} -- $fname
-        add=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $1}' )
-        sub=$(git diff --ignore-space-change --numstat ${hash} ${stash} -- $fname | awk '{print $2}' )
+    # Process each hash from the git command
+    while IFS= read -r hash; do
+        [[ -z "$hash" ]] && continue  # Skip empty lines
 
-        if [ -z "$add" ]; then
+        # Get numstat output and handle potential errors
+        local numstat_output
+        if ! numstat_output=$(git diff --ignore-space-change --numstat "${hash}" "${stash}" -- "$fname" 2>/dev/null); then
+            echo "Warning: Could not get diff stats for $hash" >&2
+            continue
+        fi
+
+        # Parse add/sub values with proper error handling
+        local add sub
+        if [[ -n "$numstat_output" ]]; then
+            add=$(echo "$numstat_output" | awk '{print $1}')
+            sub=$(echo "$numstat_output" | awk '{print $2}')
+        else
+            add="0"
+            sub="0"
+        fi
+
+        # Handle binary files and non-numeric values
+        if [[ "$add" == "-" ]] || [[ ! "$add" =~ ^[0-9]+$ ]]; then
             add=0
         fi
 
-        if [ -z "$sub" ]; then
+        if [[ "$sub" == "-" ]] || [[ ! "$sub" =~ ^[0-9]+$ ]]; then
             sub=0
         fi
 
-        # get total number of changes
-        declare -i tot=$(($add+$sub))
+        # Calculate total with error handling
+        if ! tot=$((add + sub)); then
+            echo "Warning: Could not calculate total changes for $hash" >&2
+            continue
+        fi
 
-        # exit loop of zero changes found
-        if [ $tot -eq 0 ]; then
+        # exit loop if zero changes found
+        if [ "$tot" -eq 0 ]; then
             check_min
             break
         fi
-        if [ $i_count -gt 15 ]; then
+
+        # Limit iterations to prevent infinite loops
+        if [ "$i_count" -gt 15 ]; then
+            echo "Warning: Reached maximum iteration limit" >&2
             break
         fi
 
         check_min
 
-    done
-    [ $n_rev -gt 0 ] && [ $tot -gt 0 ] && echo -e "\x1B[17G done"
+    done < <($cmd 2>/dev/null)
+
+    [ "$n_rev" -gt 0 ] && [ "$tot" -gt 0 ] && echo -e "\x1B[17G done"
     echo
 }
 
@@ -265,21 +323,29 @@ if [ $N_stash -gt 0 ]; then
         echo "${TAB}$cmd"
         do_cmd_in $cmd
 
-        unset stash_files
-        unset diff_files
-        declare -i n_diff_files=0;
+        # Initialize arrays properly
+        stash_files=()
+        diff_files=()
+        declare -i n_diff_files=0
 
-        if [ -z "$(${cmd})" ]; then
+        # Check if stash has any changes
+        stash_output=""
+        if ! stash_output=$(eval "$cmd" 2>/dev/null) || [ -z "$stash_output" ]; then
             # check if stash is empty
             echo -e "${BAD}EMPTY: no diff"
             echo "stash@{$n} has no diff"
-            git stash drop stash@{$n}
+            if git stash drop "stash@{$n}" 2>/dev/null; then
+                echo "${TAB}Successfully dropped empty stash"
+            else
+                echo "${TAB}Warning: Could not drop stash" >&2
+            fi
             echo -en "${RESET}"
             continue
         else
-            for fil in $($cmd); do
-                stash_files+=( "$fil" )
-            done
+            # Read files into array safely
+            while IFS= read -r fil; do
+                [[ -n "$fil" ]] && stash_files+=("$fil")
+            done < <(eval "$cmd" 2>/dev/null)
         fi
 
         # list stashed files
@@ -296,57 +362,74 @@ if [ $N_stash -gt 0 ]; then
 
         # loop over stashed files
         # track total changes
-        declare -i tot
-        for fname in ${stash_files[@]}; do
+        tot=""
+        for fname in "${stash_files[@]}"; do
             echo -e "${TAB}${YELLOW}$fname${RESET}..."
             itab
-            # define counters
-            unset n_min
-            unset hash_min
-            declare -a hash_min
-            declare -i i_count=0
+            # Initialize variables properly
+            n_min=""
+            hash_min=()
+            i_count=0
 
             # get list of hashes before stash that contain file
-            cmd="git rev-list ${stash}^ -- $fname"
+            cmd="git rev-list ${stash}^ -- $(printf '%q' "$fname")"
             loop_hosts
 
             # get list of hashes not found in stash, up to HEAD, that contain file
-            cmd="git rev-list HEAD^ ^${stash}^ -- $fname"
+            cmd="git rev-list HEAD^ ^${stash}^ -- $(printf '%q' "$fname")"
             loop_hosts
 
             echo "${TAB}minimum diff:"
             itab
-            echo "${TAB}$n_min +/- changes"
-            # echo "${hash_min[@]} " | sed "s/ /\n/g" | sed "s/^/${TAB}/" | sed '/^\s*$/d'
+            if [[ -n "${n_min:-}" ]]; then
+                echo "${TAB}$n_min +/- changes"
+            else
+                echo "${TAB}No minimum found"
+            fi
 
-            for hash in "${hash_min[@]}"; do
-                echo -n "${TAB}$(git log --color=always -n 1 --format="%C(auto)%H%d %ad" $hash) "
-                echo -e "$(git log --color=always -n 1 --relative-date --format="%Cblue%ad" $hash)${RESET}"
-            done
+            # Display hash information safely
+            if [[ ${#hash_min[@]} -gt 0 ]]; then
+                for hash in "${hash_min[@]}"; do
+                    if git rev-parse --verify "$hash" >/dev/null 2>&1; then
+                        echo -n "${TAB}$(git log --color=always -n 1 --format="%C(auto)%H%d %ad" "$hash" 2>/dev/null) "
+                        echo -e "$(git log --color=always -n 1 --relative-date --format="%Cblue%ad" "$hash" 2>/dev/null)${RESET}"
+                    fi
+                done
+            fi
 
             dtab
 
-            if [ $n_min -eq 0 ]; then
-                if [ $n_stash_files -eq 1 ]; then
+            # Check if minimum changes is zero (changes already committed)
+            if [[ -n "${n_min:-}" ]] && [ "$n_min" -eq 0 ]; then
+                if [ "$n_stash_files" -eq 1 ]; then
                     echo "${TAB}dropping stash@{$n}..."
-                    do_cmd_in git stash drop stash@{$n}
+                    do_cmd_in git stash drop "stash@{$n}"
                     continue 2
                 fi
                 echo -e "${TAB}${BOLD}${GREEN}stashed changes saved in commits${RESET}"
                 dtab
             else
-
-                diff_files+=( "$fname" )
+                # Add file to diff list if changes exist
+                diff_files+=("$fname")
                 ((++n_diff_files))
 
                 echo "${TAB}displaying minimum diff:"
                 itab
                 echo -e "${TAB}${RED}-removed by stash@{$n}${RESET}"
                 echo -e "${TAB}${GREEN}+  added by stash@{$n}${RESET}"
-                cmd="git --no-pager diff --color=always --color-moved=blocks --ignore-space-change ${hash_min} ${stash} -- $fname"
-                echo "${TAB}$cmd"
-                dtab
-                do_cmd $cmd
+
+                # Use first hash from minimum set for diff
+                if [[ ${#hash_min[@]} -gt 0 ]]; then
+                    first_hash="${hash_min[0]}"
+                    cmd="git --no-pager diff --color=always --color-moved=blocks --ignore-space-change $(printf '%q' "$first_hash") $(printf '%q' "$stash") -- $(printf '%q' "$fname")"
+                    echo "${TAB}$cmd"
+                    dtab
+                    if ! do_cmd "$cmd"; then
+                        echo "${TAB}Warning: Could not display diff" >&2
+                    fi
+                else
+                    echo "${TAB}Warning: No hash available for diff" >&2
+                fi
                 dtab
             fi
 
