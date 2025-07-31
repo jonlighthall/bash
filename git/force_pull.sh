@@ -164,7 +164,7 @@ fi
 ) | column -t -s+ -o ":" -R1 | sed "s/^/${TAB}/"
 
 # check remote host name against list of checked hosts
-if [ ! -z "${host_bad:+dummy}" ]; then
+if [ -n "${host_bad:+dummy}" ]; then
     echo "checking $pull_host against list of checked hosts"
     # bad hosts
     echo -n "bad hosts: "
@@ -188,7 +188,7 @@ else
 fi
 
 cbar "${BOLD}comparing branches...${RESET}"
-if [ ! -z "${remote_tracking_branch:+dummy}" ]; then
+if [ -n "${remote_tracking_branch:+dummy}" ]; then
     echo -n "${TAB}remote tracking branches... "
 
     if [ "$pull_branch" == "$remote_tracking_branch" ]; then
@@ -413,7 +413,7 @@ while [ -z "${hash_local}" ]; do
         itab
         echo "${TAB}subj = $hash_local_s" | sed "1! s/^/${TAB}       /"
         echo -n "${TAB}time = "
-        if [ ! -z ${hash_local} ]; then
+        if [ ! -z "${hash_local}" ]; then
             echo "$hash_local"
             decho "${TAB} the time-based commited is selected by default" # is there a reason for this?
             echo "${TAB} using $hash_local"
@@ -425,14 +425,14 @@ while [ -z "${hash_local}" ]; do
 
     echo "${TAB}remote commit hash: ............ ${hash_remote}"
     echo -n "${TAB}corresponding local commit hash: "
-    if [ ! -z ${hash_local} ]; then
+    if [ ! -z "${hash_local}" ]; then
         echo "$hash_local"
         # determine local commits not found on remote
         echo -en "${TAB}${YELLOW}local branch is "
         cond_local="$hash_remote..HEAD"
-        hash_start=$(git rev-list $cond_local | tail -n 1)
-        if [ ! -z ${hash_start} ]; then
-            N_local=$(git rev-list $cond_local | wc -l)
+        hash_start=$(git rev-list "$cond_local" | tail -n 1)
+        if [ ! -z "${hash_start}" ]; then
+            N_local=$(git rev-list "$cond_local" | wc -l)
             echo -en "${N_local} commit"
             if [ $N_local -ne 1 ]; then
                 echo -en "s"
@@ -441,7 +441,7 @@ while [ -z "${hash_local}" ]; do
             itab
             echo "${TAB}leading local commits: "
             itab
-            git rev-list $cond_local -n $hash_limit | sed "s/^/${TAB}/"
+            git rev-list "$cond_local" -n $hash_limit | sed "s/^/${TAB}/"
             if [ $N_local -gt $hash_limit ]; then
                 N_skip=$(( $N_local - $hash_limit))
                 N_tail=$(($hash_limit/2))
@@ -452,7 +452,7 @@ while [ -z "${hash_local}" ]; do
                         echo "${TAB}..."
                     fi
                 fi
-                git rev-list ${cond_local} | tail -${N_tail} | sed "s/^/${TAB}/"
+                git rev-list "${cond_local}" | tail -${N_tail} | sed "s/^/${TAB}/"
                 if [ $N_skip -gt 0 ]; then
                     echo -e "${TAB}${YELLOW}$(($N_skip-$N_tail)) commits not displayed${RESET}"
                 fi
@@ -460,10 +460,10 @@ while [ -z "${hash_local}" ]; do
 
             if [ $N_local -gt 1 ]; then
                 echo -ne "${TAB}\E[3Dor ${hash_start}^.."
-                hash_end=$(git rev-list $cond_local | head -n 1)
-                echo ${hash_end}
+                hash_end=$(git rev-list "$cond_local" | head -n 1)
+                echo "${hash_end}"
             else
-                hash_end=$hash_start
+                hash_end="$hash_start"
             fi
             dtab 2
         else
@@ -524,7 +524,7 @@ dtab
 echo -en "${TAB}${YELLOW}remote branch is "
 cond_remote="$hash_local..${pull_branch}"
 hash_start_remote=$(git rev-list "$cond_remote" | tail -n 1)
-if [ ! -z "${hash_start_remote}" ]; then
+if [ -n "${hash_start_remote}" ]; then
     N_remote=$(git rev-list "$cond_remote" | wc -l)
     echo -en "${N_remote} commit"
     if [ $N_remote -ne 1 ]; then
@@ -603,7 +603,7 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
         set +e
     fi
     unset_traps
-    while [[ ! -z $(git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep "${branch_temp}") ]]; do
+    while git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep -q "${branch_temp}"; do
         echo "${TAB}${fTAB}${branch_temp} exists"
         ((++i))
         branch_temp="${local_branch}.temp${i}"
@@ -865,7 +865,7 @@ else
 fi
 
 cbar "${BOLD}resetting...${RESET}"
-if [ ! -z "${remote_tracking_branch:+dummy}" ]; then
+if [ -n "${remote_tracking_branch:+dummy}" ]; then
     echo "resetting upstream remote tracking branch..."
     trap 'set_color
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
