@@ -89,7 +89,7 @@ if [ $# -ge 1 ]; then
     unset remote_name
     pull_repo=$1
     echo -n "${TAB}${fTAB}remote name: ....... $pull_repo "
-    git remote | grep $pull_repo &>/dev/null
+    git remote | grep "$pull_repo" &>/dev/null
     RETVAL=$?
     if [[ $RETVAL == 0 ]]; then
         echo -e "${GOOD}OK${RESET}"
@@ -106,7 +106,7 @@ else
         exit
     else
         echo "${TAB}${fTAB}using $upstream_repo"
-        pull_repo=${upstream_repo}
+        pull_repo="${upstream_repo}"
     fi
 fi
 if [ $# -ge 2 ]; then
@@ -126,31 +126,31 @@ if [ $# -ge 2 ]; then
 else
     echo "${TAB}no reference specified"
     echo "${TAB}${fTAB}using $upstream_refspec"
-    pull_refspec=${upstream_refspec}
+    pull_refspec="${upstream_refspec}"
 fi
 
-if [ -z ${pull_repo} ] || [ -z ${pull_refspec} ]; then
+if [ -z "${pull_repo}" ] || [ -z "${pull_refspec}" ]; then
     echo -e "${TAB}${BAD}FAIL: no remote tracking branch specified${RESET}"
     echo "${TAB} HELP: specify remote tracking branch with"
     echo "${TAB}       ${TAB}${BASH_SOURCE##*/} <repository> <refspec>"
     exit 1
 fi
 
-pull_branch=${pull_repo}/${pull_refspec}
+pull_branch="${pull_repo}/${pull_refspec}"
 echo -e "${TAB}pulling from: ......... ${BLUE}${pull_branch}${RESET}"
 
 cbar "${BOLD}checking remote host...${RESET}"
 
 # print remote parsing
-pull_url=$(git remote get-url ${pull_repo})
+pull_url=$(git remote get-url "${pull_repo}")
 
 # parse protocol
-pull_pro=$(echo ${pull_url} | sed 's/\(^[^:@]*\)[:@].*$/\1/')
+pull_pro=$(echo "${pull_url}" | sed 's/\(^[^:@]*\)[:@].*$/\1/')
 if [[ "${pull_pro}" == "git" ]]; then
     pull_pro="SSH"
-    pull_host=$(echo ${pull_url} | sed 's/\(^[^:]*\):.*$/\1/')
+    pull_host=$(echo "${pull_url}" | sed 's/\(^[^:]*\):.*$/\1/')
 else
-    pull_host=$(echo ${pull_url} | sed 's,^[a-z]*://\([^/]*\).*,\1,')
+    pull_host=$(echo "${pull_url}" | sed 's,^[a-z]*://\([^/]*\).*,\1,')
     if [[ "${pull_pro}" == "http"* ]]; then
         echo "  repo: ${pull_repo}"
     else
@@ -164,7 +164,7 @@ fi
 ) | column -t -s+ -o ":" -R1 | sed "s/^/${TAB}/"
 
 # check remote host name against list of checked hosts
-if [ ! -z ${host_bad:+dummy} ]; then
+if [ ! -z "${host_bad:+dummy}" ]; then
     echo "checking $pull_host against list of checked hosts"
     # bad hosts
     echo -n "bad hosts: "
@@ -188,7 +188,7 @@ else
 fi
 
 cbar "${BOLD}comparing branches...${RESET}"
-if [ ! -z ${remote_tracking_branch:+dummy} ]; then
+if [ ! -z "${remote_tracking_branch:+dummy}" ]; then
     echo -n "${TAB}remote tracking branches... "
 
     if [ "$pull_branch" == "$remote_tracking_branch" ]; then
@@ -199,7 +199,7 @@ if [ ! -z ${remote_tracking_branch:+dummy} ]; then
         echo "${TAB}${fTAB}${pull_branch}"
         echo "${TAB}${fTAB}${remote_tracking_branch}"
         echo "setting upstream remote tracking branch..."
-        do_cmd git branch -u ${pull_branch}
+        do_cmd git branch -u "${pull_branch}"
 
         echo -n "remotes... "
         if [ "$pull_repo" == "$upstream_repo" ]; then
@@ -236,12 +236,12 @@ cbar "${BOLD}comparing local branch ${GREEN}$local_branch${RESET} with remote br
 
 # before starting, fetch remote
 echo -n "${TAB}fetching ${pull_repo}..."
-do_cmd_stdbuf git fetch --verbose ${pull_repo} ${pull_refspec}
+do_cmd_stdbuf git fetch --verbose "${pull_repo}" "${pull_refspec}"
 
 echo "comparing repositories based on commit hash..."
-N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
+N_local=$(git rev-list "${pull_branch}..HEAD" | wc -l)
 echo -e "${fTAB} local:  ${YELLOW}ahead $N_local${RESET}"
-N_remote=$(git rev-list HEAD..${pull_branch} | wc -l)
+N_remote=$(git rev-list "HEAD..${pull_branch}" | wc -l)
 echo -e "${fTAB}remote: ${YELLOW}behind $N_remote${RESET}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
@@ -256,22 +256,22 @@ hash_limit=5
 
 if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then
     hash_local=$(git rev-parse HEAD)
-    hash_remote=$(git rev-parse ${pull_branch})
+    hash_remote=$(git rev-parse "${pull_branch}")
 else
-    iHEAD=${pull_branch}
+    iHEAD="${pull_branch}"
     if [ ${N_remote} -gt 0 ]; then
         # determine latest common local commit, based on commit time
         echo "${TAB}comparing repositories based on commit time..."
 
         # get local commit time
-        T_local=$(git log ${local_branch} --format="%at" -1)
+        T_local=$(git log "${local_branch}" --format="%at" -1)
 
         # print local and remote times
         itab
         (
             echo "local timestamp+ ${T_local}"
-            echo "local time+ $(git log ${local_branch} --format="%ad" -1)"
-            echo "remote time+ $(git log ${pull_branch} --format="%ad" -1)"
+            echo "local time+ $(git log "${local_branch}" --format="%ad" -1)"
+            echo "remote time+ $(git log "${pull_branch}" --format="%ad" -1)"
         ) | column -t -s+ -o ":" -R1 | sed "s/^/${TAB}/"
 
         echo -n "${TAB}remote commits commited after local HEAD:"
@@ -320,19 +320,19 @@ else
     hash_local=''
 fi
 
-if [ -z ${hash_local} ]; then
+if [ -z "${hash_local}" ]; then
     cbar "${BOLD}looping through remote commits...${RESET}"
 fi
 
 declare -i head_count
 head_count=0
-HEAD0=${iHEAD}
+HEAD0="${iHEAD}"
 
-while [ -z ${hash_local} ]; do
+while [ -z "${hash_local}" ]; do
     echo -e "${TAB}checking ${YELLOW}${iHEAD} (${HEAD0}~${head_count})${RESET}..."
-    hash_remote=$(git rev-parse ${iHEAD})
-    subj_remote=$(git log ${iHEAD} --format=%s -n 1)
-    time_remote=$(git log ${iHEAD} --format=%at -n 1)
+    hash_remote=$(git rev-parse "${iHEAD}")
+    subj_remote=$(git log "${iHEAD}" --format=%s -n 1)
+    time_remote=$(git log "${iHEAD}" --format=%at -n 1)
     TAB+=${fTAB:='   '}
     echo "${TAB}remote commit subject: $subj_remote"
     echo "${TAB}remote commit time: .. $time_remote or $(date -d @${time_remote} +"%a %b %-d %Y at %-l:%M %p %Z")"
@@ -479,13 +479,13 @@ while [ -z ${hash_local} ]; do
     # check if next revision exists
     HEAD_next="${iHEAD}~"
 
-    git rev-parse ${HEAD_next}
+    git rev-parse "${HEAD_next}"
     RETVAL=$?
     if [ $RETVAL -eq 0 ]; then
-        iHEAD=${HEAD_next}
+        iHEAD="${HEAD_next}"
         ((++head_count))
     else
-        hash_local=${iHEAD}
+        hash_local="${iHEAD}"
     fi
 done
 
@@ -494,18 +494,18 @@ echo -e "${TAB}${GOOD}remote commit found${RESET}"
 # compare local commit to remote commit
 itab
 echo -n "${TAB}corresponding remote commit: ... "
-echo $hash_remote
+echo "$hash_remote"
 itab
 echo -n "${TAB}local commit has... "
 if [ "$hash_local" == "$hash_remote" ]; then
     echo "the same hash"
     dtab
     echo -n "${TAB}merge base: .................... "
-    git merge-base ${local_branch} ${pull_branch}
-    hash_merge=$(git merge-base ${local_branch} ${pull_branch})
+    git merge-base "${local_branch}" "${pull_branch}"
+    hash_merge=$(git merge-base "${local_branch}" "${pull_branch}")
     itab
     echo -n "${TAB}local commit has... "
-    if [ $hash_local == $hash_merge ]; then
+    if [ "$hash_local" == "$hash_merge" ]; then
         echo "the same hash"
     else
         echo "a different hash"
@@ -514,18 +514,18 @@ else
     echo "a different hash (diverged)"
     echo "${TAB} local: $hash_local"
     echo "${TAB}remote: $hash_remote"
-    git log $hash_local -1 --color=always | sed "s/^/${TAB}/"
-    git log $hash_remote -1 --color=always | sed "s/^/${TAB}/"
+    git log "$hash_local" -1 --color=always | sed "s/^/${TAB}/"
+    git log "$hash_remote" -1 --color=always | sed "s/^/${TAB}/"
     echo
 fi
 
 # determine remote commits not found locally
 dtab
 echo -en "${TAB}${YELLOW}remote branch is "
-cond_remote=$hash_local..${pull_branch}
-hash_start_remote=$(git rev-list $cond_remote | tail -n 1)
-if [ ! -z ${hash_start_remote} ]; then
-    N_remote=$(git rev-list $cond_remote | wc -l)
+cond_remote="$hash_local..${pull_branch}"
+hash_start_remote=$(git rev-list "$cond_remote" | tail -n 1)
+if [ ! -z "${hash_start_remote}" ]; then
+    N_remote=$(git rev-list "$cond_remote" | wc -l)
     echo -en "${N_remote} commit"
     if [ $N_remote -ne 1 ]; then
         echo -en "s"
@@ -534,7 +534,7 @@ if [ ! -z ${hash_start_remote} ]; then
     itab
     echo -e "${TAB}trailing remote commits:"
     itab
-    git rev-list $cond_remote -n $hash_limit | sed "s/^/${TAB}/"
+    git rev-list "$cond_remote" -n $hash_limit | sed "s/^/${TAB}/"
 
     if [ $N_remote -gt $hash_limit ]; then
         N_skip=$(( $N_remote - $hash_limit))
@@ -544,16 +544,16 @@ if [ ! -z ${hash_start_remote} ]; then
         else
             echo "${TAB}..."
         fi
-        git rev-list ${cond_remote} | tail -${N_tail} | sed "s/^/${TAB}/"
+        git rev-list "${cond_remote}" | tail -${N_tail} | sed "s/^/${TAB}/"
         echo -e "${TAB}${YELLOW}$(($N_skip-$N_tail)) commits not displayed${RESET}"
     fi
 
     if [ $N_remote -gt 1 ]; then
         echo -ne "${TAB}\E[3Dor ${hash_start_remote}^.."
-        hash_end_remote=$(git rev-list $cond_remote | head -n 1)
-        echo ${hash_end_remote}
+        hash_end_remote=$(git rev-list "$cond_remote" | head -n 1)
+        echo "${hash_end_remote}"
     else
-        hash_end_remote=$hash_start_remote
+        hash_end_remote="$hash_start_remote"
     fi
     dtab 2
 else
@@ -593,7 +593,7 @@ fi
 cbar "${BOLD}copying local commits to temporary branch...${RESET}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
-    branch_temp=${local_branch}.temp
+    branch_temp="${local_branch}.temp"
     echo "generating temporary branch..."
     i=0
     # set shell options
@@ -603,17 +603,17 @@ if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
         set +e
     fi
     unset_traps
-    while [[ ! -z $(git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep ${branch_temp}) ]]; do
+    while [[ ! -z $(git branch -va | sed 's/^.\{2\}//;s/ .*$//' | grep "${branch_temp}") ]]; do
         echo "${TAB}${fTAB}${branch_temp} exists"
         ((++i))
-        branch_temp=${local_branch}.temp${i}
+        branch_temp="${local_branch}.temp${i}"
     done
     echo "${TAB}${fTAB}found unused branch name ${branch_temp}"
     if (! return 0 2>/dev/null); then
-        reset_shell ${old_opts-''}
+        reset_shell "${old_opts-''}"
     fi
     reset_traps
-    do_cmd git branch ${branch_temp}
+    do_cmd git branch "${branch_temp}"
 else
     echo -e "${TAB}${fTAB}no need for temporary branch"
 fi
@@ -630,14 +630,14 @@ if [ $N_remote -gt 0 ]; then
         echo -e "${fTAB}remote: ${YELLOW}behind $N_remote${RESET}"
 
         echo "${TAB}resetting HEAD to $hash_remote..."
-        do_cmd git reset --hard $hash_remote
+        do_cmd git reset --hard "$hash_remote"
         RETVAL=$?
         if [[ $RETVAL -ne 0 ]]; then
             echo -e "${TAB}${BAD}FAIL: git reset --hard failed with code $RETVAL${RESET}"
             exit $RETVAL
         fi
         N_remote_old=$N_remote
-        N_remote=$(git rev-list HEAD..${pull_branch} | wc -l)
+        N_remote=$(git rev-list "HEAD..${pull_branch}" | wc -l)
         if [ $N_remote -ne $N_remote_old ]; then
             echo "${TAB}after reset:"
             git branch -v --color=always | sed '/^*/!d'
@@ -650,11 +650,11 @@ fi
 cbar "${BOLD}pulling remote changes...${RESET}"
 if [ $N_remote -gt 0 ]; then
     echo -en "${TAB}${fTAB}${YELLOW}remote branch is $N_remote commit"
-    if [ $N_local -ne 1 ]; then
+    if [ $N_remote -ne 1 ]; then
         echo -en "s"
     fi
     echo -e " behind local branch${RESET}"
-    do_cmd git pull --ff-only ${pull_repo} ${pull_refspec}
+    do_cmd git pull --ff-only "${pull_repo}" "${pull_refspec}"
     RETVAL=$?
     if [[ $RETVAL -ne 0 ]]; then
         echo -e "${TAB}pull ${BAD}FAIL${RESET}"
@@ -667,11 +667,11 @@ fi
 # rebase and merge oustanding local commits
 cbar "${BOLD}rebasing temporary branch...${RESET}"
 
-if [ -z ${branch_temp+default} ]; then
+if [ -z "${branch_temp+default}" ]; then
     N_temp=0
 else
     echo "${TAB}before rebase:"
-    N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
+    N_temp=$(git rev-list "${local_branch}..${branch_temp}" | wc -l)
     git config advice.skippedCherryPicks false
 fi
 
@@ -705,7 +705,7 @@ echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
 
-    do_cmd git checkout ${branch_temp}
+    do_cmd git checkout "${branch_temp}"
     trap 'set_color;
 echo -e "${trap_head}rebase ${local_branch}"
 echo -e "${trap_head}checkout ${local_branch}"
@@ -717,9 +717,9 @@ echo -e "${trap_head}reset HEAD"
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    do_cmd git rebase --empty=drop --no-keep-empty ${local_branch} -X ours
+    do_cmd git rebase --empty=drop --no-keep-empty "${local_branch}" -X ours
     echo -e "${TAB}after rebase:"
-    N_temp=$(git rev-list ${local_branch}..${branch_temp} | wc -l)
+    N_temp=$(git rev-list "${local_branch}..${branch_temp}" | wc -l)
     echo -en "${TAB}${fTAB}${YELLOW}branch '${branch_temp}' is ${N_temp} commit"
     if [ $N_local -ne 1 ]; then
         echo -en "s"
@@ -738,7 +738,7 @@ echo -e "${trap_head}reset HEAD"
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    do_cmd git checkout ${local_branch}
+    do_cmd git checkout "${local_branch}"
     trap 'set_color;
 echo -e "${trap_head}merge ${branch_temp}"
 echo -e "${trap_head}branch -d ${branch_temp}"
@@ -748,7 +748,7 @@ echo -e "${trap_head}reset HEAD"
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    do_cmd git merge --ff-only ${branch_temp}
+    do_cmd git merge --ff-only "${branch_temp}"
     trap 'set_color;
 echo -e "${trap_head}branch -d ${branch_temp}"
 echo -e "${trap_head}push --set-upstream ${pull_repo} ${pull_refspec}"
@@ -757,14 +757,14 @@ echo -e "${trap_head}reset HEAD"
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
 unset_color
 print_exit $?' EXIT
-    do_cmd git branch -d ${branch_temp}
+    do_cmd git branch -d "${branch_temp}"
 else
     echo -e "${TAB}${fTAB}no need to merge"
 fi
 
 # push local commits
 cbar "${BOLD}pushing local changes...${RESET}"
-N_local=$(git rev-list ${pull_branch}..HEAD | wc -l)
+N_local=$(git rev-list "${pull_branch}..HEAD" | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -en "${TAB}${YELLOW}local branch is $N_local commit"
     if [ $N_local -ne 1 ]; then
@@ -773,7 +773,7 @@ if [ $N_local -gt 0 ]; then
     echo -e " ahead of remote${RESET}"
     echo -e "${TAB}list of commits: "
     itab
-    git --no-pager log --stat ${pull_branch}..HEAD -n ${hash_limit} --color=always | sed "s/^/${TAB}/"
+    git --no-pager log --stat "${pull_branch}..HEAD" -n ${hash_limit} --color=always | sed "s/^/${TAB}/"
     echo
     if [ $N_local -gt $hash_limit ]; then
         N_skip=$(( $N_local - $hash_limit))
@@ -801,9 +801,9 @@ print_exit $?' EXIT
         echo
         echo -e "${TAB}pushing ${GREEN}$local_branch${RESET} to ${BLUE}$pull_branch${RESET}... "
         if [ "${local_branch}" == "${pull_refspec}" ]; then
-            do_cmd_stdbuf git push --verbose --set-upstream ${pull_repo} ${pull_refspec}
+            do_cmd_stdbuf git push --verbose --set-upstream "${pull_repo}" "${pull_refspec}"
         else
-            do_cmd_stdbuf git push --verbose $pull_repo HEAD:$pull_refspec
+            do_cmd_stdbuf git push --verbose "$pull_repo" "HEAD:$pull_refspec"
         fi
         RETVAL=$?
         echo -ne "${TAB}${INVERT} push ${RESET} "
@@ -843,7 +843,7 @@ print_exit $?' EXIT
         unset_traps
         do_cmd git stash pop
         reset_traps
-        reset_shell ${old_opts-''}
+        reset_shell "${old_opts-''}"
         echo -ne "stash made... "
         if [ -z "$(git diff)" ]; then
             echo -e "${GREEN}no changes${RESET}"
@@ -865,7 +865,7 @@ else
 fi
 
 cbar "${BOLD}resetting...${RESET}"
-if [ ! -z ${remote_tracking_branch:+dummy} ]; then
+if [ ! -z "${remote_tracking_branch:+dummy}" ]; then
     echo "resetting upstream remote tracking branch..."
     trap 'set_color
 echo -e "${trap_head}branch -u ${remote_tracking_branch}"
@@ -876,7 +876,7 @@ print_exit $?' EXIT
         git branch --set-upstream "${remote_tracking_branch}"
     else
         # modern command
-        do_cmd git branch -u ${remote_tracking_branch}
+        do_cmd git branch -u "${remote_tracking_branch}"
     fi
 fi
 cbar "${BOLD}you're done!${RESET}"
