@@ -1,7 +1,7 @@
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
-if [ -e $fpretty ]; then
-    source $fpretty
+if [ -e "$fpretty" ]; then
+    source "$fpretty"
 fi
 
 # print source name at start
@@ -17,12 +17,12 @@ if [ -z "$(git branch -vv | grep \* | grep "\[")" ]; then
 else
     branch_tracking=$(git branch -vv | grep \* | sed 's/^.*\[//;s/\(]\|:\).*$//')
     echo -e "remote tracking branch is ${BLUE}${branch_tracking}${RESET}"
-    name_remote=${branch_tracking%%/*}
+    name_remote="${branch_tracking%%/*}"
     echo "remote is name $name_remote"
-    url_remote=$(git remote -v | grep ${name_remote} | awk '{print $2}' | sort -u)
+    url_remote=$(git remote -v | grep "${name_remote}" | awk '{print $2}' | sort -u)
     echo "remote url is ${url_remote}"
     # parse branches
-    branch_remote=${branch_tracking#*/}
+    branch_remote="${branch_tracking#*/}"
     echo "remote branch is $branch_remote"
 fi
 branch_local=$(git branch | grep \* | sed 's/^\* //')
@@ -33,7 +33,7 @@ echo "list of branches: "
 echo "${branch_list}" | sed 's/^/   /'
 
 export FILTER_BRANCH_SQUELCH_WARNING=1
-if [ -f ./.git-rewirte ]; then
+if [ -f ./.git-rewrite ]; then
     rm -rdv ./.git-rewrite
 fi
 
