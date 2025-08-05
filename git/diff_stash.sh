@@ -425,7 +425,7 @@ if [ $N_stash -gt 0 ]; then
                 # Use first hash from minimum set for diff
                 if [[ ${#hash_min[@]} -gt 0 ]]; then
                     first_hash="${hash_min[0]}"
-                    cmd="git --no-pager diff --color=always --color-moved=blocks --ignore-space-change $(printf '%q' "$first_hash") $(printf '%q' "$stash") -- $(printf '%q' "$fname")"
+                    cmd="git --no-pager diff --color=always --color-moved=blocks --ignore-space-change $(printf '%q' "$first_hash") $stash -- $(printf '%q' "$fname")"
                     echo "${TAB}$cmd"
                     dtab
                     if ! do_cmd "$cmd"; then
