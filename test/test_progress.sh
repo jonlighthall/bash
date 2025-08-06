@@ -1,8 +1,13 @@
+#!/bin/bash
+
+# Progress Report Function
+# This file contains a reusable progress reporting function that can be sourced by other scripts.
+
 progress_report() {
     # Function to report progress
     # Usage: progress_report <count> <total>
     # Example: progress_report 50 1000
-    # This function prints a dots and a percentages to indicate the incremental
+    # This function prints dots and percentages to indicate the incremental
     # progress of a task.
 
     # The percent per line (typically 10) and the dots per line (typically 10)
@@ -12,14 +17,14 @@ progress_report() {
     # If the count is not a multiple of (total / 100), it does not print a dot
     # If the count is not a multiple of (total / 10), it does not print a percentage
     if [ "$#" -ne 2 ]; then
-        echo "Usage: $0 <count> <total>"
-        exit 1
+        echo "Usage: progress_report <count> <total>"
+        return 1
     fi
 
     # Check if both arguments are numbers
     if ! [[ "$1" =~ ^[0-9]+$ && "$2" =~ ^[0-9]+$ ]]; then
         echo "Error: Both arguments to progress_report must be numbers."
-        exit 1
+        return 1
     fi
 
     # Convert arguments to base 10 numbers to avoid octal interpretation
@@ -28,7 +33,7 @@ progress_report() {
 
     if ((total == 0)); then
         echo "Error: total cannot be 0"
-        exit 1
+        return 1
     fi
 
     local -i dots_per_line=10                                    # number of dots per line
@@ -39,7 +44,7 @@ progress_report() {
     if ((percentage_interval == 0)); then
         percentage_interval=1
     fi
-    local -i dot_interval=$((total / total_dots)) # dots per line
+    local -i dot_interval=$((total / total_dots))                 # dots per line
     if ((dot_interval == 0)); then
         dot_interval=1
     fi
@@ -57,8 +62,10 @@ progress_report() {
             # indent each line if TAB is set
             echo -n "${TAB-}"
         else
-            perc=$((count * 100 / total))
-            echo " ${perc}%"
+            # Calculate the intended percentage (10%, 20%, 30%, etc.)
+            # instead of the actual percentage to handle edge cases
+            intended_perc=$((count / percentage_interval * 10))
+            echo " ${intended_perc}%"
             echo -n "${TAB-}"
         fi
 
@@ -104,7 +111,7 @@ progress_report() {
                 echo -n "."
             fi
         fi # end of if dot_interval
-    fi     # end of if percentage_interval
+    fi # end of if percentage_interval
 }
 
 function print_time() {
@@ -129,7 +136,10 @@ function print_elap() {
 
         # calculate interval (in ns)
         local -i elap_time=$((${end_time} - ${start_time}))
-        echo "elap: $elap_time ns"
+
+        # print elap_time right-aligned, 9 spaces wide
+        printf "    DEBUG elap:   ${WHITE}%9d ns${RESET}\n" "$elap_time"
+
         # convert to seconds
         local dT_sec
         if command -v bc &>/dev/null; then
@@ -162,12 +172,12 @@ function print_elap() {
 function nsleep() {
     # Check if the argument is only zeros and, optionally, a decimal point
     if [[ "$1" =~ ^0*\.?0*$ ]]; then
-        echo "No sleep requestedx, returning immediately."
+        #    echo "No sleep requested, returning immediately."
         return 0
     fi
 
     local -i start_sleep=$(date +%s%N)
-    echo "input: $1"
+    # echo "input: $1"
     if [ -z "$1" ]; then
         set -- 1.0
     fi
@@ -177,7 +187,7 @@ function nsleep() {
         echo "Error: sleep duration must be a non-negative number."
         return 1
     fi
-    echo "duration_sec: $duration_sec"
+    # echo "duration_sec: $duration_sec"
 
     # Convert input seconds (possibly floating point) to integer nanoseconds
     if command -v bc &>/dev/null; then
@@ -190,28 +200,26 @@ function nsleep() {
         echo "Error: sleep duration must be a non-negative number."
         return 1
     fi
-    echo "duration_ns: $duration_ns"
-
-
+    #echo "duration_ns: $duration_ns"
 
     # Print duration_ns with thousands separators (groups of three from the right)
-    duration_ns_fmt=$(echo "$duration_ns" | rev | sed 's/\(...\)/\1,/g' | rev | sed 's/^_//;s/_$//;s/^,//')
-    echo "duration: $duration_ns_fmt ns"
+    #duration_ns_fmt=$(echo "$duration_ns" | rev | sed 's/\(...\)/\1,/g' | rev | sed 's/^_//;s/_$//;s/^,//')
+    #echo "duration: $duration_ns_fmt ns"
 
     #echo "Sleeping for $1 ns..."
 
     local -i end_sleep=$(date +%s%N)
     local -i elap_time=$((${end_sleep} - ${start_sleep}))
 
-# calibration factor
-    local -i cal_factor=9000000 # minimum return time in ns
+    # calibration factor
+    local -i cal_factor=9400000 # return time in ns
 
     if ((duration_ns < cal_factor)); then
-        echo "Duration is less than $cal_factor ns, returning immediately."
+        #echo "Duration is less than $cal_factor ns, returning immediately."
         return 0
-        else
+    else
         duration_ns_cal=$((${duration_ns} - ${cal_factor}))
-        echo "calibrated duration: $duration_ns_cal ns"
+        #   echo "calibrated duration: $duration_ns_cal ns"
     fi
 
     while ((elap_time < duration_ns_cal)); do
@@ -228,23 +236,44 @@ function no_sleep() {
     echo "elap: $elap_time ns"
 }
 
-# Example usage
-echo "$(date +%s%N)"
-no_sleep
-echo "$(date +%s%N)"
+function do_nothing() {
+    # This function does nothing, but can be used to simulate work
+    # It causes a delay of about 1 millisecond
 
-count_max=5
+    for ((i = 0; i < 455; i++)); do
+        : # Do nothing
+    done
+
+}
+
+function mili_sleep() {
+    if [ -z "$1" ]; then
+        msecs=1
+    else
+        msecs=$1
+    fi
+
+    for ((i = 0; i <= msecs; i++)); do
+        do_nothing
+    done
+}
+
+# Example usage
+count_max=1000
 echo -n "Counting to $count_max... "
 # get starting time in nanoseconds
-
-for ((count = 0; count <= count_max; count++)); do
 declare -i start_time=$(date +%s%N)
-    # progress_report "$count" "$count_max"
+for ((count = 0; count <= count_max; count++)); do
+     progress_report "$count" "$count_max"
     : # Simulate some work
     #sleep 0.001 # Simulate work with a sleep
     #nsleep 5
-    nsleep $(echo "0.$count")
-    print_elap; echo
+    #nsleep 0.0001
+    #    do_nothing
+    #sleep 1e-6
+    do_nothing
+    #mili_sleep 100
 done
+
 echo "done"
 print_time
