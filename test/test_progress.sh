@@ -3,6 +3,12 @@
 # Progress Report Function
 # This file contains a reusable progress reporting function that can be sourced by other scripts.
 
+# Color definitions (with fallbacks if not set)
+WHITE=${WHITE:-'\033[37m'}
+YELLOW=${YELLOW:-'\033[33m'}
+GRAY=${GRAY:-'\033[90m'}
+RESET=${RESET:-'\033[0m'}
+
 progress_report() {
     # Function to report progress
     # Usage: progress_report <count> <total>
@@ -14,8 +20,8 @@ progress_report() {
     # are hardcoded to 10, but can be changed if needed.
 
     # It assumes count is the current count and total is the total number of items
-    # If the count is not a multiple of (total / 100), it does not print a dot
-    # If the count is not a multiple of (total / 10), it does not print a percentage
+    # Dots are printed based on dot_interval calculations
+    # Percentages are printed based on percentage_interval calculations
     if [ "$#" -ne 2 ]; then
         echo "Usage: progress_report <count> <total>"
         return 1
@@ -128,17 +134,47 @@ function print_time() {
     fi
 }
 
+GET_ELAP_TIME() {
+    # This function returns the elapsed time in nanoseconds
+    # It assumes that start_time is set
+    if [ -n "${start_time+alt}" ]; then
+        local -i end_time=$(date +%s%N)
+        elap_time=$((end_time - start_time))
+        export elap_time
+    else
+        echo "Error: start_time is not defined."
+        return 1
+    fi
+}
+
+function calibrate_time() {
+    # check if start time is defined
+    if [ -n "${start_time+alt}" ]; then
+       GET_ELAP_TIME
+        # Suggest a new calibration constant to target 1e9 ns (1 second)
+
+        # Ensure elap_time is set
+
+        if [ "${elap_time}" -gt 0 ]; then
+            local -i suggested_calibration=$((CALIBRATION_CONSTANT * 1000000000 / elap_time))
+            if [ "$suggested_calibration" -eq "$CALIBRATION_CONSTANT" ]; then
+                echo -e "${YELLOW}Calibration is already optimal.${RESET}" >&2
+            else
+                echo -e "${YELLOW}Current CALIBRATION_CONSTANT is ${CALIBRATION_CONSTANT}.${RESET}" >&2
+            fi
+            echo -e "Suggested CALIBRATION_CONSTANT for ~1s: ${WHITE}${suggested_calibration}${RESET}" >&2
+        fi
+    fi
+}
+
+
+
+
 function print_elap() {
     # check if start time is defined
     if [ -n "${start_time+alt}" ]; then
-        # get current time (end time)
-        local -i end_time=$(date +%s%N)
+   GET_ELAP_TIME
 
-        # calculate interval (in ns)
-        local -i elap_time=$((${end_time} - ${start_time}))
-
-        # print elap_time right-aligned, 9 spaces wide
-        printf "    DEBUG elap:   ${WHITE}%9d ns${RESET}\n" "$elap_time"
 
         # convert to seconds
         local dT_sec
@@ -163,10 +199,13 @@ function print_elap() {
             echo -ne "elapsed time is ${WHITE}${dT_sec} sec${RESET}" >&2
         fi
     else
-        decho -ne "${YELLOW}start_time not defined${RESET} " >&2
+        echo -ne "${YELLOW:-}start_time not defined${RESET:-} " >&2
         # reset cursor position for print_done, etc.
         echo -en "\x1b[1D" >&2
     fi
+
+    # print elap_time right-aligned, 9 spaces wide
+        printf "\n   DEBUG elap: ${WHITE}%9d ns${RESET}\n" "$elap_time"
 }
 
 function nsleep() {
@@ -236,11 +275,13 @@ function no_sleep() {
     echo "elap: $elap_time ns"
 }
 
+CALIBRATION_CONSTANT=330
+
 function do_nothing() {
     # This function does nothing, but can be used to simulate work
     # It causes a delay of about 1 millisecond
 
-    for ((i = 0; i < 455; i++)); do
+    for ((i = 0; i < CALIBRATION_CONSTANT; i++)); do
         : # Do nothing
     done
 
@@ -260,20 +301,81 @@ function mili_sleep() {
 
 # Example usage
 count_max=1000
-echo -n "Counting to $count_max... "
+# Count to 1,000 using various delay methods to try to acheive sub-second delays
+# each loop iteration should take about 1 millisecond
+# each test should take about 1 second
+
+
+echo -n "Counting to $count_max using do_nothing... "
 # get starting time in nanoseconds
+start_time=$(date +%s%N)
+for ((count = 0; count <= count_max; count++)); do
+     progress_report "$count" "$count_max"
+    # Simulate some work
+    #sleep 0.001 # Simulate work with a sleep
+    #sleep 1e-6
+    do_nothing
+done
+calibrate_time
+
+start_time=$(date +%s%N)
+print_time
+
+return 2>/dev/null || exit 0
+
+
+    echo -n "Counting to $count_max (no delay)... "
+    # reset start_time for the next test
+    start_time=$(date +%s%N)
+    for ((count = 0; count <= count_max; count++)); do
+        progress_report "$count" "$count_max"
+
+    done
+    print_time
+
+    echo -n "Counting to $count_max using null command... "
+    # reset start_time for the next test
+    start_time=$(date +%s%N)
+    for ((count = 0; count <= count_max; count++)); do
+        progress_report "$count" "$count_max"
+        : # Simulate some work
+
+    done
+    print_time
+print_time
+
+
+echo -n "Counting to $count_max using do_nothing... "
+# get starting time in nanoseconds
+start_time=$(date +%s%N)
+for ((count = 0; count <= count_max; count++)); do
+     progress_report "$count" "$count_max"
+    # Simulate some work
+    #sleep 0.001 # Simulate work with a sleep
+    #sleep 1e-6
+    do_nothing
+done
+print_time
+
+
+
+echo -n "Counting to $count_max using nsleep... "
 declare -i start_time=$(date +%s%N)
 for ((count = 0; count <= count_max; count++)); do
      progress_report "$count" "$count_max"
-    : # Simulate some work
-    #sleep 0.001 # Simulate work with a sleep
-    #nsleep 5
-    #nsleep 0.0001
-    #    do_nothing
-    #sleep 1e-6
-    do_nothing
-    #mili_sleep 100
+    # Simulate some work
+    nsleep 1000000 # Simulate work with a sleep
 done
+print_time
 
+echo -n "Counting to $count_max using mili_sleep... "
+# reset start_time for the next test
+start_time=$(date +%s%N)
+for ((count = 0; count <= count_max; count++)); do
+     progress_report "$count" "$count_max"
+    # Simulate some work
+    mili_sleep 1
+
+done
 echo "done"
 print_time
