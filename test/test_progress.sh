@@ -154,43 +154,6 @@ function calibrate_time_ms() {
     fi
 }
 
-function calibrate_time_ns() {
-    # check if start time is defined
-    if [ -n "${start_time+alt}" ]; then
-       GET_ELAP_TIME
-        # Suggest a new calibration constant to target 1e9 ns (1 second)
-
-        # Ensure elap_time is set
-
-        if [ "${elap_time}" -gt 0 ]; then
-            local -i target_ns=$((1000000000 * $1))
-
-            if [ ${target_ns} -gt ${elap_time} ]; then
-                local -i ns_diff=$((target_ns - elap_time))
-                echo "Warning: Elapsed time is less than target by ${ns_diff} ns."
-                local -i ns_per=$((ns_diff / 1000))
-                echo "or ${ns_per} ns per iteration."
-                local -i suggested_calibration=$((NS_OFFSET - ns_per))
-            else
-                local -i ns_diff=$((elap_time - target_ns))
-                echo "Warning: Elapsed time is greater than target by ${ns_diff} ns."
-                local -i ns_per=$((ns_diff / 1000))
-                echo "or ${ns_per} ns per iteration."
-                local -i suggested_calibration=$((NS_OFFSET + ns_per))
-            fi
-
-
-            #local -i suggested_calibration=$((NS_CALIBRATION * target_ns / elap_time))
-            if [ "$suggested_calibration" -eq "$NS_OFFSET" ]; then
-                echo -e "${YELLOW}Calibration is already optimal.${RESET}" >&2
-            else
-                echo -e "${YELLOW}Current NS_CALIBRATION is ${NS_OFFSET}.${RESET}" >&2
-            fi
-            echo -e "Suggested NS_CALIBRATION for ~${1}s: ${WHITE}${suggested_calibration}${RESET}" >&2
-        fi
-    fi
-}
-
 function print_elap() {
     # check if start time is defined
     if [ -n "${start_time+alt}" ]; then
@@ -242,82 +205,7 @@ function print_time() {
 }
 
     # Calibration factor (overhead of the timing loop)
-    export NS_OVERHEAD=1228582 # return time in ns
-    export NS_OFFSET=978352201  # return time in ns
     export MS_CALIBRATION=455      # calibration for millisecond delays
-
-function nsleep() {
-    # This function sleeps for a specified duration in seconds.
-    # It uses nanoseconds for precision and can handle floating point numbers.
-    # It is intended to be a more precise alternative to sleep.
-
-    # Check if the argument is only zeros and, optionally, a decimal point
-    if [[ "$1" =~ ^0*\.?0*$ ]]; then
-        #    echo "No sleep requested, returning immediately."
-        return 0
-    fi
-    # grab the start time immediately
-    local -i start_sleep=$(date +%s%N)
-
-    # echo "input: $1"
-    if [ -z "$1" ]; then
-        set -- 1.0
-    fi
-
-    local in_duration="$1"
-    local duration_sec=$(echo "$in_duration" | sed 's/^\./0./') # add leading zero if needed
-
-    if [[ ! "$duration_sec" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-        echo "Error: sleep duration must be a non-negative number."
-        return 1
-    fi
-
-    # Convert input seconds (possibly floating point) to integer nanoseconds
-    local duration_ns
-    if command -v bc &>/dev/null; then
-        duration_ns=$(echo "$1 * 1000000000 / 1" | bc)
-    else
-        duration_ns=$(awk "BEGIN {printf \"%d\", $1 * 1000000000}")
-    fi
-    # Check if the conversion was successful
-    if [[ ! "$duration_ns" =~ ^[0-9]+$ ]]; then
-        echo "Error: sleep duration must be a non-negative number."
-        return 0
-    fi
-
-
-
-    if ((duration_ns < NS_OVERHEAD)); then
-        echo "Warning: sleep duration is too short ($duration_ns ns). Using no_sleep instead."
-        exit || return 1
-    fi
-
-    # Apply calibration BEFORE starting the sleep timer
-    local -i duration_ns_cal=$((duration_ns - NS_OVERHEAD - NS_OFFSET )) # adjust for overhead and offset
-    # Check if the adjusted duration is still positive
-    if ((duration_ns_cal <= 0)); then
-        #echo "Warning: adjusted sleep duration is non-positive ($duration_ns_cal ns). Using no_sleep instead."
-        #no_sleep
-        return 0
-    fi
-
-    # NOW start timing the actual sleep
-
-    local -i end_sleep elap_time=0
-
-    while ((elap_time < duration_ns_cal)); do
-        end_sleep=$(date +%s%N)
-        elap_time=$((end_sleep - start_sleep))
-    done
-}
-
-function no_sleep() {
-    local -i start_sleep=$(date +%s%N)
-    local -i end_sleep=$(date +%s%N)
-    local -i elap_time=$((${end_sleep} - ${start_sleep}))
-    echo "elap: $elap_time ns"
-}
-
 
 
 function do_nothing() {
@@ -350,7 +238,6 @@ count_max=1000
 # each loop iteration should take about 1 millisecond
 # each test should take about 1 second
 
-if false; then
 echo -n "Counting to $count_max using do_nothing... "
 # get starting time in nanoseconds
 export CALIBRATION_CONSTANT=330
@@ -369,7 +256,6 @@ echo "test time to print time..."
 export start_time=$(date +%s%N)
 print_time
 
-
 echo -n "Counting to $count_max using mili_sleep... "
 # reset start_time for the next test
 export start_time=$(date +%s%N)
@@ -383,36 +269,3 @@ calibrate_time_ms 1
 print_time
 
 echo "done"
-fi
-echo -n "Counting to $count_max using nsleep... "
-declare -i start_time=$(date +%s%N)
-for ((count = 0; count <= ((count_max)); count++)); do
-     progress_report "$count" "$((count_max))"
-    # Simulate some work
-    nsleep 0.01
-done
-calibrate_time_ns 10
-print_time
-
-
-return 2>/dev/null || exit 0
-
-
-    echo -n "Counting to $count_max (no delay)... "
-    # reset start_time for the next test
-    start_time=$(date +%s%N)
-    for ((count = 0; count <= count_max; count++)); do
-        progress_report "$count" "$count_max"
-
-    done
-    print_time
-
-    echo -n "Counting to $count_max using null command... "
-    # reset start_time for the next test
-    start_time=$(date +%s%N)
-    for ((count = 0; count <= count_max; count++)); do
-        progress_report "$count" "$count_max"
-        : # Simulate some work
-
-    done
-    print_time
