@@ -9,6 +9,10 @@ YELLOW=${YELLOW:-'\033[33m'}
 GRAY=${GRAY:-'\033[90m'}
 RESET=${RESET:-'\033[0m'}
 
+# Global calibration constants
+readonly MS_CALIBRATION=455       # millisecond delay calibration
+readonly CALIBRATION_CONSTANT=330 # do_nothing() loop iterations
+
 progress_report() {
     # Function to report progress
     # Usage: progress_report <count> <total>
@@ -121,36 +125,67 @@ progress_report() {
 }
 
 GET_ELAP_TIME() {
-    # This function returns the elapsed time in nanoseconds
-    # It assumes that start_time is set
-    if [ -n "${start_time+alt}" ]; then
-        local -i end_time=$(date +%s%N)
-        elap_time=$((end_time - start_time))
-        export elap_time
-    else
-        echo "Error: start_time is not defined."
+    # Calculate elapsed time in nanoseconds from global start_time
+    # Sets global variable: elap_time
+    # Returns: 0 on success, 1 on error
+
+    if [[ -z "${start_time:-}" ]]; then
+        echo "Error: start_time is not defined." >&2
         return 1
+    fi
+
+    if [[ ! "$start_time" =~ ^[0-9]+$ ]]; then
+        echo "Error: start_time is not a valid number." >&2
+        return 1
+    fi
+
+    local -i end_time
+    end_time=$(date +%s%N)
+    elap_time=$((end_time - start_time))
+
+    # Validate result
+    if [[ "$elap_time" -lt 0 ]]; then
+        echo "Warning: Negative elapsed time detected. Clock may have changed." >&2
+        elap_time=0
     fi
 }
 
 function calibrate_time_ms() {
-    # check if start time is defined
-    if [ -n "${start_time+alt}" ]; then
-       GET_ELAP_TIME
-        # Suggest a new calibration constant to target 1e9 ns (1 second)
+    # Suggest calibration constant to achieve target duration
+    # Usage: calibrate_time_ms <target_seconds>
 
-        # Ensure elap_time is set
+    if [[ "$#" -ne 1 ]]; then
+        echo "Error: calibrate_time_ms requires exactly one argument (target seconds)" >&2
+        return 1
+    fi
 
-        if [ "${elap_time}" -gt 0 ]; then
-            local -i target_ms=$((1000000000 * $1))
-            local -i suggested_calibration=$((MS_CALIBRATION * ${target_ms} / elap_time))
-            if [ "$suggested_calibration" -eq "$MS_CALIBRATION" ]; then
-                echo -e "${YELLOW}Calibration is already optimal.${RESET}" >&2
-            else
-                echo -e "${YELLOW}Current MS_CALIBRATION is ${MS_CALIBRATION}.${RESET}" >&2
-                echo -e "Suggested MS_CALIBRATION for ~${1}s: ${WHITE}${suggested_calibration}${RESET}" >&2
-            fi
+    if [[ ! "$1" =~ ^[0-9]+$ ]]; then
+        echo "Error: Target seconds must be a positive integer" >&2
+        return 1
+    fi
+
+    if [[ -z "${start_time:-}" ]]; then
+        echo "Error: start_time is not defined. Cannot calibrate." >&2
+        return 1
+    fi
+
+    if ! GET_ELAP_TIME; then
+        return 1
+    fi
+
+    if [[ "$elap_time" -gt 0 ]]; then
+        local -i target_ns=$((1000000000 * $1))  # Convert seconds to nanoseconds
+        local -i suggested_calibration=$((MS_CALIBRATION * target_ns / elap_time))
+
+        if [[ "$suggested_calibration" -eq "$MS_CALIBRATION" ]]; then
+            echo -e "${YELLOW}Calibration is already optimal.${RESET}" >&2
+        else
+            echo -e "${YELLOW}Current MS_CALIBRATION is ${MS_CALIBRATION}.${RESET}" >&2
+            echo -e "Suggested MS_CALIBRATION for ~${1}s: ${WHITE}${suggested_calibration}${RESET}" >&2
         fi
+    else
+        echo "Error: Invalid elapsed time for calibration" >&2
+        return 1
     fi
 }
 
@@ -204,68 +239,72 @@ function print_time() {
     fi
 }
 
-    # Calibration factor (overhead of the timing loop)
-    export MS_CALIBRATION=455      # calibration for millisecond delays
-
-
 function do_nothing() {
-    # This function does nothing, but can be used to simulate work
-    # It causes a delay of about 1 millisecond
+    # CPU-based delay function for timing calibration
+    # Performs empty loop iterations based on CALIBRATION_CONSTANT
+    # Usage: do_nothing
 
+    local -i i
     for ((i = 0; i < CALIBRATION_CONSTANT; i++)); do
-        : # Do nothing
+        : # No-op command
     done
-
 }
 
-function mili_sleep() {
-    if [ -z "$1" ]; then
-        msecs=1
-    else
-        msecs=$1
-    fi
+function milli_sleep() {
+    # Sleep for specified milliseconds using CPU-based delay
+    # Usage: milli_sleep <milliseconds>
+    local -i msecs=${1:-1}  # Default to 1 if no argument provided
 
-   export CALIBRATION_CONSTANT=221
+    # Validate input
+    if [[ ! "$1" =~ ^[0-9]+$ ]] && [[ -n "$1" ]]; then
+        echo "Error: milli_sleep requires a positive integer" >&2
+        return 1
+    fi
 
     for ((i = 0; i <= msecs; i++)); do
         do_nothing
     done
 }
 
-# Example usage
-count_max=1000
-# Count to 1,000 using various delay methods to try to acheive sub-second delays
-# each loop iteration should take about 1 millisecond
-# each test should take about 1 second
+# =============================================================================
+# MAIN EXECUTION - Performance Testing
+# =============================================================================
 
-echo -n "Counting to $count_max using do_nothing... "
-# get starting time in nanoseconds
-export CALIBRATION_CONSTANT=330
-export start_time=$(date +%s%N)
+# Test configuration
+readonly count_max=1000
+echo "Starting performance tests with $count_max iterations each..."
+echo "Target: ~1 second per test"
+echo
+
+# Test 1: CPU-based delay with do_nothing()
+echo -n "Test 1/2: Counting to $count_max using do_nothing... "
+start_time=$(date +%s%N)
 for ((count = 0; count <= count_max; count++)); do
      progress_report "$count" "$count_max"
-    # Simulate some work
-    #sleep 0.001 # Simulate work with a sleep
-    #sleep 1e-6
     do_nothing
 done
 calibrate_time_ms 1
 print_time
+echo
 
-echo "test time to print time..."
-export start_time=$(date +%s%N)
+# Quick timing test
+echo "Timing overhead test..."
+start_time=$(date +%s%N)
 print_time
+echo
 
-echo -n "Counting to $count_max using mili_sleep... "
-# reset start_time for the next test
-export start_time=$(date +%s%N)
+# Test 2: CPU-based delay with milli_sleep()
+echo -n "Test 2/2: Counting to $count_max using milli_sleep... "
+start_time=$(date +%s%N)
 for ((count = 0; count <= count_max; count++)); do
      progress_report "$count" "$count_max"
-    # Simulate some work
-    mili_sleep 1
-
+    milli_sleep 1
 done
 calibrate_time_ms 1
 print_time
+echo
 
-echo "done"
+echo "All performance tests completed successfully!"
+
+# Clean exit for both sourced and executed contexts
+return 2>/dev/null || exit 0
