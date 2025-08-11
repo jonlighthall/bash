@@ -10,8 +10,10 @@ GRAY=${GRAY:-'\033[90m'}
 RESET=${RESET:-'\033[0m'}
 
 # Global calibration constants
-readonly MS_CALIBRATION=455       # millisecond delay calibration
-readonly CALIBRATION_CONSTANT=330 # do_nothing() loop iterations
+readonly MS_CALIB_LVL1=343 # do_nothing() loop iterations
+readonly MS_CALIB_LVL2=107       # millisecond delay calibration
+
+NOTHING_DELAY=0
 
 progress_report() {
     # Function to report progress
@@ -150,12 +152,12 @@ GET_ELAP_TIME() {
     fi
 }
 
-function calibrate_time_ms() {
+function calibrate_time_lvl1() {
     # Suggest calibration constant to achieve target duration
-    # Usage: calibrate_time_ms <target_seconds>
+    # Usage: calibrate_time_lvl1_ms <target_seconds>
 
     if [[ "$#" -ne 1 ]]; then
-        echo "Error: calibrate_time_ms requires exactly one argument (target seconds)" >&2
+        echo "Error: calibrate_time_lvl1_ms requires exactly one argument (target seconds)" >&2
         return 1
     fi
 
@@ -175,13 +177,52 @@ function calibrate_time_ms() {
 
     if [[ "$elap_time" -gt 0 ]]; then
         local -i target_ns=$((1000000000 * $1))  # Convert seconds to nanoseconds
-        local -i suggested_calibration=$((MS_CALIBRATION * target_ns / elap_time))
+        local -i suggested_calibration=$((MS_CALIB_LVL1 * target_ns / elap_time))
 
-        if [[ "$suggested_calibration" -eq "$MS_CALIBRATION" ]]; then
+        if [[ "$suggested_calibration" -eq "$MS_CALIB_LVL1" ]]; then
             echo -e "${YELLOW}Calibration is already optimal.${RESET}" >&2
         else
-            echo -e "${YELLOW}Current MS_CALIBRATION is ${MS_CALIBRATION}.${RESET}" >&2
-            echo -e "Suggested MS_CALIBRATION for ~${1}s: ${WHITE}${suggested_calibration}${RESET}" >&2
+            echo -e "${YELLOW}Current MS_CALIB_LVL1 is ${MS_CALIB_LVL1}.${RESET}" >&2
+            echo -e "Suggested MS_CALIB_LVL1 for ~${1}s: ${WHITE}${suggested_calibration}${RESET}" >&2
+        fi
+    else
+        echo "Error: Invalid elapsed time for calibration" >&2
+        return 1
+    fi
+}
+
+function calibrate_time_lvl2() {
+    # Suggest calibration constant to achieve target duration
+    # Usage: calibrate_time_lvl2 <target_seconds>
+
+    if [[ "$#" -ne 1 ]]; then
+        echo "Error: calibrate_time_lvl2 requires exactly one argument (target seconds)" >&2
+        return 1
+    fi
+
+    if [[ ! "$1" =~ ^[0-9]+$ ]]; then
+        echo "Error: Target seconds must be a positive integer" >&2
+        return 1
+    fi
+
+    if [[ -z "${start_time:-}" ]]; then
+        echo "Error: start_time is not defined. Cannot calibrate." >&2
+        return 1
+    fi
+
+    if ! GET_ELAP_TIME; then
+        return 1
+    fi
+
+    if [[ "$elap_time" -gt 0 ]]; then
+        local -i target_ns=$((1000000000 * $1))  # Convert seconds to nanoseconds
+        local -i suggested_calibration=$((MS_CALIB_LVL2 * target_ns / elap_time))
+
+        if [[ "$suggested_calibration" -eq "$MS_CALIB_LVL2" ]]; then
+            echo -e "${YELLOW}Calibration is already optimal.${RESET}" >&2
+        else
+            echo -e "${YELLOW}Current MS_CALIB_LVL2 is ${MS_CALIB_LVL2}.${RESET}" >&2
+            echo -e "Suggested MS_CALIB_LVL2 for ~${1}s: ${WHITE}${suggested_calibration}${RESET}" >&2
         fi
     else
         echo "Error: Invalid elapsed time for calibration" >&2
@@ -241,11 +282,11 @@ function print_time() {
 
 function do_nothing() {
     # CPU-based delay function for timing calibration
-    # Performs empty loop iterations based on CALIBRATION_CONSTANT
+    # Performs empty loop iterations based on MS_CALIB_LVL1
     # Usage: do_nothing
 
     local -i i
-    for ((i = 0; i < CALIBRATION_CONSTANT; i++)); do
+    for ((i = 0; i < NOTHING_DELAY; i++)); do
         : # No-op command
     done
 }
@@ -260,6 +301,8 @@ function milli_sleep() {
         echo "Error: milli_sleep requires a positive integer" >&2
         return 1
     fi
+
+    NOTHING_DELAY=${MS_CALIB_LVL2}
 
     for ((i = 0; i <= msecs; i++)); do
         do_nothing
@@ -278,20 +321,22 @@ echo
 
 # Test 1: CPU-based delay with do_nothing()
 echo -n "Test 1/2: Counting to $count_max using do_nothing... "
+NOTHING_DELAY=${MS_CALIB_LVL1}
 start_time=$(date +%s%N)
 for ((count = 0; count <= count_max; count++)); do
      progress_report "$count" "$count_max"
     do_nothing
 done
-calibrate_time_ms 1
+calibrate_time_lvl1 1
 print_time
-echo
+#exit
+#echo
 
 # Quick timing test
 echo "Timing overhead test..."
 start_time=$(date +%s%N)
 print_time
-echo
+#echo
 
 # Test 2: CPU-based delay with milli_sleep()
 echo -n "Test 2/2: Counting to $count_max using milli_sleep... "
@@ -300,9 +345,21 @@ for ((count = 0; count <= count_max; count++)); do
      progress_report "$count" "$count_max"
     milli_sleep 1
 done
-calibrate_time_ms 1
+calibrate_time_lvl2 1
 print_time
-echo
+#echo
+
+
+# Test 3: CPU-based delay with milli_sleep()
+count_max=100
+echo -n "Test 3/2: Counting to $count_max using milli_sleep... "
+start_time=$(date +%s%N)
+for ((count = 0; count <= count_max; count++)); do
+     progress_report "$count" "$count_max"
+    milli_sleep 10
+done
+calibrate_time_lvl2 1
+print_time
 
 echo "All performance tests completed successfully!"
 
