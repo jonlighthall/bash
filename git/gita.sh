@@ -21,6 +21,12 @@ function print_auth() {
     local arg
     arg=$(echo "$@" | sed -r "s/\\\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g")
 
+    # check if argument is empty
+    if [ -z "$arg" ]; then
+        echo "${TAB}no branch specified"
+        return
+    fi
+
     if [ ! -z $(git rev-parse --is-inside-work-tree 2>/dev/null) ]; then
         (
             echo "list of authors:"
