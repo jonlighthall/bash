@@ -29,17 +29,19 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
                 for bad in ${bad_ext[@]}; do
                     if [[ "$fname" == *.${bad} ]]; then
                         ((++found_deleted))
-                        echo -n "${TAB}$fname (deleted)... "
+                        echo -n "${TAB}${fname}: "
 
-                        # Check if already marked as assume-unchanged
+                        # Check if already ignored without calling print_git_status
                         file_status=$(git ls-files -v "$fname" 2>/dev/null | cut -c1)
                         if [[ "$file_status" =~ ^[a-z]$ ]]; then
-                            echo "already ignored"
+                            # Already ignored
+                            echo -e "${CYAN}tracked${RESET}, ${RED}deleted${RESET}, ${MAGENTA}ignored${RESET} → already ignored"
                             ((++count_skip))
                         else
                             # Mark as assume-unchanged to hide the deletion
+                            echo -en "${CYAN}tracked${RESET}, ${RED}deleted${RESET}, ${GREEN}not ignored${RESET} → "
                             if git update-index --assume-unchanged "$fname" > /dev/null 2>&1; then
-                                echo -e "${GOOD}ignored${RESET}"
+                                echo -e "${GOOD}marked to ignore${RESET}"
                                 ((++count_index))
                             else
                                 echo -e "${BAD}failed to update index${RESET}"
@@ -89,76 +91,65 @@ for bad in ${bad_ext[@]}; do
     itab
     for fname in ${name_list[@]}; do
         ((++count_found))
-        echo -n "${TAB}"
+        echo -n "${TAB}$fname: "
 
-        # Check if we're in a git repository
-        if git rev-parse --git-dir > /dev/null 2>&1; then
-            # Check if file is tracked by git
-            if git ls-files --error-unmatch "$fname" > /dev/null 2>&1; then
-                # File is tracked
-                # Check if file is modified
-                if git diff --quiet "$fname" && git diff --cached --quiet "$fname"; then
-                    # File is tracked and unmodified
-                    echo "tracked, unmodified: $fname"
+        # Print git status and capture return value (disable error exit temporarily)
+        print_git_status "$fname" || git_status=$?
+        echo -n " → "
 
-                    # Check if file is already marked as assume-unchanged
-                    file_status=$(git ls-files -v "$fname" 2>/dev/null | cut -c1)
-                    if [[ "$file_status" =~ ^[a-z]$ ]]; then
-                        echo "${TAB}${TAB}already marked to ignore changes"
-                        ((++count_skip))
-                    else
-                        # Update index to ignore changes (assume unchanged)
-                        if git update-index --assume-unchanged "$fname" > /dev/null 2>&1; then
-                            echo "${TAB}${TAB}marked to ignore changes"
-                            ((++count_index))
-                        else
-                            echo -e "${TAB}${TAB}${BAD}failed to update index${RESET}"
-                        fi
-                    fi
-
-                    # Delete the file
-                    if rm "$fname"; then
-                        echo -e "${TAB}${TAB}${GOOD}deleted${RESET}"
-                        ((++count_rm))
-                    else
-                        echo -e "${TAB}${TAB}${BAD}failed to delete${RESET}"
-                    fi
+        # Take action based on git status
+        case $git_status in
+            0)  # tracked, unmodified, not ignored - mark and delete
+                if git update-index --assume-unchanged "$fname" > /dev/null 2>&1; then
+                    echo -n "marked to ignore, "
+                    ((++count_index))
                 else
-                    # File is tracked but modified - rename instead
-                    echo "tracked, modified: $fname - renaming instead"
-                    new_name="$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
-                    mv -nv "$fname" "$new_name"
-                    if [ -f "$fname" ]; then
-                        echo -e "${TAB}${TAB}rename ${BAD}FAILED${RESET}"
-                        ((++count_mv_fail))
-                    else
-                        ((++count_mv))
-                    fi
+                    echo -en "${BAD}failed to mark${RESET}, "
                 fi
-            else
-                # File is not tracked - rename it
-                echo "not tracked: $fname - renaming"
+
+                if rm "$fname"; then
+                    echo -e "${GOOD}deleted${RESET}"
+                    ((++count_rm))
+                else
+                    echo -e "${BAD}failed to delete${RESET}"
+                fi
+                ;;
+
+            1)  # tracked, modified - rename instead
+                echo -n "renaming... "
                 new_name="$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
-                mv -nv "$fname" "$new_name"
+                mv -nv "$fname" "$new_name" 2>&1 | sed "s/^/${TAB}${TAB}/"
                 if [ -f "$fname" ]; then
-                    echo -e "${TAB}${TAB}rename ${BAD}FAILED${RESET}"
+                    echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
                     ((++count_mv_fail))
                 else
                     ((++count_mv))
                 fi
-            fi
-        else
-            # Not in a git repository - just rename
-            echo "not in git repo: $fname - renaming"
-            new_name="$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
-            mv -nv "$fname" "$new_name"
-            if [ -f "$fname" ]; then
-                echo -e "${TAB}${TAB}rename ${BAD}FAILED${RESET}"
-                ((++count_mv_fail))
-            else
-                ((++count_mv))
-            fi
-        fi
+                ;;
+
+            2)  # tracked, ignored - just delete
+                echo -n "already ignored, "
+                if rm "$fname"; then
+                    echo -e "${GOOD}deleted${RESET}"
+                    ((++count_rm))
+                    ((++count_skip))
+                else
+                    echo -e "${BAD}failed to delete${RESET}"
+                fi
+                ;;
+
+            3|4)  # untracked or not in git repo - rename
+                echo -n "renaming... "
+                new_name="$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
+                mv -nv "$fname" "$new_name" 2>&1 | sed "s/^/${TAB}${TAB}/"
+                if [ -f "$fname" ]; then
+                    echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
+                    ((++count_mv_fail))
+                else
+                    ((++count_mv))
+                fi
+                ;;
+        esac
     done
     dtab
 done

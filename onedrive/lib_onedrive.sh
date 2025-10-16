@@ -12,6 +12,7 @@
 #   fix_bad_base()
 #   fix_bad_ext()
 #   fix_bin()
+#   print_git_status()
 #   print_stat()
 #   reset_counters()
 #
@@ -53,6 +54,69 @@ declare -a bad_ext
 bad_ext=( "bat" "bin" "cmd" "crt" "csh" "exe" "gz" "js" "ksh" "mar" "osx" "out" "prf" "ps" "ps1" )
 declare -a bad_base
 bad_base=( "con" )
+
+function print_git_status() {
+    # PURPOSE - print standardized git status for a file
+    #
+    # USAGE: print_git_status "filename"
+    #
+    # OUTPUT: prints status like "tracked, modified, ignored" or "untracked"
+    #
+    # RETURNS:
+    #   0 - tracked, unmodified, not ignored (safe to delete)
+    #   1 - tracked, modified (should rename)
+    #   2 - tracked, ignored (already handled)
+    #   3 - untracked (should rename)
+    #   4 - not in git repo (should rename)
+    #   5 - deleted (file doesn't exist but is tracked)
+
+    local fname="$1"
+    local status_msg=""
+    local retval=0
+
+    # Check if we're in a git repository
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        echo -en "${YELLOW}not in git repo${RESET}"
+        return 4
+    fi
+
+    # Check if file is tracked
+    if git ls-files --error-unmatch "$fname" > /dev/null 2>&1; then
+        # File is tracked
+        status_msg="${CYAN}tracked${RESET}"
+
+        # Check if file exists
+        if [ ! -e "$fname" ]; then
+            echo -en "${status_msg}, ${RED}deleted${RESET}"
+            return 5
+        fi
+
+        # Check if file is modified
+        if git diff --quiet "$fname" && git diff --cached --quiet "$fname"; then
+            status_msg="${status_msg}, ${GREEN}unmodified${RESET}"
+            retval=0
+        else
+            status_msg="${status_msg}, ${YELLOW}modified${RESET}"
+            retval=1
+        fi
+
+        # Check if file is ignored (assume-unchanged)
+        local file_status=$(git ls-files -v "$fname" 2>/dev/null | cut -c1)
+        if [[ "$file_status" =~ ^[a-z]$ ]]; then
+            status_msg="${status_msg}, ${MAGENTA}ignored${RESET}"
+            retval=2
+        else
+            status_msg="${status_msg}, ${GREEN}not ignored${RESET}"
+        fi
+    else
+        # File is not tracked
+        status_msg="${MAGENTA}untracked${RESET}"
+        retval=3
+    fi
+
+    echo -en "$status_msg"
+    return $retval
+}
 
 function check_arg() {
     local arg

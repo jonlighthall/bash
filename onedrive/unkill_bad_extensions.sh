@@ -33,7 +33,21 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
         itab
         while IFS= read -r fname; do
             if [ -n "$fname" ]; then
-                echo -n "${TAB}$fname... "
+                # Print filename first
+                echo -n "${TAB}${fname}: "
+
+                # Check if file exists
+                if [ ! -e "$fname" ]; then
+                    # File is deleted, skip it but show status
+                    echo -e "${CYAN}tracked${RESET}, ${RED}deleted${RESET} → ${YELLOW}skipped (file not found)${RESET}"
+                    ((++count_skip))
+                    continue
+                fi
+
+                # Print status (disable error exit for non-zero return)
+                print_git_status "$fname" || true
+                echo -n " → "
+
                 if git update-index --no-assume-unchanged "$fname" 2>/dev/null; then
                     echo -e "${GOOD}un-ignored${RESET}"
                     ((++count_index))
@@ -85,24 +99,25 @@ for bad in ${bad_ext[@]}; do
     itab
     for fname in ${name_list[@]}; do
         ((++count_found))
-        echo -n "${TAB}"
+        echo -n "${TAB}$fname: "
 
-        # Check if file is tracked by git
-        if git rev-parse --git-dir > /dev/null 2>&1; then
-            git ls-files --error-unmatch "${fname}" &>/dev/null
-            RETVAL=$?
-            if [ $RETVAL == 0 ]; then
-                cmd="git mv"
-            else
-                cmd="mv"
-            fi
+        # Print git status and determine command (disable error exit for non-zero return)
+        print_git_status "$fname" || git_status=$?
+        echo -n " → "
+
+        # Determine which command to use
+        if [ $git_status -le 2 ]; then
+            # tracked file - use git mv
+            cmd="git mv"
         else
+            # untracked or not in repo - use regular mv
             cmd="mv"
         fi
 
-        "${cmd}" -fv "$fname" "$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
+        # Rename the file
+        "${cmd}" -fv "$fname" "$(echo $fname | sed "s/${sep_in}/${sep_out}/") " 2>&1 | sed "s/^/${TAB}${TAB}/"
         if [ -f "$fname" ]; then
-            echo -e "rename $fname ${BAD}FAILED${RESET}"
+            echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
             ((++count_mv_fail))
         else
             ((++count_mv))
