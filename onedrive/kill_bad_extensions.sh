@@ -12,6 +12,58 @@ if [ -e $flib ]; then
 fi
 
 check_arg "$@"
+
+# First, check for already deleted files in git with bad extensions
+if git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "${TAB}checking for deleted files in git index..."
+
+    # Get list of deleted files
+    deleted_files=$(git ls-files --deleted)
+
+    if [ -n "$deleted_files" ]; then
+        declare -i found_deleted=0
+        itab
+        while IFS= read -r fname; do
+            if [ -n "$fname" ]; then
+                # Check if file has a bad extension
+                for bad in ${bad_ext[@]}; do
+                    if [[ "$fname" == *.${bad} ]]; then
+                        ((++found_deleted))
+                        echo -n "${TAB}$fname (deleted)... "
+
+                        # Check if already marked as assume-unchanged
+                        file_status=$(git ls-files -v "$fname" 2>/dev/null | cut -c1)
+                        if [[ "$file_status" =~ ^[a-z]$ ]]; then
+                            echo "already ignored"
+                            ((++count_skip))
+                        else
+                            # Mark as assume-unchanged to hide the deletion
+                            if git update-index --assume-unchanged "$fname" > /dev/null 2>&1; then
+                                echo -e "${GOOD}ignored${RESET}"
+                                ((++count_index))
+                            else
+                                echo -e "${BAD}failed to update index${RESET}"
+                            fi
+                        fi
+                        break
+                    fi
+                done
+            fi
+        done <<< "$deleted_files"
+        dtab
+
+        if [ $found_deleted -eq 0 ]; then
+            echo "${TAB}no deleted files with bad extensions found"
+        fi
+    else
+        echo "${TAB}no deleted files found"
+    fi
+    echo
+else
+    echo "${TAB}not in a git repository"
+    echo
+fi
+
 echo "${TAB}looking for bad extensions..."
 
 for bad in ${bad_ext[@]}; do
@@ -49,12 +101,19 @@ for bad in ${bad_ext[@]}; do
                     # File is tracked and unmodified
                     echo "tracked, unmodified: $fname"
 
-                    # Update index to ignore changes (assume unchanged)
-                    if git update-index --assume-unchanged "$fname" > /dev/null 2>&1; then
-                        echo "${TAB}${TAB}marked to ignore changes"
-                        ((++count_index))
+                    # Check if file is already marked as assume-unchanged
+                    file_status=$(git ls-files -v "$fname" 2>/dev/null | cut -c1)
+                    if [[ "$file_status" =~ ^[a-z]$ ]]; then
+                        echo "${TAB}${TAB}already marked to ignore changes"
+                        ((++count_skip))
                     else
-                        echo -e "${TAB}${TAB}${BAD}failed to update index${RESET}"
+                        # Update index to ignore changes (assume unchanged)
+                        if git update-index --assume-unchanged "$fname" > /dev/null 2>&1; then
+                            echo "${TAB}${TAB}marked to ignore changes"
+                            ((++count_index))
+                        else
+                            echo -e "${TAB}${TAB}${BAD}failed to update index${RESET}"
+                        fi
                     fi
 
                     # Delete the file

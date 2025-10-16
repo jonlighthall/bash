@@ -24,10 +24,10 @@ check_arg "$@"
 # First, un-ignore any files that were marked with --assume-unchanged
 if git rev-parse --git-dir > /dev/null 2>&1; then
     echo "${TAB}checking for ignored files in git index..."
-    
+
     # Get list of files marked as assume-unchanged
     ignored_files=$(git ls-files -v | grep '^[a-z]' | cut -c3-)
-    
+
     if [ -n "$ignored_files" ]; then
         echo "${TAB}found files marked to ignore changes:"
         itab
@@ -86,7 +86,7 @@ for bad in ${bad_ext[@]}; do
     for fname in ${name_list[@]}; do
         ((++count_found))
         echo -n "${TAB}"
-        
+
         # Check if file is tracked by git
         if git rev-parse --git-dir > /dev/null 2>&1; then
             git ls-files --error-unmatch "${fname}" &>/dev/null
