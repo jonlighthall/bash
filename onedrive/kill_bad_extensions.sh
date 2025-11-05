@@ -94,7 +94,7 @@ for bad in ${bad_ext[@]}; do
         echo -n "${TAB}$fname: "
 
         # Print git status and capture return value (disable error exit temporarily)
-        print_git_status "$fname" || git_status=$?
+        print_git_status "$fname" && git_status=$? || git_status=$?
         echo -n " → "
 
         # Take action based on git status

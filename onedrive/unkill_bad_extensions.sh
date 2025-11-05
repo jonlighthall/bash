@@ -102,7 +102,7 @@ for bad in ${bad_ext[@]}; do
         echo -n "${TAB}$fname: "
 
         # Print git status and determine command (disable error exit for non-zero return)
-        print_git_status "$fname" || git_status=$?
+        print_git_status "$fname" && git_status=$? || git_status=$?
         echo -n " → "
 
         # Determine which command to use
