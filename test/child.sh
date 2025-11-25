@@ -52,7 +52,7 @@ echo "   ps tree shell level = $SH_LEV"
 echo "           shell level = $SHLVL"
 echo -n "   same as SHLVL? "
 
-if [ "$SHLVL" = "$SH_LEV" ]; then
+if [ "$SHLVL" -eq "$SH_LEV" ]; then
     echo "yes"
 else
     echo "no"

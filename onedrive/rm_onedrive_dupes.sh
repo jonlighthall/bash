@@ -39,7 +39,7 @@ for suff in ${list[@]}; do
                 diff -EZbwB "${fname}" "${fname2}" &>/dev/null
 
                 RETVAL=$?
-                if [ $RETVAL = 0 ]; then
+                if [ $RETVAL -eq 0 ]; then
                     echo "   delete"
                     echo -n "   "
                     rm -v "${fname}"

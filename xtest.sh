@@ -79,7 +79,7 @@ for ((i=0; i<${#list_test[@]}; i++)); do
 	  which "${list_test[i]%% *}" &>/dev/null
 	  RETVAL=$?
     fill_dots
-    if [ $RETVAL = 0 ]; then
+    if [ $RETVAL -eq 0 ]; then
 		    [ $DEBUG -gt 0 ] && echo -e "\E[${sp}G\E[32mOK\E[0m"
 		    list_found+=("${list_test[i]}")
 	  else
@@ -110,7 +110,7 @@ for ((i=0; i<${#list_found[@]}; i++)); do
 	  ${list_found[i]} 2>/dev/null &
 	  RETVAL=$?
     fill_dots
-	  if [ $RETVAL = 0 ]; then
+	  if [ $RETVAL -eq 0 ]; then
         [ $DEBUG -gt 0 ] && echo -e "\E[${sp}G\E[32mOK\E[0m"
 		    list_open+=( "${list_found[i]}")
 	  else
@@ -138,7 +138,7 @@ for ((i=0; i<${#list_open[@]}; i++)); do
     echo -en "\E[${sp}G"
 	  ps | grep "${list_open[i]%% *}" >/dev/null
 	  RETVAL=$?
-	  if [ $RETVAL = 0 ]; then
+	  if [ $RETVAL -eq 0 ]; then
 		    echo -e "\E[32mOK\E[0m"
 		    list_run+=("${list_found[i]}")
 	  else
@@ -160,7 +160,7 @@ for ((i=0; i<${#list_run[@]}; i++)); do
     echo -en "\E[${sp}G"
     pkill ${list_run[i]%% *}
 	  RETVAL=$?
-	  if [ $RETVAL = 0 ]; then
+	  if [ $RETVAL -eq 0 ]; then
 		    echo -e "\E[90mOK\E[0m"
 	  else
 		    echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"

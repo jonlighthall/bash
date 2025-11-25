@@ -35,7 +35,7 @@ for col in $(seq 0 ${loop_limit}); do
 			      echo -e "\E[m"
 		    fi
 		    # seperate out system colors and grays		
-		    if [ $col = 15 ] || [ $col = 231 ]; then
+		    if [ $col -eq 15 ] || [ $col -eq 231 ]; then
 			      echo -e "\E[m"
 		    fi
 	  fi
