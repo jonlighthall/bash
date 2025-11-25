@@ -141,7 +141,7 @@ else
 		else
 			echo -n "search file $2... "
 			# check for search file
-			if [ -f $2 ]; then
+			if [ -f "$2" ]; then
 				echo "OK"
 			else
 				echo "not found"

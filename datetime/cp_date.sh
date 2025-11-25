@@ -1,13 +1,13 @@
-#!/bin/bash -eu
+#!/bin/bash -u
 # -----------------------------------------------------------------------------------------------
 #
 # cp_date.sh
 #
 # Purpose : Create a copy of input file to include modification date.
 #
-# Adapted from mv_date.sh
+# Based on working mv_date.sh structure
 #
-# Mar 2024 JCL
+# Sep 2025 JCL
 #
 # -----------------------------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ trap 'print_exit' EXIT
 check_arg1 "$@"
 
 if [ $# -eq 2 ]; then
-    declare -n out_name="${2}"
+    declare -n out_name="$2"
     echo "${TAB}argument 2: $2"
 fi
 
