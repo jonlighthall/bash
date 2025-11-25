@@ -11,20 +11,20 @@ declare -i start_time=$(date +%s%N)
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+    source "$fpretty"
     print_source
 fi
 
 # load OneDrive library
 flib=${HOME}/utils/bash/onedrive/lib_onedrive.sh
 if [ -e $flib ]; then
-    source $flib
+    source "$flib"
 fi
 
 # load Git library
 glib=${HOME}/utils/bash/git/lib_git.sh
 if [ -e $glib ]; then
-    source $glib
+    source "$glib"
 fi
 
 trap 'echo "${TAB}exiting ${BASH_SOURCE[0]##*/}..."' EXIT

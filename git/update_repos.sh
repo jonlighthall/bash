@@ -225,7 +225,7 @@ for repo in $list; do
     #------------------------------------------------------
     # check
     #------------------------------------------------------
-    cd ${HOME}/$repo
+    cd "${HOME}/$repo"
     unset_traps
     check_repo $db_check
     RETVAL=$?
@@ -844,7 +844,7 @@ done
 
 cbar "done updating repositories"
 echo "returning to starting directory ${start_dir}..."
-cd ${start_dir}
+cd "${start_dir}"
 
 # sort and uniquify remotes list
 sort -u ${list_remote} -o ${list_remote}

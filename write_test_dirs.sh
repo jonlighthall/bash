@@ -11,7 +11,7 @@ while read line; do
 	if [ -d $line ]; then
 		#echo $line "is dir"
 		((i++))
-		cd $line
+		cd "$line"
 		touch write_test.txt
 		if [ -f write_test.txt ]; then
 			echo $line "write succeeded"

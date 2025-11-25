@@ -5,7 +5,7 @@ start_time=$(date +%s%N)
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+    source "$fpretty"
 	# set debug level
 	declare -i DEBUG=0
 	set_traps

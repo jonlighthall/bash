@@ -14,7 +14,7 @@ fi
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+    source "$fpretty"
 fi
 
 echo -e "\$BASH_SOURCE = $BASH_SOURCE"

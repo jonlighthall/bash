@@ -9,13 +9,13 @@ declare -i start_time=$(date +%s%N)
 # load onedrive utilities
 flib=${HOME}/utils/bash/onedrive/lib_onedrive.sh
 if [ -e $flib ]; then
-    source $flib
+    source "$flib"
 fi
 
 # load Git library
 glib=${HOME}/utils/bash/git/lib_git.sh
 if [ -e $glib ]; then
-    source $glib
+    source "$glib"
 fi
 
 check_arg "$@"

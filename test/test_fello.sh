@@ -18,7 +18,7 @@ else
 fi
 print_source
 vecho "loading .bash_aliases..."
-source ~/config/.bash_aliases
+source "$HOME/config/.bash_aliases"
 
 echo "here"
 # determine if script is being sourced or executed

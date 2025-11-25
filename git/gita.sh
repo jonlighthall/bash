@@ -3,7 +3,7 @@
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+    source "$fpretty"
 fi
 
 echo "current author name:"

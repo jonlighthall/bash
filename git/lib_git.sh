@@ -171,7 +171,7 @@ function check_remotes() {
     # load bash utilities
     local fpretty=${HOME}/config/.bashrc_pretty
     if [ -e $fpretty ]; then
-        source $fpretty
+        source "$fpretty"
     fi
 
     if [[ "$-" == *e* ]]; then

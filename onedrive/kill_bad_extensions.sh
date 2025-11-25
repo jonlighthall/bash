@@ -8,7 +8,7 @@
 # load onedrive utilities
 flib=${HOME}/utils/bash/onedrive/lib_onedrive.sh
 if [ -e $flib ]; then
-    source $flib
+    source "$flib"
 fi
 
 check_arg "$@"

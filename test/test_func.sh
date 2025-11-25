@@ -6,7 +6,7 @@ hello() {
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-	  source $fpretty
+	  source "$fpretty"
 fi
 
 for func in $@ hello bar hline potato

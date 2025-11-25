@@ -33,7 +33,7 @@ declare -i count_index=0
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+    source "$fpretty"
 	  set_traps
     print_source
 fi

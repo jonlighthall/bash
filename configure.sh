@@ -56,7 +56,7 @@ for prog in install_packages.sh; do
         dtab
         unset_traps
         read -p "${TAB}Proceed with ${prog}? (y/n) " -n 1 -r -t 3
-       
+
         set_traps
         if [ $DEBUG -lt 1 ]; then
             echo
@@ -84,4 +84,4 @@ for prog in make_links.sh; do
 done
 
 # return to starting directory
-cd $start_dir
+cd "$start_dir"

@@ -11,7 +11,7 @@ start_time=$(date +%s%N)
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+    source "$fpretty"
 	  set_traps
 fi
 
@@ -182,7 +182,7 @@ else
 
     do_link "${hist_save}" "${hist_ref}"
 
-    source cp_date "${hist_save}" hist_bak
+    source "cp_date" "${hist_save}" hist_bak
 
     echo "${TAB}full path: ${hist_bak}"
     echo "${TAB}file name: ${hist_bak##*/}"

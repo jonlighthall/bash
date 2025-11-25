@@ -11,7 +11,7 @@ declare -i start_time=$(date +%s%N)
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty
+    source "$fpretty"
 fi
 
 if [ $# -eq 0 ]; then
@@ -25,7 +25,7 @@ if ! [[ -d "$1" ]]; then
 fi
 echo "found $1"
 
-cd $1
+cd "$1"
 echo $PWD
 
 # check if PWD is a git repository

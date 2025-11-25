@@ -95,7 +95,7 @@ do
 done
 cbar "Done Linking Repo Files"
 
-cd $target_dir
+cd "$target_dir"
 
 # update index
 echo -n "updating index... "

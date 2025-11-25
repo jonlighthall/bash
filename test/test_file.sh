@@ -3,7 +3,7 @@
 # no echo source since this is a utility
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e $fpretty ]; then
-    source $fpretty >/dev/null
+    source "$fpretty" >/dev/null
 fi
 # set tab
 itab
