@@ -43,7 +43,9 @@ ext=.sh
 for my_link in \
     add_path \
     bell \
-    clean_mac \
+    cleanup/clean_mac \
+    cleanup/rm_broken_dupes \
+    cleanup/rmbin \
     cp_doc \
     datetime/cp_date \
     datetime/date_dir \
@@ -67,8 +69,6 @@ for my_link in \
     onedrive/rm_tracked_bad_extensions \
     onedrive/unfix_bad_extensions \
     onedrive/unsync_repo \
-    rm_broken_dupes \
-    rmbin \
     sort/sort_history \
     sort/sort_hosts \
     test/get_wttr \
