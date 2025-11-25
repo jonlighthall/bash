@@ -89,7 +89,7 @@ echo "output file name is ${cred_out}"
 echo -n "${TAB}concatenate files... "
 cat ${list_out} >${cred_out}
 echo "done"
-L=$(cat ${cred_out} | wc -l)
+L=$(wc -l < ${cred_out})
 echo "${TAB}${TAB} ${cred_out} has $L lines"
 
 # clean up whitespace

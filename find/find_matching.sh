@@ -83,7 +83,7 @@ else
     echo "${TAB}unique file name found"
 
     # read input file
-    j=$(cat ${file_in} | wc -l)
+    j=$(wc -l < ${file_in})
     echo " input file ${file_in} has $j entries"
 
     # parse arguments
@@ -129,7 +129,7 @@ else
     echo
     echo $k "file names checked"
     echo "$((j - k)) files not searched for"
-    l=$(cat ${file_out} | wc -l)
+    l=$(wc -l < ${file_out})
     echo "$l files found"
     if [ $j -lt $l ]; then
         printf "%0.2f files found for each pattern" $(bc <<<"scale=2; $l / $j")

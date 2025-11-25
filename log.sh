@@ -6,7 +6,7 @@ if [ $# -eq 0 ]; then
     echo "Please provide an executable"
 else
     # trim leading dot-slash
-    TRIM=$(echo $1 | sed 's:^\./::')
+    TRIM="${1#./}"
     echo -e "logging $TRIM... \c"
     # test command
     if ! command -v $1 &>/dev/null; then

@@ -45,7 +45,7 @@ else
 	if [ -f ${file_in} ]; then
 		echo "exits"
 		# read input file
-		j=$(cat ${file_in} | wc -l)
+		j=$(wc -l < ${file_in})
 		echo "${TAB}and has $j entries"
 
 		# set print frequency

@@ -51,7 +51,7 @@ else
     if command -v lsb_release; then
         lsb_release -a 2>&1 | \grep "Description:" | sed -e 's/^Description:[\t]//'
     else
-        cat /etc/*release | sort -u
+        sort -u /etc/*release
     fi
 fi
 echo -n "  kernel: "

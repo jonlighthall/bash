@@ -70,7 +70,7 @@ else
 	if [ -f ${file_in} ]; then
 		echo "exits"
 		# read input file
-		j=$(cat ${file_in} | wc -l)
+		j=$(wc -l < ${file_in})
 		TAB+=${fTAB:='   '}
 		echo "${TAB}and has $j entries"
 
@@ -174,7 +174,7 @@ else
 		# print summary
 		echo $k "file names checked"
 		echo "$((j - k)) files not searched for"
-		l=$(cat ${file_out} | wc -l)
+		l=$(wc -l < ${file_out})
 		echo "$l files found"
 		if [ $j -lt $l ]; then
 			printf "%0.2f files found for each pattern" $(bc <<<"scale=2; $l / $j")

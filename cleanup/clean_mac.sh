@@ -13,7 +13,7 @@ else
 	if [[ -d $1 ]]; then
 		echo "cleaning $1 ..."
 		# trim target directory name
-		TRIM=$(echo $1 | sed 's:/*$::')
+		TRIM="${1%/}"
 		# trime script name
 		bname=$(basename $BASH_SOURCE)
 		fname=${bname%.*}

@@ -392,7 +392,7 @@ sort_TS=$(echo "#$(date +'%s') SORT   $(date +'%a %b %d %Y %R:%S %Z') insert ")
 
 for hist_edit in ${hist_bak} ${hist_out}; do
     # get file length
-    L=$(cat ${hist_edit} | wc -l)
+    L=$(wc -l < ${hist_edit})
 
     cbar "sorting ${YELLOW}${hist_edit##*/}${RESET}..."
     itab

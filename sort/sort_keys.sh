@@ -87,7 +87,7 @@ echo "output file name is ${host_out}"
 echo -n "${TAB}concatenate files... "
 cat ${list_out} >${host_out}
 echo "done"
-L=$(cat ${host_out} | wc -l)
+L=$(wc -l < ${host_out})
 echo "${TAB}${TAB} ${host_out} has $L lines"
 
 # clean up whitespace

@@ -37,7 +37,7 @@ echo "done"
 
 # print contents of file
 echo "Contents of ${fname}:"
-cat "${fname}" | sed "s/^/   /"
+sed "s/^/   /" "${fname}"
 
 # define ignore file
 echo
