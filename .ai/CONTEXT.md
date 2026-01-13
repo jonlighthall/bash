@@ -157,6 +157,30 @@ fi
 - Fixed integer comparisons using `=` instead of `-eq` (7 files)
 - Fixed useless use of cat patterns (10+ instances across sort/, find/, and utility scripts)
 
+### 2025-09: diff_stash.sh Untracked Files Bug Fix
+- **Critical bug:** Script would drop stashes containing untracked files, causing data loss
+- **Root cause:** Incorrect logic interpreting `git stash show --include-untracked` failures. The command fails when there are no untracked files, but the script interpreted failure as "no untracked files" and proceeded to drop stashes that actually *did* contain untracked files
+- **Fix:** Created `has_untracked_files()` function using two reliable detection methods:
+  1. Parent count method: Stashes with untracked files have 3 parents (WIP commit + index state + untracked files commit) vs 2 parents for normal stashes
+  2. Output comparison: Compare `git stash show --name-only` vs `git stash show --include-untracked --name-only`
+- **Additional fix:** Whitespace-only diff handling. When `n_min = 0` (all changes already committed ignoring whitespace), the script now trusts this analysis and drops the stash directly, rather than doing a redundant diff check that might detect whitespace differences
+
+### 2025-09: git-filter-repo Author Rewriting
+- **Location:** `git/filter/filter.py`
+- **Purpose:** Python callback script for `git-filter-repo` to rewrite author/committer information
+- **Key discovery:** `git-filter-repo` Commit objects use `original_id` attribute (bytes), not `hexsha` like GitPython
+- **Linter errors expected:** Static analysis tools report undefined `commit` variable because they don't understand that `git-filter-repo` automatically provides it in callback scope
+- **Pattern:** Use `commit.original_id.decode()[:8]` to display shortened commit hash
+- **Deduplication pattern:** Use a boolean flag (`commit_header_printed`) to avoid printing the same commit hash twice when both author and committer are updated
+
+### 2026-01: pull_all_branches Duplication Analysis
+- **Issue:** Two implementations exist: `pull_all_branches()` function in `git/lib_git.sh` and standalone `git/pull_all_branches.sh` script
+- **Function (`lib_git.sh`):** Simple, focused (~30 lines), uses helper functions, currently functional
+- **Script (`pull_all_branches.sh`):** Complex (~280 lines), includes commit analysis, author filtering, hash comparison, but has `exit` at line 85 making most logic unreachable
+- **Critical bug in script:** Early `exit` statement prevents execution of commit analysis, author checking, and actual pulling logic (lines 86-282)
+- **Recommendation:** The function is the practical implementation; the script needs the `exit` removed and debugging to become functional
+- **Key difference:** Script attempts comprehensive analysis (author counts, commit comparisons, force push/pull logic) vs function's simple track→checkout→pull approach
+
 ---
 
 ## Superseded Decisions
