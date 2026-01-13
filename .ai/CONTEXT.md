@@ -134,6 +134,14 @@ fi
 
 ## History
 
+### 2025-09: cp_date.sh Fix
+- Script was hanging silently with exit code 1, no output
+- Root cause: Complex interaction between debug system (`libDEBUG=1` in `lib_date.sh`) and bashrc_pretty library loading caused infinite loop or hang
+- Fix: Restructured script to match working `mv_date.sh` pattern exactly
+- Created `cp_date_fixed.sh` based on `mv_date.sh` structure, then replaced broken original
+- Backup of broken version saved as `cp_date.sh.broken`
+- Key insight: The core functionality worked when tested without bashrc_pretty dependencies; issue was in the library interaction, not the logic
+
 ### 2025-10: OneDrive Script Fixes
 - Fixed `print_git_status` function calls for deleted files to avoid nameref errors
 - Fixed error trap handling with `&& git_status=$? || git_status=$?` pattern
