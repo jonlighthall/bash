@@ -1,8 +1,13 @@
 #!/bin/bash -u
 
 # used to fix bad file extensions for OneDrive
-
+# OneDrive restricts syncing files with certain extensions. This script renames
+# files by appending an underscore to the end of the filename.
+#
+# Example: file.bat -> file.bat_
+#
 # Nov 2021 JCL
+# Jan 2026 JCL - updated to use append-underscore method instead of _._
 
 # load onedrive utilities
 flib=${HOME}/utils/bash/onedrive/lib_onedrive.sh
@@ -16,13 +21,43 @@ echo "${TAB}looking for bad extensions..."
 for bad in ${bad_ext[@]}; do
     decho -n "${TAB}$bad: "
 
-    sep_in=".${bad}"
-    sep_out="${sep}${bad}"
+    # -------------------------------------------------------------------------
+    # First, migrate any old-format files (_._ext -> .ext_)
+    # -------------------------------------------------------------------------
+    old_pattern="*${sep}${bad}"
+    old_list=$(find ./ -name "${old_pattern}")
 
-    decho -n "${sep_in}: "
+    if [ -n "${old_list}" ]; then
+        start_new_line
+        echo "${TAB}migrating old format \"${sep}${bad}\" to \".${bad}_\"..."
+        itab
+        for fname in ${old_list[@]}; do
+            ((++count_found))
+            echo -n "${TAB}"
+            # convert: file_._bat -> file.bat_
+            fname_out=$(echo "$fname" | sed "s/${sep}${bad}/.${bad}_/")
+            mv -nv "$fname" "${fname_out}"
+            if [ -f "$fname" ]; then
+                echo -e "rename $fname ${BAD}FAILED${RESET}"
+                ((++count_mv_fail))
+            else
+                ((++count_mv))
+            fi
+        done
+        dtab
+    fi
+
+    # -------------------------------------------------------------------------
+    # Then, fix any unfixed files (.ext -> .ext_)
+    # -------------------------------------------------------------------------
+    pattern="*.${bad}"
+
+    decho -n "${pattern}: "
 
     # find bad files
-    name_list=$(find ./ -name "*${sep_in}")
+    # exclude already-fixed files:
+    #   - new format: ending with _ (e.g., file.bat_)
+    name_list=$(find ./ -name "${pattern}" ! -name "*_")
 
     # if list is empty, continue
     if [ -z "${name_list}" ]; then
@@ -32,12 +67,13 @@ for bad in ${bad_ext[@]}; do
 
     # print current extension
     start_new_line
-    echo "${TAB}replacing \"${sep_in}\" with \"${sep_out}\"..."
+    echo "${TAB}appending underscore to files ending with \".${bad}\"..."
     itab
     for fname in ${name_list[@]}; do
         ((++count_found))
         echo -n "${TAB}"
-        mv -nv "$fname" "$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
+        # append underscore to end of filename
+        mv -nv "$fname" "${fname}_"
         if [ -f "$fname" ];then
             echo -e  "rename $fname ${BAD}FAILED${RESET}"
             ((++count_mv_fail))
