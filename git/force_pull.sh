@@ -137,6 +137,8 @@ if [ -z "${pull_repo}" ] || [ -z "${pull_refspec}" ]; then
 fi
 
 pull_branch="${pull_repo}/${pull_refspec}"
+local_ref="refs/heads/${local_branch}"
+remote_ref="refs/remotes/${pull_branch}"
 echo -e "${TAB}pulling from: ......... ${BLUE}${pull_branch}${RESET}"
 
 cbar "${BOLD}checking remote host...${RESET}"
@@ -239,9 +241,9 @@ echo -n "${TAB}fetching ${pull_repo}..."
 do_cmd_stdbuf git fetch --verbose "${pull_repo}" "${pull_refspec}"
 
 echo "comparing repositories based on commit hash..."
-N_local=$(git rev-list "${pull_branch}..HEAD" | wc -l)
+N_local=$(git rev-list "${remote_ref}..HEAD" | wc -l)
 echo -e "${fTAB} local:  ${YELLOW}ahead $N_local${RESET}"
-N_remote=$(git rev-list "HEAD..${pull_branch}" | wc -l)
+N_remote=$(git rev-list "HEAD..${remote_ref}" | wc -l)
 echo -e "${fTAB}remote: ${YELLOW}behind $N_remote${RESET}"
 
 if [ $N_local -gt 0 ] && [ $N_remote -gt 0 ]; then
@@ -256,27 +258,27 @@ hash_limit=5
 
 if [ $N_local -eq 0 ] && [ $N_remote -eq 0 ]; then
     hash_local=$(git rev-parse HEAD)
-    hash_remote=$(git rev-parse "${pull_branch}")
+    hash_remote=$(git rev-parse "${remote_ref}")
 else
-    iHEAD="${pull_branch}"
+    iHEAD="${remote_ref}"
     if [ ${N_remote} -gt 0 ]; then
         # determine latest common local commit, based on commit time
         echo "${TAB}comparing repositories based on commit time..."
 
         # get local commit time
-        T_local=$(git log "${local_branch}" --format="%at" -1)
+        T_local=$(git log "${local_ref}" --format="%at" -1)
 
         # print local and remote times
         itab
         (
             echo "local timestamp+ ${T_local}"
-            echo "local time+ $(git log "${local_branch}" --format="%ad" -1)"
-            echo "remote time+ $(git log "${pull_branch}" --format="%ad" -1)"
+            echo "local time+ $(git log "${local_ref}" --format="%ad" -1)"
+            echo "remote time+ $(git log "${remote_ref}" --format="%ad" -1)"
         ) | column -t -s+ -o ":" -R1 | sed "s/^/${TAB}/"
 
         echo -n "${TAB}remote commits commited after local HEAD:"
         dtab
-        cond_after="${pull_branch} --after=${T_local}"
+        cond_after="${remote_ref} --after=${T_local}"
         N_after=$(git rev-list ${cond_after} | wc -l)
         if [ $N_after -eq 0 ]; then
             echo " none"
@@ -637,7 +639,7 @@ if [ $N_remote -gt 0 ]; then
             exit $RETVAL
         fi
         N_remote_old=$N_remote
-        N_remote=$(git rev-list "HEAD..${pull_branch}" | wc -l)
+        N_remote=$(git rev-list "HEAD..${remote_ref}" | wc -l)
         if [ $N_remote -ne $N_remote_old ]; then
             echo "${TAB}after reset:"
             git branch -v --color=always | sed '/^*/!d'
@@ -764,7 +766,7 @@ fi
 
 # push local commits
 cbar "${BOLD}pushing local changes...${RESET}"
-N_local=$(git rev-list "${pull_branch}..HEAD" | wc -l)
+N_local=$(git rev-list "${remote_ref}..HEAD" | wc -l)
 if [ $N_local -gt 0 ]; then
     echo -en "${TAB}${YELLOW}local branch is $N_local commit"
     if [ $N_local -ne 1 ]; then
@@ -773,7 +775,7 @@ if [ $N_local -gt 0 ]; then
     echo -e " ahead of remote${RESET}"
     echo -e "${TAB}list of commits: "
     itab
-    git --no-pager log --stat "${pull_branch}..HEAD" -n ${hash_limit} --color=always | sed "s/^/${TAB}/"
+    git --no-pager log --stat "${remote_ref}..HEAD" -n ${hash_limit} --color=always | sed "s/^/${TAB}/"
     echo
     if [ $N_local -gt $hash_limit ]; then
         N_skip=$(( $N_local - $hash_limit))
