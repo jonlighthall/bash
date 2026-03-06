@@ -1,6 +1,8 @@
 #!/bin/bash -u
+source ~/utils/bash/progress_report.sh
 i=0
-while [ $i -lt 5 ]; do
+max=500
+while [ $i -lt $max ]; do
     ((i++))
-    echo "$i"
+    progress_report $i $max
 done
