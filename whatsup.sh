@@ -80,6 +80,12 @@ echo "  groups:" $(id -nG 2>/dev/null)
 #
 echo
 echo "   shell: $SHELL"
+echo -n " version: "
+case "$(basename "$SHELL")" in
+    bash) echo "${BASH_VERSION}" ;;
+    zsh)  echo "${ZSH_VERSION}" ;;
+    *)    "$SHELL" --version 2>/dev/null | head -1 || echo "unknown" ;;
+esac
 echo "     PID: $PPID"
 echo -n "    time: shell "
 if (ps -o etimes) &>/dev/null; then
