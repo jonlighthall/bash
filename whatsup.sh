@@ -4,6 +4,19 @@
 #
 # Mar 2019 JCL
 
+# parse options
+VERBOSE=false
+while getopts "v" opt; do
+    case $opt in
+        v) VERBOSE=true ;;
+        *) echo "Usage: $0 [-v]" >&2; exit 1 ;;
+    esac
+done
+
+# ---------------------------------------------------------------------------- #
+# Network / Host
+# ---------------------------------------------------------------------------- #
+
 # print host name
 echo "    host: $HOSTNAME"
 
@@ -35,7 +48,40 @@ else
     SSH_HOST=${DOMAIN}
 fi
 
-# print display
+# ---------------------------------------------------------------------------- #
+# User / Path (needed for SSH path)
+# ---------------------------------------------------------------------------- #
+
+if [ -z "${USER:-}" ]; then
+    if [ -z "${USERNAME:-}" ]; then
+        UNAME=''
+    else
+        UNAME=$USERNAME
+    fi
+else
+    UNAME=$USER
+fi
+echo "    user: $UNAME"
+echo "     pwd: $PWD"
+
+# print full path for SSH, etc.
+echo -n "SSH path: $UNAME@"
+if [[ "$HOSTNAME" == *"."* ]]; then
+    echo -n "$HOSTNAME"
+else
+    echo -n "${SSH_HOST}"
+fi
+echo ":$PWD"
+
+# exit here unless verbose
+if ! $VERBOSE; then
+    exit 0
+fi
+
+# ---------------------------------------------------------------------------- #
+# Display
+# ---------------------------------------------------------------------------- #
+echo
 echo -n " display: "
 if [ -z ${DISPLAY+dummy} ]; then
     echo -e "\E[31mnot set\E[0m"
@@ -43,7 +89,10 @@ else
     echo "$DISPLAY"
 fi
 
-# print OS information
+# ---------------------------------------------------------------------------- #
+# OS / Hardware
+# ---------------------------------------------------------------------------- #
+
 echo -n "      OS: "
 if [ -f /etc/os-release ]; then
     \grep -i pretty /etc/os-release | sed 's/.*="\([^"].*\)"/\1/'
@@ -66,32 +115,43 @@ else
 fi
 echo -n "   cores: "
 nproc 2>/dev/null || grep -c '^processor' /proc/cpuinfo 2>/dev/null || echo "unknown"
+echo -n "   clock: "
+if command -v lscpu &>/dev/null; then
+    MHZ=$(lscpu | grep -i 'max mhz' | sed 's/.*:\s*//')
+    if [ -n "${MHZ}" ]; then
+        echo "${MHZ} MHz (max)"
+    else
+        MHZ=$(lscpu | grep -i 'cpu mhz' | sed 's/.*:\s*//')
+        if [ -n "${MHZ}" ]; then
+            echo "${MHZ} MHz"
+        else
+            echo "unknown"
+        fi
+    fi
+elif [ -f /proc/cpuinfo ]; then
+    echo "$(grep -m1 'cpu MHz' /proc/cpuinfo | sed 's/.*: //') MHz"
+else
+    echo "unknown"
+fi
 echo -n "  memory: "
 free -h 2>/dev/null | awk '/Mem/{print $2}' || echo "unknown"
 echo -n "  uptime: "
 uptime -p 2>/dev/null || uptime | sed 's/.*up /up /;s/,.*load.*//' || echo "unknown"
 
-#
-# Print user information
-#
+# ---------------------------------------------------------------------------- #
+# User details
+# ---------------------------------------------------------------------------- #
 echo
-echo -n "    user: "
-if [ -z "${USER:-}" ]; then
-    if [ -z "${USERNAME:-}" ]; then
-        echo -e "\E[31mnot set\E[0m"
-        UNAME=''
-    else
-        UNAME=$USERNAME
-    fi
-else
-    UNAME=$USER
+echo "    user: $UNAME"
+if [ -z "$UNAME" ]; then
+    echo -e "          \E[31mnot set\E[0m"
 fi
-echo "$UNAME"
 echo " user ID: $UID"
 echo "  groups: $(id -nG 2>/dev/null)"
-#
-# Print shell information
-#
+
+# ---------------------------------------------------------------------------- #
+# Shell
+# ---------------------------------------------------------------------------- #
 echo
 echo "   shell: $SHELL"
 echo -n " version: "
@@ -113,9 +173,10 @@ else
 fi
 echo -n "    date: "
 date
-#
-# Print path information
-#
+
+# ---------------------------------------------------------------------------- #
+# Paths
+# ---------------------------------------------------------------------------- #
 echo
 echo "    home: $HOME"
 echo "     pwd: $PWD"
