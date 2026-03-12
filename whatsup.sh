@@ -5,14 +5,14 @@
 # Mar 2019 JCL
 
 # print host name
-echo "    host:" $HOSTNAME
+echo "    host: $HOSTNAME"
 
 # print domain name if set
 echo -n "  domain: "
-$(hostname -y &>/dev/null)
+hostname -y &>/dev/null
 DOM_RET_VAL=$?
 DOMAIN=$(hostname -d)
-if [ $DOM_RET_VAL -ne 0 ] || [ -z ${DOMAIN} ]; then
+if [ $DOM_RET_VAL -ne 0 ] || [ -z "${DOMAIN}" ]; then
     echo -e "\E[31mnot set\E[0m"
 else
     echo "${DOMAIN}"
@@ -40,7 +40,7 @@ echo -n " display: "
 if [ -z ${DISPLAY+dummy} ]; then
     echo -e "\E[31mnot set\E[0m"
 else
-	echo "$DISPLAY"
+    echo "$DISPLAY"
 fi
 
 # print OS information
@@ -48,7 +48,7 @@ echo -n "      OS: "
 if [ -f /etc/os-release ]; then
     \grep -i pretty /etc/os-release | sed 's/.*="\([^"].*\)"/\1/'
 else
-    if command -v lsb_release; then
+    if command -v lsb_release &>/dev/null; then
         lsb_release -a 2>&1 | \grep "Description:" | sed -e 's/^Description:[\t]//'
     else
         sort -u /etc/*release
@@ -64,14 +64,20 @@ elif command -v lscpu &>/dev/null; then
 else
     uname -p
 fi
+echo -n "   cores: "
+nproc 2>/dev/null || grep -c '^processor' /proc/cpuinfo 2>/dev/null || echo "unknown"
+echo -n "  memory: "
+free -h 2>/dev/null | awk '/Mem/{print $2}' || echo "unknown"
+echo -n "  uptime: "
+uptime -p 2>/dev/null || uptime | sed 's/.*up /up /;s/,.*load.*//' || echo "unknown"
 
 #
 # Print user information
 #
 echo
 echo -n "    user: "
-if [ -z $USER ]; then
-    if [ -z $USERNAME ]; then
+if [ -z "${USER:-}" ]; then
+    if [ -z "${USERNAME:-}" ]; then
         echo -e "\E[31mnot set\E[0m"
         UNAME=''
     else
@@ -80,9 +86,9 @@ if [ -z $USER ]; then
 else
     UNAME=$USER
 fi
-echo $UNAME
-echo " user ID:" $UID
-echo "  groups:" $(id -nG 2>/dev/null)
+echo "$UNAME"
+echo " user ID: $UID"
+echo "  groups: $(id -nG 2>/dev/null)"
 #
 # Print shell information
 #
@@ -111,8 +117,8 @@ date
 # Print path information
 #
 echo
-echo "    home:" $HOME
-echo "     pwd:" $PWD
+echo "    home: $HOME"
+echo "     pwd: $PWD"
 # print full path for SSH, etc.
 echo -n "SSH path: $UNAME@"
 if [[ "$HOSTNAME" == *"."* ]]; then
