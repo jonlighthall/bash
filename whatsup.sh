@@ -56,6 +56,14 @@ else
 fi
 echo -n "  kernel: "
 uname -srm
+echo -n "     CPU: "
+if [ -f /proc/cpuinfo ]; then
+    grep -m1 'model name' /proc/cpuinfo | sed 's/.*: //'
+elif command -v lscpu &>/dev/null; then
+    lscpu | grep -m1 'Model name' | sed 's/.*:\s*//'
+else
+    uname -p
+fi
 
 #
 # Print user information
