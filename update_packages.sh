@@ -20,17 +20,17 @@ print_source
 
 # update
 bar "update..."
-sudo apt update
+sudo apt-get update
 print_time
 
 # upgrade
 bar "upgrade..."
-if ! sudo apt upgrade -y; then
+if ! sudo apt-get upgrade -y; then
     echo "Initial upgrade failed; attempting one repair and retry..."
     bar "repair and retry..."
-    sudo apt --fix-broken install -y
-    sudo apt update
-    if ! sudo apt upgrade -y --fix-missing; then
+    sudo apt-get -f install -y
+    sudo apt-get update
+    if ! sudo apt-get upgrade -y --fix-missing; then
         echo "Upgrade failed after repair retry."
         echo "Please review apt output and resolve manually."
         exit 1
@@ -40,9 +40,9 @@ print_time
 
 # cleanup
 bar "autoremove and purge..."
-sudo apt autoremove --purge -y
+sudo apt-get autoremove --purge -y
 bar "autoclean..."
-sudo apt autoclean
+sudo apt-get autoclean
 bar "clean..."
-sudo apt clean
+sudo apt-get clean
 print_time

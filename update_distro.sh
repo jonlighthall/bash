@@ -50,7 +50,7 @@ fi
 print_source
 
 if ! command -v do-release-upgrade >/dev/null 2>&1; then
-    echo "do-release-upgrade is not available. Install ubuntu-release-upgrader-core."
+    echo "do-release-upgrade is not available. Install with: sudo apt-get install ubuntu-release-upgrader-core"
     exit 1
 fi
 
