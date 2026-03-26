@@ -402,6 +402,42 @@ for hist_edit in ${hist_bak} ${hist_out}; do
     sed -i '/^$/d;s/^$//g;s/[[:blank:]]*$//g' ${hist_edit}
     echo "done"
 
+    # remove heredoc file dumps and multi-line python -c commands (AI agent pollution)
+    echo -n "${TAB}removing heredoc/inline code dumps... "
+    awk '
+        /^#[0-9]{10}/ { ts=$0; next }
+
+        # Heredoc patterns: cat > file << EOF or python3 << EOF
+        # Also match when preceded by cd && or other chained commands
+        /cat >.*<< .EOF./ || /python3 << .EOF./ || /cat >.*<<.EOF./ {
+            in_heredoc=1
+            next
+        }
+        in_heredoc && /^EOF$/ {
+            in_heredoc=0
+            next
+        }
+        in_heredoc { next }
+
+        # Multi-line python -c commands (start with python3 -c " on its own line)
+        /^python3 -c "$/ || /^python -c "$/ {
+            in_pyc=1
+            next
+        }
+        in_pyc && /"[[:space:]]*$/ {
+            in_pyc=0
+            next
+        }
+        in_pyc { next }
+
+        {
+            if(ts) print ts
+            ts=""
+            print
+        }
+    ' "${hist_edit}" > "${hist_edit}.tmp" && mv "${hist_edit}.tmp" "${hist_edit}"
+    echo "done"
+
     echo -e "${TAB}${UL}mark timestamps${RESET}"
     itab
     marker_list=''
