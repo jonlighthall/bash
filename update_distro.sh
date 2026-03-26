@@ -8,37 +8,6 @@ set -e
 
 declare -i start_time=$(date +%s%N)
 
-devel_release=0
-force_upgrade=0
-
-usage() {
-    echo "Usage: $0 [--devel-release] [--force] [--help]"
-    echo "  --devel-release  include development/pre-release upgrades (-d)"
-    echo "  --force          run upgrade immediately without interactive confirmation"
-    echo "  --help           show this help and exit"
-}
-
-while [ $# -gt 0 ]; do
-    case "$1" in
-        --devel-release)
-            devel_release=1
-            ;;
-        --force)
-            force_upgrade=1
-            ;;
-        --help|-h)
-            usage
-            exit 0
-            ;;
-        *)
-            echo "Unknown argument: $1"
-            usage
-            exit 2
-            ;;
-    esac
-    shift
-done
-
 # load bash utilities
 fpretty=${HOME}/config/.bashrc_pretty
 if [ -e "$fpretty" ]; then
@@ -54,15 +23,8 @@ if ! command -v do-release-upgrade >/dev/null 2>&1; then
     exit 1
 fi
 
-check_args="-c"
-upgrade_args=""
-if [ "$devel_release" -eq 1 ]; then
-    check_args="-c -d"
-    upgrade_args="-d"
-fi
-
 bar "checking distribution release availability..."
-check_output="$(do-release-upgrade $check_args 2>&1 || true)"
+check_output="$(do-release-upgrade -c 2>&1 || true)"
 echo "$check_output"
 print_time
 
@@ -71,18 +33,16 @@ if ! echo "$check_output" | grep -qi "New release"; then
     exit 0
 fi
 
-if [ "$force_upgrade" -ne 1 ]; then
-    read -r -p "Proceed with do-release-upgrade $upgrade_args? [y/N] " answer
-    case "$answer" in
-        y|Y|yes|YES)
-            ;;
-        *)
-            echo "Aborted by user."
-            exit 0
-            ;;
-    esac
-fi
+read -r -p "Proceed with distribution upgrade now? [y/N] " answer
+case "$answer" in
+    y|Y|yes|YES)
+        ;;
+    *)
+        echo "Aborted by user."
+        exit 0
+        ;;
+esac
 
 bar "starting distribution upgrade..."
-sudo do-release-upgrade $upgrade_args
+sudo do-release-upgrade
 print_time
