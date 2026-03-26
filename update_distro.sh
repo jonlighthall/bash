@@ -25,8 +25,6 @@ fi
 
 bar "checking distribution release availability..."
 check_output="$(do-release-upgrade -c 2>&1 || true)"
-echo "$check_output"
-print_time
 
 if ! echo "$check_output" | grep -qi "New release"; then
     echo "No new distribution release found."
@@ -45,4 +43,3 @@ esac
 
 bar "starting distribution upgrade..."
 sudo do-release-upgrade
-print_time
