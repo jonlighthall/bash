@@ -196,7 +196,8 @@ function fix_bad_ext() {
         echo -n "${TAB}.${bad}... "
 
         # find bad files
-        name_list=$(find -L ./ -name "*.${bad}")
+        # exclude already-fixed files ending with _ (e.g., file.bat_)
+        name_list=$(find -L ./ -name "*.${bad}" ! -name "*_")
 
         # if list is empty, continue
         if [ -z "${name_list}" ]; then
@@ -231,8 +232,8 @@ function fix_bad_ext() {
                     ((++count_rm))
                 else
                     echo -en "${CYAN}modified: ${RESET}"
-                    # ...then rename (move)
-                    mv -nv "$fname" "$(echo "$fname" | sed "s/\.$bad/$sep$bad/")"
+                    # ...then rename (move) - append underscore
+                    mv -nv "$fname" "${fname}_"
                     if [ -f "$fname" ];then
                         echo "rename $fname FAILED"
                         ((++count_mv_fail))
@@ -253,8 +254,8 @@ function fix_bad_ext() {
                     ((++count_rm))
                 else
                     echo -n "not ignored: "
-                    # ...then rename (move)
-                    fname_out=$(echo "$fname" | sed "s/\.$bad/$sep$bad/")
+                    # ...then rename (move) - append underscore
+                    fname_out="${fname}_"
                     echo
                     itab
                     decho "${TAB}fname: $fname"

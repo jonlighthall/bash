@@ -72,12 +72,12 @@ for bad in ${bad_ext[@]}; do
     decho -n "${TAB}$bad: "
 
     sep_in=".${bad}"
-    sep_out="${sep}${bad}"
 
     decho -n "${sep_in}: "
 
     # find bad files
-    name_list=$(find ./ -name "*${sep_in}")
+    # exclude already-fixed files ending with _ (e.g., file.bat_)
+    name_list=$(find ./ -name "*${sep_in}" ! -name "*_")
 
     # if list is empty, continue
     if [ -z "${name_list}" ]; then
@@ -117,7 +117,7 @@ for bad in ${bad_ext[@]}; do
 
             1)  # tracked, modified - rename instead
                 echo -n "renaming... "
-                new_name="$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
+                new_name="${fname}_"
                 mv -nv "$fname" "$new_name" 2>&1 | sed "s/^/${TAB}${TAB}/"
                 if [ -f "$fname" ]; then
                     echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
@@ -140,7 +140,7 @@ for bad in ${bad_ext[@]}; do
 
             3|4)  # untracked or not in git repo - rename
                 echo -n "renaming... "
-                new_name="$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
+                new_name="${fname}_"
                 mv -nv "$fname" "$new_name" 2>&1 | sed "s/^/${TAB}${TAB}/"
                 if [ -f "$fname" ]; then
                     echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"

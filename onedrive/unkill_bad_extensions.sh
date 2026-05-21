@@ -77,53 +77,106 @@ for bad in ${bad_ext[@]}; do
 
     decho -n "${TAB}$bad: "
 
+    # -------------------------------------------------------------------------
+    # Handle OLD format: file_._bat -> file.bat
+    # -------------------------------------------------------------------------
     sep_in="${sep}${bad}"
     sep_out=".${bad}"
 
     decho -n "${sep_in}: "
 
-    # find renamed files
+    # find files with old naming convention
     name_list=$(find ./ -name "*${sep_in}")
 
-    # if list is empty, continue
-    if [ -z "${name_list}" ]; then
+    # process old format files if found
+    if [ -n "${name_list}" ]; then
+        # print current extension
+        start_new_line
+        echo "${TAB}replacing \"${sep_in}\" with \"${sep_out}\" (old format)..."
+        itab
+        for fname in ${name_list[@]}; do
+            ((++count_found))
+            echo -n "${TAB}$fname: "
+
+            # Print git status and determine command (disable error exit for non-zero return)
+            print_git_status "$fname" && git_status=$? || git_status=$?
+            echo -n " → "
+
+            # Determine which command to use
+            if [ $git_status -le 2 ]; then
+                # tracked file - use git mv
+                cmd="git mv"
+            else
+                # untracked or not in repo - use regular mv
+                cmd="mv"
+            fi
+
+            # Rename the file
+            "${cmd}" -fv "$fname" "$(echo $fname | sed "s/${sep_in}/${sep_out}/")" 2>&1 | sed "s/^/${TAB}${TAB}/"
+            if [ -f "$fname" ]; then
+                echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
+                ((++count_mv_fail))
+            else
+                ((++count_mv))
+            fi
+        done
+        dtab
+    else
         decho -n "none"
         echo -n "."
         decho
-        continue
     fi
 
-    # print current extension
-    start_new_line
-    echo "${TAB}replacing \"${sep_in}\" with \"${sep_out}\"..."
-    itab
-    for fname in ${name_list[@]}; do
-        ((++count_found))
-        echo -n "${TAB}$fname: "
+    # -------------------------------------------------------------------------
+    # Handle NEW format: file.bat_ -> file.bat
+    # -------------------------------------------------------------------------
+    new_pattern=".${bad}_"
 
-        # Print git status and determine command (disable error exit for non-zero return)
-        print_git_status "$fname" && git_status=$? || git_status=$?
-        echo -n " → "
+    decho -n "${new_pattern}: "
 
-        # Determine which command to use
-        if [ $git_status -le 2 ]; then
-            # tracked file - use git mv
-            cmd="git mv"
-        else
-            # untracked or not in repo - use regular mv
-            cmd="mv"
-        fi
+    # find files with new naming convention (appended underscore)
+    name_list=$(find ./ -name "*${new_pattern}")
 
-        # Rename the file
-        "${cmd}" -fv "$fname" "$(echo $fname | sed "s/${sep_in}/${sep_out}/") " 2>&1 | sed "s/^/${TAB}${TAB}/"
-        if [ -f "$fname" ]; then
-            echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
-            ((++count_mv_fail))
-        else
-            ((++count_mv))
-        fi
-    done
-    dtab
+    # process new format files if found
+    if [ -n "${name_list}" ]; then
+        # print current extension
+        start_new_line
+        echo "${TAB}removing trailing underscore from \"*${new_pattern}\" (new format)..."
+        itab
+        for fname in ${name_list[@]}; do
+            ((++count_found))
+            echo -n "${TAB}$fname: "
+
+            # Print git status and determine command (disable error exit for non-zero return)
+            print_git_status "$fname" && git_status=$? || git_status=$?
+            echo -n " → "
+
+            # Determine which command to use
+            if [ $git_status -le 2 ]; then
+                # tracked file - use git mv
+                cmd="git mv"
+            else
+                # untracked or not in repo - use regular mv
+                cmd="mv"
+            fi
+
+            # Remove trailing underscore
+            fname_out="${fname%_}"
+            "${cmd}" -fv "$fname" "$fname_out" 2>&1 | sed "s/^/${TAB}${TAB}/"
+            if [ -f "$fname" ]; then
+                echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
+                ((++count_mv_fail))
+            else
+                ((++count_mv))
+            fi
+        done
+        dtab
+    else
+        decho -n "none"
+        echo -n "."
+        decho
+    fi
+
 done
 
 echo "done"
