@@ -3,12 +3,14 @@
 # used to un-fix bad file extensions for OneDrive
 # This script reverts renamed files back to their original extensions.
 #
-# Handles both naming conventions:
+# Handles all naming conventions:
 #   - Old format: file_._bat -> file.bat (using _._ separator)
 #   - New format: file.bat_  -> file.bat (appended underscore)
+#   - Current format: file.tab -> file.bat (flipped extension)
 #
 # Nov 2021 JCL
 # Jan 2026 JCL - added support for append-underscore format
+# May 2026 JCL - added support for flipped-extension format
 
 declare -i start_time=$(date +%s%N)
 
@@ -33,6 +35,7 @@ declare cmd
 unset_traps
 
 for bad in ${bad_ext[@]}; do
+    repl_ext=$(get_safe_ext_replacement "$bad")
 
     decho -n "${TAB}$bad: "
 
@@ -121,6 +124,50 @@ for bad in ${bad_ext[@]}; do
         decho -n "none"
         echo -n "."
         decho
+    fi
+
+    # -------------------------------------------------------------------------
+    # Handle FLIPPED format: file.tab -> file.bat
+    # -------------------------------------------------------------------------
+    if [[ "${repl_ext}" != "${bad}_" ]]; then
+        flipped_pattern=".${repl_ext}"
+
+        decho -n "${flipped_pattern}: "
+
+        # find files with flipped extension format
+        name_list=$(find ./ -name "*${flipped_pattern}")
+
+        # process flipped format files if found
+        if [ -n "${name_list}" ]; then
+            start_new_line
+            echo "${TAB}restoring flipped extension \"*${flipped_pattern}\" to \".${bad}\"..."
+            itab
+            for fname in ${name_list[@]}; do
+                ((++count_found))
+                echo -n "${TAB}"
+                git ls-files --error-unmatch ${fname} &>/dev/null
+                RETVAL=$?
+                if [ $RETVAL == 0 ]; then
+                    cmd="git mv"
+                else
+                    cmd="mv"
+                fi
+
+                fname_out="${fname%.${repl_ext}}.${bad}"
+                "${cmd}" -fv "$fname" "$fname_out"
+                if [ -f "$fname" ];then
+                    echo -e  "rename $fname ${BAD}FAILED${RESET}"
+                    ((++count_mv_fail))
+                else
+                    ((++count_mv))
+                fi
+            done
+            dtab
+        else
+            decho -n "none"
+            echo -n "."
+            decho
+        fi
     fi
 
 done

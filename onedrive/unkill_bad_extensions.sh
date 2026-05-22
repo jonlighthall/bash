@@ -4,6 +4,7 @@
 # un-ignores git-tracked files and renames files back to original extensions
 
 # Oct 2025 JCL
+# May 2026 JCL - added support for flipped-extension format
 
 declare -i start_time=$(date +%s%N)
 
@@ -74,6 +75,7 @@ declare cmd
 unset_traps
 
 for bad in ${bad_ext[@]}; do
+    repl_ext=$(get_safe_ext_replacement "$bad")
 
     decho -n "${TAB}$bad: "
 
@@ -175,6 +177,58 @@ for bad in ${bad_ext[@]}; do
         decho -n "none"
         echo -n "."
         decho
+    fi
+
+    # -------------------------------------------------------------------------
+    # Handle FLIPPED format: file.tab -> file.bat
+    # -------------------------------------------------------------------------
+    if [[ "${repl_ext}" != "${bad}_" ]]; then
+        flipped_pattern=".${repl_ext}"
+
+        decho -n "${flipped_pattern}: "
+
+        # find files with flipped extension format
+        name_list=$(find ./ -name "*${flipped_pattern}")
+
+        # process flipped format files if found
+        if [ -n "${name_list}" ]; then
+            # print current extension
+            start_new_line
+            echo "${TAB}restoring flipped extension \"*${flipped_pattern}\" to \".${bad}\"..."
+            itab
+            for fname in ${name_list[@]}; do
+                ((++count_found))
+                echo -n "${TAB}$fname: "
+
+                # Print git status and determine command (disable error exit for non-zero return)
+                print_git_status "$fname" && git_status=$? || git_status=$?
+                echo -n " → "
+
+                # Determine which command to use
+                if [ $git_status -le 2 ]; then
+                    # tracked file - use git mv
+                    cmd="git mv"
+                else
+                    # untracked or not in repo - use regular mv
+                    cmd="mv"
+                fi
+
+                # Restore original extension
+                fname_out="${fname%.${repl_ext}}.${bad}"
+                "${cmd}" -fv "$fname" "$fname_out" 2>&1 | sed "s/^/${TAB}${TAB}/"
+                if [ -f "$fname" ]; then
+                    echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
+                    ((++count_mv_fail))
+                else
+                    ((++count_mv))
+                fi
+            done
+            dtab
+        else
+            decho -n "none"
+            echo -n "."
+            decho
+        fi
     fi
 
 done

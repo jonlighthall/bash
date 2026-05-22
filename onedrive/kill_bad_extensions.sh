@@ -4,6 +4,7 @@
 # checks git status before taking action
 
 # Oct 2025 JCL
+# May 2026 JCL - updated to use flipped extension method as default
 
 # load onedrive utilities
 flib=${HOME}/utils/bash/onedrive/lib_onedrive.sh
@@ -70,6 +71,7 @@ echo "${TAB}looking for bad extensions..."
 
 for bad in ${bad_ext[@]}; do
     decho -n "${TAB}$bad: "
+    repl_ext=$(get_safe_ext_replacement "$bad")
 
     sep_in=".${bad}"
 
@@ -117,7 +119,7 @@ for bad in ${bad_ext[@]}; do
 
             1)  # tracked, modified - rename instead
                 echo -n "renaming... "
-                new_name="${fname}_"
+                new_name="${fname%${sep_in}}.${repl_ext}"
                 mv -nv "$fname" "$new_name" 2>&1 | sed "s/^/${TAB}${TAB}/"
                 if [ -f "$fname" ]; then
                     echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
@@ -140,7 +142,7 @@ for bad in ${bad_ext[@]}; do
 
             3|4)  # untracked or not in git repo - rename
                 echo -n "renaming... "
-                new_name="${fname}_"
+                new_name="${fname%${sep_in}}.${repl_ext}"
                 mv -nv "$fname" "$new_name" 2>&1 | sed "s/^/${TAB}${TAB}/"
                 if [ -f "$fname" ]; then
                     echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"

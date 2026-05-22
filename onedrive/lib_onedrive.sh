@@ -55,6 +55,20 @@ bad_ext=( "bat" "bin" "cmd" "crt" "csh" "exe" "gz" "js" "ksh" "mar" "osx" "out" 
 declare -a bad_base
 bad_base=( "con" )
 
+function get_safe_ext_replacement() {
+    # PURPOSE - return preferred replacement extension for OneDrive-safe rename
+    # METHOD  - reverse extension (zip -> piz); for palindromes use ext_ fallback
+    local bad_ext_in="$1"
+    local flipped_ext
+
+    flipped_ext=$(echo "$bad_ext_in" | rev)
+    if [[ "$flipped_ext" == "$bad_ext_in" ]]; then
+        echo "${bad_ext_in}_"
+    else
+        echo "$flipped_ext"
+    fi
+}
+
 function print_git_status() {
     # PURPOSE - print standardized git status for a file
     #
@@ -191,6 +205,8 @@ function fix_bad_ext() {
     echo -n "${TAB}checking for files with bad extensions... "
     itab
     for bad in ${bad_ext[@]}; do
+        repl_ext=$(get_safe_ext_replacement "$bad")
+
         # print current extension
         start_new_line
         echo -n "${TAB}.${bad}... "
@@ -232,8 +248,9 @@ function fix_bad_ext() {
                     ((++count_rm))
                 else
                     echo -en "${CYAN}modified: ${RESET}"
-                    # ...then rename (move) - append underscore
-                    mv -nv "$fname" "${fname}_"
+                    # ...then rename (move) - reverse extension by default
+                    fname_out="${fname%.${bad}}.${repl_ext}"
+                    mv -nv "$fname" "${fname_out}"
                     if [ -f "$fname" ];then
                         echo "rename $fname FAILED"
                         ((++count_mv_fail))
@@ -254,8 +271,8 @@ function fix_bad_ext() {
                     ((++count_rm))
                 else
                     echo -n "not ignored: "
-                    # ...then rename (move) - append underscore
-                    fname_out="${fname}_"
+                    # ...then rename (move) - reverse extension by default
+                    fname_out="${fname%.${bad}}.${repl_ext}"
                     echo
                     itab
                     decho "${TAB}fname: $fname"
