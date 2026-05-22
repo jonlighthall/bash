@@ -65,7 +65,7 @@ for bad in ${bad_ext[@]}; do
                 ((++count_found))
                 echo -n "${TAB}"
                 fname_out="${fname%_}"
-                fname_out="${fname_out%.${bad}}.${repl_ext}"
+                fname_out=$(build_ext_filename "$fname_out" "$bad" "$repl_ext")
                 mv -nv "$fname" "${fname_out}"
                 if [ -f "$fname" ]; then
                     echo -e "rename $fname ${BAD}FAILED${RESET}"
@@ -104,7 +104,7 @@ for bad in ${bad_ext[@]}; do
         ((++count_found))
         echo -n "${TAB}"
         # replace extension with OneDrive-safe extension
-        fname_out="${fname%.${bad}}.${repl_ext}"
+        fname_out=$(build_ext_filename "$fname" "$bad" "$repl_ext")
         mv -nv "$fname" "${fname_out}"
         if [ -f "$fname" ];then
             echo -e  "rename $fname ${BAD}FAILED${RESET}"

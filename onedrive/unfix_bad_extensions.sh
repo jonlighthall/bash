@@ -59,13 +59,7 @@ for bad in ${bad_ext[@]}; do
         for fname in ${name_list[@]}; do
             ((++count_found))
             echo -n "${TAB}"
-            git ls-files --error-unmatch ${fname} &>/dev/null
-            RETVAL=$?
-            if [ $RETVAL == 0 ]; then
-                cmd="git mv"
-            else
-                cmd="mv"
-            fi
+            cmd=$(get_mv_cmd_for_file "$fname")
 
             "${cmd}" -fv "$fname" "$(echo $fname | sed "s/${sep_in}/${sep_out}/")"
             if [ -f "$fname" ];then
@@ -101,13 +95,7 @@ for bad in ${bad_ext[@]}; do
         for fname in ${name_list[@]}; do
             ((++count_found))
             echo -n "${TAB}"
-            git ls-files --error-unmatch ${fname} &>/dev/null
-            RETVAL=$?
-            if [ $RETVAL == 0 ]; then
-                cmd="git mv"
-            else
-                cmd="mv"
-            fi
+            cmd=$(get_mv_cmd_for_file "$fname")
 
             # remove trailing underscore
             fname_out="${fname%_}"
@@ -145,15 +133,9 @@ for bad in ${bad_ext[@]}; do
             for fname in ${name_list[@]}; do
                 ((++count_found))
                 echo -n "${TAB}"
-                git ls-files --error-unmatch ${fname} &>/dev/null
-                RETVAL=$?
-                if [ $RETVAL == 0 ]; then
-                    cmd="git mv"
-                else
-                    cmd="mv"
-                fi
+                cmd=$(get_mv_cmd_for_file "$fname")
 
-                fname_out="${fname%.${repl_ext}}.${bad}"
+                fname_out=$(build_ext_filename "$fname" "$repl_ext" "$bad")
                 "${cmd}" -fv "$fname" "$fname_out"
                 if [ -f "$fname" ];then
                     echo -e  "rename $fname ${BAD}FAILED${RESET}"

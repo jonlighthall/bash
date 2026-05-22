@@ -69,6 +69,27 @@ function get_safe_ext_replacement() {
     fi
 }
 
+function get_mv_cmd_for_file() {
+    # PURPOSE - return move command for file: git mv (tracked) or mv (untracked)
+    local fname="$1"
+
+    if git ls-files --error-unmatch "$fname" > /dev/null 2>&1; then
+        echo "git mv"
+    else
+        echo "mv"
+    fi
+}
+
+function build_ext_filename() {
+    # PURPOSE - replace a trailing extension with another extension
+    # EXAMPLE - build_ext_filename "./a/file.bat" "bat" "tab" -> ./a/file.tab
+    local fname="$1"
+    local ext_in="$2"
+    local ext_out="$3"
+
+    echo "${fname%.${ext_in}}.${ext_out}"
+}
+
 function print_git_status() {
     # PURPOSE - print standardized git status for a file
     #
@@ -249,7 +270,7 @@ function fix_bad_ext() {
                 else
                     echo -en "${CYAN}modified: ${RESET}"
                     # ...then rename (move) - reverse extension by default
-                    fname_out="${fname%.${bad}}.${repl_ext}"
+                    fname_out=$(build_ext_filename "$fname" "$bad" "$repl_ext")
                     mv -nv "$fname" "${fname_out}"
                     if [ -f "$fname" ];then
                         echo "rename $fname FAILED"
@@ -272,7 +293,7 @@ function fix_bad_ext() {
                 else
                     echo -n "not ignored: "
                     # ...then rename (move) - reverse extension by default
-                    fname_out="${fname%.${bad}}.${repl_ext}"
+                    fname_out=$(build_ext_filename "$fname" "$bad" "$repl_ext")
                     echo
                     itab
                     decho "${TAB}fname: $fname"

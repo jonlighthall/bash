@@ -105,13 +105,7 @@ for bad in ${bad_ext[@]}; do
             echo -n " → "
 
             # Determine which command to use
-            if [ $git_status -le 2 ]; then
-                # tracked file - use git mv
-                cmd="git mv"
-            else
-                # untracked or not in repo - use regular mv
-                cmd="mv"
-            fi
+            cmd=$(get_mv_cmd_for_file "$fname")
 
             # Rename the file
             "${cmd}" -fv "$fname" "$(echo $fname | sed "s/${sep_in}/${sep_out}/")" 2>&1 | sed "s/^/${TAB}${TAB}/"
@@ -154,13 +148,7 @@ for bad in ${bad_ext[@]}; do
             echo -n " → "
 
             # Determine which command to use
-            if [ $git_status -le 2 ]; then
-                # tracked file - use git mv
-                cmd="git mv"
-            else
-                # untracked or not in repo - use regular mv
-                cmd="mv"
-            fi
+            cmd=$(get_mv_cmd_for_file "$fname")
 
             # Remove trailing underscore
             fname_out="${fname%_}"
@@ -205,16 +193,10 @@ for bad in ${bad_ext[@]}; do
                 echo -n " → "
 
                 # Determine which command to use
-                if [ $git_status -le 2 ]; then
-                    # tracked file - use git mv
-                    cmd="git mv"
-                else
-                    # untracked or not in repo - use regular mv
-                    cmd="mv"
-                fi
+                cmd=$(get_mv_cmd_for_file "$fname")
 
                 # Restore original extension
-                fname_out="${fname%.${repl_ext}}.${bad}"
+                fname_out=$(build_ext_filename "$fname" "$repl_ext" "$bad")
                 "${cmd}" -fv "$fname" "$fname_out" 2>&1 | sed "s/^/${TAB}${TAB}/"
                 if [ -f "$fname" ]; then
                     echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"

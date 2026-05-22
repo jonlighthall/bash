@@ -119,7 +119,7 @@ for bad in ${bad_ext[@]}; do
 
             1)  # tracked, modified - rename instead
                 echo -n "renaming... "
-                new_name="${fname%${sep_in}}.${repl_ext}"
+                new_name=$(build_ext_filename "$fname" "$bad" "$repl_ext")
                 mv -nv "$fname" "$new_name" 2>&1 | sed "s/^/${TAB}${TAB}/"
                 if [ -f "$fname" ]; then
                     echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
@@ -142,7 +142,7 @@ for bad in ${bad_ext[@]}; do
 
             3|4)  # untracked or not in git repo - rename
                 echo -n "renaming... "
-                new_name="${fname%${sep_in}}.${repl_ext}"
+                new_name=$(build_ext_filename "$fname" "$bad" "$repl_ext")
                 mv -nv "$fname" "$new_name" 2>&1 | sed "s/^/${TAB}${TAB}/"
                 if [ -f "$fname" ]; then
                     echo -e "${TAB}${TAB}${BAD}FAILED${RESET}"
