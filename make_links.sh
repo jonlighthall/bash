@@ -83,6 +83,7 @@ for my_link in \
 do
     # define target (source)
     target=${target_dir}/${my_link}${ext}
+
     # define link name (destination)
     sub_dir=$(dirname "$my_link")
     if [ ! $sub_dir = "." ]; then
@@ -90,6 +91,7 @@ do
         my_link=$(basename "$my_link")
     fi
     link=${link_dir}/${my_link}
+    
     # create link
     do_link_exe "${target}" "${link}"
 done
