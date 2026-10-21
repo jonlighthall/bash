@@ -9,7 +9,7 @@ echo "${0##*/}"
 # test X11
 export LC_ALL=C
 declare -a list_test
-list_test=( "xeyes" "xclock -chime -update 1" "xcalc" "xman" "xlogo" "xterm" "xmessage hello")
+list_test=( "xeyes" "xclock -chime -update 1" "xcalc" "xman" "xlogo" "xterm" "xmessage hello" "glxgears")
 
 declare -i DEBUG=${DEBUG-0}
 declare -i i
@@ -107,7 +107,7 @@ fi
 declare -a list_open
 for ((i=0; i<${#list_found[@]}; i++)); do
     [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_found[i]%% *}\t"
-	  ${list_found[i]} 2>/dev/null &
+	  ${list_found[i]} &>/dev/null &
 	  RETVAL=$?
     fill_dots
 	  if [ $RETVAL -eq 0 ]; then
@@ -140,7 +140,7 @@ for ((i=0; i<${#list_open[@]}; i++)); do
 	  RETVAL=$?
 	  if [ $RETVAL -eq 0 ]; then
 		    echo -e "\E[32mOK\E[0m"
-		    list_run+=("${list_found[i]}")
+		    list_run+=("${list_open[i]}")
 	  else
 		    echo -e "\E[31mFAIL \E[90mRETVAL=$RETVAL\E[0m"
 	  fi
