@@ -29,7 +29,7 @@ print_time
 
 # install packages
 bar "install packages..."
-for PACK in dbus-x11 x11-apps xterm git-filter-repo; do
+for PACK in dbus-x11 x11-apps x11-utils xterm mesa-utils git-filter-repo; do
     echo "installing ${PACK}..."
     sudo apt install -y --fix-missing ${PACK}
 done
