@@ -6,10 +6,16 @@
 
 echo "${0##*/}"
 
+# check display
+if [ -z "${DISPLAY:-}" ]; then
+    echo -e "\E[31mFAIL\E[0m: DISPLAY not set!"
+    exit 1
+fi
+
 # test X11
 export LC_ALL=C
 declare -a list_test
-list_test=( "xeyes" "xclock -chime -update 1" "xcalc" "xman" "xlogo" "xterm" "xmessage hello" "glxgears")
+list_test=( "xeyes" "xclock -chime -update 1" "xcalc" "xman" "xlogo" "xterm" "xmessage hello, world" "glxgears")
 
 declare -i DEBUG=${DEBUG-0}
 declare -i i
@@ -57,7 +63,7 @@ function fill_dots() {
 }
 
 # find programs
-declare -a list_found
+declare -a list_found=()
 
 # lenght of prefix
 declare -i spp
@@ -88,12 +94,10 @@ for ((i=0; i<${#list_test[@]}; i++)); do
 	  fi
 done
 
-set +u
-if [ -z "${list_found}" ]; then
+if [ ${#list_found[@]} -eq 0 ]; then
 	  echo -e "\E[31mFAIL\E[0m: no X11 programs found!"
-    exit
+    exit 1
 fi
-set -u
 
 if [ $DEBUG -gt 0 ]; then
     echo "found"
@@ -104,7 +108,7 @@ fi
 
 [ $DEBUG -gt 0 ] && echo "open"
 # open programs
-declare -a list_open
+declare -a list_open=()
 for ((i=0; i<${#list_found[@]}; i++)); do
     [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_found[i]%% *}\t"
 	  ${list_found[i]} &>/dev/null &
@@ -119,9 +123,9 @@ for ((i=0; i<${#list_found[@]}; i++)); do
 	  fi
 done
 
-if [ -z "${list_open}" ]; then
+if [ ${#list_open[@]} -eq 0 ]; then
     echo -e "\E[31mFAIL\E[0m: no X11 programs opened!"
-    exit
+    exit 1
 fi
 
 if [ $DEBUG -gt 0 ]; then
@@ -132,7 +136,7 @@ if [ $DEBUG -gt 0 ]; then
 fi
 
 # check if programs are running
-declare -a list_run
+declare -a list_run=()
 for ((i=0; i<${#list_open[@]}; i++)); do
     echo -en " opening ${list_open[i]%% *}..."
     echo -en "\E[${sp}G"
@@ -146,9 +150,9 @@ for ((i=0; i<${#list_open[@]}; i++)); do
 	  fi
 done
 
-if [ -z "${list_run}" ]; then
+if [ ${#list_run[@]} -eq 0 ]; then
     echo -e "\E[31mFAIL\E[0m: no X11 programs running!"
-    exit
+    exit 1
 fi
 
 # close windows
