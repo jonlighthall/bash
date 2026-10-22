@@ -115,6 +115,8 @@ for ((i=0; i<${#list_found[@]}; i++)); do
     [ $DEBUG -gt 0 ] && echo -en "  $i: ${list_found[i]%% *}\t"
 	  ${list_found[i]} &>/dev/null &
 	  RETVAL=$?
+	  # stop tracking the job, so bash does not print "Terminated" when it is closed
+	  disown $!
     fill_dots
 	  if [ $RETVAL -eq 0 ]; then
         [ $DEBUG -gt 0 ] && echo -e "\E[${sp}G\E[32mOK\E[0m"
