@@ -10,6 +10,8 @@ echo "${0##*/}"
 if [ -z "${DISPLAY:-}" ]; then
     echo -e "\E[31mFAIL\E[0m: DISPLAY not set!"
     exit 1
+else
+    echo "DISPLAY = $DISPLAY"
 fi
 
 # test X11
